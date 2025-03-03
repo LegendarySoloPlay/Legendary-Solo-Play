@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marvel Legendary Solo Play</title>
+<link rel="icon" type="image/png" href="Visual Assets/Icons/favicon.png">
+  <link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<body>
+<div id="intro-popup-container">
+    <div id="intro-popup">
+      <div id="intro-popup-header">
+        <h2>Welcome to Marvel Legendary</h2>
+        <button id="intro-popup-close-button">&times;</button>
+      </div>
+      <div id="popup-tabs">
+        <button class="tab-button active" id="left-tab" data-tab="intro">Intro</button>
+        <button class="tab-button" id="right-tab" data-tab="updates">Updates</button>
+      </div>
+      <div id="intro-popup-content">
+        <div id="intro" class="tab-content active">
+  <p>Get ready to dive into the <strong>Marvel Legendary</strong> universe in this fan-made digital adaptation of the classic deck-building game! Assemble a team of heroes, take down powerful villains, and stop the mastermind’s nefarious schemes—all in <strong>solo mode</strong>, optimised with the latest <i>"What If...?"</i> variations to the Advanced Solo rules.</p>
+
+  <h3>🎮 How to Play</h3>
+  <p>If you're new to <em>Marvel Legendary</em>, be sure to check out the official rules <a href="https://theupperdeckco.wpenginepowered.com/wp-content/uploads/2024/05/Legendary_Rules-Core_Set.pdf" style="color:#00a6ed;" target="_blank">here</a> to learn the basics.</p>
+<p>This version of the game includes a console log and pop-ups that will guide you through card effects.</p>
+<p><strong>IMPORTANT:</strong> Use the <i>Confirm Actions</i> button to play cards and activate their effects. Multiple S.H.I.E.L.D. heroes can be selected and played at the same time, but <strong>any heroes with effects should be confirmed one at a time, in the order you wish to play them</strong>.</p>
+
+  <h3>🔥 What’s Different in <i>“What If...?”</i> Solo Mode?</h3>
+  <ul>
+    <li>✅ A chain of Scheme Twists will only cycle ONE hero in the HQ, rather than one per twist.</li>
+    <li>✅ Master Strikes no longer chain into playing another card.</li>
+    <li>✅ You'll use 4 Henchmen in the Villain deck, but 2 will enter the city immediately at the start of the game.</li>
+  </ul>
+
+  <p>These changes ensure a more balanced solo experience while keeping the game exciting!</p>
+
+<h3>⚡ Advanced Solo Rules</h3>
+  <ul>
+    <li>✅ Ignore the "Always Leads" ability of the Mastermind.</li>
+    <li>✅ If a Scheme requires multiple Henchmen groups, only select ONE and the full 10 Henchmen cards will be included in the Villain deck.</li>
+    <li>✅ Any effect that targets "each other player" applies to you instead.</li>
+  </ul>
+
+  <h3>💖 Support the Project</h3>
+  <p>This project is a passion-driven endeavor, and every bit of support helps keep development going. If you're enjoying this <strong>free</strong> digital version, please consider <strong>donating</strong> to help bring more heroes, villains, and expansions to life!</p>
+
+  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>DONATE HERE</strong></a> ⬅️</p>
+
+<p><i>This project is provided free of charge as a passion project for fans. Any donations collected are solely to cover hosting and development costs and are not for profit.</i></p>
+
+  <p><strong>🛑 Disclaimer:</strong> <i>This project is an unofficial, fan-made adaptation and is not affiliated with, endorsed by, or approved by Upper Deck Entertainment, Marvel, or any other rights holders associated with Marvel Legendary. All rights to the original game, including its mechanics, characters, and artwork, belong to their respective owners.</i></p>
+
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+
+  <p>🚀 Thank you for playing, and may your deck always be legendary!</p>
+</div>
+        <div id="updates" class="tab-content">
+<h3><i>Version 1.0.0</i> - Initial Release</h3>
+<ul>
+  <li>🎉 First release of the digital <strong>Marvel Legendary</strong> Solo experience!</li>
+  <li>Includes the core game with all base set heroes, villains, masterminds, and schemes.</li>
+  <li>Implements the latest <i>"What If...?"</i> solo rules building upon Advanced Solo mode for an optimised single-player experience.</li>
+  <li>Features a fully functional game board, card interactions, automated game start up and deck management.</li>
+</ul>
+
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content" id="home-screen">
+    <div class="banner"><span id="title-banner-text">MARVEL LEGENDARY<br>SOLO PLAY</span></div>
+<div class="overall-filter">
+<div id="overallsetlist" class="dropdown-check-list" tabindex="100">
+  <span class="anchor">OVERALL SET</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+  </ul>
+</div>
+</div>
+<div id="all-selected-filters" class="selected-filters"></div>
+    <div class="section" id="scheme-section">
+<div class="section-bar-image">
+      <h2>SELECT YOUR SCHEME</h2>
+<div class="filters">
+<div id="schemelist" class="dropdown-check-list" tabindex="100">
+  <span class="anchor">Sets</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+
+  </ul>
+</div>
+</div>
+<div id="scheme-selected-filters" class="selected-filters"></div>
+      <div class="options">
+<div id="scheme-section" class="scrollable-list">
+  <form id="scheme-selection">
+            <label><input type="radio" name="scheme" value="Midtown Bank Robbery" data-set="Core"> Midtown Bank Robbery</label>
+            <label><input type="radio" name="scheme" value="Negative Zone Prison Breakout" data-set="Core"> Negative Zone Prison Breakout</label>
+            <label><input type="radio" name="scheme" value="Portals to the Dark Dimension" data-set="Core"> Portals to the Dark Dimension</label>
+            <label><input type="radio" name="scheme" value="Replace Earth's Leaders with Killbots" data-set="Core"> Replace Earth's Leaders with Killbots</label>
+            <label><input type="radio" name="scheme" value="Secret Invasion of the Skrull Shapeshifters" data-set="Core"> Secret Invasion of the Skrull Shapeshifters</label>
+            <label><input type="radio" name="scheme" value="Superhero Civil War" data-set="Core"> Superhero Civil War</label>
+            <label><input type="radio" name="scheme" value="The Legacy Virus" data-set="Core"> The Legacy Virus</label>
+            <label><input type="radio" name="scheme" value="Unleash the Power of the Cosmic Cube" data-set="Core"> Unleash the Power of the Cosmic Cube</label>
+
+          </form>
+        </div>
+        
+      </div>
+
+      <div class="centered-button">
+        <button id="randomize-scheme">RANDOMIZE SCHEME</button>
+      </div>
+</div>
+<div class="choice-display-area">
+          <div id="chosen-scheme-image">
+    <img src="Visual Assets/CardBack.png" alt="Face Down Card" class="chosen-card-image">
+</div>
+        </div>
+
+    </div>
+   
+
+<div class="section" id="mastermind-section">
+<div class="section-bar-image">
+      <h2>SELECT YOUR MASTERMIND</h2>
+<div class="filters">
+<div id="mastermindlist" class="dropdown-check-list" tabindex="100">
+  <span class="anchor">Sets</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+  </ul>
+</div>
+</div>
+<div id="mastermind-selected-filters" class="selected-filters"></div>
+      <div class="options">
+<div id="mastermind-section" class="scrollable-list">
+  <form id="mastermind-selection">
+<label><input type="radio" name="mastermind" value="Dr Doom" data-set="Core"> Dr Doom</label>
+            <label><input type="radio" name="mastermind" value="Loki" data-set="Core"> Loki</label>
+            <label><input type="radio" name="mastermind" value="Red Skull" data-set="Core"> Red Skull</label>
+            <label><input type="radio" name="mastermind" value="Magneto" data-set="Core"> Magneto</label>
+          </form>
+        </div>
+              </div>
+      <div class="centered-button">
+        <button id="randomize-mastermind">RANDOMIZE MASTERMIND</button>
+      </div>
+</div>
+<div class="choice-display-area">
+          <div id="chosen-mastermind-image">
+    <img src="Visual Assets/CardBack.png" alt="Face Down Card" class="chosen-card-image">
+</div>
+        </div>
+
+    </div>
+
+    <div class="section" id="villain-section">
+      <div class="section-bar-image">
+      <h2>SELECT YOUR VILLAINS</h2>
+<div class="filters">
+<div id="villainlist" class="dropdown-check-list" tabindex="100">
+  <span class="anchor">Sets</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+  </ul>
+</div>
+</div>
+        <div id="villain-selected-filters" class="selected-filters"></div>
+      <div class="options">
+        <div id="villain-section" class="scrollable-list">
+            <form id="villain-selection">
+            <label><input type="checkbox" name="villain" value="Brotherhood" data-set="Core"> Brotherhood</label>
+            <label><input type="checkbox" name="villain" value="Enemies of Asgard" data-set="Core"> Enemies of Asgard</label>
+            <label><input type="checkbox" name="villain" value="HYDRA" data-set="Core"> HYDRA</label>
+            <label><input type="checkbox" name="villain" value="Masters of Evil" data-set="Core"> Masters of Evil</label>
+            <label><input type="checkbox" name="villain" value="Radiation" data-set="Core"> Radiation</label>
+            <label><input type="checkbox" name="villain" value="Skrulls" data-set="Core"> Skrulls</label>
+            <label><input type="checkbox" name="villain" value="Spider-Foes" data-set="Core"> Spider-Foes</label>          
+          </form>
+        </div>
+        
+      </div>
+      <div class="centered-button">
+        <button id="randomize-villains">RANDOMIZE VILLAINS</button>
+      </div>
+    </div>
+      <div class="choice-display-area">
+          <div id="chosen-villain-image">
+    <img src="Visual Assets/CardBack.png" alt="Face Down Card" class="chosen-card-image">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="villainfacedowncard1">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="villainfacedowncard2">
+</div>
+        </div>
+
+    </div>
+
+   <div class="section" id="henchmen-section">
+      <div class="section-bar-image">
+      <h2>SELECT YOUR HENCHMEN</h2>
+<div class="filters">
+<div id="henchmenlist" class="dropdown-check-list" tabindex="100">
+  <span class="anchor">Sets</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+  </ul>
+</div>
+</div>
+        <div id="henchmen-selected-filters" class="selected-filters"></div>
+      <div class="options">
+        <div id="henchmen-section" class="scrollable-list">
+            <form id="henchmen-selection">
+            <label><input type="checkbox" name="henchmen" value="Doombot Legion" data-set="Core"> Doombot Legion</label>
+            <label><input type="checkbox" name="henchmen" value="Hand Ninjas" data-set="Core"> Hand Ninjas</label>
+            <label><input type="checkbox" name="henchmen" value="Savage Land Mutates" data-set="Core"> Savage Land Mutates</label>
+            <label><input type="checkbox" name="henchmen" value="Sentinel" data-set="Core"> Sentinel</label>
+   </form>
+        </div>
+        
+      </div>
+      <div class="centered-button">
+        <button id="randomize-henchmen">RANDOMIZE HENCHMEN</button>
+      </div>
+    </div>
+      <div class="choice-display-area">
+          <div id="chosen-henchmen-image">
+    <img src="Visual Assets/CardBack.png" alt="Face Down Card" class="chosen-card-image">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="henchmenfacedowncard1">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="henchmenfacedowncard2">
+
+</div>
+        </div>
+
+    </div>
+    
+    <div class="section" id="hero-section">
+      <div class="section-bar-image">
+      <h2>SELECT YOUR HEROES</h2>
+<div class="filters">
+<div id="herosetfilter" class="dropdown-check-list" tabindex="100">
+  <span class="anchor2">Sets</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
+    <li><label><input type="checkbox" data-set="Spare"/> Spare</label></li>
+  </ul>
+</div>
+<div id="heroteamfilter" class="dropdown-check-list" tabindex="100">
+  <span class="anchor2">Teams</span>
+  <ul class="items">
+    <li><label><input type="checkbox" data-team="Avengers"/> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Avengers</label></li>
+    <li><label><input type="checkbox" data-team="X-Men"/> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> X-Men</label></li>
+    <li><label><input type="checkbox" data-team="Spider Friends"/> <img src="Visual Assets/Icons/SpiderFriends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
+    <li><label><input type="checkbox" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
+  </ul>
+</div>
+</div>
+        <div id="hero-selected-set-filters" class="selected-filters"></div>
+<div id="hero-selected-team-filters" class="selected-filters"></div>
+      <div class="options">
+        <div id="hero-section" class="scrollable-list">
+            <form id="hero-selection">
+<label><input type="checkbox" name="hero" value="Black Widow" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Black Widow</label>
+            <label><input type="checkbox" name="hero" value="Captain America" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Captain America</label>
+            <label><input type="checkbox" name="hero" value="Cyclops" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Cyclops</label>
+            <label><input type="checkbox" name="hero" value="Deadpool" data-set="Core" data-team=""> <img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="card-icons"> Deadpool</label>
+            <label><input type="checkbox" name="hero" value="Emma Frost" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Emma Frost</label>
+            <label><input type="checkbox" name="hero" value="Gambit" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Gambit</label>
+            <label><input type="checkbox" name="hero" value="Hawkeye" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Hawkeye</label>
+            <label><input type="checkbox" name="hero" value="Hulk" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Hulk</label>
+            <label><input type="checkbox" name="hero" value="Iron Man" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Iron Man</label>
+            <label><input type="checkbox" name="hero" value="Nick Fury" data-set="Core" data-team="S.H.I.E.L.D."> <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> Nick Fury</label>
+            <label><input type="checkbox" name="hero" value="Rogue" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Rogue</label>
+            <label><input type="checkbox" name="hero" value="Spider-Man" data-set="Core" data-team="Spider Friends"> <img src="Visual Assets/Icons/SpiderFriends.svg" alt="Spider Friends Icon" class="card-icons"> Spider-Man</label>
+            <label><input type="checkbox" name="hero" value="Storm" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Storm</label>
+            <label><input type="checkbox" name="hero" value="Thor" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Thor</label>
+            <label><input type="checkbox" name="hero" value="Wolverine" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Wolverine</label>  
+          </form>
+        </div>
+        
+      </div>
+      <div class="centered-button">
+        <button id="randomize-heroes">RANDOMIZE HEROES</button>
+      </div>
+    </div>
+      <div class="choice-display-area">
+          <div id="chosen-hero-image">
+    <img src="Visual Assets/CardBack.png" alt="Face Down Card" class="chosen-card-image">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="herofacedowncard1">
+<img src="Visual Assets/CardBack.png" alt="Face Down Card" id="herofacedowncard2">
+</div>
+        </div>
+
+    </div>
+
+
+    <div id="final-blow-section" class="section">
+      <h2>FINAL BLOW</h2>
+<div id="finalBlowToggle">
+<label class="switch">
+  <input type="checkbox" id="final-blow-checkbox">
+  <span class="slider round"></span>
+</label>
+</div>
+<br>
+      <label for="final-blow-checkbox">Marvel Legendary Solo Play rules only require you to defeat the Mastermind's four tactic cards in order to win. If Final Blow is enabled, you need to defeat the Mastermind's four tactics and then attack one final time in order to secure victory.</label>
+    </div>
+    <div class="startup-centered-buttons">
+      <button id="randomize-all">RANDOMIZE ALL</button>
+      <button id="start-game">CHECK SELECTIONS</button>
+    </div>
+  </div>
+
+<div id="confirm-start-up-choices" class="popup" style="display:none;">
+    <h2>CONFIRM CHOICES</h2>
+    <div class="popup-content">
+        <div class="p-and-button-wrapper">
+            <div class="p-section">
+                <p id="chosen-scheme">Chosen Scheme: </p>
+                <p id="chosen-mastermind">Chosen Mastermind: </p>
+                <p id="chosen-villains">Your chosen Scheme requires <span id="required-villains-count"></span>. You have chosen: <span id="villains-list"></span></p>
+                <p id="chosen-henchmen">Your chosen Scheme requires <span id="required-henchmen-count"></span>. You have chosen: <span id="henchmen-list"></span></p>
+                <p id="chosen-heroes">Your chosen Scheme requires <span id="required-heroes-count"></span>. You have chosen <span id="heroes-list"></span></p>
+            </div>
+            <div class="button-group">
+                <button id="return-to-selections">RETURN TO SELECTIONS</button>
+                <button id="begin-game" disabled>START GAME</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+  <div class="container" id="game-board" style="display: none;">
+    <div class="grid">
+      <!-- Title Banner -->
+      <div class="row">
+        <div id="game-board-title-banner" class="cell title-banner" colspan="7">LEGENDARY</div>
+      </div>
+      <!-- Row of 7 Cells -->
+      <div class="row">
+        <div class="cell scheme" id="scheme-place"></div>
+        <div class="cell escaped-villains" id="escape-place" style="grid-column: span 2;"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="escaped-villains-card-back" style="display:none;"></div>
+        
+        <div class="cell ko-pile" id="ko-place"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="ko-pile-card-back" style="display:none;"></div>
+        
+        <div class="cell wounds" id="wounds-place" style="grid-column: span 2;"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="wounds-card-back" style="display:flex;"></div>
+        <div class="cell bystanders" id="bystanders-place"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="bystanders-card-back" style="display:flex;"></div>
+      </div>
+<div class="row">
+        <div class="cell-label"><p class="labeltext">SCHEME</p></div>
+        <div class="cell-label" id="escapedVillainsButton" style="grid-column: span 2;"><p class="labeltext">ESCAPED VILLAINS</p></div>
+        
+        <div class="cell-label" id="koPileButton"><p class="labeltext">KO PILE</p></div>
+        
+        <div class="cell-label" style="grid-column: span 2;"><p class="labeltext">WOUNDS</p></div>
+        <div class="cell-label"><p class="labeltext">BYSTANDERS</p></div>
+      </div>
+
+      <!-- Row of 7 Cells for City and Mastermind -->
+      <div class="row">
+        <div id="mastermind" class="cell mastermind">
+          <div class="overlay"></div>
+          <div class="temp-buff-overlay" id="mastermind-temp-buff"><p></p></div>
+<div class="perm-buff-overlay" id="mastermind-perm-buff"><p></p></div>
+        </div>
+        <div class="cell city" id="city-1">City - Bridge<div class="temp-buff-overlay" id="city-1-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-1-perm-buff"><p></p></div></div>
+        <div class="cell city" id="city-2">City - Streets<div class="temp-buff-overlay" id="city-2-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-2-perm-buff"><p></p></div></div>
+        <div class="cell city" id="city-3">City - Rooftops<div class="temp-buff-overlay" id="city-3-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-3-perm-buff"><p></p></div></div>
+        <div class="cell city" id="city-4">City - Bank<div class="temp-buff-overlay" id="city-4-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-4-perm-buff"><p></p></div></div>
+        <div class="cell city" id="city-5">City - Sewers<div class="temp-buff-overlay" id="city-5-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-5-perm-buff"><p></p></div></div>
+        <div class="cell villain-deck" id="villain-deck"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="villain-deck-card-back" style="display:flex;"></div>
+
+      </div>
+<div class="row">
+        <div class="cell-label"><p class="labeltext">MASTERMIND</p></div>
+        <div class="cell-label"><p class="labeltext">BRIDGE</p></div>
+        <div class="cell-label"><p class="labeltext">STREETS</p></div>
+        <div class="cell-label"><p class="labeltext">ROOFTOPS</p></div>
+        <div class="cell-label"><p class="labeltext">BANK</p></div>
+        <div class="cell-label"><p class="labeltext">SEWERS</p></div>
+        <div class="cell-label"><p class="labeltext">VILLAIN DECK</p></div>
+      </div>
+      <!-- Row of 7 Cells for HQ and Decks -->
+      <div class="row">
+        <div class="cell shield-deck" id="shield-deck"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="shield-deck-card-back" style="display:flex;"></div>
+<div id="hq-wrapper">
+        <div class="cell hq" id="hq-1">HQ 1</div>
+        <div class="cell hq" id="hq-2">HQ 2</div>
+        <div class="cell hq" id="hq-3">HQ 3</div>
+        <div class="cell hq" id="hq-4">HQ 4</div>
+        <div class="cell hq" id="hq-5">HQ 5</div>
+</div>
+        <div class="cell hero-deck" id="hero-deck"><img src="Visual Assets/CardBack.png"  alt="Card Back" class="card-image-back" id="hero-deck-card-back" style="display:flex;"></div>
+      </div>
+<div class="row">
+        <div class="cell-label"><p class="labeltext">S.H.I.E.L.D.</p></div>
+      
+        <div class="cell-label" style="grid-column: span 5;"><p class="labeltext">HQ</p></div>
+        
+        <div class="cell-label"><p class="labeltext">HERO DECK</p></div>
+      </div>
+      <!-- Single Row for Player Hand, Discard Pile, and Deck -->
+      <div class="row">
+        <div class="cell discard-pile" id="discard-pile-cell"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="discard-pile-card-back" style="display:flex;"></div>
+        <div class="cell player-zone" colspan="5" id="player-card-zone">
+          <div class="player-hand" id="player-hand-element"></div></div>
+          
+         <div class="cell player-deck" id="player-deck-cell"><img src="Visual Assets/CardBack.png" alt="Card Back" class="card-image-back" id="player-deck-card-back" style="display:flex;"></div>
+      </div>
+
+ <div class="row">
+        <div class="cell-label"><p class="labeltext">DISCARD PILE</p></div>
+
+        <div class="attack-recruit" style="grid-column: span 5;">
+            <div><img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"><span id="attack-point-label">ATTACK: </span><span id="attack-points">0</span></div>
+            <div><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"><span id="recruit-point-label">RECRUIT: </span><span id="recruit-points">0</span></div>
+          </div>
+
+        <div class="cell-label"><p class="labeltext">PLAYER DECK</p></div>
+      </div>
+
+      <div class="row">
+        <button id="cards-played-button" class="cell button-cards-played"><span class="game-board-bottom-row">PLAYED CARDS</span></button>
+<button id="healing-button"><span class="game-board-bottom-row">HEAL WOUNDS?</span></button>
+<button id="confirm-actions" style="grid-column: span 3;"><span class="game-board-bottom-row">CONFIRM ACTIONS</span></button>
+        <button id="end-turn" class="cell button-end-turn"><span class="game-board-bottom-row">END TURN</span></button>
+        <button id="victory-pile-button" class="cell button-victory-pile"><span class="game-board-bottom-row">VICTORY PILE</span></button>
+      </div>
+
+
+
+
+    </div>
+  </div>
+  <div id="side-panel" class="side-panel" style="display: none;">
+    <div id="zoom-preview" class="zoom-preview">HOVER FOR CARD TEXT<img id="zoomed-image" src="" alt="Zoomed Preview" style="display:none;"></div>
+<div class="keywords"><h2>KEYWORDS</h2><p id="keyword-content"></p></div>
+    <div class="console-log"><h2>CONSOLE</h2><div class="inner-console-log"><div class="scroll-gradient"></div></div></div>
+  </div>
+
+  <!-- Pop-up for recruiting S.H.I.E.L.D. Officer -->
+  
+<div id="recruit-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+<span class="close-btn">&times;</span>
+      <p>SPEND 3<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> TO RECRUIT A <span class="bold-spans">S.H.I.E.L.D. OFFICER</span> ?</p>
+<img src="Visual Assets/Heroes/SHIELD/shieldofficer.png" alt="Shield Officer" class="recruit-officer-card-image">
+    <button id="confirm-recruit">Confirm</button>
+    </div>
+  </div>
+
+  <div id="hero-recruit-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <p id="hero-recruit-text"></p>
+<img src="Visual Assets/cardback.png" alt="Card Image" id="recruit-hero-card-image">
+      <button id="confirm-hero-recruit">Confirm</button>
+    </div>
+  </div>
+
+  <!-- Pop-up for confirming attack -->
+  <div id="attack-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <p id="confirm-attack-text"></p>
+<img src="Visual Assets/cardback.png" alt="Card Image" id="attack-villain-card-image">
+      <button id="confirm-attack">Confirm</button>
+    </div>
+  </div>
+
+  <div id="popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <h2 id="popup-title"></h2>
+<div id="popup-single-image"></div>
+      <button id="popup-confirm">Confirm</button>
+    </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+  <div id="popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <h2 id="popup-title"></h2>
+      <button id="popup-confirm">Confirm</button>
+    </div>
+  </div>
+
+  <div id="hero-select-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <div class="hero-text">
+        <p>SELECT A HERO TO RETURN TO THE BOTTOM OF THE HERO DECK:</p>
+      </div>
+      <div class="hero-options-container">
+        <div class="hero-buttons" id="hero-options"></div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+<img id="hero-select-image" src="" alt="Hero Card" style="display:none; max-width:100%; height:auto;" />
+              <span id="selectHoverText">HOVER FOR CARD DISPLAY</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<div id="hero-KO-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <div class="hero-text">
+        <p>A VILLAIN HAS ESCAPED! WHICH HERO DO THEY KO?</p>
+      </div>
+      <div class="hero-options-container">
+        <div id="hero-KO-options" class="hero-buttons"></div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+              <img id="hero-ko-image" src="" alt="Hero Card" style="display:none; max-width:100%; height:auto;" />
+              <span id="KOHoverText">HOVER FOR CARD DISPLAY</span>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+
+  <div id="discard-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h2>The villain escaped with a bystander! Discard 1 card.</h2>
+      <div id="discard-options" class="discard-options-container">
+        <div class="discard-buttons"></div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+         <img src="" alt="Card Image" id="discard-card-image" style="display:none; height:100%;">
+ <span id="discard-card-popupHoverText">HOVER FOR CARD DISPLAY</span>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="healing-popup" class="popup">
+    <div class="popup-content">
+      <span id="healing-message">Healing Wounds and ending your turn.</span>
+<img src="Visual Assets/Other/Wound.png" alt="Wound Card" id="healing-popup-card" style="display:flex;height: 35vh;">   
+ </div>
+  </div>
+
+  <div id="mastermind-attack-confirmation-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn">&times;</span>
+      <h2>MASTERMIND ATTACK</h2>
+      <p id="mastermind-confirm-attack-text"></p>
+<img src="Visual Assets/cardback.png" alt="Card Image" id="mastermind-confirm-attack-image">
+      <button id="confirm-mastermind-attack">Confirm</button>
+    </div>
+  </div>
+
+  <!-- Popup for Revealing Tactic Card -->
+  <div id="tactic-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h2>MASTERMIND TACTIC</h2>
+      <p id="tactic-effect"></p>
+<img src="Visual Assets/cardback.png" alt="Card Image" id="mastermind-tactic-image">
+      <button id="resolve-tactic">RESOLVE</button>
+    </div>
+  </div>
+
+  <div id="message-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <p id="message-popup-text"></p>
+      <button id="confirm-message-btn" onclick="closeMessagePopup()">Confirm</button>
+    </div>
+  </div>
+  
+
+  <div id="draw-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h1>DRAW!</h1>
+      <p>You've run out of villains to battle. The Mastermind has not succeeded, but neither have you.</p>
+      
+      <button id="return-home-button">Return Home</button>
+<br>
+<br>
+<h3>💖 Support the Project 💖</h3>
+  <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
+
+  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>Donate Here</strong></a> ⬅️</p>
+
+    </div>
+  </div>
+
+  <!-- Add this HTML near the other popups -->
+  <div id="hero-deck-empty-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h1>DRAW!</h1>
+      <p>You've run out of heroes to recruit. The Mastermind has not succeeded, but neither have you.</p>
+      
+      <button id="return-home-hero-button">Return Home</button>
+<br>
+<br>
+<h3>💖 Support the Project 💖</h3>
+  <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
+
+  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>Donate Here</strong></a> ⬅️</p>
+
+    </div>
+  </div>
+
+    <div id="defeat-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h1>DEFEAT!</h1>
+      <p>The Mastermind has succeeded in their scheme. All hope is lost!</p>
+      
+      <button id="defeat-return-home-button">Return Home</button>
+<br>
+<br>
+<h3>💖 Support the Project 💖</h3>
+  <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
+
+  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>Donate Here</strong></a> ⬅️</p>
+
+    </div>
+  </div>
+
+  <div id="finish-turn-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h2>Well done!</h2>
+      <p>You have defeated the Mastermind. Finish your turn to maximise your Victory Points.</p>
+      <button id="finish-turn-button">Confirm</button>
+    </div>
+  </div>
+
+  <div id="win-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h1>VICTORY!</h1>
+      <p>You have defeated the Mastermind and prevented their nefarious scheme! Well done!</p>
+      <h2>Victory Points:</h2>
+      <p id="victoryPointsTotal"></p>
+      <button id="win-return-home-button">Return Home</button>
+<br>
+<br>
+<h3>💖 Support the Project 💖</h3>
+  <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
+
+  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>Donate Here</strong></a> ⬅️</p>
+
+    </div>
+  </div>
+
+  <div id="final-blow-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeFinalBlowPopup()">&times;</span>
+      <h2>Final Blow!</h2>
+      <p>The Mastermind is out of tactics! You only need to attack one more time!</p>
+      <button onclick="closeFinalBlowPopup()">Confirm</button>
+    </div>
+  </div>
+
+  <div id="card-ko-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeKoPopup()">×</span>
+      <h2 id="card-ko-popup-h2">Do you wish to KO a card from your Discard Pile or Hand to rescue a Bystander?</h2>
+      <div class="card-selection">
+        <div class="card-list">
+          <h3>Discard Pile</h3>
+          <ul id="discard-pile-cards">
+            <!-- Discard pile cards will be listed here -->
+          </ul>
+        </div>
+        <div class="card-list">
+          <h3>Hand</h3>
+          <ul id="hand-cards">
+            <!-- Hand cards will be listed here -->
+          </ul>
+        </div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+         <img src="" alt="Card Image" id="card-ko-popup-image" style="display:none; height:100%;">
+ <span id="card-ko-card-popupHoverText">HOVER FOR CARD DISPLAY</span>
+</div>
+
+        </div>
+
+      </div>
+<button id="close-ko-button" style="display:none;">KO Selected Cards</button>
+      <button id="no-thanks-button" onclick="closeKoPopup()">No Thanks!</button>
+    </div>
+  </div>
+  
+
+  <div id="hero-ability-may-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <h2 id="hero-ability-may-h2">Hero Ability!</h2>
+      <p>Would you like to use this hero's ability?</p>
+      <div class="card-display">
+        <div class="card-image-frame"><img src="" alt="Card Image" id="hero-ability-may-card" style="display:none;"><span id="heroAbilityHoverText">HOVER FOR CARD DISPLAY</span></div>
+      </div>
+      <button id="hero-ability-confirm">Yes</button>
+      <button id="hero-ability-deny">No</button>
+<button id="hero-ability-extra" style="display: none;">Extra Option</button>
+    </div>
+  </div>
+
+<div id="card-choice-one-location-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+      <h2 id="cardChoiceh2">Hero Ability!</h2>
+<span id="context">Context</span>
+      <div class="card-selection">
+        <div class="card-list">
+           <ul id="cards-to-choose-from">
+            <!-- Cards will be listed here -->
+          </ul>
+<button id="close-choice-button" style="display:none;">No Thanks!</button>
+        </div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+<img id="hero-one-location-image" src="" alt="Hero Card" style="display:none; max-width:100%; height:auto;" />
+              <span id="oneChoiceHoverText">HOVER FOR CARD DISPLAY</span></div>
+        </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+<div id="villain-movement-popup" class="popup" style="display: none;">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2000;">
+    <defs>
+        <marker id="arrowhead" viewBox="0 0 10 10" refX="5" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto" style="stroke:#ffab0f;fill:#ffab0f;">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+    </defs>
+    <g fill="none" stroke="#ffab0f" stroke-width="2" marker-end="url(#arrowhead)">
+        <path id="selection-arrow"/>
+    </g>
+</svg>
+
+    <div class="popup-content">
+
+        <span class="close-btn">&times;</span>
+        <h2>Hero Ability!</h2>
+        <p>You may move a villain to a new city space (swapping two if needed). Rescue any bystanders captured by that villain.</p>
+        
+        <table id="city-representation">
+            <tr>
+                <td id="villain-bridge">Villain 1</td>
+                <td id="villain-streets">Empty</td>
+                <td id="villain-rooftops">Villain 2</td>
+                <td id="villain-bank">Empty</td>
+                <td id="villain-sewers">Villain 3</td>
+            </tr>
+            <tr id="bottom-row-city-representation">
+                <td>Bridge</td>
+                <td>Streets</td>
+                <td>Rooftops</td>
+                <td>Bank</td>
+                <td>Sewers</td>
+            </tr>
+        </table>
+
+
+
+        <button id="confirm-villain-movement">Confirm</button>
+        <button id="no-thanks-villain-movement">No Thanks</button>
+    </div>
+
+</div>
+
+  <div id="played-cards-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closePlayedCardsPopup()">&times;</span>
+      <h2>PLAYED CARDS</h2>
+      <div id="playedCardsTable" class="pile-table"></div>
+      <button class="pile-button" onclick="closePlayedCardsPopup()">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="victory-pile-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeVictoryPilePopup()">&times;</span>
+      <h2>VICTORY PILE</h2>
+      <div id="victoryPileTable" class="pile-table"></div>
+      <button class="pile-button" onclick="closeVictoryPilePopup()">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="escaped-villains-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeEscapedVillainsPopup()">&times;</span>
+      <h2>ESCAPED VILLAINS</h2>
+      <div id="escapedVillainsTable" class="pile-table"></div>
+      <button class="pile-button" onclick="closeEscapedVillainsPopup()">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="ko-pile-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeKOPilePopup()">&times;</span>
+      <h2>KO PILE</h2>
+      <div id="KOPileTable" class="pile-table"></div>
+      <button class="pile-button" onclick="closeKOPilePopup()">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="discard-pile-popup" class="popup" style="display: none;">
+    <div class="popup-content">
+      <span class="close-btn" onclick="closeDiscardPilePopup()">&times;</span>
+      <h2>DISCARD PILE</h2>
+      <div id="DiscardPileTable" class="pile-table"></div>
+      <button class="pile-button" onclick="closeDiscardPilePopup()">CLOSE</button>
+    </div>
+  </div>
+
+
+  <script>
+    // Dynamically load the card database script
+    const cardDatabaseScript = document.createElement('script');
+    cardDatabaseScript.src = 'cardDatabase.js';
+    cardDatabaseScript.onload = () => {
+      // After loading the cardDatabase script, load the cardAbilities script
+      const cardAbilitiesScript = document.createElement('script');
+      cardAbilitiesScript.src = 'cardAbilities.js';
+      cardAbilitiesScript.onload = () => {
+        // After loading the cardAbilities script, load the main script
+        const mainScript = document.createElement('script');
+        mainScript.src = 'script.js';
+        document.body.appendChild(mainScript);
+      };
+      document.body.appendChild(cardAbilitiesScript);
+    };
+    document.head.appendChild(cardDatabaseScript);
+  </script>
+</body>
+
+</html>
