@@ -33,6 +33,7 @@ document.querySelector('.inner-console-log').addEventListener('scroll', function
 
 // Usage examples:
 onscreenConsole.log('<span style="font-style:italic;">Initializing game...</span>');
+onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn 1:</span>`);
 
 // Function to toggle dropdowns when clicking either anchor or anchor2
 document.querySelectorAll('.dropdown-check-list').forEach(function(checkList) {
@@ -333,28 +334,8 @@ document.querySelectorAll('.scrollable-list').forEach(function(list) {
     });
 });
 
-
-
-
-
-const shieldCards = [
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.png" },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, cost: 0, color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.png"  }
-];
-
-const shieldOfficers = Array(20).fill({ type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, cost: 3, color: "Grey", image: "Visual Assets/Heroes/SHIELD/shieldofficer.png" });
-
 let shieldDeck = [...shieldOfficers];
+let sidekickDeck = shuffle(sidekicks);
 let woundDeck = [...wounds];
 let villainDeck = [];
 let currentVillainLocation = null;
@@ -387,6 +368,7 @@ let recruitPoints = 0;
 let cumulativeAttackPoints = 0;
 let cumulativeRecruitPoints = 0;
 let recruitUsedToAttack = false;
+let sidekickRecruited = false;
 let selectedCards = [];
 let totalAttackPoints = 0;
 let totalRecruitPoints = 0;
@@ -401,17 +383,39 @@ let totalBystanders = 30;
 let extraCardsDrawnThisTurn = 0;
 let nextTurnsDraw = 6;
 let cardsToBeDrawnNextTurn = [];
-let rescueThreeBystandersAvailable = false;
+let rescueExtraBystanders = 0;
 let extraThreeRecruitAvailable = false;
 let bystanderDeck = shuffle(bystanders);
-let schemeTwistDrawn = false;
 let schemeTwistCount = 0;
+let turnCount = 1;
+let killbotSchemeTwistCount = 0;
+let suppressRecruitButtonAutoShow = false;
+let autoSuperpowers = true;
+let currentTwistChainLength = 0; // Tracks active Scheme Twists in the current chain
+let schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
+let pendingHeroKO = false; document.getElementById('autoButton').classList.add('active');
+
 
 window.victoryPile = [];
 
 document.getElementById('intro-popup-close-button').addEventListener('click', function () {
   document.getElementById('intro-popup-container').style.display = 'none';
 });
+
+function getSelectedExpansions() {
+            let selectedExpansions = [];
+            document.querySelectorAll('#sidekick-selection input[name="sidekick"]:checked').forEach(checkbox => {
+                selectedExpansions.push(checkbox.value);
+            });
+            return selectedExpansions;
+        }
+
+        // Function to filter the deck based on selected expansions
+        function filterDeckByExpansions(deck, expansions) {
+            return deck.filter(card => expansions.includes(card.expansion));
+        }
+
+
 
 document.querySelectorAll('.tab-button').forEach(button => {
   button.addEventListener('click', function () {
@@ -622,7 +626,7 @@ function updateSchemeImage(selectedSchemeName) {
         schemeImageElement.alt = selectedScheme.name; // Update alt for accessibility
     } else {
         // If no scheme is found, use the default back-of-card image
-        schemeImageElement.src = 'Visual Assets/CardBack.png';
+        schemeImageElement.src = 'Visual Assets/CardBack.webp';
         schemeImageElement.alt = 'Default Scheme';
     }
 }
@@ -640,7 +644,7 @@ function updateMastermindImage(selectedMastermindName) {
         mastermindImageElement.alt = selectedMastermind.name; // Update alt for accessibility
     } else {
         // If no mastermind is found, use the default back-of-card image
-        mastermindImageElement.src = 'Visual Assets/CardBack.png';
+        mastermindImageElement.src = 'Visual Assets/CardBack.webp';
         mastermindImageElement.alt = 'Default Mastermind';
     }
 }
@@ -658,7 +662,7 @@ function updateMastermindImage(selectedMastermindName) {
         mastermindImageElement.alt = selectedMastermind.name; // Update alt for accessibility
     } else {
         // If no mastermind is found, use the default back-of-card image
-        mastermindImageElement.src = 'Visual Assets/CardBack.png';
+        mastermindImageElement.src = 'Visual Assets/CardBack.webp';
         mastermindImageElement.alt = 'Default Mastermind';
     }
 }
@@ -698,7 +702,7 @@ function updateVillainImage(selectedVillainName) {
         };
     } else {
         // If no villain group is found, use the default back-of-card image
-        villainImageElement.src = 'Visual Assets/CardBack.png';
+        villainImageElement.src = 'Visual Assets/CardBack.webp';
         villainImageElement.alt = 'Default Villain';
         selectedVillainGroups = [];  // Clear the selected groups
         currentGroupIndex = 0;       // Reset group index
@@ -780,7 +784,7 @@ function cycleHenchmenImages() {
 // Helper function to reset henchman image to default
 function resetHenchmenImage() {
     const henchmenImageElement = document.querySelector('#chosen-henchmen-image img'); // Ensure this ID matches your actual HTML structure
-    henchmenImageElement.src = 'Visual Assets/CardBack.png';
+    henchmenImageElement.src = 'Visual Assets/CardBack.webp';
     henchmenImageElement.alt = 'Default Henchman';
     
     selectedHenchmenGroups = [];
@@ -824,7 +828,7 @@ function updateHeroImage(selectedHeroName) {
         };
     } else {
         // If no hero group is found, use the default back-of-card image
-        heroImageElement.src = 'Visual Assets/CardBack.png';
+        heroImageElement.src = 'Visual Assets/CardBack.webp';
         heroImageElement.alt = 'Default Hero';
         selectedHeroGroups = [];  // Clear the selected groups
         currentHeroGroupIndex = 0; // Reset group index
@@ -1018,7 +1022,186 @@ imageElement.style.cursor = 'default';
     }
 }
 
+let selectedSidekickGroups = [];  // Store selected sidekick groups in the order they were selected
+let currentSidekickGroupIndex = 0; // Index to track which group we are cycling through
+let currentSidekickIndex = 0;      // Index to track which card in the current group is displayed
 
+// Initialize sidekick groups (replace with your actual data)
+const sidekicksFromStartup = [
+   {
+        name: "Secret Wars Volume 1",
+        cards: [
+            { name: "Sidekick 1A", image: "Visual Assets/Sidekicks/Sidekick.webp" }
+        ]
+    },
+    {
+        name: "Civil War",
+        cards: [
+            { name: "Sidekick 2A", image: "Visual Assets/Sidekicks/Hairball.webp" },
+            { name: "Sidekick 2B", image: "Visual Assets/Sidekicks/Ms_Lion.webp" },
+            { name: "Sidekick 2C", image: "Visual Assets/Sidekicks/Lockheed.webp" },
+            { name: "Sidekick 2D", image: "Visual Assets/Sidekicks/Lockjaw.webp" },
+            { name: "Sidekick 2E", image: "Visual Assets/Sidekicks/Redwing.webp" },
+            { name: "Sidekick 2E", image: "Visual Assets/Sidekicks/Throg.webp" },
+            { name: "Sidekick 2E", image: "Visual Assets/Sidekicks/Zabu.webp" }
+        ]
+    },
+    {
+        name: "Messiah Complex",
+        cards: [
+            { name: "Sidekick 3A", image: "Visual Assets/Sidekicks/Layla_Miller.webp" },
+            { name: "Sidekick 3B", image: "Visual Assets/Sidekicks/Skids.webp" },
+            { name: "Sidekick 3C", image: "Visual Assets/Sidekicks/Rockslide.webp" },
+            { name: "Sidekick 3D", image: "Visual Assets/Sidekicks/Darwin.webp" },
+            { name: "Sidekick 3E", image: "Visual Assets/Sidekicks/Boom_Boom.webp" },
+            { name: "Sidekick 3F", image: "Visual Assets/Sidekicks/Rusty_Firefist_Collins.webp" },
+            { name: "Sidekick 3G", image: "Visual Assets/Sidekicks/Prodigy.webp" }
+        ]
+    }
+];
+
+// Function to update the sidekick image based on the selected sidekick group
+function updateSidekickImage(selectedSidekickName) {
+    // Find the corresponding sidekick group from the array
+    const selectedSidekickGroup = sidekicksFromStartup.find(sidekickGroup => sidekickGroup.name === selectedSidekickName);
+
+    // Get the image element inside the container
+    const sidekickImageElement = document.querySelector('#chosen-sidekick-image img');
+
+    if (selectedSidekickGroup) {
+        // Check if the sidekick group is already in the list
+        const existingGroupIndex = selectedSidekickGroups.findIndex(group => group.name === selectedSidekickName);
+
+        // If not in the list, add it to the end of the array (most recently selected)
+        if (existingGroupIndex === -1) {
+            selectedSidekickGroups.push(selectedSidekickGroup);
+        } else {
+            // Move the selected group to the end of the array to make it most recent
+            selectedSidekickGroups.push(...selectedSidekickGroups.splice(existingGroupIndex, 1));
+        }
+
+        // Set the first card of the most recently selected group to display
+        currentSidekickGroupIndex = selectedSidekickGroups.length - 1;  // Start from the most recent group
+        currentSidekickIndex = 0;  // Reset to the first card of this group
+        sidekickImageElement.src = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].image;
+        sidekickImageElement.alt = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].name;
+
+        // Add event listener to cycle through cards when the image is clicked
+        sidekickImageElement.onclick = function () {
+            cycleSidekickImages();
+        };
+    } else {
+        // If no sidekick group is found, use the default back-of-card image
+        sidekickImageElement.src = 'Visual Assets/CardBack.webp';
+        sidekickImageElement.alt = 'Default Sidekick';
+        selectedSidekickGroups = [];  // Clear the selected groups
+        currentSidekickGroupIndex = 0; // Reset group index
+        currentSidekickIndex = 0;      // Reset sidekick index
+    }
+
+    // Update face-down cards visibility based on the number of selected sidekick groups
+    updateSidekickFaceDownCards();
+}
+
+// Function to cycle through sidekick images
+function cycleSidekickImages() {
+    if (selectedSidekickGroups.length > 0) {
+        // Increment to the next sidekick card within the current group
+        currentSidekickIndex++;
+
+        // If we've reached the end of the current group's cards, move to the next group
+        if (currentSidekickIndex >= selectedSidekickGroups[currentSidekickGroupIndex].cards.length) {
+            currentSidekickIndex = 0;  // Reset to the first card of the next group
+            currentSidekickGroupIndex = (currentSidekickGroupIndex + 1) % selectedSidekickGroups.length;  // Cycle to the next group, loop back to the first
+        }
+
+        // Update the image and alt text for the current card in the current group
+        const sidekickImageElement = document.querySelector('#chosen-sidekick-image img');
+        sidekickImageElement.src = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].image;
+        sidekickImageElement.alt = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].name;
+    }
+}
+
+// Event listener for sidekick selection changes
+document.querySelectorAll('#sidekick-selection input[type=checkbox]').forEach(checkbox => {
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            updateSidekickImage(this.value);  // Update the sidekick image when a sidekick group is selected
+        } else {
+            // If a sidekick is deselected, remove it from the selectedSidekickGroups array
+            const deselectedSidekickName = this.value;
+            const indexToRemove = selectedSidekickGroups.findIndex(group => group.name === deselectedSidekickName);
+
+            if (indexToRemove !== -1) {
+                selectedSidekickGroups.splice(indexToRemove, 1);  // Remove the group from the array
+
+                // Adjust currentSidekickGroupIndex to stay within bounds
+                if (currentSidekickGroupIndex >= selectedSidekickGroups.length) {
+                    currentSidekickGroupIndex = 0;  // Reset index if it's out of bounds
+                }
+
+                // If any sidekick groups remain, display the next one
+                if (selectedSidekickGroups.length > 0) {
+                    displayCurrentSidekickImage();
+                } else {
+                    // If no sidekicks are selected, reset the image to the default back-of-card image
+                    resetSidekickImage();
+                }
+            }
+        }
+
+        // Update face-down cards visibility based on the number of selected sidekick groups
+        updateSidekickFaceDownCards();
+    });
+});
+
+function updateSidekickFaceDownCards() {
+    const faceDownCard1 = document.getElementById('sidekickfacedowncard1');
+    const faceDownCard2 = document.getElementById('sidekickfacedowncard2');
+    const cardPile = document.getElementById('chosen-sidekick-image');
+    const imageElement = cardPile.querySelector('img');
+
+    // Special case: If only Secret Wars Volume 1 is selected, hide face-down cards
+    if (selectedSidekickGroups.length === 1 && selectedSidekickGroups[0].name === "Secret Wars Volume 1") {
+        faceDownCard1.style.display = 'none';
+        faceDownCard2.style.display = 'none';
+        imageElement.style.cursor = 'default'; // Optional: Change cursor to default since there's no cycling
+    } else if (selectedSidekickGroups.length > 0) {
+        // Show face-down cards if multiple sidekick groups are selected or if the selected group has multiple cards
+        faceDownCard1.style.display = 'block';
+        faceDownCard2.style.display = 'block';
+        imageElement.style.cursor = 'alias'; // Optional: Change cursor to indicate cycling
+    } else {
+        // Hide face-down cards if no sidekick groups are selected
+        faceDownCard1.style.display = 'none';
+        faceDownCard2.style.display = 'none';
+        imageElement.style.cursor = 'default'; // Optional: Change cursor to default
+    }
+}
+
+// Function to display the current sidekick image
+function displayCurrentSidekickImage() {
+    const sidekickImageElement = document.querySelector('#chosen-sidekick-image img');
+    sidekickImageElement.src = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].image;
+    sidekickImageElement.alt = selectedSidekickGroups[currentSidekickGroupIndex].cards[currentSidekickIndex].name;
+}
+
+// Function to reset the sidekick image to the default back-of-card image
+function resetSidekickImage() {
+    const sidekickImageElement = document.querySelector('#chosen-sidekick-image img');
+    sidekickImageElement.src = 'Visual Assets/CardBack.webp';
+    sidekickImageElement.alt = 'Default Sidekick';
+}
+
+// Initialize sidekick selection on page load
+window.addEventListener('load', () => {
+    // Trigger the change event for each checkbox to initialize the selected sidekick groups
+    document.querySelectorAll('#sidekick-selection input[type=checkbox]').forEach(checkbox => {
+        if (checkbox.checked) {
+            updateSidekickImage(checkbox.value);
+        }
+    });
+});
 
 function randomizeScheme() {
   // Get the selected filters
@@ -1190,7 +1373,7 @@ function cycleVillainImages() {
 // Helper function to reset villain image to default
 function resetVillainImage() {
     const villainImageElement = document.querySelector('#chosen-villain-image img');
-    villainImageElement.src = 'Visual Assets/CardBack.png';
+    villainImageElement.src = 'Visual Assets/CardBack.webp';
     villainImageElement.alt = 'Default Villain';
     
     selectedVillainGroups = [];
@@ -1379,7 +1562,7 @@ function cycleHeroImages() {
 // Helper function to reset hero image to default
 function resetHeroImage() {
     const heroImageElement = document.querySelector('#chosen-hero-image img');
-    heroImageElement.src = 'Visual Assets/CardBack.png';
+    heroImageElement.src = 'Visual Assets/CardBack.webp';
     heroImageElement.alt = 'Default Hero';
     
     // Also clear any selected hero groups
@@ -1394,11 +1577,11 @@ function resetHeroImage() {
 
 // Individual randomize buttons
 document.getElementById('randomize-scheme').addEventListener('click', () => {
-    randomizeScheme(); // Call the new specific scheme randomization function
+    randomizeScheme();
 });
 
 document.getElementById('randomize-mastermind').addEventListener('click', () => {
-    randomizeMastermind(); // Call the new specific mastermind randomization function
+    randomizeMastermind();
 });
 
 document.getElementById('randomize-villains').addEventListener('click', () => {
@@ -1412,41 +1595,243 @@ document.getElementById('randomize-henchmen').addEventListener('click', () => {
 document.getElementById('randomize-heroes').addEventListener('click', () => {
     randomizeHero();
 });
-   
- 
-document.getElementById('randomize-all').addEventListener('click', () => {
-    // Randomize the scheme first
-    
-randomizeVillain();
-  
-  randomizeHenchmen();
-  
-  randomizeScheme();
-    // Randomize the mastermind
-    randomizeMastermind(); // Use the new randomizeMastermind function
-randomizeHero();
-  
-      // Update the scheme image after all randomizations are done
-    setTimeout(() => {
-        const selectedSchemeValue = document.querySelector('#scheme-section input[type=radio]:checked').value;
-        updateSchemeImage(selectedSchemeValue);
-    }, 0); // Delay slightly to allow DOM updates
 
-    // Update the mastermind image as well
-    setTimeout(() => {
-        const selectedMastermindValue = document.querySelector('#mastermind-section input[type=radio]:checked').value;
-        updateMastermindImage(selectedMastermindValue);
-    }, 0);
+document.getElementById('randomize-all').addEventListener('click', () => {
+    randomizeAll();
 });
 
+function randomizeAll() {
+    // Step 1: Randomize the scheme first
+    randomizeScheme();
 
+    // Get the selected scheme to determine its requirements
+    const selectedScheme = document.querySelector('#scheme-section input[type="radio"]:checked');
+    const schemeName = selectedScheme.value;
+    const scheme = schemes.find(s => s.name === schemeName); // Assuming `schemes` is an array of scheme objects
+
+    if (!scheme) {
+        console.error("Selected scheme not found in the schemes list.");
+        return;
+    }
+
+    // Step 2: Randomize the mastermind
+    randomizeMastermind();
+
+    // Step 3: Randomize villains based on the scheme's requirements
+    randomizeVillainWithRequirements(scheme);
+
+    // Step 4: Randomize henchmen based on the scheme's requirements
+    randomizeHenchmenWithRequirements(scheme);
+
+    // Step 5: Randomize heroes based on the scheme's requirements
+    randomizeHeroWithRequirements(scheme);
+
+    // Update images after all randomizations are done
+    setTimeout(() => {
+        updateSchemeImage(schemeName);
+        const selectedMastermindValue = document.querySelector('#mastermind-section input[type="radio"]:checked').value;
+        updateMastermindImage(selectedMastermindValue);
+    }, 0);
+}
+
+function randomizeVillainWithRequirements(scheme) {
+    // Clear all current checkbox selections before randomizing
+    const villainCheckboxes = document.querySelectorAll('#villain-selection input[type="checkbox"]');
+    villainCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+    // Get the selected filters
+    const selectedFilters = Array.from(document.querySelectorAll('#villainlist input[type="checkbox"]:checked'))
+        .map(cb => cb.getAttribute('data-set'));
+
+    // Filter the villain checkboxes by the selected filters
+    const filteredCheckboxes = Array.from(villainCheckboxes).filter(checkbox => {
+        const villainSet = checkbox.getAttribute('data-set');
+        return selectedFilters.length === 0 || selectedFilters.includes(villainSet);
+    });
+
+    // If no villains match the filters, reset image and return
+    if (filteredCheckboxes.length === 0) {
+        resetVillainImage();
+        return;
+    }
+
+    // Clear the previously selected villain groups
+    selectedVillainGroups = [];
+
+    // If the scheme has a specific villain requirement, ensure it's included
+    if (scheme.specificVillainRequirement) {
+        const requiredVillain = filteredCheckboxes.find(checkbox => checkbox.value === scheme.specificVillainRequirement);
+        if (requiredVillain) {
+            // Select the required villain
+            requiredVillain.checked = true;
+            const requiredVillainGroup = villains.find(villainGroup => villainGroup.name === requiredVillain.value);
+            selectedVillainGroups.push(requiredVillainGroup);
+
+            // Remove the required villain from the pool of available villains
+            const remainingCheckboxes = filteredCheckboxes.filter(checkbox => checkbox !== requiredVillain);
+
+            // Randomly select the remaining villains (if any are needed)
+            const remainingSlots = scheme.requiredVillains - 1; // Subtract 1 for the required villain
+            if (remainingSlots > 0 && remainingCheckboxes.length > 0) {
+                const shuffledCheckboxes = remainingCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+                const selectedCheckboxes = shuffledCheckboxes.slice(0, remainingSlots); // Pick the required number
+
+                // Add the selected villain groups
+                selectedCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    const villainGroup = villains.find(villainGroup => villainGroup.name === checkbox.value);
+                    selectedVillainGroups.push(villainGroup);
+                });
+            }
+        } else {
+            console.error(`Required villain "${scheme.specificVillainRequirement}" not found in the filtered list.`);
+        }
+    } else {
+        // If no specific villain is required, randomly select the required number of villains
+        const shuffledCheckboxes = filteredCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+        const selectedCheckboxes = shuffledCheckboxes.slice(0, scheme.requiredVillains); // Pick the required number
+
+        // Add the selected villain groups
+        selectedCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+            const villainGroup = villains.find(villainGroup => villainGroup.name === checkbox.value);
+            selectedVillainGroups.push(villainGroup);
+        });
+    }
+
+    // Set the image to the first villain in the list
+    currentVillainGroupIndex = 0;
+    currentVillainIndex = 0;
+    displayCurrentVillainImage();
+
+    // Scroll to the first selected villain checkbox
+    const villainContainer = document.querySelector('#villain-section .scrollable-list');
+    if (villainContainer && selectedVillainGroups.length > 0) {
+        // Convert villainCheckboxes to an array to use .find()
+        const villainCheckboxesArray = Array.from(villainCheckboxes);
+        const firstVillainCheckbox = villainCheckboxesArray.find(checkbox => checkbox.value === selectedVillainGroups[0].name);
+        if (firstVillainCheckbox) {
+            const villainPosition = firstVillainCheckbox.offsetTop - villainContainer.offsetTop;
+            villainContainer.scrollTop = villainPosition - villainContainer.clientHeight / 2;
+        }
+    }
+
+    // Update face-down cards for the selected villains
+    updateVillainFaceDownCards();
+}
+
+
+function randomizeHenchmenWithRequirements(scheme) {
+    // Clear all current checkbox selections before randomizing
+    const henchmenCheckboxes = document.querySelectorAll('#henchmen-selection input[type="checkbox"]');
+    henchmenCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+    // Get the selected filters
+    const selectedFilters = Array.from(document.querySelectorAll('#henchmenlist input[type="checkbox"]:checked'))
+        .map(cb => cb.getAttribute('data-set'));
+
+    // Filter the henchmen checkboxes by the selected filters
+    const filteredCheckboxes = Array.from(henchmenCheckboxes).filter(checkbox => {
+        const henchmenSet = checkbox.getAttribute('data-set');
+        return selectedFilters.length === 0 || selectedFilters.includes(henchmenSet);
+    });
+
+    // If no henchmen match the filters, reset image and return
+    if (filteredCheckboxes.length === 0) {
+        resetHenchmenImage();
+        return;
+    }
+
+    // Randomly select the required number of henchmen
+    const shuffledCheckboxes = filteredCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+    const selectedCheckboxes = shuffledCheckboxes.slice(0, scheme.requiredHenchmen); // Pick the required number
+
+    // Clear the previously selected henchmen groups
+    selectedHenchmenGroups = [];
+
+    // Add the selected henchmen groups
+    selectedCheckboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        const henchmenGroup = henchmen.find(henchmenGroup => henchmenGroup.name === checkbox.value);
+        selectedHenchmenGroups.push(henchmenGroup);
+    });
+
+    // Set the image to the first henchman in the list
+    currentHenchmenGroupIndex = 0;
+    displayCurrentHenchmenImage();
+
+    // Scroll to the first selected henchman checkbox
+    const henchmenContainer = document.querySelector('#henchmen-section .scrollable-list');
+    if (henchmenContainer) {
+        const henchmenPosition = selectedCheckboxes[0].offsetTop - henchmenContainer.offsetTop;
+        henchmenContainer.scrollTop = henchmenPosition - henchmenContainer.clientHeight / 2;
+    }
+
+    // Update face-down cards for the selected henchmen
+    updateHenchmenFaceDownCards();
+}
+
+function randomizeHeroWithRequirements(scheme) {
+    // Clear all current checkbox selections before randomizing
+    const heroCheckboxes = document.querySelectorAll('#hero-selection input[type="checkbox"]');
+    heroCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+    // Get the selected set and team filters
+    const selectedSetFilters = Array.from(document.querySelectorAll('#herosetfilter input[type="checkbox"]:checked'))
+        .map(cb => cb.getAttribute('data-set'));
+    const selectedTeamFilters = Array.from(document.querySelectorAll('#heroteamfilter input[type="checkbox"]:checked'))
+        .map(cb => cb.getAttribute('data-team'));
+
+    // Filter the hero checkboxes by the selected filters
+    const filteredCheckboxes = Array.from(heroCheckboxes).filter(checkbox => {
+        const heroSet = checkbox.getAttribute('data-set');
+        const heroTeam = checkbox.getAttribute('data-team');
+        const matchesSet = selectedSetFilters.length === 0 || selectedSetFilters.includes(heroSet);
+        const matchesTeam = selectedTeamFilters.length === 0 || selectedTeamFilters.includes(heroTeam);
+        return matchesSet && matchesTeam;
+    });
+
+    // If no heroes match the filters, reset image and return
+    if (filteredCheckboxes.length === 0) {
+        resetHeroImage();
+        return;
+    }
+
+    // Randomly select the required number of heroes
+    const shuffledCheckboxes = filteredCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+    const selectedCheckboxes = shuffledCheckboxes.slice(0, scheme.requiredHeroes); // Pick the required number
+
+    // Clear the previously selected hero groups
+    selectedHeroGroups = [];
+
+    // Add the selected hero groups
+    selectedCheckboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        const heroGroup = heroes.find(heroGroup => heroGroup.name === checkbox.value);
+        selectedHeroGroups.push(heroGroup);
+    });
+
+    // Set the image to the first hero in the list
+    currentHeroGroupIndex = 0;
+    currentHeroIndex = 0;
+    displayCurrentHeroImage();
+
+    // Scroll to the first selected hero checkbox
+    const heroContainer = document.querySelector('#hero-section .scrollable-list');
+    if (heroContainer) {
+        const heroPosition = selectedCheckboxes[0].offsetTop - heroContainer.offsetTop;
+        heroContainer.scrollTop = heroPosition - heroContainer.clientHeight / 2;
+    }
+
+    // Update face-down cards for the selected heroes
+    updateHeroFaceDownCards();
+}
 
 function formatList(items) {
     if (items.length === 0) return '';
     if (items.length === 1) return items[0];
     return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
 }
-
 
 function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes) {
 
@@ -1480,19 +1865,7 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
         villainFeedback += `<br><span class="error-spans">Please select ${villains.length - scheme.requiredVillains > 1 ? 'fewer villain groups' : 'one less villain group'}.</span>`;
     }
 
-    if (scheme.requiredHenchmen === 2 && henchmen.length !== 1) {
-        henchmenFeedback = henchmen.length < 1 
-            ? '<br><span class="error-spans">Please select a Henchmen group.</span>' 
-            : '<br><span class="error-spans">Please select fewer Henchmen groups.</span>';
-    } else if (scheme.requiredHenchmen !== 2 && henchmen.length !== scheme.requiredHenchmen) {
-        if (henchmen.length < scheme.requiredHenchmen) {
-            henchmenFeedback += `<br><span class="error-spans">Please select ${scheme.requiredHenchmen - henchmen.length > 1 ? 'more henchmen groups' : 'another henchmen group'}.</span>`;
-        } else if (henchmen.length > scheme.requiredHenchmen) {
-            henchmenFeedback += `<br><span class="error-spans">Please select ${henchmen.length - scheme.requiredHenchmen > 1 ? 'fewer henchmen groups' : 'one less henchmen group'}.</span>`;
-        }
-    }
-
-    if (heroes.length < scheme.requiredHeroes) {
+       if (heroes.length < scheme.requiredHeroes) {
         heroFeedback += `<br><span class="error-spans">Please select ${scheme.requiredHeroes - heroes.length > 1 ? 'more heroes' : 'another hero'}.</span>`;
     } else if (heroes.length > scheme.requiredHeroes) {
         heroFeedback += `<br><span class="error-spans">Please select ${heroes.length - scheme.requiredHeroes > 1 ? 'fewer heroes' : 'one less hero'}.</span>`;
@@ -1505,23 +1878,33 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
     document.getElementById('required-villains-count').innerHTML = `<span class="bold-spans">${scheme.requiredVillains} Villain ${villainGroupText}</span>`;
     document.getElementById('villains-list').innerHTML = formattedVillains + villainFeedback;
 
-    if (scheme.requiredHenchmen === 2) {
-        document.getElementById('required-henchmen-count').innerHTML = `<span class="bold-spans">2 Henchmen groups</span>`;
-        document.getElementById('henchmen-list').innerHTML = henchmen.length === 1 
-            ? `<span class="bold-spans">${formattedHenchmen}<br>As per Solo Play rules, all 10 henchmen will be added instead of an additional group.</span>` + henchmenFeedback
-            : henchmenFeedback;
+   
+// Check if the number of selected henchmen is incorrect
+if (henchmen.length < scheme.requiredHenchmen) {
+    // Not enough henchmen selected
+    if (henchmen.length === 0) {
+        henchmenFeedback = '<br><span class="error-spans">Please select a Henchmen group.</span>';
     } else {
-        const henchmenGroupText = henchmen.length === 1 ? 'group' : 'groups';
-        document.getElementById('required-henchmen-count').innerHTML = `<span class="bold-spans">${scheme.requiredHenchmen} Henchmen ${henchmenGroupText}</span>`;
-        document.getElementById('henchmen-list').innerHTML = formattedHenchmen + henchmenFeedback;
+        henchmenFeedback = `<br><span class="error-spans">Please select ${scheme.requiredHenchmen - henchmen.length} more Henchmen ${scheme.requiredHenchmen - henchmen.length > 1 ? 'groups' : 'group'}.</span>`;
     }
+} else if (henchmen.length > scheme.requiredHenchmen) {
+    // Too many henchmen selected
+    henchmenFeedback = `<br><span class="error-spans">Please select ${henchmen.length - scheme.requiredHenchmen} fewer Henchmen ${henchmen.length - scheme.requiredHenchmen > 1 ? 'groups' : 'group'}.</span>`;
+}
+
+// Update the UI with the required number of henchmen and feedback
+const henchmenGroupText = scheme.requiredHenchmen === 1 ? 'group' : 'groups';
+document.getElementById('required-henchmen-count').innerHTML = `<span class="bold-spans">${scheme.requiredHenchmen} Henchmen ${henchmenGroupText}</span>`;
+
+// Display the selected henchmen and feedback
+document.getElementById('henchmen-list').innerHTML = henchmen.length > 0 ? formattedHenchmen + henchmenFeedback : henchmenFeedback;
 
     document.getElementById('required-heroes-count').innerHTML = `<span class="bold-spans">${scheme.requiredHeroes} ${heroGroupText}</span>`;
     document.getElementById('heroes-list').innerHTML = formattedHeroes + heroFeedback;
 
     const villainsCorrect = villains.length === scheme.requiredVillains && specificVillainRequirementMet;
     const heroesCorrect = heroes.length === scheme.requiredHeroes;
-    const henchmenCorrect = scheme.requiredHenchmen === 2 ? henchmen.length === 1 : henchmen.length === scheme.requiredHenchmen;
+    const henchmenCorrect = henchmen.length === scheme.requiredHenchmen;
 
     const allRequirementsMet = villainsCorrect && henchmenCorrect && heroesCorrect;
 
@@ -1531,7 +1914,6 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
     document.getElementById('confirm-start-up-choices').style.display = 'block';
 document.getElementById('modal-overlay').style.display = 'block';
 }
-
 
 
 document.getElementById('return-to-selections').addEventListener('click', function() {
@@ -1554,6 +1936,7 @@ document.getElementById('begin-game').addEventListener('click', function() {
         // Start the game
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('game-board').style.display = 'block';
+	document.getElementById('expand-side-panel').style.display = 'block';
         document.getElementById('side-panel').style.display = 'flex';
 
         initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
@@ -1589,7 +1972,7 @@ document.getElementById('start-game').addEventListener('click', () => {
 
 function adjustWoundDeckForScheme(scheme) {
     if (scheme.name === 'The Legacy Virus') {
-        woundDeck = Array(6).fill({ name: "Wound", type: "Wound", cost: 0, image: "Visual Assets/Other/Wound.png" });
+        woundDeck = Array(6).fill({ name: "Wound", type: "Wound", cost: 0, image: "Visual Assets/Other/Wound.webp" });
     } else {
         woundDeck = [...wounds]; // Default setup for the woundDeck
     }
@@ -1642,26 +2025,34 @@ function generateVillainDeck(selectedVillains, selectedHenchmen, scheme, heroDec
         }
     });
 
-    // Add henchmen cards
-    selectedHenchmen.forEach(henchmanName => {
-        const henchman = window.henchmen.find(h => h.name === henchmanName);
-        if (henchman) {
-            let henchmenCount;
-            if (scheme.requiredHenchmen === 1) {
-                henchmenCount = 4;
-            } else if (scheme.requiredHenchmen === 2) {
-                henchmenCount = 10;
-            } else {
-                henchmenCount = 4; // Default case if `requiredHenchmen` is not 1 or 2
-            }
+const selectedSpecialHenchman = selectedHenchmen[Math.floor(Math.random() * selectedHenchmen.length)];
+let henchmenToPlaceOnTop = [];
 
-            for (let i = 0; i < henchmenCount; i++) {
+
+  selectedHenchmen.forEach(henchmanName => {
+    const henchman = window.henchmen.find(h => h.name === henchmanName);
+    if (henchman) {
+        if (henchmanName === selectedSpecialHenchman) {
+            // For the selected special henchman:
+            // Add 2 copies to the deck
+            for (let i = 0; i < 2; i++) {
                 deck.push({ ...henchman, subtype: 'Henchman' });
             }
+            // Add 2 copies to the "to place on top" array
+            for (let i = 0; i < 2; i++) {
+                henchmenToPlaceOnTop.push({ ...henchman, subtype: 'Henchman' });
+            }
         } else {
-            console.warn(`Henchman with name ${henchmanName} not found.`);
+            // For the other henchmen:
+            // Add 10 copies to the deck
+            for (let i = 0; i < 10; i++) {
+                deck.push({ ...henchman, subtype: 'Henchman' });
+            }
         }
-    });
+    } else {
+        console.warn(`Henchman with name ${henchmanName} not found.`);
+    }
+});
 
     // Adjust for the scheme "Secret Invasion of the Skrull Shapeshifters"
     if (scheme.name === 'Secret Invasion of the Skrull Shapeshifters' && heroDeck) {
@@ -1670,12 +2061,12 @@ function generateVillainDeck(selectedVillains, selectedHenchmen, scheme, heroDec
                 ...hero,
                 skrulled: true,
                 originalAttack: hero.attack,
-                cost: hero.cost + 2, // Increase cost
+                cost: hero.cost,
                 attack: hero.cost + 2, // Assign the increased cost to attack
                 type: 'Villain',
                 fightEffect: 'unskrull',
-overlayText: `SKRULL`,
-overlayTextAttack: `${hero.attack}`
+overlayText: `<span style="filter:drop-shadow(0vh 0vh 0.3vh black);">SKRULL</span>`,
+overlayTextAttack: `${hero.cost + 2}`
         };
         });
         deck.push(...skrulledHeroes);
@@ -1702,39 +2093,42 @@ const schemePlace = document.getElementById('scheme-place');
     // Append the image to the mastermind cell
     schemePlace.appendChild(schemeImage);
 
-    if (scheme.name === 'Replace Earth\'s Leaders with Killbots') {
-        for (let i = 0; i < 18; i++) {
-            deck.push({ type: "Villain", name: "Killbot", team: "None", attack: 0, cost: 0, victoryPoints: 1, killbot: true, overlayTextAttack: `${killbotAttack}`, image: "Visual Assets/Other/Killbot.png" });
+   if (scheme.name === "Replace Earth's Leaders with Killbots") {
+
+killbotSchemeTwistCount += 3;
+    for (let i = 0; i < 18; i++) {
+        // Remove a random bystander from the bystander deck
+        if (bystanderDeck.length > 0) {
+            const randomIndex = Math.floor(Math.random() * bystanderDeck.length);
+            bystanderDeck.splice(randomIndex, 1); // Removes the randomly selected bystander
         }
+
+        // Add a Killbot to the deck
+        deck.push({
+            type: "Villain",
+            name: "Killbot",
+            team: "None",
+	    originalAttack: 0,
+            attack: 0,
+            cost: 0,
+            victoryPoints: 1,
+            killbot: true,
+            overlayTextAttack: `${killbotAttack}`,
+            image: "Visual Assets/Other/Killbot.webp"
+        });
     }
+}
 
     for (let i = 0; i < 5; i++) {
-        deck.push({ name: 'Master Strike', type: 'Master Strike', image: "Visual Assets/Other/MasterStrike.png" });
+        deck.push({ name: 'Master Strike', type: 'Master Strike', image: "Visual Assets/Other/MasterStrike.webp" });
     }
 
     for (let i = 0; i < scheme.twistCount; i++) {
-        deck.push({ name: 'Scheme Twist', type: 'Scheme Twist', image: "Visual Assets/Other/SchemeTwist.png" });
+        deck.push({ name: 'Scheme Twist', type: 'Scheme Twist', image: "Visual Assets/Other/SchemeTwist.webp" });
     }
 
     // Shuffle the deck
     deck = shuffle(deck);
-
-    // Place two henchmen on top of the deck
-    let henchmenToPlaceOnTop = [];
-    let henchmenCount = 0;
-
-    for (let i = 0; i < deck.length && henchmenCount < 2; i++) {
-        if (deck[i].subtype === 'Henchman') {
-            henchmenToPlaceOnTop.push(deck.splice(i, 1)[0]);
-            henchmenCount++;
-            i--; // Adjust index after splicing
-        }
-    }
-
-    // Ensure we actually placed two henchmen cards
-    if (henchmenToPlaceOnTop.length < 2) {
-        console.error('Not enough henchmen cards to place on top of the deck!');
-    }
 
     deck = [...deck, ...henchmenToPlaceOnTop];
 
@@ -1753,6 +2147,13 @@ function initGame(heroes, villains, henchmen, mastermindName, scheme) {
     console.log('Mastermind:', mastermindName);
     console.log('Scheme:', scheme);
     console.log('Final Blow Enabled:', finalBlowEnabled);
+
+let selectedExpansions = getSelectedExpansions();
+
+            // Filter the shuffled deck
+            sidekickDeck = filterDeckByExpansions(sidekickDeck, selectedExpansions);
+
+updateDeckCounts();
 
     const mastermind = getSelectedMastermind();
     mastermind.bystanders = [];
@@ -1823,7 +2224,7 @@ const mastermindCell = document.getElementById('mastermind');
 
 let isFirstTurn = true;
 
-function drawVillainCard() {
+async function drawVillainCard() {
     return new Promise((resolve, reject) => {
         if (villainDeck.length === 0) {
             showDrawPopup();
@@ -1834,7 +2235,7 @@ function drawVillainCard() {
         const drawCount = isFirstTurn ? 3 : 1;
         isFirstTurn = false;
 
-        const drawVillainsRecursively = (drawRemaining) => {
+        const drawVillainsRecursively = async (drawRemaining) => {
             if (drawRemaining === 0) {
                 updateGameBoard();
                 resolve(); // Resolve after all villains are drawn and processed
@@ -1866,14 +2267,16 @@ function drawVillainCard() {
                     drawVillainsRecursively(drawRemaining - 1); // Proceed even if there's an error
                 });
             } else if (villainCard.name.includes('Scheme Twist')) {
-                handleSchemeTwist(villainCard).then(() => {
-                    console.log('Scheme Twist handled.');
-                    drawVillainsRecursively(drawRemaining - 1); // Continue drawing villains after resolving Scheme Twist
-                }).catch((error) => {
-                    console.error('Error handling Scheme Twist:', error);
-                    drawVillainsRecursively(drawRemaining - 1); // Proceed even if there's an error
-                });
-            } else {
+    await handleSchemeTwist(villainCard);
+    
+    // Check if we need to KO a hero after processing all Twists
+    if (pendingHeroKO && schemeTwistChainDepth === 0) {
+        pendingHeroKO = false;
+        await showHeroSelectPopup();
+    }
+    
+    await drawVillainsRecursively(drawRemaining - 1);
+} else {
                 // Handle Bystanders
                 if (villainCard.name === 'Bystander') {
                     handleBystander(villainCard);
@@ -1957,7 +2360,6 @@ onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span>
         drawVillainsRecursively(drawCount);
     });
 }
-
 
 function handleBystander(bystanderCard) {
     let sewersIndex = city.length - 1;
@@ -2060,76 +2462,66 @@ onscreenConsole.log(`<span class="console-highlights">Master Strike!</span> ${ma
 }
 
 function handleSchemeTwist(schemeTwistCard) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+        // Get selected scheme
         const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
         const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
-        koPile.push(schemeTwistCard); // Move Scheme Twist to KO Pile
+        // Update game state
+        koPile.push(schemeTwistCard);
+        schemeTwistCount += 1;
 
-schemeTwistCount += 1; 
+        // Log appropriate message
+        if (selectedScheme.variableTwist === false) {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
+        } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[`twistText${schemeTwistCount}`]}`);
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
+        }
 
-if (selectedScheme.variableTwist === false) {
-    // For schemes with the same twist every time
-    onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
-} else if (selectedScheme.variableTwist === true) {
-    // For schemes with variable twists, dynamically access the correct twist text
-    const twistTextKey = `twistText${schemeTwistCount}`;
-    
-    // Check if the key exists in the selectedScheme object
-    if (selectedScheme[twistTextKey]) {
-        onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[twistTextKey]}`);
-    } else {
-        onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
-    }
-} else {
-    onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
-}
-
-
-        showPopup('Scheme Twist', () => {
-            updateGameBoard(); // Update the game board immediately
+        showPopup('Scheme Twist', async () => {
+            updateGameBoard();
             
-            let twistEffectPromise = Promise.resolve();
+            // Mark that we're in a Scheme Twist chain
+            schemeTwistChainDepth++;
+            
+            // Run the twist effect if it exists
             if (selectedScheme.twistEffect && selectedScheme.twistEffect !== "None") {
                 const twistEffectFunction = window[selectedScheme.twistEffect];
-                console.log("Twist effect function found:", twistEffectFunction);
                 if (typeof twistEffectFunction === 'function') {
-                    twistEffectPromise = new Promise((resolveTwistEffect, rejectTwistEffect) => {
-                        try {
-                            const result = twistEffectFunction();
-                            if (result instanceof Promise) {
-                                result.then(resolveTwistEffect).catch(rejectTwistEffect);
-                            } else {
-                                resolveTwistEffect(result);
-                            }
-                        } catch (error) {
-                            rejectTwistEffect(error);
-                        }
-                    });
-                } else {
-                    console.error(`Twist effect function ${selectedScheme.twistEffect} not found`);
+                    try {
+                        await twistEffectFunction();
+                    } catch (error) {
+                        console.error('Error in twist effect:', error);
+                    }
                 }
-            } else {
-                console.log("No twist effect found for this scheme.");
             }
-
-            twistEffectPromise.then(() => {
-                if (!schemeTwistDrawn) {
-                    showHeroSelectPopup();
-                    schemeTwistDrawn = true;
-                }
-                resolve(); // Resolve after the Scheme Twist and hero selection are handled
-            }).catch(error => {
-                console.error(`Error in twist effect: ${error}`);
-                if (!schemeTwistDrawn) {
-                    showHeroSelectPopup();
-                    schemeTwistDrawn = true;
-                }
-                resolve(); // Resolve even if an error occurs
-            });
+            
+            // Decrement depth and check if we're at the end of the chain
+            schemeTwistChainDepth--;
+            
+            // If this was the last Twist in the chain, trigger KO
+            if (schemeTwistChainDepth === 0) {
+                pendingHeroKO = true;
+            }
+            
+            resolve();
         });
     });
 }
+
+  function defaultWoundDraw() {
+  if (woundDeck.length > 0) {
+    const gainedWound = woundDeck.pop();
+    playerDiscardPile.push(gainedWound);
+    onscreenConsole.log("Wound gained.");
+    updateGameBoard();
+  } else {
+    onscreenConsole.log("No wounds left. You've taken enough damage!");
+  }
+}
+
 
 function handleVillainEscape(escapedVillain) {
     if (escapedVillain) {
@@ -2224,58 +2616,104 @@ function showHeroSelectPopup() {
         const heroOptions = document.getElementById('hero-options');
         const heroImage = document.getElementById('hero-select-image');
         const hoverText = document.getElementById('selectHoverText');
+        const confirmButton = document.createElement('button'); // Create confirm button dynamically
+        confirmButton.id = 'hero-select-confirm';
+        confirmButton.textContent = 'CONFIRM';
+        confirmButton.style.display = 'inline-block'; // Show button immediately
+        confirmButton.disabled = true; // Disabled by default
 
         heroOptions.innerHTML = ''; // Clear previous options
+        let selectedHero = null;
+        let activeImage = null;
 
-        let eligibleHeroes = 0;
+        // Add confirm button to popup
+        heroSelectPopup.appendChild(confirmButton);
 
-        // Loop through the HQ to find eligible heroes
-        hq.forEach((hero, index) => {
-            if (hero && hero.cost <= 6) {
-                eligibleHeroes++;
-                const heroButton = document.createElement('button');
-                heroButton.innerText = hero.name;
+        // Filter eligible heroes
+        const eligibleHeroes = hq.filter(hero => hero && hero.cost <= 6);
 
-                // Handle hover to display hero image
-                heroButton.onmouseover = () => {
-                    heroImage.src = hero.image; // Dynamically change the image src
-                    heroImage.style.display = 'block'; // Show the image
-                    hoverText.style.display = 'none'; // Hide hover text
-                };
-
-                // Handle mouse out to restore original state
-                heroButton.onmouseout = () => {
-                    heroImage.src = ''; // Clear the image source
-                    heroImage.style.display = 'none'; // Hide the image
-                    hoverText.style.display = 'block'; // Show hover text again
-                };
-
-                // When a hero is selected, log the hero and resolve the promise
-                heroButton.onclick = () => {
-                    onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been returned to the bottom of the Hero Deck.`);
-                    returnHeroToDeck(index); // Move the selected hero back to the deck
-                    heroSelectPopup.style.display = 'none';
-                    modalOverlay.style.display = 'none';
-                    resolve(); // Resolve after hero selection
-                };
-
-                heroOptions.appendChild(heroButton);
-            }
-        });
-
-        // If there are no eligible heroes, log a message and resolve immediately
-        if (eligibleHeroes === 0) {
+        if (eligibleHeroes.length === 0) {
             onscreenConsole.log('No Heroes available with a cost of 6 or less.');
-            resolve(); // Resolve the promise without showing the popup
-            return; // Stop further execution since there are no heroes
+            resolve();
+            return;
         }
 
-        // Display the popup if there are eligible heroes
+        // Populate hero options
+        eligibleHeroes.forEach((hero, index) => {
+            const heroButton = document.createElement('button');
+            heroButton.innerText = hero.name;
+            heroButton.classList.add('hero-option');
+
+            // Hover functionality
+            heroButton.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = hero.image;
+                    heroImage.style.display = 'block';
+                    hoverText.style.display = 'none';
+                }
+            };
+
+            heroButton.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
+                }
+            };
+
+            // Selection functionality
+            heroButton.onclick = () => {
+                if (selectedHero === index) {
+                    // Deselect
+                    selectedHero = null;
+                    heroButton.classList.remove('selected');
+                    activeImage = null;
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
+                    confirmButton.disabled = true;
+                } else {
+                    // Deselect previous
+                    if (selectedHero !== null) {
+                        const prevButton = heroOptions.querySelector(`button[data-hero-id="${selectedHero}"]`);
+                        if (prevButton) prevButton.classList.remove('selected');
+                    }
+                    // Select new
+                    selectedHero = index;
+                    heroButton.classList.add('selected');
+                    activeImage = hero.image;
+                    heroImage.src = hero.image;
+                    heroImage.style.display = 'block';
+                    hoverText.style.display = 'none';
+                    confirmButton.disabled = false;
+                }
+            };
+
+            heroButton.setAttribute('data-hero-id', index);
+            heroOptions.appendChild(heroButton);
+        });
+
+        // Confirm button handler
+        confirmButton.onclick = () => {
+            if (selectedHero === null) return;
+
+            const hero = eligibleHeroes[selectedHero];
+            onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
+            returnHeroToDeck(selectedHero);
+            updateGameBoard();
+            
+            // Clean up
+            heroSelectPopup.removeChild(confirmButton);
+            heroSelectPopup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            resolve();
+        };
+
+        // Show popup
         modalOverlay.style.display = 'block';
         heroSelectPopup.style.display = 'block';
     });
 }
-
 
 function returnHeroToDeck(index) {
     const hero = hq[index];
@@ -2302,10 +2740,10 @@ const popupImage = document.getElementById('popup-single-image');
     // Check and set image based on the type
     if (type === 'Master Strike') {
         popupImage.style.display = 'block';
-        popupImage.style.backgroundImage = "url('Visual Assets/Other/MasterStrike.png')";
+        popupImage.style.backgroundImage = "url('Visual Assets/Other/MasterStrike.webp')";
     } else if (type === 'Scheme Twist') {
         popupImage.style.display = 'block';
-        popupImage.style.backgroundImage = "url('Visual Assets/Other/SchemeTwist.png')";
+        popupImage.style.backgroundImage = "url('Visual Assets/Other/SchemeTwist.webp')";
     } else {
         popupImage.style.display = 'none'; // Hide image if the type is unknown
     }
@@ -2333,29 +2771,88 @@ function getRandomConfirmText() {
     return options[Math.floor(Math.random() * options.length)];
 }
 
-function updateGameBoard() {
-for (let i = 0; i < hq.length; i++) {
-    const hqCell = document.querySelector(`#hq-${i + 1}`);
-    
-    // Clear previous content
-    hqCell.innerHTML = ''; 
-    
-    if (hq[i]) {
-        // Create an image element
-        const heroImage = document.createElement('img');
-        heroImage.src = hq[i].image;  // Use the image property from the hero object
-        heroImage.alt = hq[i].name;   // Set alt text as the hero's name
-        heroImage.classList.add('card-image'); // Add a class for styling if needed
+function updateDeckCounts() {
 
-        // Append the image to the HQ cell
-        hqCell.appendChild(heroImage);
+const twistCountNumber = document.getElementById('drawnTwistCount');
+const masterStrikeCountNumber = document.getElementById('drawnMasterStrikeCount');
+const escapePileCountNumber = document.getElementById('escapePileCount');
+const koPileCountNumber = document.getElementById('koPileCount');
+const woundDeckCountNumber = document.getElementById('woundDeckCount');
+const bystanderDeckCountNumber = document.getElementById('bystanderDeckCount');
+const sidekickCountNumber = document.getElementById('sidekickCountNumber');
+const shieldCountNumber = document.getElementById('shieldCountNumber');
+const discardCountNumber = document.getElementById('discardCountNumber');
+const playedCardsCountNumber = document.getElementById('playedCardsCountNumber');
+const villainDeckCountNumber = document.getElementById('villainDeckCountNumber');
+const heroDeckCountNumber = document.getElementById('heroDeckCountNumber');
+const playerDeckCountNumber = document.getElementById('playerDeckCountNumber');
+const mastermindTacticCountNumber = document.getElementById('mastermindTacticCountNumber');
 
-        // Set the onclick event to recruit the hero
-        hqCell.onclick = () => recruitHero(i);
-    } else {
-        hqCell.onclick = null; // No action if the cell is empty
-    }
+let mastermind = getSelectedMastermind();
+
+twistCountNumber.innerHTML = `&nbsp;${koPile.filter(card => card.type === 'Scheme Twist').length + killbotSchemeTwistCount}`;
+masterStrikeCountNumber.innerHTML = `&nbsp;${koPile.filter(card => card.type === 'Master Strike').length}`;
+escapePileCountNumber.innerHTML = `&nbsp;${escapedVillainsDeck.length}`;
+koPileCountNumber.innerHTML = `&nbsp;${koPile.length}`;
+woundDeckCountNumber.innerHTML = `&nbsp;${woundDeck.length}`;
+bystanderDeckCountNumber.innerHTML = `&nbsp;${bystanderDeck.length}`;
+sidekickCountNumber.innerHTML = `&nbsp;${sidekickDeck.length}`;
+shieldCountNumber.innerHTML = `&nbsp;${shieldDeck.length}`;
+discardCountNumber.innerHTML = `&nbsp;${playerDiscardPile.length}`;
+playedCardsCountNumber.innerHTML = `&nbsp;${cardsPlayedThisTurn.length}`;
+villainDeckCountNumber.innerHTML = `&nbsp;${villainDeck.length}`;
+heroDeckCountNumber.innerHTML = `&nbsp;${heroDeck.length}`;
+playerDeckCountNumber.innerHTML = `&nbsp;${playerDeck.length}`;
+mastermindTacticCountNumber.innerHTML = `&nbsp;${mastermind.tactics.length}`;
+
+const currentVictoryPoints = calculateVictoryPoints(victoryPile);
+document.getElementById('currentVictoryPointsTally').innerHTML = `&nbsp;${currentVictoryPoints}`;
+
 }
+
+let isRecruiting = false; // Flag to track if a hero is being recruited
+
+function updateGameBoard() {
+    for (let i = 0; i < hq.length; i++) {
+        const hqCell = document.querySelector(`#hq-${i + 1}`);
+        const recruitButtonContainer = document.querySelector(`#hq${i + 1}-recruit-button-container`);
+        const recruitButton = document.querySelector(`#hq${i + 1}-deck-recruit-button`);
+        const recruitCostSpan = document.querySelector(`#hq${i + 1}-recruit-cost`);
+
+        // Clear only the hero image, not the entire cell content
+        const existingHeroImage = hqCell.querySelector('.card-image');
+        if (existingHeroImage) {
+            hqCell.removeChild(existingHeroImage);
+        }
+
+        if (hq[i]) {
+            // Create an image element for the hero
+            const heroImage = document.createElement('img');
+            heroImage.src = hq[i].image;  // Use the image property from the hero object
+            heroImage.alt = hq[i].name;   // Set alt text as the hero's name
+            heroImage.classList.add('card-image'); // Add a class for styling if needed
+
+            // Append the image to the HQ cell
+            hqCell.appendChild(heroImage);
+
+            // Set the onclick event to show the recruit button
+            hqCell.onclick = () => {
+                if (!isRecruiting) {
+                    showHeroRecruitButton(i + 1, hq[i]);
+                }
+            };
+
+            // Update the recruit cost dynamically
+            if (recruitCostSpan) {
+                recruitCostSpan.innerHTML = `${hq[i].cost} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">`;
+            }
+        } else {
+            hqCell.onclick = null; // No action if the cell is empty
+            if (recruitButtonContainer) {
+                recruitButtonContainer.style.display = 'none'; // Hide the button if no hero is present
+            }
+        }
+    }
 
     for (let i = 0; i < city.length; i++) {
         const cityCell = document.querySelector(`#city-${i + 1}`);
@@ -2377,23 +2874,9 @@ victoryPile.forEach(item => {
         item.name = 'Bystander'; 
         item.type = 'Bystander';
 item.attack = 0;
-item.image = "Visual Assets/Other/Bystander.png"
+item.image = "Visual Assets/Other/Bystander.webp"
     }
 });
-
-if (koPile.length >= 1) {
-    const koPileImage = document.getElementById('ko-pile-card-back');
-    if (koPileImage) {
-        koPileImage.style.display = 'block'; // Show the overlay
-    }
-}
-
-if (escapedVillainsDeck.length >= 1) {
-    const escapedVillainsImage = document.getElementById('escaped-villains-card-back');
-    if (escapedVillainsImage) {
-        escapedVillainsImage.style.display = 'block'; // Show the overlay
-    }
-}
 
 if (woundDeck.length >= 1) {
     const woundPileImage = document.getElementById('wounds-card-back');
@@ -2478,6 +2961,17 @@ if (discardPileImage) {
     console.warn('discard-pile-card-back element not found');
 }
 
+const playedCardsPileImage = document.getElementById('played-cards-deck-pile');
+if (playedCardsPileImage) {
+    if (cardsPlayedThisTurn.length >= 1) {
+        playedCardsPileImage.style.display = 'flex';
+    } else {
+        playedCardsPileImage.style.display = 'none';
+    }
+} else {
+    console.warn('played-cards-deck-pile element not found');
+}
+
 const permBuffOverlay = document.createElement('div');
         const permBuffVariableName = `city${i + 1}PermBuff`; // Construct the variable name (e.g., "city1TempBuff")
         const currentPermBuff = window[permBuffVariableName]; // Access the variable using window
@@ -2534,7 +3028,7 @@ if (city[i]) {
     if (city[i].overlayText) {
         const villainOverlay = document.createElement('div');
         villainOverlay.className = 'skrull-overlay';
-        villainOverlay.innerHTML = city[i].overlayText;
+        villainOverlay.innerHTML = `${city[i].overlayText}`;
 
         // Append the overlay directly to the container (over the image)
         cardContainer.appendChild(villainOverlay);
@@ -2564,7 +3058,7 @@ if (city[i].bystander) {
     if (selectedScheme.name === 'Midtown Bank Robbery') {
 
         // Add the attack increase to the overlay text on a new line
-        overlayText += `<br>+${city[i].bystander.length} Attack`;
+        overlayText += `<br>+${city[i].bystander.length} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
     }
 
     // Set the overlay content and apply style for multiline text
@@ -2574,22 +3068,21 @@ if (city[i].bystander) {
     cityCell.appendChild(overlay);
 }
 
-
-// Function to adjust the villain's attack when bystanders change
-function updateVillainAttack(villain) {
-const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-
-    if (selectedScheme.name === 'Midtown Bank Robbery' && villain.bystander) {
-        // Base attack minus any previous bystander bonus
-        villain.attack = villain.originalAttack + villain.bystander.length;
-    }
+if (city[i].shattered > 0) {
+    const shatteredOverlay = document.createElement('div');
+    shatteredOverlay.className = 'shattered-overlay';
+    shatteredOverlay.innerHTML = `Shattered!<br><span>-${city[i].shattered}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"></span>`;
+    
+    // Clear existing overlay first to avoid duplicates
+    const existingOverlay = cityCell.querySelector('.shattered-overlay');
+    if (existingOverlay) cityCell.removeChild(existingOverlay);
+    
+    cityCell.appendChild(shatteredOverlay);
 }
 
-// Call this function whenever the bystander count changes
-updateVillainAttack(city[i]);
+updateDeckCounts();
 
-            cityCell.onclick = city[i].type !== 'Bystander' && city[i].type !== 'Attached to Mastermind' ? () => attackCard(i) : null;
+            cityCell.onclick = city[i].type !== 'Bystander' && city[i].type !== 'Attached to Mastermind' ? () => showAttackButton(i) : null;
         } else {
             const emptyText = document.createElement('div');
             emptyText.innerText = "";
@@ -2696,8 +3189,18 @@ playerHand.forEach((card, index) => {
     overlaySpan.className = 'overlay';
     cardElement.appendChild(overlaySpan);
 
-    // Set the click event for selecting the card
-    cardElement.onclick = () => toggleCard(index);
+ cardElement.onclick = () => {
+    const card = playerHand[index];
+
+    // Check if the card is a Wound
+    if (card.name === 'Wound') {
+        console.log("Cannot toggle a Wound card.");
+        return; // Exit the handler without toggling
+    }
+
+    // Call the toggleCard function
+    toggleCard(index);
+};
 
 playerHandElement.appendChild(cardElement);
 });
@@ -2710,7 +3213,46 @@ playerHandElement.appendChild(cardElement);
     updateHealWoundsButton();
 
 updateCardSizing();
+resetOpacity();
+
 }
+
+document.getElementById('play-all-button').addEventListener('click', () => {
+
+selectedCards = [];
+
+    // Define the names of the cards you want to select
+    const shieldNames = ["S.H.I.E.L.D. Officer", "S.H.I.E.L.D. Trooper", "S.H.I.E.L.D. Agent"];
+
+    // Check if all cards with the specified names are already selected
+    const allSelected = playerHand.every((card, index) => 
+        !shieldNames.includes(card.name) || selectedCards.includes(index));
+
+    if (allSelected) {
+        // If all are selected, deselect all
+        selectedCards = selectedCards.filter(index => !shieldNames.includes(playerHand[index].name));
+    } else {
+        // Otherwise, select all cards with the specified names
+        playerHand.forEach((card, index) => {
+            if (shieldNames.includes(card.name) && !selectedCards.includes(index)) {
+                selectedCards.push(index);
+            }
+        });
+    }
+
+    // Update the UI without re-rendering
+    document.querySelectorAll('.card').forEach((cardElement, index) => {
+        if (selectedCards.includes(index)) {
+            cardElement.classList.add('selected'); // Mark as selected
+        } else {
+            cardElement.classList.remove('selected'); // Deselect
+        }
+    });
+
+    updateSelectionOrder();
+confirmActions();
+})
+
 
 
 function drawCard() {
@@ -2791,7 +3333,7 @@ function confirmActions() {
 
             console.log('Confirm Actions Called:', card, currentPlayer);
 
-            // Handle unconditional ability
+          // Handle unconditional ability
             let abilityPromise = Promise.resolve();
             if (card.unconditionalAbility && card.unconditionalAbility !== "None") {
                 const abilityFunction = window[card.unconditionalAbility];
@@ -2815,20 +3357,58 @@ function confirmActions() {
                 if (card.conditionalAbility && card.conditionalAbility !== "None") {
                     const { conditionType, condition } = card;
                     if (isConditionMet(conditionType, condition)) {
-                        const conditionalAbilityFunction = window[card.conditionalAbility];
-
-                        if (typeof conditionalAbilityFunction === 'function') {
-                            // Wrap the result in a Promise if it isn't one
-                            return new Promise((resolve, reject) => {
-                                try {
-                                    const result = conditionalAbilityFunction(currentPlayer, card);
-                                    resolve(result);
-                                } catch (error) {
-                                    reject(error);
-                                }
-                            });
+                        if (autoSuperpowers) {
+                            const conditionalAbilityFunction = window[card.conditionalAbility];
+                            if (typeof conditionalAbilityFunction === 'function') {
+                                return new Promise((resolve, reject) => {
+                                    try {
+                                        const result = conditionalAbilityFunction(currentPlayer, card);
+                                        resolve(result);
+                                    } catch (error) {
+                                        reject(error);
+                                    }
+                                });
+                            } else {
+                                console.error(`Conditional ability function ${card.conditionalAbility} not found`);
+                            }
                         } else {
-                            console.error(`Conditional ability function ${card.conditionalAbility} not found`);
+                            return new Promise((resolve, reject) => {
+                                const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                                    `DO YOU WISH TO ACTIVATE <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> superpower?`,
+                                    "Yes",
+                                    "No"
+                                );
+
+                                document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+                                const cardImage = document.getElementById('hero-ability-may-card');
+                                cardImage.src = card.image;
+                                cardImage.style.display = 'block';
+
+                                confirmButton.onclick = () => {
+                                    try {
+                                        const conditionalAbilityFunction = window[card.conditionalAbility];
+                                        if (typeof conditionalAbilityFunction === 'function') {
+                                            const result = conditionalAbilityFunction(currentPlayer, card);
+                                            resolve(result);
+                                        } else {
+                                            console.error(`Conditional ability function ${card.conditionalAbility} not found`);
+                                            resolve();
+                                        }
+                                    } catch (error) {
+                                        reject(error);
+                                    }
+                                    hideHeroAbilityMayPopup();
+                                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                                };
+
+                                denyButton.onclick = () => {
+                                    onscreenConsole.log(`You have chosen not to activate <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> superpower.`);
+                                    hideHeroAbilityMayPopup();
+                                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                                    resolve();
+                                };
+                            });
                         }
                     } else {
                         console.log(`Unable to use Superpower Ability.`);
@@ -2906,13 +3486,25 @@ function resolveVillainActions() {
 
 function endTurn() {
 
+updateDeckCounts();
+
 onscreenConsole.log("Turn ended.");
+
+turnCount += 1;
+
+onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn&nbsp;</span><span class="console-highlights" style="text-decoration:underline;">${turnCount}</span><span class="console-highlights" style="text-decoration:underline;">:</span>`);
 
 if (lastTurn == true) {
 showWinPopup()
 } else {
 
     console.log('Ending turn...');
+    
+        city.forEach(card => {
+        if (card && (card.type === 'Villain' || card.type === 'Henchman') && card.shattered) {
+            card.shattered = 0;
+        }
+    });
 
 cardsPlayedThisTurn.forEach(card => {
         if (card.originalAttributes) {
@@ -2922,7 +3514,24 @@ cardsPlayedThisTurn.forEach(card => {
         }
     });
 
-  playerDiscardPile.push(...cardsPlayedThisTurn);
+  // Iterate through the cardsPlayedThisTurn array
+for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
+    const card = cardsPlayedThisTurn[i];
+
+    // Check if the card has the sidekickToDestroy attribute
+    if (card.hasOwnProperty('sidekickToDestroy')) {
+        // If sidekickToDestroy is true, remove the card from the array
+        if (card.sidekickToDestroy === true) {
+            cardsPlayedThisTurn.splice(i, 1); // Remove the card at index i
+        } else {
+            // If sidekickToDestroy is false, push the card to the discard pile
+            playerDiscardPile.push(card);
+        }
+    } else {
+        // If the card does not have the sidekickToDestroy attribute, push it to the discard pile
+        playerDiscardPile.push(card);
+    }
+}
     selectedCards = [];
 justAddedToDiscard = [];
 cardsPlayedThisTurn = [];
@@ -2933,6 +3542,7 @@ cardsPlayedThisTurn = [];
 recruitUsedToAttack = false;
 const recruitLabel = document.getElementById('recruit-point-label')
 recruitLabel.innerHTML = "Recruit: ";
+sidekickRecruited = false;
     attackPoints = 0;
     recruitPoints = 0;
 extraCardsDrawnThisTurn = 0;
@@ -2942,10 +3552,11 @@ city3TempBuff = 0;
 city4TempBuff = 0;
 city5TempBuff = 0;
 mastermindTempBuff = 0;
-rescueThreeBystandersAvailable = false;
-extraThreeRecruitAvailable = false;
+rescueExtraBystanders = 0;
+rescueExtraBystanders = 0;
 secondDocOc = false;
-schemeTwistDrawn = false;
+let schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
+let pendingHeroKO = false; 
     playerDiscardPile.push(...playerHand);
     playerHand = [];
 for (let i = 0; i < nextTurnsDraw; i++) {
@@ -2983,10 +3594,6 @@ cardsToBeDrawnNextTurn = [];
 }
 }
 
-document.getElementById('end-turn').addEventListener('click', () => {
-    endTurn();
-});
-
 function showRecruitPopup() {
     const recruitPopup = document.getElementById('recruit-popup');
     const closeBtn = recruitPopup.querySelector('.close-btn');
@@ -3013,80 +3620,55 @@ function showRecruitPopup() {
     }
 }
 
-function recruitOfficer() {
-    if (shieldDeck.length > 0 && totalRecruitPoints >= 3) {
-        const officer = shieldDeck.pop();
-        playerDiscardPile.push(officer);
-        totalRecruitPoints -= 3;
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">S.H.I.E.L.D. Officer</span> has been added to your discard pile.`);
-        updateGameBoard();
-    }
+const endTurnButton = document.getElementById("end-turn");
+let holdTimer;
+let isHolding = false; // Tracks if the button is being held
+
+function startHold() {
+    if (isHolding) return; // Prevent multiple triggers
+
+    isHolding = true;
+    endTurnButton.classList.add("holding"); // Start border animation
+
+    holdTimer = setTimeout(() => {
+        endTurn();
+        resetButton(); // Reset automatically
+    }, 1500);
 }
 
-document.querySelector('.shield-deck').addEventListener('click', showRecruitPopup);
-
-function recruitHero(hqIndex) {
-    const hero = hq[hqIndex];
-    if (totalRecruitPoints >= hero.cost) {
-        showHeroRecruitPopup(hero, hqIndex);
-    } else {
-        showMessagePopup(`You need ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> to recruit a <span class="bold-spans">${hero.name}</span>.`);
-    }
+function cancelHold() {
+    clearTimeout(holdTimer);
+    resetButton();
 }
 
-function recruitHeroConfirmed(hero, hqIndex) {
-    playerDiscardPile.push(hero);
-    totalRecruitPoints -= hero.cost;
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
-    hq[hqIndex] = heroDeck.length > 0 ? heroDeck.pop() : null;
-    healingPossible = false;
-
-    if (!hq[hqIndex]) {
-        showHeroDeckEmptyPopup();
-    }
-    updateGameBoard();
+function resetButton() {
+    isHolding = false;
+    endTurnButton.classList.remove("holding"); // Remove border animation
 }
 
-function attackCard(cityIndex) {
-    const villainCard = city[cityIndex];
+// Mouse events (Desktop)
+endTurnButton.addEventListener("mousedown", startHold);
+endTurnButton.addEventListener("mouseup", cancelHold);
+endTurnButton.addEventListener("mouseleave", cancelHold);
 
-    // Use the existing method to recalculate the villain's effective attack
-    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-    
-    // Recalculate the villain's attack using the unified function
-    let villainAttack = recalculateVillainAttack(villainCard, selectedScheme);
-
-    // Ensure villainAttack doesn't drop below 0
-    if (villainAttack < 0) {
-        villainAttack = 0;
-    }
-
-    // Check if the fight condition for the villain is met, or if there's no condition
-    if (villainCard.fightCondition && villainCard.fightCondition !== "None" && !isVillainConditionMet(villainCard)) {
-        showMessagePopup("YOU HAVE NOT MET THIS VILLAIN'S FIGHT CONDITION.");
-        return; // Exit the function if the condition is not met
-    }
-
-    // Calculate player's attack points, including recruit points if flag is true
-    let playerAttackPoints = totalAttackPoints;
-
-    if (recruitUsedToAttack === true) {
-        playerAttackPoints += totalRecruitPoints;
-    }
-
-    // Check if player has enough attack points
-    if (playerAttackPoints >= villainAttack) {
-        showAttackPopup(cityIndex);
-    } else {
-        showMessagePopup(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> to defeat <span class="bold-spans">${villainCard.name}</span>.`);
-    }
-}
+// Touch events (Mobile)
+endTurnButton.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Prevents accidental double-taps
+    startHold();
+});
+endTurnButton.addEventListener("touchend", cancelHold);
+endTurnButton.addEventListener("touchcancel", cancelHold);
 
 
 function isVillainConditionMet(villainCard) {
     const { fightCondition, conditionType, condition } = villainCard;
-const heroesYouHave = [...cardsPlayedThisTurn,...playerHand];
+const cardsYouHave = [
+    ...playerHand,
+    ...cardsPlayedThisTurn.filter(card => 
+        card.isCopied !== true && 
+        card.sidekickToDestroy !== true
+    )
+];
 
     switch (fightCondition) {
         case 'heroYouHave':
@@ -3106,39 +3688,68 @@ const heroesYouHave = [...cardsPlayedThisTurn,...playerHand];
     }
 }
 
-function showAttackPopup(cityIndex) {
-    const attackPopup = document.getElementById('attack-popup');
-    const closeBtn = attackPopup.querySelector('.close-btn');
-    const confirmBtn = document.getElementById('confirm-attack');
-    const modalOverlay = document.getElementById('modal-overlay');
-const villainCard = city[cityIndex];
-const attackText = document.getElementById('confirm-attack-text');
-const attackImage = document.getElementById('attack-villain-card-image');
- const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-
+function showAttackButton(cityIndex) {
+    const villainCard = city[cityIndex];
+    const cityCell = document.querySelector(`#city-${cityIndex + 1}`);
 
     // Calculate the villain's effective attack value
- let villainAttack = recalculateVillainAttack(villainCard, selectedScheme);
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+    let villainAttack = recalculateVillainAttack(villainCard, selectedScheme);
 
-    attackText.innerHTML = `Spend ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> to attack <span class="bold-spans">${villainCard.name}</span> ?`;
-attackImage.src = villainCard.image;
+    // Ensure villainAttack doesn't drop below 0
+    if (villainAttack < 0) {
+        villainAttack = 0;
+    }
 
-    attackPopup.style.display = 'block';
-    modalOverlay.style.display = 'block';
+    // Check if the fight condition is met
+    if (villainCard.fightCondition && villainCard.fightCondition !== "None" && !isVillainConditionMet(villainCard)) {
+        onscreenConsole.log(`You have not met <span class="console-highlights">${villainCard.name}</span><span class="bold-spans">'s</span> fight condition.`);
+        return;
+    }
 
-    closeBtn.onclick = () => {
-        attackPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-    };
+    // Check if the player has enough attack points
+    let playerAttackPoints = totalAttackPoints;
+    if (recruitUsedToAttack === true) {
+        playerAttackPoints += totalRecruitPoints;
+    }
 
-    confirmBtn.onclick = () => {
-        confirmAttack(cityIndex);
-        attackPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-        healingPossible = false;
-        updateGameBoard();
-    };
+    if (playerAttackPoints >= villainAttack) {
+        // Create or update the attack button
+        let attackButton = cityCell.querySelector('.attack-button');
+        if (!attackButton) {
+            attackButton = document.createElement('button');
+            attackButton.classList.add('attack-button');
+            cityCell.appendChild(attackButton);
+        }
+
+        // Update the button text and style
+        attackButton.innerHTML = `<span style="filter: drop-shadow(0vh 0vh 0.3vh black);">ATTACK?<br><span style="white-space: nowrap;">COST: ${villainAttack} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"></span></span>`;
+        attackButton.style.display = 'block';
+
+        // Handle button click
+        attackButton.onclick = () => {
+            confirmAttack(cityIndex);
+            attackButton.style.display = 'none'; // Hide the button after attack
+            healingPossible = false;
+            updateGameBoard();
+        };
+
+        // Handle clicks outside the button
+        const handleClickOutside = (event) => {
+            if (!attackButton.contains(event.target)) {
+                attackButton.style.display = 'none'; // Hide the button if clicked outside
+                document.removeEventListener('click', handleClickOutside);
+            }
+        };
+
+        // Add a slight delay to avoid immediately hiding the button
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+    } else {
+        onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
+    }
 }
 
 function recalculateVillainAttack(villainCard, selectedScheme) {
@@ -3148,7 +3759,7 @@ function recalculateVillainAttack(villainCard, selectedScheme) {
     }
 
     // Recalculate the attack as before (with buffs, etc.)
-    let attackValue = villainCard.originalAttack || villainCard.attack;
+    let attackValue = villainCard.attack || villainCard.originalAttack;
 
     // Add any buffs or other conditions if applicable
     const cityIndex = city.indexOf(villainCard);
@@ -3156,8 +3767,9 @@ function recalculateVillainAttack(villainCard, selectedScheme) {
     const tempBuffValue = window[tempBuffVariableName] || 0;
     const permBuffVariableName = `city${cityIndex + 1}PermBuff`;
     const permBuffValue = window[permBuffVariableName] || 0;
+    const shatteredAmount = villainCard.shattered || 0;
 
-    attackValue += tempBuffValue + permBuffValue;
+    attackValue += tempBuffValue + permBuffValue - (villainCard.shattered || 0);
 
     // Safely handle the "Midtown Bank Robbery" scheme adjustment
     if (selectedScheme && selectedScheme.name === 'Midtown Bank Robbery' && Array.isArray(villainCard.bystander)) {
@@ -3169,6 +3781,7 @@ attackValue += killbotAttack;
 }
 
     return attackValue;
+    
 }
 
 function confirmAttack(cityIndex) {
@@ -3217,11 +3830,11 @@ onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span>
         totalAttackPoints -= villainAttack; // Subtract the effective attack value
     }
 
-    if (rescueThreeBystandersAvailable === true) {
-        rescueBystander();
-        rescueBystander();
-        rescueBystander();
-    }
+if (rescueExtraBystanders > 0) {
+  for (let i = 0; i < rescueExtraBystanders; i++) {
+    rescueBystander();
+  }
+}
 
     if (extraThreeRecruitAvailable === true) {
         totalRecruitPoints += 3;
@@ -3265,35 +3878,6 @@ if (villainCard.fightEffect && villainCard.fightEffect !== "None") {
         // Reset the currentVillainLocation even if an error occurs
         currentVillainLocation = null;
     });
-}
-
-function showHeroRecruitPopup(hero, hqIndex) {
-    const heroRecruitPopup = document.getElementById('hero-recruit-popup');
-    const heroRecruitText = document.getElementById('hero-recruit-text');
-    const closeBtn = heroRecruitPopup.querySelector('.close-btn');
-    const confirmBtn = document.getElementById('confirm-hero-recruit');
-    const modalOverlay = document.getElementById('modal-overlay');
-const heroRecruitImage = document.getElementById('recruit-hero-card-image');
-
-
-    // Set dynamic text with hero's recruitment cost
-    heroRecruitText.innerHTML = `Do you want to spend ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> to recruit <span class="bold-spans">${hero.name}</span> ?`;
-heroRecruitImage.src = hero.image;
-    heroRecruitPopup.style.display = 'block';
-    modalOverlay.style.display = 'block';
-
-
-    closeBtn.onclick = () => {
-        heroRecruitPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-    };
-
-    confirmBtn.onclick = () => {
-        recruitHeroConfirmed(hero, hqIndex);
-        heroRecruitPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-        healingPossible = false;
-    };
 }
 
 function showHeroKOPopup(callback) {
@@ -3523,51 +4107,80 @@ document.getElementById('mastermind').addEventListener('click', () => {
         playerAttackPoints += totalRecruitPoints; // Add recruit points to attack points if allowed
     }
 
-    if (playerAttackPoints >= mastermindAttack) {
-        showMastermindAttackConfirmationPopup();
-    } else {
-        showMessagePopup(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> to defeat <span class="bold-spans">${mastermind.name}</span>.`);
-    }
+    if (mastermind.tactics.length === 0) {
+    onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no remaining tactics and cannot be attacked.`);
+} else if (playerAttackPoints >= mastermindAttack) {
+    showMastermindAttackButton();
+} else {
+    onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
+}
 });
 
 
-function showMastermindAttackConfirmationPopup() {
-    const popup = document.getElementById('mastermind-attack-confirmation-popup');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const closeBtn = popup.querySelector('.close-btn');
-    const attackText = document.getElementById('mastermind-confirm-attack-text');
-    const attackImage = document.getElementById('mastermind-confirm-attack-image');
-
+function showMastermindAttackButton() {
     let mastermind = getSelectedMastermind();
+
+    const mastermindAttackButtonContainer = document.getElementById('mastermind-attack-button-container');
+    const mastermindAttackButton = document.getElementById('mastermind-attack-button');
+    const mastermindAttackButtonText = document.getElementById('mastermind-attack-cost');
+
+    if (!mastermindAttackButtonContainer || !mastermindAttackButton || !mastermindAttackButtonText) {
+        console.error('Attack button container, button, or text element not found for the mastermind');
+        return;
+    }
 
     // Use the recalculated mastermind attack value
     let mastermindAttack = recalculateMastermindAttack(mastermind);
 
-    attackText.innerHTML = `Spend ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> to attack <span class="bold-spans">${mastermind.name}</span> ?`;
-    attackImage.src = mastermind.image;
+    // Show the button and container
+    mastermindAttackButtonContainer.style.display = 'block';
+    mastermindAttackButton.style.display = 'block';
+    mastermindAttackButtonText.innerHTML = `${mastermindAttack}`;
 
-    popup.style.display = 'block';
-    modalOverlay.style.display = 'block';
+    // Function to handle clicks outside the button
+    const handleClickOutside = (event) => {
+        // Check if the click was outside the button and its container
+        if (!mastermindAttackButton.contains(event.target) && !mastermindAttackButtonContainer.contains(event.target)) {
+            // Hide the button and its container
+            mastermindAttackButtonContainer.style.display = 'none';
+            mastermindAttackButton.style.display = 'none';
 
-    closeBtn.onclick = () => {
-        popup.style.display = 'none';
-        modalOverlay.style.display = 'none';
+            // Remove the event listener after hiding the button
+            document.removeEventListener('click', handleClickOutside);
+        }
     };
 
-    document.getElementById('confirm-mastermind-attack').addEventListener('click', confirmMastermindAttack);
+    // Add the event listener to detect clicks outside the button
+    // Use a slight delay to avoid immediately hiding the button
+    setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+    }, 0);
+
+    // Add a click event listener to the attack button
+    mastermindAttackButton.onclick = () => {
+        isAttacking = true; // Set the flag to true when attacking starts
+        confirmMastermindAttack();
+        mastermindAttackButtonContainer.style.display = 'none';
+        mastermindAttackButton.style.display = 'none';
+        healingPossible = false;
+
+        // Remove the event listener after the button is clicked
+        document.removeEventListener('click', handleClickOutside);
+
+        // Re-enable the onclick event handler after a short delay
+        setTimeout(() => {
+            isAttacking = false;
+        }, 500); // Adjust the delay as needed
+    };
 }
 
 function confirmMastermindAttack() {
-    const popup = document.getElementById('mastermind-attack-confirmation-popup');
-    const modalOverlay = document.getElementById('modal-overlay');
+    
     let mastermind = getSelectedMastermind();
+healingPossible = false;
 
     // Use the recalculated mastermind attack value
     let mastermindAttack = recalculateMastermindAttack(mastermind);
-
-    // Hide the popup and modal overlay
-    popup.style.display = 'none';
-    modalOverlay.style.display = 'none';
 
     // Deduct attack points or use recruit points if needed
     if (recruitUsedToAttack === true) {
@@ -3582,12 +4195,11 @@ function confirmMastermindAttack() {
         totalAttackPoints -= mastermindAttack;
     }
 
-    // Handle bystanders, extra recruits, and tactics
-    if (rescueThreeBystandersAvailable === true) {
-        rescueBystander();
-        rescueBystander();
-        rescueBystander();
-    }
+if (rescueExtraBystanders > 0) {
+  for (let i = 0; i < rescueExtraBystanders; i++) {
+    rescueBystander();
+  }
+}
 
     if (extraThreeRecruitAvailable === true) {
         totalRecruitPoints += 3;
@@ -3807,11 +4419,11 @@ totalBystanders = 30;
 extraCardsDrawnThisTurn = 0;
 nextTurnsDraw = 6;
 cardsToBeDrawnNextTurn = [];
-rescueThreeBystandersAvailable = false;
+rescueExtraBystanders = 0;
 extraThreeRecruitAvailable = false;
 bystanderDeck = shuffle(bystanders);
-schemeTwistDrawn = false;
-
+let pendingSchemeTwists = []; // Stores all Twists awaiting resolution
+let isProcessingTwists = false; // Prevents overlapping chains
    
     // Clear the game board
     updateGameBoard();
@@ -4077,27 +4689,202 @@ function showHeroAbilityMayPopup(promptText, confirmLabel = "Confirm", denyLabel
   };
 }
 
-const cardImages = document.querySelectorAll('.cell');
-const zoomPreview = document.getElementById('zoom-preview');
+
+
 const zoomedImage = document.getElementById('zoomed-image');
+let activeImage = null; // Track the currently locked image
 
-cardImages.forEach(card => {
-    card.addEventListener('mouseover', (e) => {
-        const imageUrl = e.target.src;
+// Combine all card lists into a single array
+const allCards = [
+    ...(bystanders ?? []),
+    ...(shieldCards ?? []),
+    ...(shieldOfficers ?? []),
+    ...(wounds ?? []),
+    ...(schemes ?? []),
+    ...(henchmen ?? []),
+    ...(sidekicks ?? []),
+    ...(masterminds),
+    ...[].concat(...(heroes?.map(group => group.cards) ?? [])), 
+    ...[].concat(...(villains?.map(group => group.cards) ?? [])) 
+];
 
-        // Check if the target is not an overlay image (e.g., by class name)
-        if (!e.target.classList.contains('card-icons') && imageUrl && imageUrl !== '') {
-            zoomedImage.src = imageUrl; // Set the zoomed image source
-            zoomedImage.style.transform = 'none'; // Remove any previous transform styles
-            zoomedImage.style.display = 'block';
-        }
-    });
-
-    card.addEventListener('mouseout', () => {
-        zoomedImage.style.display = 'none';
-        zoomedImage.src = ''; // Reset the image source to avoid showing a broken image link
-    });
+// Create a lookup table for faster access
+const cardLookup = {};
+allCards.forEach((card) => {
+    const normalizedPath = normalizeImagePath(card.image); // Normalize the image path
+    cardLookup[normalizedPath] = card;
 });
+
+// Function to show the zoomed image
+function showZoomedImage(imageUrl) {
+    zoomedImage.src = imageUrl;
+    zoomedImage.style.display = 'block';
+}
+
+// Function to hide the zoomed image (only if no image is locked)
+function hideZoomedImage() {
+    if (!activeImage) { 
+        zoomedImage.style.display = 'none';
+        zoomedImage.src = '';
+    }
+}
+
+// Function to get the correct image URL from an element
+function getImageFromElement(element) {
+    if (element.classList.contains('console-highlights')) {
+        return getCardImageFromName(element.textContent);
+    }
+    if (element.tagName === 'IMG') {
+        return element.src; // Allow zooming any image
+    }
+    return null;
+}
+
+// Function to normalize the image path
+function normalizeImagePath(imageUrl) {
+    // Extract the relative path from the full URL
+    const url = new URL(imageUrl, window.location.origin);
+    let relativePath = url.pathname;
+
+    // Remove leading slash if present
+    if (relativePath.startsWith("/")) {
+        relativePath = relativePath.slice(1);
+    }
+
+    // Decode URI-encoded characters (e.g., %20 -> space)
+    relativePath = decodeURIComponent(relativePath);
+
+    // Extract the "Visual Assets/..." part of the path
+    const visualAssetsIndex = relativePath.indexOf("Visual Assets/");
+    if (visualAssetsIndex !== -1) {
+        relativePath = relativePath.slice(visualAssetsIndex);
+    }
+
+    return relativePath;
+}
+
+// Handle hover (for desktop users)
+document.addEventListener('mouseover', (e) => {
+    const target = e.target.closest('img, .console-highlights'); // Works on any img
+    if (target) {
+        const imageUrl = getImageFromElement(target);
+
+        // Show zoomed image (existing functionality)
+        if (!activeImage && imageUrl) {
+            showZoomedImage(imageUrl);
+        } else if (activeImage && imageUrl && imageUrl !== activeImage) {
+            // Unlock if hovering over a different image
+            activeImage = null;
+            showZoomedImage(imageUrl);
+        }
+
+        // Fetch and display card data (new functionality)
+        if (imageUrl) {
+            // Normalize the path
+            const relativePath = normalizeImagePath(imageUrl);
+            console.log("Normalized path:", relativePath); // Log the normalized path
+
+            // Find the corresponding card
+            const card = cardLookup[relativePath];
+
+            if (card) {
+                updateRightPanel(card); // Pass the card data to another function
+            } else {
+                console.log("No card data found for image:", relativePath); // Log if no card data is found
+            }
+        }
+    }
+});
+
+document.addEventListener('mouseout', (e) => {
+    const target = e.target.closest('img, .console-highlights');
+    if (!activeImage && target) {
+        hideZoomedImage();
+
+        // Clear the right panel
+        const keyword1Display = document.getElementById("keyword1");
+        const keyword2Display = document.getElementById("keyword2");
+        const keyword3Display = document.getElementById("keyword3");
+        keyword1Display.textContent = "";
+        keyword2Display.textContent = "";
+        keyword3Display.textContent = "";
+
+        // Clear keyword descriptions
+        updateKeywordDescriptions(null, "keyword1Description");
+        updateKeywordDescriptions(null, "keyword2Description");
+        updateKeywordDescriptions(null, "keyword3Description");
+    }
+});
+
+// Handle click (for mobile & desktop)
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('img, .console-highlights'); // Works on any img
+    if (target) {
+        const imageUrl = getImageFromElement(target);
+
+        if (imageUrl) {
+            if (activeImage === imageUrl) {
+                // If clicking the same image again, unlock it
+                activeImage = null;
+                hideZoomedImage();
+            } else {
+                // Lock the image
+                activeImage = imageUrl;
+                showZoomedImage(imageUrl);
+            }
+        }
+    }
+});
+
+// Function to match text with a card's image
+function getCardImageFromName(cardName) {
+    const matchedCard = allCards.find(card => card.name.trim().toLowerCase() === cardName.trim().toLowerCase());
+    return matchedCard ? matchedCard.image : null;
+}
+
+function updateRightPanel(card) {
+    // Update keyword1 and its description
+    const keyword1Display = document.getElementById("keyword1");
+    if (card.keyword1 && card.keyword1 !== "None") {
+        keyword1Display.textContent = `${card.keyword1}: `; // Add colon after keyword1
+        updateKeywordDescriptions(card.keyword1, "keyword1Description"); // Update description
+    } else {
+        keyword1Display.textContent = ""; // Clear if keyword1 is missing or "None"
+        updateKeywordDescriptions(null, "keyword1Description"); // Clear description
+    }
+
+    // Update keyword2 and its description
+    const keyword2Display = document.getElementById("keyword2");
+    if (card.keyword2 && card.keyword2 !== "None") {
+        keyword2Display.textContent = `${card.keyword2}: `; // Add colon after keyword2
+        updateKeywordDescriptions(card.keyword2, "keyword2Description"); // Update description
+    } else {
+        keyword2Display.textContent = ""; // Clear if keyword2 is missing or "None"
+        updateKeywordDescriptions(null, "keyword2Description"); // Clear description
+    }
+
+    // Update keyword3 and its description
+    const keyword3Display = document.getElementById("keyword3");
+    if (card.keyword3 && card.keyword3 !== "None") {
+        keyword3Display.textContent = `${card.keyword3}: `; // Add colon after keyword3
+        updateKeywordDescriptions(card.keyword3, "keyword3Description"); // Update description
+    } else {
+        keyword3Display.textContent = ""; // Clear if keyword3 is missing or "None"
+        updateKeywordDescriptions(null, "keyword3Description"); // Clear description
+    }
+
+    console.log(`Card hovered: ${card.name}`); // Optional: Log the card name for debugging
+}
+
+
+function updateKeywordDescriptions(keyword, descriptionElementId) {
+    const descriptionElement = document.getElementById(descriptionElementId);
+    if (keyword && keywordDescriptions[keyword]) {
+        descriptionElement.innerHTML = keywordDescriptions[keyword]; // Display the description
+    } else {
+        descriptionElement.innerHTML = ""; // Clear if no description is found
+    }
+}
 
 // Function to show the modal overlay
 function showModalOverlay() {
@@ -4232,10 +5019,10 @@ function closeDiscardPilePopup() {
 }
 
 // Event listeners for the buttons
-document.getElementById('cards-played-button').addEventListener('click', openPlayedCardsPopup);
+document.getElementById('played-cards-deck-pile').addEventListener('click', openPlayedCardsPopup);
 document.getElementById('victory-pile-button').addEventListener('click', openVictoryPilePopup);
-document.getElementById('escaped-villains-card-back').addEventListener('click', openEscapedVillainsPopup);
-document.getElementById('ko-pile-card-back').addEventListener('click', openKOPilePopup);
+document.getElementById('escape-pile-button').addEventListener('click', openEscapedVillainsPopup);
+document.getElementById('ko-pile-button').addEventListener('click', openKOPilePopup);
 document.getElementById('discard-pile-card-back').addEventListener('click', openDiscardPilePopup);
 
 const playerHandElement = document.getElementById('player-hand-element');
@@ -4252,4 +5039,255 @@ function updateCardSizing() {
         playerHandElement.style.setProperty('--num-cards', maxCardsToFit);
     }
 }
+
+// Get all elements with the class 'popup-visibility-btn'
+const buttons = document.querySelectorAll('.popup-visibility-btn');
+
+// Loop through each button and add the event listener
+buttons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Get all elements with the class 'popup'
+        const popups = document.querySelectorAll('.popup');
+
+        // Loop through each popup element
+        popups.forEach(popup => {
+            // Check the current opacity of the popup
+            if (popup.style.opacity === '0.2') {
+            
+                popup.style.opacity = '1';
+            } else {
+             
+                popup.style.opacity = '0.2';
+            }
+        });
+    });
+});
+
+function resetOpacity() {
+    // Get all elements with the class 'popup'
+    const popups = document.querySelectorAll('.popup');
+
+    // Loop through each popup element and set opacity to 1
+    popups.forEach(popup => {
+        popup.style.opacity = '1';
+    });
+}
+
+function recruitSidekick() {
+    if (sidekickDeck.length > 0 && totalRecruitPoints >= 2) {
+        const sidekick = sidekickDeck.pop();
+        playerDiscardPile.push(sidekick);
+        totalRecruitPoints -= 2;
+        onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to your discard pile.`);
+        updateGameBoard();
+	sidekickRecruited = true;
+        healingPossible = false;
+    }
+}
+
+function showSidekickRecruitButton() {
+    const sidekickRecruitButtonContainer = document.getElementById('sidekick-recruit-button-container');
+    const sidekickRecruitButton = document.getElementById('sidekick-recruit-button');
+
+    // Check if a sidekick has already been recruited this turn
+    if (sidekickRecruited) {
+        onscreenConsole.log('A maximum of one sidekick can be recruited each turn.');
+        return; // Exit the function early
+    }
+
+    // Check if the player has enough recruit points
+    if (totalRecruitPoints >= 2) {
+        // Show the button and its container
+        sidekickRecruitButtonContainer.style.display = 'block';
+        sidekickRecruitButton.style.display = 'block';
+
+        // Function to handle clicks outside the button
+        const handleClickOutside = (event) => {
+            // Check if the click was outside the button and its container
+            if (!sidekickRecruitButton.contains(event.target) && !sidekickRecruitButtonContainer.contains(event.target)) {
+                // Hide the button and its container
+                sidekickRecruitButtonContainer.style.display = 'none';
+                sidekickRecruitButton.style.display = 'none';
+
+                // Remove the event listener after hiding the button
+                document.removeEventListener('click', handleClickOutside);
+            }
+        };
+
+        // Add the event listener to detect clicks outside the button
+        // Use a slight delay to avoid immediately hiding the button
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+
+        // Add a click event listener to the recruit button
+        sidekickRecruitButton.onclick = () => {
+            recruitSidekick();
+            sidekickRecruitButtonContainer.style.display = 'none';
+            sidekickRecruitButton.style.display = 'none';
+            healingPossible = false;
+
+            // Set sidekickRecruited to true after recruiting a sidekick
+            sidekickRecruited = true;
+
+            // Remove the event listener after the button is clicked
+            document.removeEventListener('click', handleClickOutside);
+        };
+    } else {
+        onscreenConsole.log(`You need 2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit a sidekick.`);
+    }
+}
+
+document.getElementById('sidekick-deck-card-back').addEventListener('click', showSidekickRecruitButton);
+
+function recruitOfficer() {
+    if (shieldDeck.length > 0 && totalRecruitPoints >= 3) {
+        const officer = shieldDeck.pop();
+        playerDiscardPile.push(officer);
+        totalRecruitPoints -= 3;
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">S.H.I.E.L.D. Officer</span> has been added to your discard pile.`);
+        updateGameBoard();
+    }
+}
+
+function showSHIELDRecruitButton() {
+    const SHIELDRecruitButtonContainer = document.getElementById('shield-recruit-button-container');
+    const SHIELDRecruitButton = document.getElementById('shield-deck-recruit-button');
+
+   // Check if the player has enough recruit points
+    if (totalRecruitPoints >= 3) {
+        // Show the button and its container
+        SHIELDRecruitButtonContainer.style.display = 'block';
+        SHIELDRecruitButton.style.display = 'block';
+
+        // Function to handle clicks outside the button
+        const handleClickOutside = (event) => {
+            // Check if the click was outside the button and its container
+            if (!SHIELDRecruitButton.contains(event.target) && !SHIELDRecruitButtonContainer.contains(event.target)) {
+                // Hide the button and its container
+                SHIELDRecruitButtonContainer.style.display = 'none';
+                SHIELDRecruitButton.style.display = 'none';
+
+                // Remove the event listener after hiding the button
+                document.removeEventListener('click', handleClickOutside);
+            }
+        };
+
+        // Add the event listener to detect clicks outside the button
+        // Use a slight delay to avoid immediately hiding the button
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+
+        // Add a click event listener to the recruit button
+        SHIELDRecruitButton.onclick = () => {
+            recruitOfficer();
+            SHIELDRecruitButtonContainer.style.display = 'none';
+            SHIELDRecruitButton.style.display = 'none';
+            healingPossible = false;
+
+            // Remove the event listener after the button is clicked
+            document.removeEventListener('click', handleClickOutside);
+        };
+    } else {
+        onscreenConsole.log(`You need 3<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit a <span class="console-highlight">SHIELD Officer</span>.`);
+    }
+}
+
+document.getElementById('shield-deck-card-back').addEventListener('click', showSHIELDRecruitButton);
+
+function showHeroRecruitButton(hqIndex, hero) {
+    const recruitButtonContainer = document.querySelector(`#hq${hqIndex}-recruit-button-container`);
+    const recruitButton = document.querySelector(`#hq${hqIndex}-deck-recruit-button`);
+
+    if (!recruitButtonContainer || !recruitButton) {
+        console.error(`Recruit button container or button not found for HQ index ${hqIndex}`);
+        return;
+    }
+
+    // Check if the player has enough recruit points
+    if (totalRecruitPoints >= hero.cost) {
+        // Show the button and its container
+        recruitButtonContainer.style.display = 'block';
+        recruitButton.style.display = 'block';
+
+        // Function to handle clicks outside the button
+        const handleClickOutside = (event) => {
+            // Check if the click was outside the button and its container
+            if (!recruitButton.contains(event.target) && !recruitButtonContainer.contains(event.target)) {
+                // Hide the button and its container
+                recruitButtonContainer.style.display = 'none';
+                recruitButton.style.display = 'none';
+
+                // Remove the event listener after hiding the button
+                document.removeEventListener('click', handleClickOutside);
+            }
+        };
+
+        // Add the event listener to detect clicks outside the button
+        // Use a slight delay to avoid immediately hiding the button
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+
+        // Add a click event listener to the recruit button
+        recruitButton.onclick = () => {
+            isRecruiting = true; // Set the flag to true when recruiting starts
+            recruitHeroConfirmed(hero, hqIndex - 1); // hqIndex is 1-based, convert to 0-based
+            recruitButtonContainer.style.display = 'none';
+            recruitButton.style.display = 'none';
+            healingPossible = false;
+
+            // Remove the event listener after the button is clicked
+            document.removeEventListener('click', handleClickOutside);
+
+            // Re-enable the onclick event handler after a short delay
+            setTimeout(() => {
+                isRecruiting = false;
+            }, 500); // Adjust the delay as needed
+        };
+    } else {
+        onscreenConsole.log(`You need ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit <span class="console-highlights">${hero.name}</span>.`);
+    }
+}
+
+function recruitHeroConfirmed(hero, hqIndex) {
+    playerDiscardPile.push(hero);
+    totalRecruitPoints -= hero.cost;
+    onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
+    hq[hqIndex] = heroDeck.length > 0 ? heroDeck.pop() : null;
+    healingPossible = false;
+
+    if (!hq[hqIndex]) {
+        showHeroDeckEmptyPopup();
+    }
+    updateGameBoard();
+}
+
+document.getElementById('superToggleAuto').onclick = function() {
+    document.getElementById('autoButton').classList.add('active');
+    document.getElementById('manualButton').classList.remove('active');
+autoSuperpowers = true;
+
+};
+
+document.getElementById('superToggleManual').onclick = function() {
+    document.getElementById('manualButton').classList.add('active');
+    document.getElementById('autoButton').classList.remove('active');
+autoSuperpowers = false;
+};
+
+document.getElementById('expand-arrows').addEventListener('click', function() {
+    const sidePanel = document.getElementById('side-panel');
+    const expandArrowsButton = document.getElementById('expand-arrows');
+
+    // Toggle the visibility of the side panel
+    if (sidePanel.classList.contains('hidden')) {
+        sidePanel.classList.remove('hidden');
+        expandArrowsButton.innerHTML = '<b>&#62;<br>&#62;<br>&#62;</b>'; // Arrows for "Minimise"
+    } else {
+        sidePanel.classList.add('hidden');
+        expandArrowsButton.innerHTML = '<b>&#60;<br>&#60;<br>&#60;</b>'; // Arrows for "Maximise"
+    }
+});
 
