@@ -78,7 +78,6 @@ function hairballExtraDraw() {
 
     onscreenConsole.log(`<span class="console-highlights">Hairball</span> played. Superpower ability activated.`);
     extraDraw();
-    extraDraw();
     returnToSidekickDeck(playedSidekick);
 updateGameBoard();
 }
@@ -907,38 +906,31 @@ updateGameBoard();
 }
 
 function skidsWoundInvulnerability(card) {
+  // 1. First check if we even got a card
   if (!card) {
-    console.error("No card provided to skidsWoundInvulnerability");
+    console.error("⚠️ No card provided to skidsWoundInvulnerability");
     return;
   }
 
-  // 1. Create the marked copy
-  const skidsCopy = { ...card };
-  skidsCopy.sidekickToDestroy = true;
-
-  // 2. Remove original from its source array
-  let sourceArray, index;
-  if (playerHand.includes(card)) {
-    sourceArray = playerHand;
-    index = playerHand.indexOf(card);
-    playerHand.splice(index, 1); // Remove from hand
-  } else if (cardsPlayedThisTurn.includes(card)) {
-    sourceArray = cardsPlayedThisTurn;
-    index = cardsPlayedThisTurn.indexOf(card);
-    cardsPlayedThisTurn.splice(index, 1); // Remove from played
-  } else {
-    console.error("Skids card not found in any expected location", card);
+  // 2. Find ANY Skids card in the hand (since we only care about the name)
+  const skidsInHand = playerHand.filter(handCard => handCard.name === "Skids");
+  
+  // 3. If no Skids found, show error
+  if (skidsInHand.length === 0) {
+    console.error("🚨 No Skids card found in hand. Current hand:", playerHand);
     return;
   }
 
-  // 3. Add copy to cardsPlayedThisTurn (regardless of original location)
-  cardsPlayedThisTurn.push(skidsCopy);
+  // 4. Take THE FIRST Skids card found (even if multiple exist)
+  const skidsCard = skidsInHand[0]; 
+  const cardIndex = playerHand.indexOf(skidsCard); // Now we have the exact reference
 
-  // 4. Discard original card
-  playerDiscardPile.push(card);
+  // 5. Move it to discard
+  playerHand.splice(cardIndex, 1);
+  playerDiscardPile.push(skidsCard);
 
-  // 5. Apply effects
-  onscreenConsole.log(`<span class="console-highlights">Skids</span><span class="bold-spans">'</span> ability activated! You have avoided gaining a Wound.`);
+  // 6. Do the rest of the ability
+  onscreenConsole.log(`<span class="console-highlights">Skids</span><span class="bold-spans">'</span> ability activated! Avoided a Wound.`);
   extraDraw();
   extraDraw();
   updateGameBoard();
@@ -975,7 +967,7 @@ async function prodigyCopyPowers(currentPlayer) {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Copy Hero';
+        confirmButton.textContent = 'Confirm';
         closeButton.style.display = 'inline-block';
         closeButton.textContent = 'Cancel';
         modalOverlay.style.display = 'block';

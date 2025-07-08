@@ -2559,53 +2559,50 @@ escapedVillain.type = 'Hero';
 function handleVillainEscapeActions(escapedVillain) {
     return new Promise((resolve, reject) => {
         const eligibleHeroes = hq.filter(hero => hero && hero.cost <= 6);
-        let heroKOPromise = Promise.resolve();
-        let discardCardPromise = Promise.resolve();
-
-        // Handle hero KO if there are eligible heroes
-        if (eligibleHeroes.length > 0) {
-            heroKOPromise = new Promise((resolveHeroKO) => {
-                showHeroKOPopup(() => {
-                    resolveHeroKO(); // Resolve after the hero KO popup is handled
+        
+        // 1. First handle hero KO
+        const handleKO = () => {
+            if (eligibleHeroes.length === 0) {
+                return Promise.resolve();
+            }
+            return new Promise(koResolve => {
+                const cleanup = () => {
+                    document.removeEventListener('heroKOComplete', cleanup);
+                    koResolve();
+                };
+                document.addEventListener('heroKOComplete', cleanup);
+                
+                showHeroKOPopup().then(() => {
+                    document.dispatchEvent(new Event('heroKOComplete'));
                 });
             });
-        }
+        };
 
-        // Handle discard if there are bystanders to discard
-        heroKOPromise.then(() => {
-            if (escapedVillain.bystander && escapedVillain.bystander.length > 0) {
-                discardCardPromise = new Promise((resolveDiscard) => {
-                    showDiscardCardPopup().then(resolveDiscard);
-                });
+        // 2. Then handle discard
+        const handleDiscard = () => {
+            if (escapedVillain.bystander?.length > 0) {
+                return showDiscardCardPopup();
             }
-            return discardCardPromise;
-        }).then(() => {
-            // Now handle the villain's escape effect
+            return Promise.resolve();
+        };
+
+        // 3. Then handle escape effect
+        const handleEffect = () => {
             if (!escapedVillain.escapeEffect || escapedVillain.escapeEffect === "None") {
-                console.log("No Escape Effect");
-                resolve(); // Resolve the promise since there's no effect to handle
-            } else {
-                const escapeEffectFunction = window[escapedVillain.escapeEffect];
-                if (typeof escapeEffectFunction === 'function') {
-                    let escapeEffectPromise = new Promise((resolveEscapeEffect, rejectEscapeEffect) => {
-                        try {
-                            const result = escapeEffectFunction(escapedVillain);
-                            if (result instanceof Promise) {
-                                result.then(resolveEscapeEffect).catch(rejectEscapeEffect); // If it returns a promise, chain it
-                            } else {
-                                resolveEscapeEffect(result);
-                            }
-                        } catch (error) {
-                            rejectEscapeEffect(error);
-                        }
-                    });
-                    escapeEffectPromise.then(resolve).catch(reject);
-                } else {
-                    console.error(`Escape effect function ${escapedVillain.escapeEffect} not found`);
-                    resolve(); // Resolve if the function isn't found
-                }
+                return Promise.resolve();
             }
-        }).catch(reject);
+            const effectFn = window[escapedVillain.escapeEffect];
+            return typeof effectFn === 'function' 
+                ? effectFn(escapedVillain) 
+                : Promise.resolve();
+        };
+
+        // Execute in sequence
+        handleKO()
+            .then(handleDiscard)
+            .then(handleEffect)
+            .then(resolve)
+            .catch(reject);
     });
 }
 
@@ -2621,6 +2618,9 @@ function showHeroSelectPopup() {
         confirmButton.textContent = 'CONFIRM';
         confirmButton.style.display = 'inline-block'; // Show button immediately
         confirmButton.disabled = true; // Disabled by default
+
+heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
 
         heroOptions.innerHTML = ''; // Clear previous options
         let selectedHero = null;
@@ -2714,12 +2714,21 @@ function showHeroSelectPopup() {
         heroSelectPopup.style.display = 'block';
     });
 }
-
 function returnHeroToDeck(index) {
     const hero = hq[index];
     if (hero) {
         heroDeck.unshift(hero); // Add the Hero to the bottom of the Hero deck
-        hq[index] = heroDeck.length > 0 ? heroDeck.pop() : null; // Fill the HQ slot with the top card of the Hero deck
+        
+        // Get the new card before placing it in HQ
+        const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+        hq[index] = newCard; // Fill the HQ slot with the top card of the Hero deck
+        
+        if (newCard) {
+            onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+        } else {
+            onscreenConsole.log(`HQ Update: No new card available.`);
+        }
+        
         updateGameBoard();
     }
 }
@@ -2853,6 +2862,7 @@ function updateGameBoard() {
             }
         }
     }
+   
 
     for (let i = 0; i < city.length; i++) {
         const cityCell = document.querySelector(`#city-${i + 1}`);
@@ -2953,9 +2963,14 @@ if (playerDeck.length >= 1) {
 const discardPileImage = document.getElementById('discard-pile-card-back');
 if (discardPileImage) {
     if (playerDiscardPile.length >= 1) {
+        // Show the discard pile and set the image to the last discarded card
         discardPileImage.style.display = 'flex';
+        discardPileImage.src = playerDiscardPile[playerDiscardPile.length - 1].image;
     } else {
+        // Hide the discard pile when empty
         discardPileImage.style.display = 'none';
+        // Optional: Clear the image source when empty
+        discardPileImage.src = '';
     }
 } else {
     console.warn('discard-pile-card-back element not found');
@@ -2965,6 +2980,7 @@ const playedCardsPileImage = document.getElementById('played-cards-deck-pile');
 if (playedCardsPileImage) {
     if (cardsPlayedThisTurn.length >= 1) {
         playedCardsPileImage.style.display = 'flex';
+        playedCardsPileImage.src = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1].image;
     } else {
         playedCardsPileImage.style.display = 'none';
     }
@@ -3374,7 +3390,7 @@ function confirmActions() {
                         } else {
                             return new Promise((resolve, reject) => {
                                 const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-                                    `DO YOU WISH TO ACTIVATE <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> superpower?`,
+                                    `DO YOU WISH TO ACTIVATE <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> ability?`,
                                     "Yes",
                                     "No"
                                 );
@@ -3403,7 +3419,7 @@ function confirmActions() {
                                 };
 
                                 denyButton.onclick = () => {
-                                    onscreenConsole.log(`You have chosen not to activate <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> superpower.`);
+                                    onscreenConsole.log(`You have chosen not to activate <span class="console-highlights">${card.name}</span><span class="bold-spans">’s</span> ability.`);
                                     hideHeroAbilityMayPopup();
                                     document.getElementById('heroAbilityHoverText').style.display = 'block';
                                     resolve();
@@ -3411,7 +3427,7 @@ function confirmActions() {
                             });
                         }
                     } else {
-                        console.log(`Unable to use Superpower Ability.`);
+                        console.log(`Unable to use ability.`);
                     }
                 }
             });
@@ -3518,20 +3534,26 @@ cardsPlayedThisTurn.forEach(card => {
 for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
     const card = cardsPlayedThisTurn[i];
 
-    // Check if the card has the sidekickToDestroy attribute
+    // If the card is marked to destroy, remove it
+    if (card.markedToDestroy === true) {
+        cardsPlayedThisTurn.splice(i, 1);
+        console.log(`${card.name} was destroyed (markedToDestroy).`);
+        continue; // Skip any further logic for this card
+    }
+
+    // Handle sidekickToDestroy logic
     if (card.hasOwnProperty('sidekickToDestroy')) {
-        // If sidekickToDestroy is true, remove the card from the array
         if (card.sidekickToDestroy === true) {
-            cardsPlayedThisTurn.splice(i, 1); // Remove the card at index i
+            cardsPlayedThisTurn.splice(i, 1);
+            console.log(`${card.name} was destroyed (sidekickToDestroy).`);
         } else {
-            // If sidekickToDestroy is false, push the card to the discard pile
             playerDiscardPile.push(card);
         }
     } else {
-        // If the card does not have the sidekickToDestroy attribute, push it to the discard pile
         playerDiscardPile.push(card);
     }
 }
+
     selectedCards = [];
 justAddedToDiscard = [];
 cardsPlayedThisTurn = [];
@@ -3633,7 +3655,7 @@ function startHold() {
     holdTimer = setTimeout(() => {
         endTurn();
         resetButton(); // Reset automatically
-    }, 1500);
+    }, 800);
 }
 
 function cancelHold() {
@@ -3672,7 +3694,7 @@ const cardsYouHave = [
 
     switch (fightCondition) {
         case 'heroYouHave':
-            return heroesYouHave.some(heroCard =>
+            return cardsYouHave.some(heroCard =>
                 heroCard[conditionType] === condition
             );
         
@@ -3880,81 +3902,138 @@ if (villainCard.fightEffect && villainCard.fightEffect !== "None") {
     });
 }
 
-function showHeroKOPopup(callback) {
-    const heroKOPopup = document.getElementById('hero-KO-popup');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const heroOptions = document.getElementById('hero-KO-options');
-    const heroImagePlaceholder = document.getElementById('hero-image-placeholder');
-    const heroImage = document.getElementById('hero-ko-image'); // Reference to the img element
-const hoverText = document.getElementById('KOHoverText');
+function showHeroKOPopup() {
+    return new Promise((resolve) => {
+        const heroKOPopup = document.getElementById('hero-KO-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const heroOptions = document.getElementById('hero-KO-options');
+        const heroImage = document.getElementById('hero-ko-image');
+        const hoverText = document.getElementById('KOHoverText');
+        const confirmButton = document.createElement('button'); // Create confirm button dynamically
+        confirmButton.id = 'hero-KO-confirm';
+        confirmButton.textContent = 'CONFIRM';
+        confirmButton.style.display = 'inline-block'; // Show button immediately
+        confirmButton.disabled = true; // Disabled by default
+heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
 
-    heroOptions.innerHTML = ''; // Clear previous options
+        heroOptions.innerHTML = ''; // Clear previous options
+        let selectedHero = null;
+        let activeImage = null;
 
-    let eligibleHeroes = 0;
+        // Add confirm button to popup
+        heroKOPopup.appendChild(confirmButton);
 
-    hq.forEach((hero, index) => {
-        if (hero && hero.cost <= 6) {
-            eligibleHeroes++;
+        // Filter eligible heroes
+        const eligibleHeroes = hq.filter(hero => hero && hero.cost <= 6);
+
+        if (eligibleHeroes.length === 0) {
+            onscreenConsole.log('No Heroes available with a cost of 6 or less.');
+            resolve();
+            return;
+        }
+
+        // Populate hero options
+        eligibleHeroes.forEach((hero, index) => {
             const heroButton = document.createElement('button');
             heroButton.innerText = hero.name;
+            heroButton.classList.add('hero-option');
 
-            // Handle hover to display hero image
+            // Hover functionality
             heroButton.onmouseover = () => {
-                heroImage.src = hero.image; // Dynamically change the image src
-                heroImage.style.display = 'block'; // Show the image
-                hoverText.style.display = 'none'; // Show the image
+                if (!activeImage) {
+                    heroImage.src = hero.image;
+                    heroImage.style.display = 'block';
+                    hoverText.style.display = 'none';
+                }
             };
 
-            // Handle mouse out to restore original state
             heroButton.onmouseout = () => {
-                heroImage.src = ''; // Clear the image source
-                heroImage.style.display = 'none'; // Hide the image
-                hoverText.style.display = 'block'; // Show the image
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
+                }
             };
 
-            // Handle click to KO hero
+            // Selection functionality
             heroButton.onclick = () => {
-
-                koHeroInHQ(index);
-                heroKOPopup.style.display = 'none';
-                modalOverlay.style.display = 'none';
-                if (callback) callback();
+                if (selectedHero === index) {
+                    // Deselect
+                    selectedHero = null;
+                    heroButton.classList.remove('selected');
+                    activeImage = null;
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    hoverText.style.display = 'block';
+                    confirmButton.disabled = true;
+                } else {
+                    // Deselect previous
+                    if (selectedHero !== null) {
+                        const prevButton = heroOptions.querySelector(`button[data-hero-id="${selectedHero}"]`);
+                        if (prevButton) prevButton.classList.remove('selected');
+                    }
+                    // Select new
+                    selectedHero = index;
+                    heroButton.classList.add('selected');
+                    activeImage = hero.image;
+                    heroImage.src = hero.image;
+                    heroImage.style.display = 'block';
+                    hoverText.style.display = 'none';
+                    confirmButton.disabled = false;
+                }
             };
 
+            heroButton.setAttribute('data-hero-id', index);
             heroOptions.appendChild(heroButton);
-        }
-    });
+        });
 
-    if (eligibleHeroes === 0) {
-        const message = document.createElement('p');
-        message.innerText = 'No heroes available with a cost of 6 or less.';
-        heroOptions.appendChild(message);
-
-        setTimeout(() => {
+        // Confirm button handler
+        confirmButton.onclick = () => {
+            if (selectedHero === null) return;
+            const hero = eligibleHeroes[selectedHero];
+            koHeroInHQ(selectedHero);
+            
+            // Cleanup
+            heroKOPopup.removeChild(confirmButton);
             heroKOPopup.style.display = 'none';
             modalOverlay.style.display = 'none';
-            if (callback) callback();
-        }, 3000); // Close the popup after 3 seconds
-    }
+            
+            requestAnimationFrame(() => {
+                updateGameBoard();
+                resolve();
+            });
+        };
 
-    modalOverlay.style.display = 'block';
-    heroKOPopup.style.display = 'block';
+        // Show popup
+        modalOverlay.style.display = 'block';
+        heroKOPopup.style.display = 'block';
+    });
 }
-
 
 
 function koHeroInHQ(index) {
     const hero = hq[index];
     if (hero) {
         koPile.push(hero); // Add the Hero to the KO pile
-onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
-        hq[index] = heroDeck.length > 0 ? heroDeck.pop() : null; // Fill the HQ slot with the top card of the Hero deck
+        
+        // Get the new card before placing it in HQ
+        const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+        hq[index] = newCard; // Fill the HQ slot with the top card of the Hero deck
+        
+        if (newCard) {
+            onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
+            onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
+        }
+        
         updateGameBoard();
-    }
 
         if (!hq[index] && heroDeck.length === 0) {
             showHeroDeckEmptyPopup();
         }
+    }
 }
 
 function showDiscardCardPopup() {
@@ -4043,10 +4122,10 @@ function updateHealWoundsButton() {
     
     if (hasWounds && healingPossible) {
         healWoundsButton.disabled = false; // Enable the button
-console.log('Heal Button Enabled');
+
     } else {
         healWoundsButton.disabled = true; // Disable the button
-console.log('Heal Button Disabled');
+
     }
 }
 
@@ -4097,23 +4176,25 @@ function recalculateMastermindAttack(mastermind) {
 
 document.getElementById('mastermind').addEventListener('click', () => {
     let mastermind = getSelectedMastermind();
-
-    // Use the recalculated mastermind attack value
     let mastermindAttack = recalculateMastermindAttack(mastermind);
-
     let playerAttackPoints = totalAttackPoints;
 
     if (recruitUsedToAttack === true) {
-        playerAttackPoints += totalRecruitPoints; // Add recruit points to attack points if allowed
+        playerAttackPoints += totalRecruitPoints;
     }
 
     if (mastermind.tactics.length === 0) {
-    onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no remaining tactics and cannot be attacked.`);
-} else if (playerAttackPoints >= mastermindAttack) {
-    showMastermindAttackButton();
-} else {
-    onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
-}
+        if (finalBlowEnabled === true) {
+            showMastermindAttackButton(); // Show button even with no tactics if final blow is enabled
+            onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no tactics remaining - deliver the Final Blow!`);
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no remaining tactics and cannot be attacked.`);
+        }
+    } else if (playerAttackPoints >= mastermindAttack) {
+        showMastermindAttackButton();
+    } else {
+        onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
+    }
 });
 
 
@@ -4341,6 +4422,21 @@ function showDrawPopup() {
     const modalOverlay = document.getElementById('modal-overlay');
     drawPopup.style.display = 'block';
     modalOverlay.style.display = 'block';
+
+    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
+    document.getElementById('villainDRAWvictoryPointsTotal').innerText = totalVictoryPoints;
+
+    const totalTurnsTaken = turnCount;
+    document.getElementById('villainDRAWtotalTurnsTaken').innerText = totalTurnsTaken;
+   
+    const averageVPPerTurn = totalTurnsTaken > 0 
+    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
+    : "0.0"; // Handle division by zero case
+document.getElementById('villainDRAWaverageVPPerTurn').innerText = averageVPPerTurn;
+
+const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+document.getElementById('villainDRAWnumberOfEscapes').innerText = numberOfEscapes;
+
 }
 
 function closeDrawPopup() {
@@ -4439,6 +4535,20 @@ function showHeroDeckEmptyPopup() {
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
+    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
+    document.getElementById('heroDRAWvictoryPointsTotal').innerText = totalVictoryPoints;
+
+    const totalTurnsTaken = turnCount;
+    document.getElementById('heroDRAWtotalTurnsTaken').innerText = totalTurnsTaken;
+   
+    const averageVPPerTurn = totalTurnsTaken > 0 
+    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
+    : "0.0"; // Handle division by zero case
+document.getElementById('heroDRAWaverageVPPerTurn').innerText = averageVPPerTurn;
+
+const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+document.getElementById('heroDRAWnumberOfEscapes').innerText = numberOfEscapes;
+
     if (selectedScheme.name === 'Super Hero Civil War') { 
         console.log('Defeat popup should display instead of draw.');
     } else {
@@ -4464,6 +4574,20 @@ function showDefeatPopup() {
 const modalOverlay = document.getElementById('modal-overlay');
     defeatPopup.style.display = 'block';
 modalOverlay.style.display = 'block';
+
+const totalVictoryPoints = calculateVictoryPoints(victoryPile);
+    document.getElementById('LOSSvictoryPointsTotal').innerText = totalVictoryPoints;
+
+    const totalTurnsTaken = turnCount;
+    document.getElementById('LOSStotalTurnsTaken').innerText = totalTurnsTaken;
+   
+    const averageVPPerTurn = totalTurnsTaken > 0 
+    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
+    : "0.0"; // Handle division by zero case
+document.getElementById('LOSSaverageVPPerTurn').innerText = averageVPPerTurn;
+
+const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+document.getElementById('LOSSnumberOfEscapes').innerText = numberOfEscapes;
 
 
     document.getElementById('defeat-return-home-button').addEventListener('click', returnHome);
@@ -4521,8 +4645,18 @@ function showWinPopup() {
 const modalOverlay = document.getElementById('modal-overlay');
 
 const totalVictoryPoints = calculateVictoryPoints(victoryPile);
-    document.getElementById('victoryPointsTotal').innerText = totalVictoryPoints;
+    document.getElementById('WINvictoryPointsTotal').innerText = totalVictoryPoints;
 
+    const totalTurnsTaken = turnCount;
+    document.getElementById('WINtotalTurnsTaken').innerText = totalTurnsTaken;
+   
+    const averageVPPerTurn = totalTurnsTaken > 0 
+    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
+    : "0.0"; // Handle division by zero case
+document.getElementById('WINaverageVPPerTurn').innerText = averageVPPerTurn;
+
+const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+document.getElementById('WINnumberOfEscapes').innerText = numberOfEscapes;
 
     winPopup.style.display = 'block';
 modalOverlay.style.display = 'block';
@@ -4552,15 +4686,6 @@ function calculateVictoryPoints(victoryPile) {
 
     // Get current game stats
     const { villainsInEscapeDeck, schemeTwistsInKoDeck, capturedBystanders } = getCurrentGameStats();
-
-    // Subtract points for escaped villains
-    totalPoints -= (villainsInEscapeDeck - capturedBystanders) * 1;
-
-    // Subtract points for captured bystanders
-    totalPoints -= capturedBystanders * 4;
-
-    // Subtract points for scheme twists in KO deck
-    totalPoints -= 3 * schemeTwistsInKoDeck;
 
     // -------- Supreme HYDRA Calculation --------
     // Count the number of 'Supreme HYDRA' cards in the victory pile
@@ -4782,16 +4907,13 @@ document.addEventListener('mouseover', (e) => {
         if (imageUrl) {
             // Normalize the path
             const relativePath = normalizeImagePath(imageUrl);
-            console.log("Normalized path:", relativePath); // Log the normalized path
-
+           
             // Find the corresponding card
             const card = cardLookup[relativePath];
 
             if (card) {
                 updateRightPanel(card); // Pass the card data to another function
-            } else {
-                console.log("No card data found for image:", relativePath); // Log if no card data is found
-            }
+            } 
         }
     }
 });
@@ -4873,7 +4995,6 @@ function updateRightPanel(card) {
         updateKeywordDescriptions(null, "keyword3Description"); // Clear description
     }
 
-    console.log(`Card hovered: ${card.name}`); // Optional: Log the card name for debugging
 }
 
 
@@ -5254,11 +5375,21 @@ function showHeroRecruitButton(hqIndex, hero) {
 function recruitHeroConfirmed(hero, hqIndex) {
     playerDiscardPile.push(hero);
     totalRecruitPoints -= hero.cost;
-    onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
-    hq[hqIndex] = heroDeck.length > 0 ? heroDeck.pop() : null;
+    
+    // Get the new card before placing it in HQ
+    const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+    hq[hqIndex] = newCard;
+    
+    if (newCard) {
+        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your Discard pile.`);
+        onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+    } else {
+        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your Discard pile.`);
+    }
+    
     healingPossible = false;
 
-    if (!hq[hqIndex]) {
+    if (!hq[hqIndex] && heroDeck.length === 0) {
         showHeroDeckEmptyPopup();
     }
     updateGameBoard();

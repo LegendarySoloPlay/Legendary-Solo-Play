@@ -912,7 +912,7 @@ background-color: #b8d7f88a;
 
 #end-turn.holding {
     border-color: rgb(213 52 52);
-    transition: border-color 2s linear;
+    transition: border-color 0.8s linear;
 }
 
 
@@ -1052,6 +1052,10 @@ margin-left:-1vh;
     width:75%;
 font-size: 2vh;
 height:6vh;
+}
+
+#hero-ko-confirm {
+    width:50%;
 }
 
 .hero-text {
@@ -2727,7 +2731,6 @@ width:auto;
 
 #card-ko-popup #no-thanks-button {
 width:50%;
-margin-top: 2.5vh;
 }
 
 #card-ko-popup li {
@@ -2839,6 +2842,12 @@ margin-left: auto;
 
 
 #close-ko-button {
+margin-left: auto;
+    margin-right: auto;
+width:50%;
+}
+
+#ko-third-option-button {
 margin-left: auto;
     margin-right: auto;
 width:50%;

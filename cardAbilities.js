@@ -28,49 +28,76 @@ function extraDraw() {
 }
 
 function WolverineExtraDraw() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 extraDraw();
 }
 
 function EmmaFrostExtraDraw() {
+    return new Promise((resolve) => {
+        const previousCards = cardsPlayedThisTurn.slice(0, -1);
+        const cardsYouHave = [
+            ...playerHand,
+            ...previousCards.filter(card => 
+                !card.isCopied && 
+                !card.sidekickToDestroy
+            )
+        ];
 
-const previousCards = cardsPlayedThisTurn.slice(0, -1);
-const cardsYouHave = [
-    ...playerHand,  // Include all cards from hand
-    ...previousCards.filter(card => 
-        !card.isCopied && 
-        !card.sidekickToDestroy
-    )
-];
+        const XMenCount = cardsYouHave.filter(item => item.team === "X-Men").length;
+        
+        if (XMenCount === 0) {
+            onscreenConsole.log(`You are unable to reveal an <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero.`);
+            resolve();
+            return;
+        }
 
- const XMenCount = cardsYouHave.filter(item => item.team === "X-Men").length;
- 
-  if (XMenCount === 0) {
-    onscreenConsole.log(`You are unable to reveal an <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero.`);
-return;
-  }
+        setTimeout(() => {
+            const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                "DO YOU WISH TO REVEAL AN <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> HERO?",
+                "Yes",
+                "No"
+            );
 
-  if (XMenCount >= 1) {
-    onscreenConsole.log(`<img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero revealed.`);
-extraDraw();
-  }
+            document.getElementById('heroAbilityHoverText').style.display = 'none';
+            
+            const cardImage = document.getElementById('hero-ability-may-card');
+            cardImage.src = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp'; // Update with Emma Frost image
+            cardImage.style.display = 'block';
 
+            confirmButton.onclick = () => {
+                onscreenConsole.log(`<img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero revealed.`);
+                extraDraw();
+                hideHeroAbilityMayPopup();
+                document.getElementById('heroAbilityHoverText').style.display = 'block';
+                cardImage.style.display = 'none';
+                resolve();
+            };
+
+            denyButton.onclick = () => {
+                onscreenConsole.log(`You have chosen not to reveal an <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero.`);
+                hideHeroAbilityMayPopup();
+                document.getElementById('heroAbilityHoverText').style.display = 'block';
+                cardImage.style.display = 'none';
+                resolve();
+            };
+        }, 10);
+    });
 }
 
 function StormExtraDraw() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 extraDraw();
 }
 
 function IronManExtraDraw() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 extraDraw();
 }
 
 
 
 function WolverineBonusAttackPerExtraCard() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
   const extraCardsDrawn = extraCardsDrawnThisTurn;
   const extraDrawBonusAttack = 1 * extraCardsDrawn;
 onscreenConsole.log(`You have drawn ${extraCardsDrawn} extra cards this turn. +${extraDrawBonusAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
@@ -156,60 +183,148 @@ function drawWound() {
 }
 
 function showInvulnerabilityChoicePopup(invulnerableCards) {
-  return new Promise((resolve) => {
-    const popup = document.getElementById('card-choice-one-location-popup');
-    const cardsList = document.getElementById('cards-to-choose-from');
-    const closeButton = document.getElementById('close-choice-button');
-    const context = document.getElementById('context');
-    const heroImage = document.getElementById('hero-one-location-image');
-    const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+    return new Promise((resolve) => {
+        // Get popup elements
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-    context.innerHTML = "YOU ARE ABOUT TO GAIN A WOUND. WOULD YOU LIKE TO PLAY A CARD TO AVOID THIS?";
+        // Initialize UI
+        popupTitle.textContent = 'Avoid Wound';
+        instructionsDiv.innerHTML = 'Select a card to play and avoid gaining a Wound.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Play Card';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
-    cardsList.innerHTML = '';
+        let selectedCard = null;
+        let activeImage = null;
 
-    invulnerableCards.forEach((card) => {
-      const li = document.createElement('li');
-      // Add location label after card name
-      li.textContent = `${card.name} (${card.location})`;
+        // Update confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = 'Select a card to play and avoid gaining a Wound.';
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be played to avoid the Wound.`;
+            }
+        }
+
+        // Show/hide card image
+        function updateCardImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
+        function toggleCardSelection(card, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                listItem.classList.remove('selected');
+                updateCardImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                listItem.classList.add('selected');
+                updateCardImage(card);
+            }
+
+            updateConfirmButton();
+            updateInstructions();
+        }
+
+        // Populate the list with invulnerable cards
+        invulnerableCards.forEach(card => {
+            const li = document.createElement('li');
+            li.textContent = `${card.name} (${card.location})`;
+            li.dataset.cardId = card.id;
+
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, li);
+            cardsList.appendChild(li);
+        });
+
+        // Handle confirmation
+        confirmButton.onclick = () => {
+            if (selectedCard) {
+                triggerInvulnerabilityEffect(selectedCard);
+                closePopup();
+                resolve(true);
+            }
+        };
+
+        // Handle take wound option
+        const takeWoundButton = document.getElementById('close-choice-button');
+        takeWoundButton.style.display = 'block';
+        takeWoundButton.textContent = 'Take Wound Instead';
+        takeWoundButton.onclick = () => {
+            defaultWoundDraw();
+            closePopup();
+            resolve(false);
+        };
       
-      // Store original card object for later use
-      li.dataset.card = JSON.stringify(card);
 
-      li.onmouseover = () => {
-        heroImage.src = card.image;
-        heroImage.style.display = 'block';
-        oneChoiceHoverText.style.display = 'none';
-      };
+        function closePopup() {
+            // Reset UI
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
-      li.onmouseout = () => {
-        heroImage.src = '';
-        heroImage.style.display = 'none';
-        oneChoiceHoverText.style.display = 'block';
-      };
+          takeWoundButton.textContent = 'No Thanks!';
+          takeWoundButton.style.display = 'none';
 
-li.onclick = () => {
-  popup.style.display = 'none';
-  document.getElementById("modal-overlay").style.display = "none";
-  // Pass the ENTIRE card object, not just the parsed data
-  const selectedCard = getOriginalCard(JSON.parse(li.dataset.card));
-  triggerInvulnerabilityEffect(selectedCard);
-  resolve(true);
-};
-      cardsList.appendChild(li);
+            // Hide popup
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            updateGameBoard();
+        }
     });
-
-    closeButton.onclick = () => {
-      popup.style.display = 'none';
-      document.getElementById("modal-overlay").style.display = "none";
-      defaultWoundDraw();
-      resolve(false);
-    };
-
-    popup.style.display = 'block';
-    document.getElementById("modal-overlay").style.display = "block";
-    closeButton.style.display = 'inline-block';
-  });
 }
 
 // Helper function to find the original card object
@@ -249,12 +364,12 @@ function drawTwo() {
 }
 
 function IronManDrawTwo() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
   drawTwo();
 }
 
 function WolverineDrawTwo() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
   drawTwo();
 }
 
@@ -294,7 +409,7 @@ function BlackWidowRescueBystander() {
   if (bystanderDeck.length > 0) {
     const rescuedBystander = bystanderDeck.pop();
     victoryPile.push(rescuedBystander);
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log('Bystander rescued.');
     updateGameBoard();
   } else {
@@ -307,7 +422,7 @@ onscreenConsole.log('No Bystanders left to rescue.');
 
 function BlackWidowRescueBystanderByKO() {
   return new Promise((resolve) => {
-    onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+    onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
     // Check if there are any bystanders available
     if (bystanderDeck.length === 0) {
@@ -469,6 +584,25 @@ function BlackWidowRescueBystanderByKO() {
         }
     };
 
+  // Handle cancellation
+        const closeButton = document.getElementById('no-thanks-button');
+        closeButton.style.display = 'inline-block';
+        closeButton.onclick = () => {
+            console.log(`No wound was KO'd.`);
+            onscreenConsole.log(`You chose not to KO any cards.`);
+            closePopup();
+            resolve(false);
+        };
+
+        const closeXButton = document.getElementById('card-ko-popup-close');
+            closeXButton.onclick = () => {
+            console.log(`No wound was KO'd.`);
+            onscreenConsole.log(`You chose not to KO any cards.`);
+            closePopup();
+            resolve(false);
+        };
+
+
     function closePopup() {
         context.innerHTML = `Do you wish to KO a card from your Discard Pile or Hand to rescue a <span class="bold-spans">S.H.I.E.L.D. Officer</span>?`;
         confirmButton.style.display = 'none';
@@ -542,21 +676,21 @@ function bonusAttack() {
 }
 
 function ThorBonusAttack() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+3<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 bonusAttack();
 }
 
 
 function RogueBonusAttack() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+3<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 bonusAttack();
 }
 
 
 function NickFuryBonusAttack() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+1<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 bonusAttack();
 }
@@ -578,13 +712,13 @@ const previousCards = cardsPlayedThisTurn.slice(0, -1);
 
 
 function HulkGrowingAngerBonusAttack() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+1<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 bonusAttack();
 }
 
 function HulkSmashBonusAttack() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+5<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 bonusAttack();
 }
@@ -603,7 +737,7 @@ function BlackWidowBonusAttack() {
 }
 
 function IronManBonusAttack() {
- onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+ onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
  onscreenConsole.log(`+1<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
   
   bonusAttack();
@@ -619,7 +753,7 @@ const previousCards = cardsPlayedThisTurn.slice(0, -1);
     techText = "Hero";
   }
 
- onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+ onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`You have played ${techCount} ${techText}. +${techCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
   
   bonusAttack();
@@ -627,7 +761,7 @@ onscreenConsole.log(`You have played ${techCount} ${techText}. +${techCount}<img
 
 
 function HawkeyeBonusAttack() {
- onscreenConsole.log(`<img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="console-card-icons"> Hero played. Superpower ability activated.`); 
+ onscreenConsole.log(`<img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`); 
 onscreenConsole.log(`+1<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
   
   bonusAttack();
@@ -645,7 +779,7 @@ function CaptainAmericaBonusAttack() {
   }
 
   onscreenConsole.log(
-    `<img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="console-card-icons"> Hero played. Superpower ability activated.`); 
+    `<img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`); 
 onscreenConsole.log(`You have played ${AvengersCount} <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="console-card-icons"> ${AvengersText}. +${AvengersAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`
   );
 
@@ -662,7 +796,7 @@ let XMenText = "Heroes";
   }
 
   onscreenConsole.log(
-    `<img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+    `<img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`You have played ${XMenCount} <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> ${XMenText}. +${XMenAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`
   );
 
@@ -727,7 +861,7 @@ function bonusRecruit() {
 }
 
 function ThorBonusRecruit() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+2 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
 bonusRecruit();
 }
@@ -813,7 +947,7 @@ oddCostText = "Heroes";
   console.log(`Number of odd cost cards: ${oddCostCount}`);
   console.log(`${oddCostCount} added to Attack points.`);
 
-onscreenConsole.log(`Superpower ability activated. You have played ${oddCostCount} ${oddCostText} with an odd-numbered <img src="Visual Assets/Icons/Cost.svg" alt="Cost Icon" class="console-card-icons">. +${oddCostCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
+onscreenConsole.log(`Special Ability: You have played ${oddCostCount} ${oddCostText} with an odd-numbered <img src="Visual Assets/Icons/Cost.svg" alt="Cost Icon" class="console-card-icons">. +${oddCostCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 
   updateGameBoard();
 }
@@ -850,7 +984,7 @@ function CaptainAmericaCountUniqueColorsAndAddAttack() {
 
   updateGameBoard();
   console.log(`You have ${uniqueColorCount} unique colors. ${attackPointsToAdd} Attack points have been added.`);
-onscreenConsole.log(`Superpower ability activated. You have ${uniqueColorCount} unique colors. +${uniqueColorCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
+onscreenConsole.log(`Special Ability: You have ${uniqueColorCount} unique colors. +${uniqueColorCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 }
 
 function CaptainAmericaCountUniqueColorsAndAddRecruit() {
@@ -886,7 +1020,7 @@ function CaptainAmericaCountUniqueColorsAndAddRecruit() {
 
   updateGameBoard();
   console.log(`You have ${uniqueColorCount} unique colors. ${recruitPointsToAdd} Recruit points have been added.`);
-onscreenConsole.log(`Superpower ability activated. You have ${uniqueColorCount} unique colors. +${uniqueColorCount} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+onscreenConsole.log(`Special Ability: You have ${uniqueColorCount} unique colors. +${uniqueColorCount} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
 }
 
 function DeadpoolReDraw() {
@@ -952,7 +1086,7 @@ function DeadpoolReDraw() {
 
 function EmmaFrostVoluntaryVillainForAttack() {
 
-onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
   return new Promise((resolve) => {
     const { confirmButton, denyButton } = showHeroAbilityMayPopup(
@@ -996,14 +1130,16 @@ hoverText.style.display = 'block';
 function hideHeroAbilityMayPopup() {
 document.getElementById('hero-ability-may-popup').style.display = 'none';
 document.getElementById('modal-overlay').style.display = 'none';
+document.getElementById('hero-ability-may-h2').innerHTML = 'Hero Ability!';
 const cardImage = document.getElementById('hero-ability-may-card');
 cardImage.style.display = 'none';
+updateGameBoard();
 
 }
 
 function drawInsteadOfWound() {
   
-onscreenConsole.log(`Superpower ability activated. You have avoided gaining a Wound.`);
+onscreenConsole.log(`Special Ability: You have avoided gaining a Wound.`);
       extraDraw(); // Logic for drawing the extra card
      
 }
@@ -1011,7 +1147,7 @@ onscreenConsole.log(`Superpower ability activated. You have avoided gaining a Wo
 
 
 function DeadpoolChooseToGainWound() {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const { confirmButton, denyButton } = showHeroAbilityMayPopup(
       "Do you wish to gain a Wound?",
       "Yes",
@@ -1025,45 +1161,16 @@ function DeadpoolChooseToGainWound() {
     if (WoundImage && imageText) {
       WoundImage.style.display = 'block';
       WoundImage.src = "Visual Assets/Other/Wound.webp";
-      imageText.style.display = 'none'; // Hide hover text
+      imageText.style.display = 'none';
     }
 
     // Confirm button handling
-    confirmButton.onclick = function() {
-      function hasWoundInvulnerability() {
-        return playerHand.some(card => card.invulnerability === 'Wound') ||
-               cardsPlayedThisTurn.some(card => card.invulnerability === 'Wound');
-      }
-
-      if (hasWoundInvulnerability()) {
-        console.log("Invulnerability to wound found.");
-        drawInsteadOfWound().then(() => {
-          hideHeroAbilityMayPopup();
-          if (WoundImage && imageText) {
-            imageText.style.display = 'block';
-            WoundImage.src = ""; // Clear the wound image
-          }
-          resolve(); // Resolve after the wound handling is complete
-        });
-        return; // Exit since we're waiting for `drawInsteadOfWound`
-      }
-
-      // Handle gaining a wound
-      if (woundDeck.length > 0) {
-        const gainedWound = woundDeck.pop();
-        playerHand.push(gainedWound);
-        console.log("Wound gained and added to your hand.");
-onscreenConsole.log("Wound gained and added to your hand.");
-        updateGameBoard();
-      } else {
-        console.log("No wounds left. You've taken enough damage!");
-onscreenConsole.log("No wounds left. You've taken enough damage!");
-      }
-
+    confirmButton.onclick = async function() {
+      await drawWound(); // Let drawWound handle all the logic
       hideHeroAbilityMayPopup();
       if (WoundImage && imageText) {
         imageText.style.display = 'block';
-        WoundImage.src = ""; // Clear the wound image
+        WoundImage.src = "";
       }
       resolve();
     };
@@ -1071,17 +1178,16 @@ onscreenConsole.log("No wounds left. You've taken enough damage!");
     // Deny button handling
     denyButton.onclick = function() {
       console.log("No Wound gained.");
-onscreenConsole.log("No Wound gained.");
+      onscreenConsole.log("No Wound gained.");
       hideHeroAbilityMayPopup();
       if (WoundImage && imageText) {
         imageText.style.display = 'block';
-        WoundImage.src = ""; // Clear the wound image
+        WoundImage.src = "";
       }
       resolve();
     };
   });
 }
-
 
 function GambitTopCardDiscardOrPutBack(currentPlayer) {
     return new Promise((resolve) => {
@@ -1192,6 +1298,13 @@ imageHoverText.style.display = 'block';
   });
 }
 
+function Gambit2ndTopCardDiscardOrPutBack() {
+onscreenConsole.log(`<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero played. Superpower Ability not activated - "each other player" Hero effects do not apply in Solo play.`);
+}
+
+function HawkeyeDontDrawOrDiscard() {
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability not activated - "each other player" Hero effects do not apply in Solo play.`);
+}
 
 function rescueThreeBystanders() {
   rescueExtraBystanders += 3;
@@ -1381,9 +1494,17 @@ function WolverineKoWoundToDraw() {
         };
 
         // Handle cancellation
-        const closeButton = document.getElementById('close-choice-button');
+        const closeButton = document.getElementById('no-thanks-button');
         closeButton.style.display = 'inline-block';
         closeButton.onclick = () => {
+            console.log(`No wound was KO'd.`);
+            onscreenConsole.log(`You chose not to KO any Wounds.`);
+            closePopup();
+            resolve(false);
+        };
+
+        const closeXButton = document.getElementById('card-ko-popup-close');
+            closeXButton.onclick = () => {
             console.log(`No wound was KO'd.`);
             onscreenConsole.log(`You chose not to KO any Wounds.`);
             closePopup();
@@ -1446,7 +1567,7 @@ function HulkKoWoundToGainAttack() {
         hoverText.style.display = 'none';
 
         let selectedWound = null;
-        let selectedLocation = null; // 'hand' or 'discard'
+        let selectedLocation = null; // 'Hand' or 'Discard Pile'
         let activeImage = null;
 
         // Update the confirm button state
@@ -1503,7 +1624,7 @@ function HulkKoWoundToGainAttack() {
                 }
             };
 
-            li.onclick = () => toggleWoundSelection(wound, 'discard pile', li);
+            li.onclick = () => toggleWoundSelection(wound, 'Discard Pile', li);
             discardPileList.appendChild(li);
         });
 
@@ -1524,7 +1645,7 @@ function HulkKoWoundToGainAttack() {
                 }
             };
 
-            li.onclick = () => toggleWoundSelection(wound, 'hand', li);
+            li.onclick = () => toggleWoundSelection(wound, 'Hand', li);
             handList.appendChild(li);
         });
 
@@ -1532,7 +1653,7 @@ function HulkKoWoundToGainAttack() {
         confirmButton.onclick = () => {
             if (selectedWound && selectedLocation) {
                 // Remove wound from its location
-                if (selectedLocation === 'discard pile') {
+                if (selectedLocation === 'Discard Pile') {
                     const index = playerDiscardPile.indexOf(selectedWound);
                     if (index !== -1) playerDiscardPile.splice(index, 1);
                 } else {
@@ -1545,7 +1666,7 @@ function HulkKoWoundToGainAttack() {
                 totalAttackPoints += 2;
                 cumulativeAttackPoints += 2;
 
-                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedWound.name}</span> from your ${selectedLocation}. +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
+                onscreenConsole.log(`You KO'd a <span class="console-highlights">${selectedWound.name}</span> from your ${selectedLocation}. +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 
                 closePopup();
                 updateGameBoard();
@@ -1568,11 +1689,20 @@ function HulkKoWoundToGainAttack() {
             modalOverlay.style.display = 'none';
         }
 
-        // Add cancel button functionality
-        const closeButton = document.getElementById('close-choice-button');
+        // Handle cancellation
+        const closeButton = document.getElementById('no-thanks-button');
         closeButton.style.display = 'inline-block';
         closeButton.onclick = () => {
-            onscreenConsole.log(`No Wound was KO'd.`);
+            console.log(`No wound was KO'd.`);
+            onscreenConsole.log(`You chose not to KO any Wounds.`);
+            closePopup();
+            resolve(false);
+        };
+
+        const closeXButton = document.getElementById('card-ko-popup-close');
+            closeXButton.onclick = () => {
+            console.log(`No Wound was KO'd.`);
+            onscreenConsole.log(`You chose not to KO any Wounds.`);
             closePopup();
             resolve(false);
         };
@@ -1996,6 +2126,14 @@ function CyclopsOpticBlastDiscardToPlay() {
         // Check if there are any cards to discard
         if (playerHand.length === 0) {
             console.log("No cards in Hand to discard. You are unable to play this card.");
+            const unplayedCard = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1];
+            playerHand.push(unplayedCard);
+            cardsPlayedThisTurn.pop(unplayedCard);
+            totalAttackPoints -= unplayedCard.attack;
+            totalRecruitPoints -= unplayedCard.recruit;
+            cumulativeAttackPoints -= unplayedCard.attack;
+            cumulativeRecruitPoints -= unplayedCard.recruit;
+            updateGameBoard();
             onscreenConsole.log("No cards in Hand to discard. You are unable to play this card.");
             resolve(false);
             return;
@@ -2114,12 +2252,13 @@ function CyclopsOpticBlastDiscardToPlay() {
             if (selectedCard) {
                 const discardedCard = playerHand.splice(selectedIndex, 1)[0];
                 
-                // Handle the discard logic
-                await checkDiscardForInvulnerability(discardedCard);
+                
 
                 onscreenConsole.log(`You have discarded <span class="console-highlights">${discardedCard.name}</span>, allowing you to play <span class="console-highlights">Cyclops - Optic Blast</span>.`);
 
                 closePopup();
+                // Handle the discard logic
+                await checkDiscardForInvulnerability(discardedCard);
                 updateGameBoard();
                 resolve(true);
             }
@@ -2132,6 +2271,7 @@ function CyclopsOpticBlastDiscardToPlay() {
             
             const unplayedCard = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1];
             playerHand.push(unplayedCard);
+            cardsPlayedThisTurn.pop(unplayedCard);
             totalAttackPoints -= unplayedCard.attack;
             totalRecruitPoints -= unplayedCard.recruit;
             cumulativeAttackPoints -= unplayedCard.attack;
@@ -2276,6 +2416,14 @@ function CyclopsDeterminationDiscardToPlay() {
         // Check if there are any cards to discard
         if (playerHand.length === 0) {
             console.log("No cards in Hand to discard. You are unable to play this card.");
+            const unplayedCard = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1];
+            playerHand.push(unplayedCard);
+            cardsPlayedThisTurn.pop(unplayedCard);
+            totalAttackPoints -= unplayedCard.attack;
+            totalRecruitPoints -= unplayedCard.recruit;
+            cumulativeAttackPoints -= unplayedCard.attack;
+            cumulativeRecruitPoints -= unplayedCard.recruit;
+            updateGameBoard();
             onscreenConsole.log("No cards in Hand to discard. You are unable to play this card.");
             resolve(false);
             return;
@@ -2394,12 +2542,13 @@ function CyclopsDeterminationDiscardToPlay() {
             if (selectedCard) {
                 const discardedCard = playerHand.splice(selectedIndex, 1)[0];
                 
-                // Handle the discard logic
-                await checkDiscardForInvulnerability(discardedCard);
+               
 
                 onscreenConsole.log(`You have discarded <span class="console-highlights">${discardedCard.name}</span>, allowing you to play <span class="console-highlights">Cyclops - Determination</span>.`);
 
                 closePopup();
+                 // Handle the discard logic
+                 await checkDiscardForInvulnerability(discardedCard);
                 updateGameBoard();
                 resolve(true);
             }
@@ -2412,6 +2561,7 @@ function CyclopsDeterminationDiscardToPlay() {
             
             const unplayedCard = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1];
             playerHand.push(unplayedCard);
+            cardsPlayedThisTurn.pop(unplayedCard);
             totalAttackPoints -= unplayedCard.attack;
             totalRecruitPoints -= unplayedCard.recruit;
             cumulativeAttackPoints -= unplayedCard.attack;
@@ -2639,9 +2789,10 @@ function GambitDrawTwoPutOneBack() {
         const instructionsDiv = document.getElementById('context');
         const heroImage = document.getElementById('hero-one-location-image');
         const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        document.getElementById('close-choice-button').style.display = 'none';
 
         // Initialize UI
-        popupTitle.textContent = 'Gambit - Draw Two, Put One Back';
+        popupTitle.textContent = 'Hero Ability';
         instructionsDiv.innerHTML = 'Select one card to return to the top of your deck.';
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
@@ -2649,6 +2800,7 @@ function GambitDrawTwoPutOneBack() {
         confirmButton.textContent = 'Return Card';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
+        document.getElementById('close-choice-button').style.display = 'none';
 
         let selectedCard = null;
         let selectedIndex = null;
@@ -2774,113 +2926,198 @@ function GambitDrawTwoPutOneBack() {
 
 function DoomDrawOrDiscard() {
     return new Promise((resolve) => {
+        // Show initial choice popup
         const { confirmButton, denyButton } = showHeroAbilityMayPopup(
             `Do you wish to draw or discard?`,
             "Draw",
             "Discard"
         );
 
- const DoomImage = document.getElementById('hero-ability-may-card');
-const DoomText = document.getElementById('heroAbilityHoverText');
-        DoomImage.src = "Visual Assets/Masterminds/DrDoom_5.webp"; 
-const DoomTitle = document.getElementById('hero-ability-may-h2');
+        const DoomImage = document.getElementById('hero-ability-may-card');
+        const DoomText = document.getElementById('heroAbilityHoverText');
+        DoomImage.src = "Visual Assets/Masterminds/DrDoom_5.webp";
+        const DoomTitle = document.getElementById('hero-ability-may-h2');
 
-DoomTitle.innerText = 'MASTERMIND TACTIC!';
+        DoomTitle.innerText = 'MASTERMIND TACTIC!';
+        DoomText.style.display = 'none';
+        DoomImage.style.display = 'block';
 
-DoomText.style.display = 'none';
-DoomImage.style.display = 'block';
+        function resetPopup() {
+            DoomText.style.display = 'block';
+            DoomImage.style.display = 'none';
+            DoomImage.src = "";
+            DoomTitle.innerText = 'HERO ABILITY!';
+        }
 
-
-        confirmButton.onclick = function() {
+        // Handle Draw choice
+        confirmButton.onclick = async function() {
             if (playerDeck.length === 0) {
                 if (playerDiscardPile.length > 0) {
                     playerDeck = shuffle(playerDiscardPile);
                     playerDiscardPile = [];
                 } else {
                     console.log("No cards left in deck or discard pile.");
-onscreenConsole.log(`No cards available to be drawn.`);
+                    onscreenConsole.log(`No cards available to be drawn.`);
                     hideHeroAbilityMayPopup();
-DoomText.style.display = 'block';
-DoomImage.style.display = 'none';
-DoomImage.src = ""; 
-DoomTitle.innerHTML = 'HERO ABILITY!';
-                    resolve();
+                    resetPopup();
+                    updateGameBoard();
+                    resolve(false);
                     return;
                 }
             }
 
-            extraDraw();
+            await extraDraw();
             hideHeroAbilityMayPopup();
-            resolve();
+            resetPopup();
+            resolve(true);
         };
 
+        // Handle Discard choice
         denyButton.onclick = function() {
             hideHeroAbilityMayPopup();
+            resetPopup();
+
             if (playerHand.length === 0) {
-                console.log("No cards in hand to discard. You are unable to play this card.");
-onscreenConsole.log(`No cards available to be discarded.`);
-DoomText.style.display = 'block';
-DoomImage.style.display = 'none';
-DoomImage.src = ""; 
-DoomTitle.innerHTML = 'HERO ABILITY!';
-                resolve();
+                console.log("No cards in hand to discard.");
+                onscreenConsole.log(`No cards available to be discarded.`);
+                updateGameBoard();
+                resolve(false);
                 return;
             }
 
+            // Setup discard selection popup
             const popup = document.getElementById('card-choice-one-location-popup');
+            const modalOverlay = document.getElementById('modal-overlay');
             const cardsList = document.getElementById('cards-to-choose-from');
+            const confirmButton = document.getElementById('card-choice-confirm-button');
+            const popupTitle = document.getElementById('cardChoiceh2');
+            const instructionsDiv = document.getElementById('context');
+            const heroImage = document.getElementById('hero-one-location-image');
+            const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+            // Initialize UI
+            popupTitle.textContent = 'MASTERMIND TACTIC!';
+            instructionsDiv.textContent = 'Select a card to discard.';
             cardsList.innerHTML = '';
-const doomTacticTitle = document.getElementById('cardChoiceh2');
-const doomContext = document.getElementById('context');
+            confirmButton.style.display = 'inline-block';
+            confirmButton.disabled = true;
+            confirmButton.textContent = 'Discard Card';
+            modalOverlay.style.display = 'block';
+            popup.style.display = 'block';
 
-doomTacticTitle.innerHTML = 'MASTERMIND TACTIC!';
-doomContext.innerHTML = 'Select a card to discard.';
+            let selectedCard = null;
+            let selectedIndex = null;
+            let activeImage = null;
 
+            // Update confirm button state
+            function updateConfirmButton() {
+                confirmButton.disabled = selectedCard === null;
+            }
+
+            // Update instructions with styled card name
+            function updateInstructions() {
+                if (selectedCard === null) {
+                    instructionsDiv.textContent = 'Select a card to discard.';
+                } else {
+                    instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be discarded.`;
+                }
+            }
+
+            // Show/hide hero image
+            function updateHeroImage(card) {
+                if (card) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                    activeImage = card.image;
+                } else {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                    activeImage = null;
+                }
+            }
+
+            // Toggle card selection
+            function toggleCardSelection(card, index, listItem) {
+                if (selectedCard === card) {
+                    // Deselect if same card clicked
+                    selectedCard = null;
+                    selectedIndex = null;
+                    listItem.classList.remove('selected');
+                    updateHeroImage(null);
+                } else {
+                    // Clear previous selection if any
+                    if (selectedCard) {
+                        const prevListItem = document.querySelector('li.selected');
+                        if (prevListItem) prevListItem.classList.remove('selected');
+                    }
+                    // Select new card
+                    selectedCard = card;
+                    selectedIndex = index;
+                    listItem.classList.add('selected');
+                    updateHeroImage(card);
+                }
+
+                updateConfirmButton();
+                updateInstructions();
+            }
+
+            // Populate the list with cards in hand
             playerHand.forEach((card, index) => {
                 const li = document.createElement('li');
                 li.textContent = card.name;
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
+                li.setAttribute('data-card-id', card.id);
 
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
-
-                li.onclick = () => {
-                    discardSelectedCard(index);
-                    popup.style.display = 'none';
-                    document.getElementById("modal-overlay").style.display = "none";
-doomTacticTitle.innerHTML = 'HERO ABILITY!';
-doomContext.innerHTML = 'Context';
-                    resolve();
+                li.onmouseover = () => {
+                    if (!activeImage) {
+                        heroImage.src = card.image;
+                        heroImage.style.display = 'block';
+                        oneChoiceHoverText.style.display = 'none';
+                    }
                 };
+
+                li.onmouseout = () => {
+                    if (!activeImage) {
+                        heroImage.src = '';
+                        heroImage.style.display = 'none';
+                        oneChoiceHoverText.style.display = 'block';
+                    }
+                };
+
+                li.onclick = () => toggleCardSelection(card, index, li);
                 cardsList.appendChild(li);
             });
 
-            function discardSelectedCard(cardIndex) {
-                const selectedCard = playerHand[cardIndex];
-                console.log('Card selected for discard:', selectedCard);
-onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been discarded.`);
-                
-                playerHand.splice(cardIndex, 1);
-                checkDiscardForInvulnerability(selectedCard);
-                                
-                updateGameBoard();
+            // Handle confirmation
+            confirmButton.onclick = async function() {
+                if (selectedCard) {
+                    const discardedCard = playerHand.splice(selectedIndex, 1)[0];
+                    console.log('Card discarded:', discardedCard);
+                    onscreenConsole.log(`<span class="console-highlights">${discardedCard.name}</span> has been discarded.`);
 
-       
+                    await checkDiscardForInvulnerability(discardedCard);
+                    closeDiscardPopup();
+                    updateGameBoard();
+                    resolve(true);
+                }
+            };
+
+            function closeDiscardPopup() {
+                // Reset UI
+                popupTitle.textContent = 'HERO ABILITY!';
+                instructionsDiv.textContent = 'Context';
+                confirmButton.style.display = 'none';
+                confirmButton.disabled = true;
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+
+                // Hide popup
+                popup.style.display = 'none';
+                modalOverlay.style.display = 'none';
             }
-
-            popup.style.display = 'block';
-            document.getElementById("modal-overlay").style.display = "block";
         };
     });
 }
@@ -2893,7 +3130,7 @@ function HawkeyeDrawOrDiscard() {
             "Discard"
         );
 
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
     const HawkeyeImage = document.getElementById('hero-ability-may-card');
 const HawkeyeText = document.getElementById('heroAbilityHoverText');
@@ -3260,17 +3497,20 @@ function NickFuryRecruitShieldOfficerByKO() {
         const discardPileList = document.getElementById("discard-pile-cards");
         const handList = document.getElementById("hand-cards");
         const confirmButton = document.getElementById("close-ko-button");
+const secondConfirmButton = document.getElementById("ko-third-option-button");
         const hoverText = document.getElementById("card-ko-card-popupHoverText");
         const KOImage = document.getElementById("card-ko-popup-image");
         const context = document.getElementById("card-ko-popup-h2");
 
         // Initialize UI
-        context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+        context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
         discardPileList.innerHTML = '';
         handList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Recruit Officer';
+	secondConfirmButton.style.display = 'inline-block';
+	secondConfirmButton.disabled = true;
+        confirmButton.textContent = 'KO + RECRUIT';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -3281,14 +3521,15 @@ function NickFuryRecruitShieldOfficerByKO() {
         // Update the confirm button state
         function updateConfirmButton() {
             confirmButton.disabled = selectedCard === null;
+		secondConfirmButton.disabled = selectedCard === null;
         }
 
         // Update instructions with styled card name
         function updateInstructions() {
             if (selectedCard === null) {
-                context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+                context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
             } else {
-                context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd from your ${selectedLocation} to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+                context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd from your ${selectedLocation}.`;
             }
         }
 
@@ -3408,6 +3649,28 @@ function NickFuryRecruitShieldOfficerByKO() {
                 updateGameBoard();
                 resolve(true);
             }
+};
+
+ secondConfirmButton.onclick = () => {
+            if (selectedCard && selectedLocation) {
+                // Remove card from its location
+                if (selectedLocation === 'discard pile') {
+                    const index = playerDiscardPile.indexOf(selectedCard);
+                    if (index !== -1) playerDiscardPile.splice(index, 1);
+                } else {
+                    const index = playerHand.indexOf(selectedCard);
+                    if (index !== -1) playerHand.splice(index, 1);
+                }
+
+                // Add to KO pile
+                koPile.push(selectedCard);
+                
+                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} and chose not to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
+
+                closePopup();
+                updateGameBoard();
+                resolve(true);
+            }
         };
 
         function closePopup() {
@@ -3415,6 +3678,8 @@ function NickFuryRecruitShieldOfficerByKO() {
             context.innerHTML = `Do you wish to KO a card from your Discard Pile or Hand to rescue a Bystander?`;
             confirmButton.style.display = 'none';
             confirmButton.disabled = true;
+	secondConfirmButton.style.display = 'none';
+            secondConfirmButton.disabled = true;
             KOImage.src = '';
             KOImage.style.display = 'none';
             hoverText.style.display = 'block';
@@ -3426,9 +3691,15 @@ function NickFuryRecruitShieldOfficerByKO() {
         }
 
         // Add cancel button functionality
-        const closeButton = document.getElementById('close-choice-button');
-        closeButton.style.display = 'inline-block';
+        const closeButton = document.getElementById('no-thanks-button');
         closeButton.onclick = () => {
+            onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
+            closePopup();
+            resolve(false);
+        };
+
+        const closeXButton = document.getElementById('card-ko-popup-close');
+            closeButton.onclick = () => {
             onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
             closePopup();
             resolve(false);
@@ -3451,7 +3722,7 @@ onscreenConsole.log('There are no <span class="console-highlights">S.H.I.E.L.D. 
 
 
 function RogueKOHandOrDiscardForRecruit() {
-    onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+    onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
     return new Promise((resolve) => {
         // Get popup elements
@@ -3676,7 +3947,7 @@ function RogueCopyPowers(currentPlayer) {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Copy Hero';
+        confirmButton.textContent = 'Confirm';
         closeButton.style.display = 'inline-block';
         closeButton.textContent = 'Cancel';
         modalOverlay.style.display = 'block';
@@ -3915,7 +4186,7 @@ function StormMinus2ToMastermind() {
 mastermindTempBuff--;
 mastermindTempBuff--;
 console.log('The Mastermind loses 2 Attack this turn.')
-onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower ability activated. The Mastermind gets -2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> this turn.`);
+onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower Ability activated. The Mastermind gets -2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> this turn.`);
 updateGameBoard();
 }
 
@@ -4261,7 +4532,7 @@ function ThorRecruitPointsCanAttack() {
 const recruitLabel = document.getElementById('recruit-point-label')
 recruitLabel.innerHTML = "RECRUIT OR ATTACK: ";
 recruitUsedToAttack = true;
-onscreenConsole.log(`<span class="console-highlights">Thor - God of Thunder's</span> Superpower ability activated. You can use <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> as <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> this turn.`);
+onscreenConsole.log(`<span class="console-highlights">Thor - God of Thunder's</span> Special Ability: You can use <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> as <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> this turn.`);
 }
 
 function add1Recruit() {
@@ -4308,6 +4579,7 @@ function SentinelKOHeroYouHave() {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block'; // Always visible
         confirmButton.disabled = true; // Disabled by default
+        confirmButton.innerHTML = "Confirm";
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -4473,6 +4745,7 @@ function FightKOHeroYouHave() {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block'; // Always visible
         confirmButton.disabled = true; // Disabled by default
+confirmButton.textContent = 'Confirm'; 
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -5703,85 +5976,149 @@ revealRangeOrWound();
 
 
 function doomHeroRecruit() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const eligibleHeroesForDoomRecruit = hq.map((item, index) => ({ ...item, index }))
                                  .filter(item => item.class1 === 'Tech' || item.class1 === 'Range');
 
         if (eligibleHeroesForDoomRecruit.length === 0) {
             console.log('No available Tech or Range Heroes to recruit.');
-onscreenConsole.log(`No available <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='console-card-icons'> or<img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='console-card-icons'>Heroes to recruit.`);
-            resolve(); // Resolve immediately if there are no heroes to recruit
+            onscreenConsole.log(`No available <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='console-card-icons'> or <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='console-card-icons'> Heroes to recruit.`);
+            resolve(false);
             return;
         }
 
-        // Get the popup elements
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
-        const cardsList = document.getElementById('cards-to-choose-from');
         const modalOverlay = document.getElementById('modal-overlay');
-        const noThanksButton = document.getElementById('close-choice-button'); // Assuming this is your "No Thanks" button
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-
-
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
         const popupTitle = popup.querySelector('h2');
-        popupTitle.textContent = 'Recruit a Hero';
-        cardsList.innerHTML = '';
         const instructionsDiv = document.getElementById('context');
-        instructionsDiv.innerHTML = `You may recruit a <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='card-icons'> or<img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='card-icons'>Hero from the HQ for free.`;
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-        // Clear previous list
+        // Initialize UI
+        popupTitle.textContent = 'Recruit a Hero';
+        instructionsDiv.innerHTML = `Select a <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='card-icons'> or <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='card-icons'> Hero to recruit for free.`;
         cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Recruit Hero';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        // Update confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = `Select a <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='card-icons'> or <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='card-icons'> Hero to recruit for free.`;
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be recruited for free.`;
+            }
+        }
+
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
+        function toggleCardSelection(card, index, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                selectedIndex = index;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+
+            updateConfirmButton();
+            updateInstructions();
+        }
 
         // Populate the list with eligible heroes
-        eligibleHeroesForDoomRecruit.forEach(card => {
+        eligibleHeroesForDoomRecruit.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
             li.textContent = card.name;
+            li.setAttribute('data-card-id', card.id);
 
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
-
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
-
-            li.onclick = () => {
-                recruitHeroConfirmed(card, card.index);
-                totalRecruitPoints += card.cost;
-                updateGameBoard();
-                
-                // Hide the popup after selection
-                closePopup();
-                resolve(); // Resolve after the hero is recruited
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
             };
 
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, index, li);
             cardsList.appendChild(li);
         });
 
-        // Add functionality to the "No Thanks" button
-        noThanksButton.textContent = 'No Thanks!';
-        noThanksButton.style.display = 'inline-block';
-        noThanksButton.onclick = () => {
-            closePopup();
-            resolve(); // Resolve when "No Thanks" is clicked
+        // Handle confirmation
+        confirmButton.onclick = () => {
+            if (selectedCard) {
+                recruitHeroConfirmed(selectedCard, selectedCard.index);
+                totalRecruitPoints += selectedCard.cost;
+                
+                console.log(`${selectedCard.name} has been recruited.`);
+                onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
+
+                closePopup();
+                updateGameBoard();
+                resolve(true);
+            }
         };
 
-        // Show the popup
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
-
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
-            noThanksButton.style.display = 'none'; // Hide the button after it's used
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
@@ -5790,223 +6127,280 @@ oneChoiceHoverText.style.display = 'block';
 
 function instantVillainDefeat() {
     return new Promise((resolve, reject) => {
-        // Filter the city to get only valid Villains and Henchmen with their unique indexes
         const villainsInCity = city
             .map((card, index) => (card && card.type === 'Villain') ? { ...card, id: `city-${index}`, index } : null)
             .filter(card => card !== null);
 
         if (villainsInCity.length === 0) {
             onscreenConsole.log('There are no Villains available to defeat.');
-            resolve(); // Resolve immediately if there are no villains to defeat
+            resolve();
             return;
         }
 
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
         const cardsList = document.getElementById('cards-to-choose-from');
-        const defeatButton = document.getElementById('close-choice-button');
-        defeatButton.textContent = 'DEFEAT SELECTED VILLAIN';
-        defeatButton.disabled = true;
-
+        const defeatButton = document.getElementById('card-choice-confirm-button');
+        const noThanksButton = document.getElementById('close-choice-button');
         const popupTitle = popup.querySelector('h2');
-        popupTitle.textContent = 'Defeat Villain';
-        cardsList.innerHTML = '';
         const instructionsDiv = document.getElementById('context');
-        instructionsDiv.textContent = 'Select a Villain or Henchman to defeat.';
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-        let selectedVillainId = null;
+        // Initialize UI
+        popupTitle.textContent = 'Defeat Villain';
+        instructionsDiv.innerHTML = 'Select a Villain or Henchman to defeat.';
+        cardsList.innerHTML = '';
+        defeatButton.style.display = 'inline-block';
+        defeatButton.disabled = true;
+        defeatButton.textContent = 'DEFEAT SELECTED VILLAIN';
+        noThanksButton.style.display = 'none';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
+        let selectedVillain = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        // Update defeat button state
         function updateDefeatButton() {
-            if (selectedVillainId !== null) {
-                defeatButton.disabled = false;
-                defeatButton.style.display = 'inline-block';
+            defeatButton.disabled = selectedVillain === null;
+        }
+
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedVillain === null) {
+                instructionsDiv.textContent = 'Select a Villain or Henchman to defeat.';
             } else {
-                defeatButton.disabled = true;
-                defeatButton.style.display = 'none';
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedVillain.name}</span> will be defeated.`;
             }
         }
 
-        function toggleVillainSelection(card, listItem) {
-            if (selectedVillainId === card.id) {
-                selectedVillainId = null;
-                listItem.classList.remove('selected');
+        // Show/hide villain image
+        function updateVillainImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
             } else {
-                const previouslySelectedItem = document.querySelector(`[data-card-id="${selectedVillainId}"]`);
-                if (previouslySelectedItem) {
-                    previouslySelectedItem.classList.remove('selected');
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle villain selection
+        function toggleVillainSelection(card, listItem) {
+            if (selectedVillain === card) {
+                // Deselect if same villain clicked
+                selectedVillain = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateVillainImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedVillain) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
                 }
-                selectedVillainId = card.id;
+                // Select new villain
+                selectedVillain = card;
+                selectedIndex = card.index;
                 listItem.classList.add('selected');
+                updateVillainImage(card);
             }
 
             updateDefeatButton();
-
-            if (selectedVillainId !== null) {
-                console.log('Selected Villain for defeat:', card.name);
-            } else {
-                console.log('No valid Villain selected for defeat.');
-            }
+            updateInstructions();
         }
 
+        // Populate the list with eligible villains
         villainsInCity.forEach(card => {
             const li = document.createElement('li');
             li.textContent = card.name;
             li.setAttribute('data-card-id', card.id);
 
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
 
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
-
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
 
             li.onclick = () => toggleVillainSelection(card, li);
             cardsList.appendChild(li);
         });
 
+        // Handle defeat confirmation
         defeatButton.onclick = () => {
-            if (selectedVillainId !== null) {
-                const selectedVillain = villainsInCity.find(villain => villain.id === selectedVillainId);
-
-                if (!selectedVillain) {
-                    console.error(`No villain found with id ${selectedVillainId}.`);
-                    alert("Invalid selection. No villain found.");
-                    reject("Invalid villain selection"); // Reject the promise if an invalid selection occurs
-                    return;
-                }
-
-                console.log('Villain selected for defeat:', selectedVillain.name);
-
-                // Add the villain's attack value to the player's total attack points
-                const tempBuffVariableName = `city${selectedVillain.index + 1}TempBuff`; // Match index correctly
+            if (selectedVillain) {
+                // Calculate attack points
+                const tempBuffVariableName = `city${selectedVillain.index + 1}TempBuff`;
                 const tempBuffValue = window[tempBuffVariableName] || 0;
-                const permBuffVariableName = `city${selectedVillain.index + 1}PermBuff`; // Match index correctly
+                const permBuffVariableName = `city${selectedVillain.index + 1}PermBuff`;
                 const permBuffValue = window[permBuffVariableName] || 0;
 
                 let villainAttack = selectedVillain.attack + tempBuffValue + permBuffValue;
-
-                if (villainAttack < 0) {
-                    villainAttack = 0;
-                }
+                if (villainAttack < 0) villainAttack = 0;
 
                 totalAttackPoints += villainAttack;
-
-                // Trigger the confirmAttack function to handle the defeat
                 confirmAttack(selectedVillain.index);
 
-                // Close the popup and resolve the promise
+                console.log(`${selectedVillain.name} has been defeated.`);
+                onscreenConsole.log(`You have defeated <span class="console-highlights">${selectedVillain.name}</span>.`);
+
                 closePopup();
-                resolve(); // Resolve the promise after the villain is defeated
+                updateGameBoard();
+                resolve();
             } else {
                 alert("You must select a valid Villain to defeat.");
-                reject("No villain selected"); // Reject the promise if no villain is selected
+                reject("No villain selected");
             }
         };
 
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
-            defeatButton.textContent = 'No Thanks!';
             defeatButton.style.display = 'none';
+            defeatButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
     });
 }
 
-
 function KO1To4FromDiscard() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         if (playerDiscardPile.length === 0) {
             console.log('No cards in the Discard Pile to KO.');
-onscreenConsole.log('Your discard pile is currently empty. Unable to KO any cards.');
-            resolve(); // Resolve immediately if there are no cards to KO
+            onscreenConsole.log('Your discard pile is currently empty. Unable to KO any cards.');
+            resolve();
             return;
         }
 
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
         const cardsList = document.getElementById('cards-to-choose-from');
         const koButton = document.getElementById('close-choice-button');
-
-        koButton.textContent = 'No Thanks!';
-koButton.style.display = 'block';
-        koButton.disabled = false; // The button is now active from the start
-
         const popupTitle = popup.querySelector('h2');
-        popupTitle.textContent = 'KO Cards';
-        cardsList.innerHTML = '';
         const instructionsDiv = document.getElementById('context');
-        instructionsDiv.textContent = 'You may select up to four cards from your discard pile to KO.';
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'KO Cards';
+        instructionsDiv.innerHTML = 'You may select up to four cards from your discard pile to KO.';
+        cardsList.innerHTML = '';
+        koButton.style.display = 'inline-block';
+        koButton.disabled = false;
+        koButton.textContent = 'No Thanks!';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
         let selectedCards = [];
+        let activeImage = null;
 
-        // Update the KO button text based on selection status
+        // Update KO button text and state
         function updateKOButton() {
-            if (selectedCards.length > 0 && selectedCards.length <= 4) {
-                koButton.textContent = 'KO Selected Cards';
+            if (selectedCards.length > 0) {
+                koButton.textContent = `KO ${selectedCards.length} Selected Card${selectedCards.length !== 1 ? 's' : ''}`;
             } else {
                 koButton.textContent = 'No Thanks!';
             }
         }
 
+        // Update instructions with selected cards
+        function updateInstructions() {
+            if (selectedCards.length === 0) {
+                instructionsDiv.textContent = 'You may select up to four cards from your discard pile to KO.';
+            } else {
+                const names = selectedCards.map(card => `<span class="console-highlights">${card.name}</span>`).join(', ');
+                instructionsDiv.innerHTML = `Selected: ${names} (${selectedCards.length}/4)`;
+            }
+        }
+
+        // Show/hide card image
+        function updateCardImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
         function toggleCardSelection(card, listItem) {
             const cardIndex = selectedCards.indexOf(card);
+            
             if (cardIndex > -1) {
+                // Deselect card
                 selectedCards.splice(cardIndex, 1);
                 listItem.classList.remove('selected');
-            } else {
-                if (selectedCards.length >= 4) return;
+                if (activeImage === card.image) updateCardImage(null);
+            } else if (selectedCards.length < 4) {
+                // Select card
                 selectedCards.push(card);
                 listItem.classList.add('selected');
+                updateCardImage(card);
             }
 
             updateKOButton();
-            console.log('Selected cards for KO:', selectedCards.map(c => c.name));
+            updateInstructions();
         }
 
-        // Render discard pile cards as selectable list items
+        // Populate the list with discard pile cards
         playerDiscardPile.forEach((card, index) => {
             const li = document.createElement('li');
             li.textContent = card.name;
             li.setAttribute('data-card-id', `discard-${index}`);
-            
-            const heroImage = document.getElementById('hero-one-location-image');
-            const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-            
-            // On mouseover, change the hero image to the selected card's image
+
             li.onmouseover = () => {
-                heroImage.src = card.image;  // Dynamically change the image source
-                heroImage.style.display = 'block';  // Ensure the image is visible
-                oneChoiceHoverText.style.display = 'none';
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
             };
 
-            // On mouseout, reset the image to its default state (or hide it)
             li.onmouseout = () => {
-                heroImage.src = '';  // Clear the image source
-                heroImage.style.display = 'none';  // Hide the image
-                oneChoiceHoverText.style.display = 'block';
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
             };
 
             li.onclick = () => toggleCardSelection(card, li);
             cardsList.appendChild(li);
         });
 
-        // KO button click handler
+        // Handle KO button click
         koButton.onclick = () => {
             if (selectedCards.length > 0) {
                 selectedCards.forEach(card => {
@@ -6014,278 +6408,354 @@ koButton.style.display = 'block';
                     if (cardIndex !== -1) {
                         playerDiscardPile.splice(cardIndex, 1);
                         koPile.push(card);
-                        console.log(`${card.name} is being sent from the Discard Pile to the KO Pile.`);
-                        onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd from your discard pile.`);
+                        console.log(`${card.name} KO'd from discard pile.`);
+                        onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
                     }
                 });
-                closePopup();
-                updateGameBoard();
-                resolve(); // Resolve after the user has completed the KO action
             } else {
-                console.log('No cards selected. Action skipped.');
-                onscreenConsole.log(`You chose not to KO any cards.`);
-                closePopup(); // Close the popup even if no cards are selected
-                resolve(); // Resolve even if no action is taken
+                console.log('No cards selected for KO.');
+                onscreenConsole.log('You chose not to KO any cards.');
             }
+
+            closePopup();
+            updateGameBoard();
+            resolve();
         };
 
-        // Function to close the popup
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
             koButton.textContent = 'No Thanks!';
-            koButton.style.display = 'none';  // Hide the button when the popup closes
+            koButton.style.display = 'none';
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
-        // Show the popup and overlay
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
     });
 }
 
 
 function chooseVillainKOFromVP() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const villainsInVP = victoryPile
-            .map((card, index) => (card && (card.type === 'Villain' || card.type === 'Henchman')) ? { ...card, id: `vp-${index}`, index } : null)
+            .map((card, index) => (card && (card.type === 'Villain' || card.type === 'Henchman')) 
+                ? { ...card, id: `vp-${index}`, index } 
+                : null)
             .filter(card => card !== null);
 
         if (villainsInVP.length === 0) {
             onscreenConsole.log('There are no Villains in your Victory Pile to KO.');
-            resolve(); // Resolve immediately if there are no villains to KO
+            resolve();
             return;
         }
 
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
         const cardsList = document.getElementById('cards-to-choose-from');
-        const koButton = document.getElementById('close-choice-button');
-        koButton.textContent = 'KO Selected Villain';
-        koButton.disabled = true;
-
+        const koButton = document.getElementById('card-choice-confirm-button');
         const popupTitle = popup.querySelector('h2');
-        popupTitle.textContent = 'KO a Villain';
-        cardsList.innerHTML = '';
         const instructionsDiv = document.getElementById('context');
-        instructionsDiv.textContent = 'Select a Villain or Henchman to KO from your Victory Pile.';
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-        let selectedVillainId = null;
+        // Initialize UI
+        popupTitle.textContent = 'KO a Villain';
+        instructionsDiv.innerHTML = 'Select a Villain or Henchman to KO from your Victory Pile.';
+        cardsList.innerHTML = '';
+        koButton.style.display = 'inline-block';
+        koButton.disabled = true;
+        koButton.textContent = 'KO Selected Villain';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
+        let selectedVillain = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        // Update KO button state
         function updateKOButton() {
-            if (selectedVillainId !== null) {
-                koButton.disabled = false;
-                koButton.style.display = 'inline-block';
+            koButton.disabled = selectedVillain === null;
+        }
+
+        // Update instructions with selected card
+        function updateInstructions() {
+            if (selectedVillain === null) {
+                instructionsDiv.textContent = 'Select a Villain or Henchman to KO from your Victory Pile.';
             } else {
-                koButton.disabled = true;
-                koButton.style.display = 'none';
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedVillain.name}</span> will be KO'd.`;
             }
         }
 
-        function toggleVillainSelection(card, listItem) {
-            if (selectedVillainId === card.id) {
-                selectedVillainId = null;
-                listItem.classList.remove('selected');
+        // Show/hide villain image
+        function updateVillainImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
             } else {
-                const previouslySelectedItem = document.querySelector(`[data-card-id="${selectedVillainId}"]`);
-                if (previouslySelectedItem) {
-                    previouslySelectedItem.classList.remove('selected');
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle villain selection
+        function toggleVillainSelection(card, listItem) {
+            if (selectedVillain === card) {
+                // Deselect if same card clicked
+                selectedVillain = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateVillainImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedVillain) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
                 }
-                selectedVillainId = card.id;
+                // Select new villain
+                selectedVillain = card;
+                selectedIndex = card.index;
                 listItem.classList.add('selected');
+                updateVillainImage(card);
             }
 
             updateKOButton();
-
-            if (selectedVillainId !== null) {
-                console.log('Selected card for KO:', card.name);
-            } else {
-                console.log('No valid Villain selected for KO.');
-            }
+            updateInstructions();
         }
 
+        // Populate the list with eligible villains
         villainsInVP.forEach(card => {
             const li = document.createElement('li');
             li.textContent = card.name;
             li.setAttribute('data-card-id', card.id);
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
 
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
 
             li.onclick = () => toggleVillainSelection(card, li);
             cardsList.appendChild(li);
         });
 
+        // Handle KO confirmation
         koButton.onclick = () => {
-            if (selectedVillainId !== null) {
-                const selectedVillain = villainsInVP.find(villain => villain.id === selectedVillainId);
-
-                onscreenConsole.log(`<span class="console-highlights">${selectedVillain.name}</span> has been KO'd from your Victory Pile.`);
-
-                victoryPile.splice(selectedVillain.index, 1);
+            if (selectedVillain) {
+                victoryPile.splice(selectedIndex, 1);
                 koPile.push(selectedVillain);
+                
+                console.log(`${selectedVillain.name} KO'd from Victory Pile.`);
+                onscreenConsole.log(`<span class="console-highlights">${selectedVillain.name}</span> has been KO'd from your Victory Pile.`);
 
                 closePopup();
                 updateGameBoard();
-                resolve(); // Resolve the Promise after the villain is KO'd
+                resolve();
             } else {
-                alert("You must select a valid Villain to KO.");
+                alert("Please select a Villain to KO.");
             }
         };
 
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
-            koButton.textContent = 'No Thanks!';
+            koButton.textContent = 'Confirm';
             koButton.style.display = 'none';
+            koButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
     });
 }
 
 
 function chooseBystanderKOFromVP() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const bystandersInVP = victoryPile
-            .map((card, index) => (card && card.type === 'Bystander') ? { ...card, id: `vp-${index}` } : null)
+            .map((card, index) => (card && card.type === 'Bystander') 
+                ? { ...card, id: `vp-${index}`, index } 
+                : null)
             .filter(card => card !== null);
 
-if (bystandersInVP.length === 0) {
-            onscreenConsole.log(`There are no Bystanders in your Victory Pile to KO.`);
-               
+        // Handle cases with 0-2 bystanders immediately
+        if (bystandersInVP.length === 0) {
+            onscreenConsole.log('There are no Bystanders in your Victory Pile to KO.');
             updateGameBoard();
-            resolve(); // Resolve immediately after KOing
+            resolve();
             return;
         }
-
 
         if (bystandersInVP.length <= 2) {
             bystandersInVP.forEach(card => {
-                const indexInVP = victoryPile.indexOf(card);
-                if (indexInVP !== -1) {
-                    victoryPile.splice(indexInVP, 1);
-                    koPile.push(card);
-                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd from your Victory Pile.`);
-                }
+                victoryPile.splice(card.index, 1);
+                koPile.push(card);
+                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
             });
             updateGameBoard();
-            resolve(); // Resolve immediately after KOing
+            resolve();
             return;
         }
 
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
         const cardsList = document.getElementById('cards-to-choose-from');
-        const koButton = document.getElementById('close-choice-button');
-        koButton.textContent = 'KO Selected Bystanders';
-        koButton.disabled = true;
-
+        const koButton = document.getElementById('card-choice-confirm-button');
         const popupTitle = popup.querySelector('h2');
-        popupTitle.textContent = 'KO Bystanders';
-        cardsList.innerHTML = '';
         const instructionsDiv = document.getElementById('context');
-        instructionsDiv.textContent = 'Select exactly two Bystanders to KO from your Victory Pile.';
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'KO Bystanders';
+        instructionsDiv.innerHTML = 'Select exactly two Bystanders to KO from your Victory Pile.';
+        cardsList.innerHTML = '';
+        koButton.style.display = 'inline-block';
+        koButton.disabled = true;
+        koButton.textContent = 'KO Selected Bystanders';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
         let selectedBystanders = [];
+        let activeImage = null;
 
+        // Update KO button state and text
         function updateKOButton() {
-            if (selectedBystanders.length === 2) {
-                koButton.disabled = false;
-                koButton.style.display = 'inline-block';
+            const count = selectedBystanders.length;
+            koButton.disabled = count !== 2;
+            koButton.textContent = count === 2 ? 'KO 2 Selected Bystanders' : `Select ${2 - count} More`;
+        }
+
+        // Update instructions with selection status
+        function updateInstructions() {
+            const count = selectedBystanders.length;
+            if (count === 0) {
+                instructionsDiv.textContent = 'Select exactly two Bystanders to KO from your Victory Pile.';
             } else {
-                koButton.disabled = true;
-                koButton.style.display = 'none';
+                const names = selectedBystanders.map(b => `<span class="console-highlights">${b.name}</span>`).join(', ');
+                instructionsDiv.innerHTML = `Selected: ${names} (${count}/2)`;
             }
         }
 
+        // Show/hide bystander image
+        function updateBystanderImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle bystander selection
         function toggleBystanderSelection(card, listItem) {
             const index = selectedBystanders.indexOf(card);
+            
             if (index > -1) {
+                // Deselect
                 selectedBystanders.splice(index, 1);
                 listItem.classList.remove('selected');
-            } else {
-                if (selectedBystanders.length >= 2) return;
+                if (activeImage === card.image) updateBystanderImage(null);
+            } else if (selectedBystanders.length < 2) {
+                // Select
                 selectedBystanders.push(card);
                 listItem.classList.add('selected');
+                updateBystanderImage(card);
             }
 
             updateKOButton();
-            console.log('Selected Bystanders for KO:', selectedBystanders.map(b => b.name));
+            updateInstructions();
         }
 
+        // Populate the list with bystanders
         bystandersInVP.forEach(card => {
             const li = document.createElement('li');
             li.textContent = card.name;
             li.setAttribute('data-card-id', card.id);
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
 
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
 
             li.onclick = () => toggleBystanderSelection(card, li);
             cardsList.appendChild(li);
         });
 
+        // Handle KO confirmation
         koButton.onclick = () => {
             if (selectedBystanders.length === 2) {
                 selectedBystanders.forEach(card => {
-                    const indexInVP = victoryPile.indexOf(card);
-                    if (indexInVP !== -1) {
-                        victoryPile.splice(indexInVP, 1);
-                        koPile.push(card);
-                         onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd from your Victory Pile.`);
-                    }
+                    victoryPile.splice(card.index, 1);
+                    koPile.push(card);
+                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> KO'd from Victory Pile.`);
                 });
+                
                 closePopup();
                 updateGameBoard();
-                resolve(); // Resolve after the user has completed the action
-            } else {
-                alert("You must select exactly 2 Bystanders to KO.");
+                resolve();
             }
         };
 
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
-            koButton.textContent = 'No Thanks!';
+            koButton.textContent = 'Confirm';
             koButton.style.display = 'none';
+            koButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
     });
 }
 
@@ -6300,82 +6770,154 @@ function updateHealWoundsButton() {
 }
 
 function recruitXMen() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const eligibleHeroesForXMenRecruit = hq.map((item, index) => ({ ...item, index }))
                                  .filter(item => item.team === 'X-Men');
 
         if (eligibleHeroesForXMenRecruit.length === 0) {
             console.log('No available X-Men Heroes to recruit.');
-onscreenConsole.log(`No available <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='console-card-icons'> Heroes to recruit.`);
-            resolve(); // Resolve immediately if there are no heroes to recruit
+            onscreenConsole.log(`No available <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='console-card-icons'> Heroes to recruit.`);
+            resolve(false);
             return;
         }
 
-        // Get the popup elements
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
-        const cardsList = document.getElementById('cards-to-choose-from');
         const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
         const popupTitle = popup.querySelector('h2');
         const instructionsDiv = document.getElementById('context');
-        
-        popupTitle.textContent = 'Recruit a Hero';
-        cardsList.innerHTML = '';
-        instructionsDiv.innerHTML = `Recruit an <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Hero from the HQ for free.`;
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-        // Clear previous list
+        // Initialize UI
+        popupTitle.textContent = 'Recruit a Hero';
+        instructionsDiv.innerHTML = `Select an <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Hero from the HQ to recruit for free.`;
         cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Recruit Hero';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        // Update confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = `Select an <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Hero from the HQ to recruit for free.`;
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be recruited for free.`;
+            }
+        }
+
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
+        function toggleCardSelection(card, index, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                selectedIndex = index;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+
+            updateConfirmButton();
+            updateInstructions();
+        }
 
         // Populate the list with eligible heroes
-        eligibleHeroesForXMenRecruit.forEach(card => {
+        eligibleHeroesForXMenRecruit.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
             li.textContent = card.name;
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
+            li.setAttribute('data-card-id', card.id);
 
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
-
-            li.onclick = () => {
-                recruitHeroConfirmed(card, card.index);
-                totalRecruitPoints += card.cost;
-                updateGameBoard();
-                
-                // Hide the popup after selection
-                closePopup();
-                resolve(); // Resolve after the hero is recruited
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
             };
 
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, index, li);
             cardsList.appendChild(li);
         });
 
-        // Show the popup
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
+        // Handle confirmation
+        confirmButton.onclick = () => {
+            if (selectedCard) {
+                recruitHeroConfirmed(selectedCard, selectedCard.index);
+                totalRecruitPoints += selectedCard.cost;
+                
+                console.log(`${selectedCard.name} has been recruited.`);
+                onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
 
-        // Define closePopup within the scope of the variables it needs
+                closePopup();
+                updateGameBoard();
+                resolve(true);
+            }
+        };
+
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
-
-            resolve(); // Ensure the promise is resolved when closing the popup
         }
     });
 }
-
 
 function MagnetoRevealXMenOrWound() {
 
@@ -6407,7 +6949,7 @@ document.getElementById('heroAbilityHoverText').style.display = 'none';
     cardImage.style.display = 'block';
 
     confirmButton.onclick = () => {
-        onscreenConsole.log(`You are able to reveal an <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero and have escaped gaining wounds!`);
+        onscreenConsole.log(`You are able to reveal an <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="console-card-icons"> Hero and have escaped gaining Wounds!`);
         hideHeroAbilityMayPopup();
 document.getElementById('heroAbilityHoverText').style.display = 'block';
     };
@@ -6529,102 +7071,163 @@ onscreenConsole.log(`You currently have ${AvengersCardsYouHave.length} <img src=
 }
 
 function XMen7thDraw() {
-    return new Promise((resolve, reject) => {
-    const cardsYouHave = [
-    ...playerHand, // Include all cards in hand (unchanged)
-    ...cardsPlayedThisTurn.filter(card => 
-        !card.isCopied &&  // Exclude copied cards
-        !card.sidekickToDestroy // Exclude sidekicks marked for destruction
-    )
-];
-    const XMenCardsYouHave = cardsYouHave.filter(item => item.team === 'X-Men');
+    return new Promise((resolve) => {
+        const cardsYouHave = [
+            ...playerHand,
+            ...cardsPlayedThisTurn.filter(card => 
+                !card.isCopied && 
+                !card.sidekickToDestroy
+            )
+        ];
+        const XMenCardsYouHave = cardsYouHave.filter(item => item.team === 'X-Men');
 
         if (XMenCardsYouHave.length === 0) {
             console.log('No available X-Men Heroes.');
-onscreenConsole.log(`You do not have any <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='console-card-icons'> Heroes to add to next turn's draw.`);
-            resolve(); // Resolve immediately if there are no heroes to recruit
+            onscreenConsole.log(`You do not have any <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='console-card-icons'> Heroes to add to next turn's draw.`);
+            resolve(false);
             return;
         }
 
-        // Get the popup elements
+        // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
-        const cardsList = document.getElementById('cards-to-choose-from');
         const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
         const popupTitle = popup.querySelector('h2');
         const instructionsDiv = document.getElementById('context');
-        
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
         popupTitle.textContent = 'Mastermind Tactic!';
+        instructionsDiv.innerHTML = `Choose one of your <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Heroes to add to next turn's draw.`;
         cardsList.innerHTML = '';
-        instructionsDiv.innerHTML = `Choose one of your <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Heroes. When you draw a new hand of cards at the end of this turn, add that Hero to you hand as a seventh card.`;
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Select Hero';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
-        // Clear previous list
-        cardsList.innerHTML = '';
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
 
-        // Populate the list with eligible heroes
-XMenCardsYouHave.forEach(card => {
-    console.log('Adding card to selection list:', card);
-    const li = document.createElement('li');
-    li.textContent = card.name;
-const heroImage = document.getElementById('hero-one-location-image');
-const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
-// On mouseover, change the hero image to the selected card's image
-    li.onmouseover = () => {
-        heroImage.src = card.image;  // Dynamically change the image source
-        heroImage.style.display = 'block';  // Ensure the image is visible
-oneChoiceHoverText.style.display = 'none';
-    };
-
-    // On mouseout, reset the image to its default state (or hide it)
-    li.onmouseout = () => {
-        heroImage.src = '';  // Clear the image source
-        heroImage.style.display = 'none';  // Hide the image
-oneChoiceHoverText.style.display = 'block';
-    };
-
-    li.onclick = () => {
-        // Remove the card from the player's hand or played cards
-        const handIndex = playerHand.indexOf(card);
-        const playedIndex = cardsPlayedThisTurn.indexOf(card);
-
-        if (handIndex !== -1) {
-            playerHand.splice(handIndex, 1);
-            console.log(`${card.name} removed from hand.`);
-        } else if (playedIndex !== -1) {
-            cardsPlayedThisTurn.splice(playedIndex, 1);
-            console.log(`${card.name} removed from cards played this turn.`);
+        // Update confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
         }
 
-        // Add the card to cardsToBeDrawnNextTurn array
-        cardsToBeDrawnNextTurn.push(card);
-nextTurnsDraw++;
-        console.log(`${card.name} has been reserved for next turn.`);
-onscreenConsole.log(`You have selected <span class="console-highlights">${card.name}</span> to be added to your next draw as a seventh card.`);
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = `Choose one of your <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Heroes to add to next turn's draw.`;
+            } else {
+                const location = playerHand.includes(selectedCard) ? '(from Hand)' : '(from Played Cards)';
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> ${location} will be added to next turn's draw.`;
+            }
+        }
 
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
 
-        // Update the game board to reflect changes
-        updateGameBoard();
+        // Toggle card selection
+        function toggleCardSelection(card, index, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                selectedIndex = index;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
 
-        // Hide the popup after selection
-        closePopup();
-        resolve(); // Resolve after the card is added and removed from play
-    };
+            updateConfirmButton();
+            updateInstructions();
+        }
 
-    cardsList.appendChild(li);
-});
+        // Populate the list with eligible heroes
+        XMenCardsYouHave.forEach((card, index) => {
+            console.log('Adding card to selection list:', card);
+            const li = document.createElement('li');
+            const location = playerHand.includes(card) ? '(Hand)' : '(Played Cards)';
+            li.textContent = `${card.name} ${location}`;
+            li.setAttribute('data-card-id', card.id);
 
-        // Show the popup
-        popup.style.display = 'block';
-        modalOverlay.style.display = 'block';
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
 
-        // Define closePopup within the scope of the variables it needs
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, index, li);
+            cardsList.appendChild(li);
+        });
+
+        // Handle confirmation
+        confirmButton.onclick = () => {
+            if (selectedCard) {
+                const cardCopy = { ...selectedCard };
+                cardsToBeDrawnNextTurn.push(cardCopy);
+                nextTurnsDraw++;
+                
+                // Mark the original card to be destroyed later
+                selectedCard.markedToDestroy = true;
+                
+                console.log(`${selectedCard.name} has been reserved for next turn.`);
+                onscreenConsole.log(`You have selected <span class="console-highlights">${selectedCard.name}</span> to be added to your next draw as a seventh card.`);
+
+                closePopup();
+                updateGameBoard();
+                resolve(true);
+            }
+        };
+
         function closePopup() {
+            // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
 
+            // Hide popup
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
-
-            resolve(); // Ensure the promise is resolved when closing the popup
         }
     });
 }
@@ -6669,18 +7272,17 @@ function redSkullDrawing() {
 
 function revealTop3AndChooseActions() {
     return new Promise((resolve) => {
-        // Calculate the total number of available cards (deck + discard pile)
+        // Calculate total available cards
         const totalAvailableCards = playerDeck.length + playerDiscardPile.length;
 
-        // If fewer than 3 cards are available, exit early
         if (totalAvailableCards < 3) {
             onscreenConsole.log('Not enough cards available to reveal and resolve.');
             console.log('Not enough cards available to reveal and resolve.');
-            resolve(); // Resolve immediately if fewer than 3 cards are available
+            resolve(false);
             return;
         }
 
-        // Function to draw up to 3 cards, shuffling if necessary
+        // Draw up to 3 cards, shuffling if needed
         function drawCards(num) {
             const drawnCards = [];
             for (let i = 0; i < num; i++) {
@@ -6689,103 +7291,177 @@ function revealTop3AndChooseActions() {
                         playerDeck = shuffle(playerDiscardPile);
                         playerDiscardPile = [];
                     } else {
-                        console.log("No cards left in deck or discard pile.");
-                        onscreenConsole.log("No cards left in deck or discard pile.");
-                        break; // Exit the loop if both deck and discard pile are empty
+                        break;
                     }
                 }
-                drawnCards.push(playerDeck.shift()); // Draw the top card
+                drawnCards.push(playerDeck.shift());
             }
             return drawnCards;
         }
 
-        // Draw the top 3 cards
         const top3Cards = drawCards(3);
-
-        // Get the popup elements
-        const popup = document.getElementById('card-choice-one-location-popup');
-        const cardsList = document.getElementById('cards-to-choose-from');
-        const title = document.getElementById('cardChoiceh2');
-        const context = document.getElementById('context');
-
-        title.innerHTML = 'MASTERMIND TACTIC!';
-        context.innerHTML = 'You revealed the following cards. Select one to KO.';
-
-        // Clear previous list and set initial instructions
-        cardsList.innerHTML = '';
-
-        let choices = { KO: null, Discard: null, Return: null };
-
-        // Function to update the instructions
-        function updateInstructions(newInstructions) {
-            context.innerHTML = newInstructions;
+        if (top3Cards.length < 3) {
+            resolve(false);
+            return;
         }
 
-        // Function to handle card selection and action updates
-        function handleCardClick(card, cardElement) {
-            if (!choices.KO) {
-                choices.KO = card;
-                console.log(`${card.name} has been KO'd.`);
-                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-                koPile.push(card);
-                cardElement.remove(); // Remove the card element from the DOM
-                updateInstructions('Now select a card to discard.');
-            } else if (!choices.Discard) {
-                choices.Discard = card;
-                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
-                checkDiscardForInvulnerability(card);
-                cardElement.remove(); // Remove the card element from the DOM
-                updateInstructions('The last card will be returned to the top of the deck.');
-            } else {
-                choices.Return = card;
-                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been returned to the top of your deck.`);
-                playerDeck.unshift(card); // Move the card to the top of the deck
-                console.log(`Choices Summary: KO - ${choices.KO.name}, Discard - ${choices.Discard.name}, Return - ${choices.Return.name}`);
-                // Hide the popup after the last selection
-                closePopup();
-                updateGameBoard();
-                resolve(); // Resolve the promise after all choices are made
+        // Get popup elements
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = document.getElementById('cardChoiceh2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'MASTERMIND TACTIC!';
+        instructionsDiv.textContent = 'Select a card to KO.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Confirm KO';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
+        let currentAction = 'KO'; // KO -> Discard -> Return
+        let availableCards = [...top3Cards];
+
+        // Update UI based on current state
+        function updateUI() {
+            cardsList.innerHTML = '';
+            confirmButton.disabled = true;
+            selectedCard = null;
+            selectedIndex = null;
+            updateHeroImage(null);
+
+            availableCards.forEach((card, index) => {
+                const li = document.createElement('li');
+                li.textContent = card.name;
+                li.setAttribute('data-card-id', card.id);
+
+                li.onmouseover = () => {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                };
+
+                li.onmouseout = () => {
+                    if (!activeImage) {
+                        heroImage.src = '';
+                        heroImage.style.display = 'none';
+                        oneChoiceHoverText.style.display = 'block';
+                    }
+                };
+
+                li.onclick = () => {
+                    // Clear any previous selection
+                    const selected = cardsList.querySelector('.selected');
+                    if (selected) selected.classList.remove('selected');
+                    
+                    // Set new selection
+                    li.classList.add('selected');
+                    selectedCard = card;
+                    selectedIndex = index;
+                    activeImage = card.image;
+                    updateHeroImage(card);
+                    confirmButton.disabled = false;
+                };
+
+                cardsList.appendChild(li);
+            });
+
+            switch (currentAction) {
+                case 'KO':
+                    instructionsDiv.textContent = 'Select a card to KO.';
+                    confirmButton.textContent = 'Confirm KO';
+                    break;
+                case 'Discard':
+                    instructionsDiv.textContent = 'Select a card to discard.';
+                    confirmButton.textContent = 'Confirm Discard';
+                    break;
+                case 'Return':
+                    instructionsDiv.textContent = 'Select a card to return to deck.';
+                    confirmButton.textContent = 'Confirm Return';
+                    break;
             }
         }
 
-        // Function to close the popup and reset
-        function closePopup() {
-            title.innerHTML = 'HERO ABILITY';
-            context.innerHTML = 'Context';
-            popup.style.display = 'none';
-            document.getElementById("modal-overlay").style.display = "none";
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
         }
 
-        // Populate the list with the top 3 cards
-        top3Cards.forEach((card, index) => {
-            console.log('Adding card to selection list:', card);
-            const li = document.createElement('li');
-            li.textContent = card.name;
+        // Process the current action
+        async function processAction() {
+            if (!selectedCard) return;
 
-            const heroImage = document.getElementById('hero-one-location-image');
-            const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+            const card = selectedCard;
 
-            // On mouseover, change the hero image to the selected card's image
-            li.onmouseover = () => {
-                heroImage.src = card.image;  // Dynamically change the image source
-                heroImage.style.display = 'block';  // Ensure the image is visible
-                oneChoiceHoverText.style.display = 'none';
-            };
+            switch (currentAction) {
+                case 'KO':
+                    koPile.push(card);
+                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
+                    break;
+                case 'Discard':
+                    await checkDiscardForInvulnerability(card);
+                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
+                    break;
+                case 'Return':
+                    playerDeck.unshift(card);
+                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been returned to your deck.`);
+                    break;
+            }
 
-            // On mouseout, reset the image to its default state (or hide it)
-            li.onmouseout = () => {
-                heroImage.src = '';  // Clear the image source
-                heroImage.style.display = 'none';  // Hide the image
-                oneChoiceHoverText.style.display = 'block';
-            };
+            // Remove processed card from available selections
+            availableCards = availableCards.filter(c => c !== card);
 
-            // Attach the click handler for card selection
-            li.onclick = () => handleCardClick(card, li);
-            cardsList.appendChild(li);
-        });
+            // Move to next action or complete
+            if (currentAction === 'KO') {
+                currentAction = 'Discard';
+            } else if (currentAction === 'Discard') {
+                currentAction = 'Return';
+            } else {
+                closePopup();
+                updateGameBoard();
+                resolve(true);
+                return;
+            }
 
-               // Show the popup
-        popup.style.display = 'block';
+            updateUI();
+        }
+
+        // Initialize the first selection UI
+        updateUI();
+
+        // Handle confirmation
+        confirmButton.onclick = processAction;
+
+        function closePopup() {
+            popupTitle.textContent = 'HERO ABILITY';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
     });
 }
 
@@ -7953,14 +8629,24 @@ onscreenConsole.log(`Fight! KO all your <img src="Visual Assets/Icons/SHIELD.svg
         }
     }
 
-    // KO S.H.I.E.L.D. cards from cards played this turn
-    for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
-        if (cardsPlayedThisTurn[i].team === "S.H.I.E.L.D.") {
-            // Move the card to the KO pile
-            koPile.push(cardsPlayedThisTurn.splice(i, 1)[0]);
-            shieldKOCounter++; // Increment the counter
-        }
+// KO S.H.I.E.L.D. cards from cards played this turn
+for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
+    if (cardsPlayedThisTurn[i].team === "S.H.I.E.L.D.") {
+        // Get reference to original card
+        const originalCard = cardsPlayedThisTurn[i];
+        
+        // Create marked duplicate
+        const markedDuplicate = { ...originalCard, markedToDestroy: true };
+        
+        // Replace original with marked duplicate in cardsPlayedThisTurn
+        cardsPlayedThisTurn[i] = markedDuplicate;
+        
+        // Move original to KO pile
+        koPile.push(originalCard);
+        
+        shieldKOCounter++; // Increment the counter
     }
+}
 
     if (shieldKOCounter > 0) {
         const cardText = shieldKOCounter === 1 ? 'card' : 'cards'; // Determine singular or plural
@@ -7968,6 +8654,8 @@ onscreenConsole.log(`Fight! KO all your <img src="Visual Assets/Icons/SHIELD.svg
     } else {
         onscreenConsole.log('No <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> cards available to KO.');
     }
+
+    updateGameBoard();
 }
 
 function rooftopsOrBridgeKOs() {
@@ -8690,6 +9378,7 @@ villainCard.type = 'Hero';
 villainCard.overlayTextAttack = '';
 
     playerDiscardPile.push(villainCard);
-    console.log(`${villainCard.name} has been defeated and rescued from the Skrulls. They have been added to your Discard Pile.`);
+    victoryPile.pop(villainCard);
+    onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated and rescued from the Skrulls. They have been added to your Discard Pile.`);
     updateGameBoard();
 }
