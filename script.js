@@ -2694,20 +2694,26 @@ heroImage.style.display = 'none';
         });
 
         // Confirm button handler
-        confirmButton.onclick = () => {
-            if (selectedHero === null) return;
+       confirmButton.onclick = (e) => {
+    e.stopPropagation(); // Stop event bubbling
+    e.preventDefault();  // Prevent default behavior
+    
+    if (selectedHero === null) return;
 
-            const hero = eligibleHeroes[selectedHero];
-            onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
-            returnHeroToDeck(selectedHero);
-            updateGameBoard();
-            
-            // Clean up
-            heroSelectPopup.removeChild(confirmButton);
-            heroSelectPopup.style.display = 'none';
-            modalOverlay.style.display = 'none';
-            resolve();
-        };
+    // Add a small delay before closing to block ghost clicks
+    setTimeout(() => {
+        const hero = eligibleHeroes[selectedHero];
+        onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
+        returnHeroToDeck(selectedHero);
+        updateGameBoard();
+        
+        // Clean up
+        heroSelectPopup.removeChild(confirmButton);
+        heroSelectPopup.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        resolve();
+    }, 100); // 100ms delay blocks ghost clicks
+};
 
         // Show popup
         modalOverlay.style.display = 'block';
@@ -5023,13 +5029,19 @@ function openPlayedCardsPopup() {
     playedCardsTable.innerHTML = ''; 
 
     // Populate the playedCardsTable with images
-    cardsPlayedThisTurn.forEach(card => {
-        const imgElement = document.createElement('img');
-        imgElement.src = card.image;
-        imgElement.alt = 'Played card';
-        imgElement.classList.add('pile-card-image'); // Add a class for styling
-        playedCardsTable.appendChild(imgElement);
-    });
+cardsPlayedThisTurn.forEach(card => {
+    const imgElement = document.createElement('img');
+    imgElement.src = card.image;
+    imgElement.alt = 'Played card';
+    imgElement.classList.add('pile-card-image');
+    
+    // Apply 50% opacity if any of these conditions are true
+    if (card.markedToDestroy || card.sidekickToDestroy || card.isCopied) {
+        imgElement.style.opacity = '0.5';
+    }
+    
+    playedCardsTable.appendChild(imgElement);
+});
 
     // Show the popup and modal overlay
     document.getElementById('played-cards-popup').style.display = 'block';

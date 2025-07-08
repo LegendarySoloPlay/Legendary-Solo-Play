@@ -20,7 +20,7 @@ const updatesHTML = `
 <li><strong>Eyes on the prize –</strong> An optional toggle has been added to the side panel so that it can be minimised when you want to concentrate on the gameboard.
 <li><strong>Who just arrived?</strong> The console now logs when a new Hero enters the HQ.
 <li><strong>That was last time - </strong> Scheme Twist and Villain Escape popups were displaying the card image from the previous iteration of the popup. Fixed now. 
-<li><strong>Powered or not?</strong> Minor corrections to wording in popups and the console log to differentiate between Hero <i>Special Abilities</i> that can be played immediately and <i>Superpower Abilities</i> that require something to activate. The <i>Superpowers</i> toggle has been renamed to <i>Abilities</i> since it applies to both.
+<li><strong>Powered or not?</strong> Minor corrections to wording in popups and the console log to differentiate between Hero <i>Special Abilities</i> that can be played immediately and <i>Superpower Abilities</i> that require something to activate.
 </ul>
 <p style="text-decoration:underline;"><strong>SCHEMES:</strong></p>
 <ul>

@@ -3724,6 +3724,12 @@ onscreenConsole.log('There are no <span class="console-highlights">S.H.I.E.L.D. 
 function RogueKOHandOrDiscardForRecruit() {
     onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
+  if (playerHand.length === 0) {
+                console.log("No cards in hand to discard. You are unable to play this card.");
+onscreenConsole.log(`No cards available to KO.`);
+                return;
+            }
+
     return new Promise((resolve) => {
         // Get popup elements
         const popup = document.getElementById('card-ko-popup');

@@ -24,7 +24,7 @@ function sidekickExtraDraw() {
 
     if (autoSuperpowers) {
         // If autoSuperpowers is true, activate the superpower automatically
-        onscreenConsole.log(`<span class="console-highlights">Sidekick</span> played. Superpower ability activated.`);
+        onscreenConsole.log(`<span class="console-highlights">Sidekick</span> played. Special Ability activated.`);
         extraDraw();
         extraDraw();
         returnToSidekickDeck(playedSidekick);
@@ -33,7 +33,7 @@ function sidekickExtraDraw() {
         // If autoSuperpowers is false, ask the player if they want to activate the superpower
         return new Promise((resolve, reject) => {
             const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-                `DO YOU WISH TO ACTIVATE <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> superpower?`,
+                `DO YOU WISH TO ACTIVATE <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Special Ability?`,
                 "Yes",
                 "No"
             );
@@ -46,7 +46,7 @@ function sidekickExtraDraw() {
 
             confirmButton.onclick = () => {
                 try {
-                    onscreenConsole.log(`Sidekick played. Superpower ability activated.`);
+                    onscreenConsole.log(`Sidekick played. Special Ability activated.`);
                     extraDraw();
                     extraDraw();
                     returnToSidekickDeck(playedSidekick);
@@ -60,7 +60,7 @@ function sidekickExtraDraw() {
             };
 
             denyButton.onclick = () => {
-                onscreenConsole.log(`You have chosen not to activate <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> superpower.`);
+                onscreenConsole.log(`You have chosen not to activate <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Special Ability.`);
                 hideHeroAbilityMayPopup();
                 document.getElementById('heroAbilityHoverText').style.display = 'block';
                 resolve();
@@ -76,7 +76,7 @@ function hairballExtraDraw() {
         return;
     }
 
-    onscreenConsole.log(`<span class="console-highlights">Hairball</span> played. Superpower ability activated.`);
+    onscreenConsole.log(`<span class="console-highlights">Hairball</span> played. Special Ability activated.`);
     extraDraw();
     returnToSidekickDeck(playedSidekick);
 updateGameBoard();
@@ -89,7 +89,7 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card => card.name =
         return;
     }
 
-    onscreenConsole.log(`<span class="console-highlights">Ms. Lion</span> played. Superpower ability activated.`);
+    onscreenConsole.log(`<span class="console-highlights">Ms. Lion</span> played. Special Ability activated.`);
     rescueBystander();
     extraDraw();
     returnToSidekickDeck(playedSidekick);
@@ -103,11 +103,11 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card => card.name =
         return;
     }
 
-    onscreenConsole.log(`<span class="console-highlights">Lockheed</span> played. Superpower ability activated.`);
+    onscreenConsole.log(`<span class="console-highlights">Lockheed</span> played.`);
     if (cardsPlayedThisTurn.filter(card => card.class1 === "Range").length > 1) {
      totalAttackPoints += 1;
 	cumulativeAttackPoints += 1;
-    onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower ability activated.`);
+    onscreenConsole.log(`<img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log(`+1<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
 } else {
     onscreenConsole.log(`A <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> hero has not been played. No additional <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
@@ -278,7 +278,7 @@ function zabuKO() {
     return Promise.resolve(false);
   }
 
-  onscreenConsole.log(`<span class="console-highlights">Zabu</span> played. Superpower ability activated.`);
+  onscreenConsole.log(`<span class="console-highlights">Zabu</span> played. Special Ability activated.`);
 
   // Execute the KO logic and wait for it to complete
   return zabuKOChoice().then((kocard) => {
@@ -499,7 +499,7 @@ function RedwingRevealTopThreeDrawAndReorder() {
       return;
     }
 
-    onscreenConsole.log(`<span class="console-highlights">Redwing</span> played. Superpower ability activated.`);
+    onscreenConsole.log(`<span class="console-highlights">Redwing</span> played. Special Ability activated.`);
 
     redwingDrawAndReturn().then(() => {
       returnToSidekickDeck(playedSidekick);
@@ -606,7 +606,7 @@ function RustyRevealTopTwoAndHandle() {
       return;
     }
 
-    onscreenConsole.log(`<span class="console-highlights">Rusty 'Firefist' Collins</span> played. Superpower ability activated.`);
+    onscreenConsole.log(`<span class="console-highlights">Rusty 'Firefist' Collins</span> played. Special Ability activated.`);
 
     // Draw up to two cards
     let revealedCards = [];
