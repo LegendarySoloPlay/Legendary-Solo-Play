@@ -3655,7 +3655,7 @@ function startHold() {
     holdTimer = setTimeout(() => {
         endTurn();
         resetButton(); // Reset automatically
-    }, 800);
+    }, 600);
 }
 
 function cancelHold() {
