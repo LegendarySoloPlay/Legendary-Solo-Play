@@ -170,8 +170,9 @@ extraCardsDrawnThisTurn++;
 function drawWound() {
   // Find all invulnerable cards and track their location
   const invulnerableCards = [
-    ...playerHand.filter(card => card.invulnerability === 'Wound').map(card => ({...card, location: 'Hand'})),
-    ...cardsPlayedThisTurn.filter(card => card.invulnerability === 'Wound').map(card => ({...card, location: 'Already Played'}))
+    ...playerHand.filter(card => card.invulnerability === 'revealWound').map(card => ({...card, location: 'Hand'})),
+	...playerHand.filter(card => card.invulnerability === 'discardWound').map(card => ({...card, location: 'Hand'})),
+    ...cardsPlayedThisTurn.filter(card => card.invulnerability === 'revealWound').map(card => ({...card, location: 'Already Played'}))
   ];
 
   if (invulnerableCards.length === 0) {
@@ -196,11 +197,11 @@ function showInvulnerabilityChoicePopup(invulnerableCards) {
 
         // Initialize UI
         popupTitle.textContent = 'Avoid Wound';
-        instructionsDiv.innerHTML = 'Select a card to play and avoid gaining a Wound.';
+        instructionsDiv.innerHTML = 'Select a card to avoid gaining a Wound.';
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Play Card';
+        confirmButton.textContent = 'Confirm';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -215,9 +216,9 @@ function showInvulnerabilityChoicePopup(invulnerableCards) {
         // Update instructions with styled card name
         function updateInstructions() {
             if (selectedCard === null) {
-                instructionsDiv.innerHTML = 'Select a card to play and avoid gaining a Wound.';
+                instructionsDiv.innerHTML = 'Select a card to avoid gaining a Wound.';
             } else {
-                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be played to avoid the Wound.`;
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be used to avoid gaining a Wound.`;
             }
         }
 
@@ -431,6 +432,14 @@ function BlackWidowRescueBystanderByKO() {
         resolve();
         return;
     }
+
+            if (playerHand.length === 0 && playerDiscardPile.length === 0) {
+                console.log("No cards in hand to discard.");
+                onscreenConsole.log(`No cards available to be KO'd.`);
+                updateGameBoard();
+                resolve(false);
+                return;
+            }
 
     const popup = document.getElementById("card-ko-popup");
     const modalOverlay = document.getElementById("modal-overlay");
@@ -2924,6 +2933,25 @@ function GambitDrawTwoPutOneBack() {
     });
 }
 
+function doomAdditionalTurn() {
+    if (!finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 4) {
+        delayEndGame = true;
+        impossibleToDraw = true;
+        onscreenConsole.log(`You will be able to take one final turn before claiming your victory!`);
+        return;
+    } 
+    else if (finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 4) {
+        doomDelayEndGameFinalBlow = true;
+        impossibleToDraw = true;
+        mastermindDefeatTurn = turnCount;
+        onscreenConsole.log(`If you deliver the Final Blow this turn, you will be able to take another before claiming your victory!`);
+        return;
+    } 
+    else {
+        return;
+    }
+}
+
 function DoomDrawOrDiscard() {
     return new Promise((resolve) => {
         // Show initial choice popup
@@ -3298,7 +3326,6 @@ function showEligibleVillainsOptions(eligibleVillains) {
         const modalOverlay = document.getElementById('modal-overlay');
         const cardsList = document.getElementById('cards-to-choose-from');
         const confirmButton = document.getElementById('card-choice-confirm-button');
-        const closeButton = document.getElementById('close-choice-button');
         const popupTitle = popup.querySelector('h2');
         const instructionsDiv = document.getElementById('context');
         const heroImage = document.getElementById('hero-one-location-image');
@@ -3309,8 +3336,6 @@ function showEligibleVillainsOptions(eligibleVillains) {
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
         confirmButton.textContent = 'Defeat Target';
-        closeButton.style.display = 'inline-block';
-        closeButton.textContent = 'Cancel';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -3440,22 +3465,12 @@ function showEligibleVillainsOptions(eligibleVillains) {
             }
         };
 
-        // Handle cancellation
-        closeButton.onclick = () => {
-            console.log('Player chose not to defeat any villain or mastermind.');
-            onscreenConsole.log('You have chosen not to defeat any Villain or Mastermind.');
-            
-            closePopup();
-            resolve(false);
-        };
-
-        function closePopup() {
+function closePopup() {
             // Reset UI
             popupTitle.textContent = 'Hero Ability!';
             instructionsDiv.textContent = 'Context';
             confirmButton.style.display = 'none';
             confirmButton.disabled = true;
-            closeButton.style.display = 'none';
             heroImage.src = '';
             heroImage.style.display = 'none';
             oneChoiceHoverText.style.display = 'block';
@@ -3486,7 +3501,7 @@ function NickFuryRecruitShieldOfficerByKO() {
 
         // Check if there are any SHIELD Officers left to recruit
         if (shieldOfficers.length === 0) {
-            onscreenConsole.log(`No <span class="console-highlights">S.H.I.E.L.D. Officers</span> left to recruit.`);
+            onscreenConsole.log(`No <span class="console-highlights">S.H.I.E.L.D. Officers</span> left to gain.`);
             resolve(false);
             return;
         }
@@ -3503,14 +3518,14 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
         const context = document.getElementById("card-ko-popup-h2");
 
         // Initialize UI
-        context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+        context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
         discardPileList.innerHTML = '';
         handList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
 	secondConfirmButton.style.display = 'inline-block';
 	secondConfirmButton.disabled = true;
-        confirmButton.textContent = 'KO + RECRUIT';
+        confirmButton.textContent = 'KO + GAIN';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -3527,7 +3542,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
         // Update instructions with styled card name
         function updateInstructions() {
             if (selectedCard === null) {
-                context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+                context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
             } else {
                 context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd from your ${selectedLocation}.`;
             }
@@ -3643,7 +3658,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
                 // Recruit SHIELD Officer
                 moveShieldOfficerToHand();
 
-                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
+                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
 
                 closePopup();
                 updateGameBoard();
@@ -3665,7 +3680,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
                 // Add to KO pile
                 koPile.push(selectedCard);
                 
-                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} and chose not to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
+                onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} and chose not to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
 
                 closePopup();
                 updateGameBoard();
@@ -4200,7 +4215,7 @@ function StormMoveVillain() {
     // Elements for the popup and overlay
     const popup = document.getElementById('villain-movement-popup');
     const overlay = document.getElementById('modal-overlay');
-    const closeButton = popup.querySelector('.close-btn');
+    const closeButton = popup.querySelector('.close-triangle-btn');
     const noThanksButton = document.getElementById('no-thanks-villain-movement');
     const confirmButton = document.getElementById('confirm-villain-movement');
     const selectionArrow = document.getElementById('selection-arrow');

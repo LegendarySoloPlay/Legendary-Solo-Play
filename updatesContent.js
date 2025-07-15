@@ -1,5 +1,51 @@
 // updatesContent.js
 const updatesHTML = `
+<h3><i>Version 1.1.2</i> - UI Upgrade</h3>
+<p>Welcome to the latest patch of the digital <strong>Marvel Legendary</strong> Solo experience! This patch brings you an upgraded UI experience and greater mobile responsiveness. See all patch notes below.</p>
+<p>Thank you for all of the feedback and bug reports so far! Please keep them coming.</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p style="text-decoration:underline;"><strong>USER INTERFACE:</strong></p>
+<ul>
+<li><strong>Under the hood -</strong> Popup minimization has changed - you can now fully minimize popups, hover over cards on the game board and check various decks without affecting game play. Use the triangle in the top left corner of each popup. 
+<li><strong>Shiny and new -</strong> Popups have been redesigned to be more mobile responsive and friendly. Let me know if any cause issues or display incorrectly.
+<li><strong>Target acquired –</strong> The HQ, S.H.I.E.L.D. Deck, Sidekick Stack, City and Mastermind will now be highlighted when you have enough points to Recruit or Attack. When you click a card, it now features a simpler Attack or Recruit icon to confirm your choice.
+<li><strong>Begin at the beginning –</strong> The game setup screen now features duplicate <i>Randomize All</i> and <i>Start Game</i> buttons at the top, no longer requiring you to scroll.
+<li><strong>Limited time only -</strong> When viewing the Discard or Played Cards piles, any cards that are temporary (copied cards, played Sidekicks) now have reduced opacity to mark them as such.
+<li><strong>Sort it out -</strong> Every time a new hand is drawn, it is automatically sorted by colour first and then by name. When you draw extra cards, they will be added to the end of the hand but can be sorted manually using the <i>Sort Hand</i> button at the bottom of the game board. 
+</ul>
+<p style="text-decoration:underline;"><strong>GAMEPLAY:</strong></p>
+<ul>
+<li><strong>Move it!</strong> UI + Gameplay - you can now play cards in your Hand, attack and recruit simply by clicking a card twice. The <i>Play Selected</i> button isn't even needed anymore but has been left for those who don't read these notes!
+<li><strong>Finish him!</strong> If playing with Final Blow, the Mastermind card will now appear properly in the Victory Pile when defeated. Victory Point calculation has also been fixed and you can no longer attack the Mastermind again after delivering the final blow.
+<li><strong>Let me finish –</strong> If the Hero deck runs out, you now have until the end of your turn to win or maximise VP, rather than seeing the Draw popup instantly.
+</ul>
+<p style="text-decoration:underline;"><strong>SCHEMES:</strong></p>
+<ul>
+<li><strong>Midtown Bank Robbery -</strong> Fixed issue with Scheme Twists causing multiple hero tucks. Keep an eye on this one for me. 
+</ul>
+<p style="text-decoration:underline;"><strong>MASTERMINDS:</strong></p>
+<ul>
+<li><strong>Dr Doom –</strong> The <i>Secrets of Time Travel</i> Tactic didn't actually award an additional turn if drawn last. If it is your final tactic, you will now have an extra turn to gain more Victory Points before the game ends.
+</ul>
+<p style="text-decoration:underline;"><strong>SIDEKICKS:</strong></p>
+<ul>
+<li><strong>All Sidekicks –</strong> Fixed wording of Superpowers versus Special Abilities.
+<li><strong>Boom-Boom –</strong> Error in handling Wounds addressed - will now work properly with Skids.
+<li><strong>Lockjaw –</strong> Removed unnecessary console log.
+<li><strong>Skids –</strong> Removed reference to 'playing' Skids when actually discarding.
+<li><strong>Throg –</strong> Fixed an issue with Throg not returning to the Sidekick Stack properly.
+</ul>
+<p style="text-decoration:underline;"><strong>HEROES:</strong></p>
+<ul>
+<li><strong>Black Widow – Dangerous Rescue –</strong> This ability was triggering even when no cards were available to KO. Fixed now.
+<li><strong>Nick Fury – Battlefield Promotion –</strong> Changed wording from Recruit to Gain.
+<li><strong>Nick Fury – Pure Fury –</strong> Previously allowed you to close or cancel the popup - now requires you to make a choice.
+<li><strong>Rogue – Energy Drain –</strong> Same as Black Widow - will not trigger anymore if you have no cards available to KO.
+<li><strong>Thor – God of Thunder –</strong> This ability now triggers a brand new Attack popup that lets the player choose how many Attack and Recruit points to use - was good preparation for the <i>Bribe</i> keyword 😉.
+</ul>
+<p>I hope these changes improve your Marvel Legendary Solo Play experience. Look out for another update soon to improve popup layout and visuals. Enjoy!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3><i>Version 1.1.1</i> - Squashing Bugs</h3>
 <p>Welcome to the latest patch of the digital <strong>Marvel Legendary</strong> Solo experience! See all patch notes below.</p>
 <p>Thank you for all of the feedback and bug reports so far! Please keep them coming.</p>
@@ -15,7 +61,7 @@ const updatesHTML = `
 <p style="text-decoration:underline;"><strong>USER INTERFACE:</strong></p>
 <ul>
 <li><strong>What's that called?</strong> Incorrect popup titles have been corrected. 
-<li><strong>Slight misnomers</strong> <i>Play All S.H.I.E.L.D.</i> has been changed to <i>Play All Greys</i> to avoid confusion with other S.H.I.E.L.D. cards like Nick Fury. Also, Escape Pile corrected form Escaped Pile.
+<li><strong>Slight misnomers -</strong> <i>Play All S.H.I.E.L.D.</i> has been changed to <i>Play All Greys</i> to avoid confusion with other S.H.I.E.L.D. cards like Nick Fury. Also, Escape Pile corrected form Escaped Pile.
 <li><strong>At a glance –</strong> The Discard pile and Played Cards pile are now face up and will display the last card added to them. Not enough room on the gameboard to add this for Escapes, KOs or VP.
 <li><strong>Eyes on the prize –</strong> An optional toggle has been added to the side panel so that it can be minimised when you want to concentrate on the gameboard.
 <li><strong>Who just arrived?</strong> The console now logs when a new Hero enters the HQ.

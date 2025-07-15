@@ -165,12 +165,14 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card => card.name =
 onscreenConsole.log(`You have made at least 6 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> this turn. +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
     totalAttackPoints += 2;
     cumulativeAttackPoints += 2;
+  }
 
 returnToSidekickDeck(playedSidekick);
 updateGameBoard();
 
-  }
+  
 }
+
 
 function lockjawPhasing() {
     let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card => card.name === "Lockjaw");
@@ -213,7 +215,7 @@ function lockjawPhasing() {
                     cumulativeAttackPoints -= 2;
 
                     onscreenConsole.log(`Phasing activated. ${topCard.name} added to hand, <span class="console-highlights">Lockjaw</span> moved to the top of the deck.`);
-                    onscreenConsole.log(`2 attack points deducted.`);
+                    
                 } else if (discardPile.length > 0) {
                     // Shuffle the discard pile into the player deck if the deck is empty
                     shuffleArray(discardPile);
@@ -237,7 +239,7 @@ function lockjawPhasing() {
                         cumulativeAttackPoints -= 2;
 
                         onscreenConsole.log(`Phasing activated. ${topCard.name} added to hand, <span class="console-highlights">Lockjaw</span> moved to the top of the deck.`);
-                        onscreenConsole.log(`2 attack points deducted.`);
+                        
                     } else {
                         onscreenConsole.log("Phasing not possible. No cards available to draw.");
                     }
@@ -809,7 +811,7 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card =>
   if (index !== -1) {
     cardsPlayedThisTurn[index] = copy; // Keep the copy
     koPile.push(playedSidekick);      // Move original to KO pile
-      onscreenConsole.log(`You chose to play <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Meltdown ability. You have gained +4 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and a wound. <span class="console-highlights">${playedSidekick.name}</span> has been KO’d.`);
+      onscreenConsole.log(`You chose to play <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Meltdown ability. You have gained +4 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and a Wound. <span class="console-highlights">${playedSidekick.name}</span> has been KO’d.`);
   } else {
     console.error("playedSidekick not found in cardsPlayedThisTurn.");
   }

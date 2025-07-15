@@ -19,7 +19,7 @@
     <div id="intro-popup">
       <div id="intro-popup-header">
         <h2>Welcome to Marvel Legendary</h2>
-        <button id="intro-popup-close-button">&times;</button>
+        <span id="intro-popup-close-button"><b>✕</b></span>
       </div>
       <div id="popup-tabs">
         <button class="tab-button active" id="left-tab" data-tab="intro">Intro</button>
@@ -27,13 +27,13 @@
       </div>
       <div id="intro-popup-content">
         <div id="intro" class="tab-content active">
-<h3 style="color: #ffab0f; text-shadow: 2px 2px 3px #e3e3e3;"><center><strong>MINOR UPDATE -</strong> Please see the <i>Updates</i> tab for patch notes.</center></h3>
+<h3 style="color: #ffab0f; text-shadow: 2px 2px 3px #e3e3e3;"><center><strong>UI & BUG UPDATE -</strong> Please see the <i>Updates</i> tab for patch notes.</center></h3>
   <p>Get ready to dive into the <strong>Marvel Legendary</strong> universe in this fan-made digital adaptation of the classic deck-building game! Assemble a team of heroes, take down powerful villains, and stop the mastermind’s nefarious schemes—all in <strong>solo mode</strong>, optimised with the latest <i>"What If...?"</i> variations to the Advanced Solo rules.</p>
 
   <h3>🎮 How to Play</h3>
   <p>If you're new to <em>Marvel Legendary</em>, be sure to check out the official rules <a href="https://theupperdeckco.wpenginepowered.com/wp-content/uploads/2024/05/Legendary_Rules-Core_Set.pdf" style="color:#00a6ed;" target="_blank">here</a> to learn the basics.</p>
 <p>This version of the game includes a console log and pop-ups that will guide you through card effects.</p>
-<p><strong>IMPORTANT:</strong> Use the <i>Confirm Actions</i> button to play cards and activate their effects. Multiple S.H.I.E.L.D. heroes can be selected and played at the same time, but <strong>any heroes with effects should be confirmed one at a time, in the order you wish to play them</strong>.</p>
+<p><strong>IMPORTANT:</strong> Select a card and tap it again to play. Multiple S.H.I.E.L.D. heroes can be played at the same time by using the <i>Play All Greys</i> button, but <strong>any heroes must be played individually, in the order you wish to play them or activate their abilities</strong>.</p>
 
   <h3>🔥 What’s Different in <i>"What If...?"</i> Solo Mode?</h3>
   <ul>
@@ -80,6 +80,10 @@
   </ul>
 </div>
 </div>
+    <div class="startup-centered-buttons">
+      <button id="randomize-all" style="width:70%; margin-left:auto; margin-right: auto;">RANDOMIZE ALL</button>
+      <button id="start-game" style="width:70%; margin-left:auto; margin-right: auto;">START GAME</button>
+    </div>
 <div id="all-selected-filters" class="selected-filters"></div>
     <div class="section" id="scheme-section">
 <div class="section-bar-image">
@@ -336,12 +340,15 @@
       <label for="final-blow-checkbox">Marvel Legendary Solo Play rules only require you to defeat the Mastermind's four tactic cards in order to win. If Final Blow is enabled, you need to defeat the Mastermind's four tactics and then attack one final time in order to secure victory.</label>
     </div>
     <div class="startup-centered-buttons">
-      <button id="randomize-all">RANDOMIZE ALL</button>
-      <button id="start-game">START GAME</button>
+      <button id="randomize-all2"  style="width:70%; margin-left:auto; margin-right: auto;">RANDOMIZE ALL</button>
+      <button id="start-game2"  style="width:70%; margin-left:auto; margin-right: auto;">START GAME</button>
     </div>
   </div>
 
 <div id="confirm-start-up-choices" class="popup" style="display:none;">
+  <div id="confirm-startup-close-x" class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <h2>CONFIRM CHOICES</h2>
     <div class="popup-content">
         <div class="p-and-button-wrapper">
@@ -383,8 +390,7 @@
       <div class="row">
 <div class="cell scheme" id="scheme-place"></div>
 <div id="mastermind" class="cell mastermind">
-<div id="mastermind-attack-button-container" style="display: none;">
-        <button id="mastermind-attack-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">ATTACK?<br><span>COST: <span id="mastermind-attack-cost"></span> <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"></span></span></button>
+        <div id="mastermind-attack-button" style="display:none;"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="overlay-attack-icons"></span>
     </div>
           <div class="overlay"></div>
           <div class="temp-buff-overlay" id="mastermind-temp-buff"><p></p></div>
@@ -411,27 +417,27 @@
       </div>
       <!-- Row of 7 Cells for HQ and Decks -->
       <div class="row">
-        <div class="cell sidekick-deck" id="sidekick-deck"><img src="Visual Assets/CardBack.webp" alt="Card Back" class="card-image-back" id="sidekick-deck-card-back" style="display:flex;"><div id="sidekick-recruit-button-container" style="display: none;">
-        <button id="sidekick-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: 2 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div class="cell sidekick-deck" id="sidekick-deck" class="disable-when-minimized"><img src="Visual Assets/CardBack.webp" alt="Card Back" class="card-image-back" id="sidekick-deck-card-back" style="display:flex;"><div id="sidekick-recruit-button-container" style="display: none;">
+        <div id="sidekick-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
         <div class="cell shield-deck" id="shield-deck"><img src="Visual Assets/CardBack.webp" alt="Card Back" class="card-image-back" id="shield-deck-card-back" style="display:flex;"><div id="shield-recruit-button-container" style="display: none;">
-        <button id="shield-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: 3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="shield-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
 <div id="hq-wrapper">
         <div class="cell hq" id="hq-1"><div id="hq1-recruit-button-container" style="display: none;">
-        <button id="hq1-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: <span id="hq1-recruit-cost"</span> <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="hq1-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
         <div class="cell hq" id="hq-2"><div id="hq2-recruit-button-container" style="display: none;">
-        <button id="hq2-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: <span id="hq2-recruit-cost"</span> <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="hq2-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
         <div class="cell hq" id="hq-3"><div id="hq3-recruit-button-container" style="display: none;">
-        <button id="hq3-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: <span id="hq3-recruit-cost"</span> <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="hq3-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
         <div class="cell hq" id="hq-4"><div id="hq4-recruit-button-container" style="display: none;">
-        <button id="hq4-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: <span id="hq4-recruit-cost"</span> <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="hq4-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
         <div class="cell hq" id="hq-5"><div id="hq5-recruit-button-container" style="display: none;">
-        <button id="hq5-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);">RECRUIT?<br>COST: <span id="hq5-recruit-cost"</span> <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span></button>
+        <div id="hq5-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
 </div>
         <div class="cell hero-deck" id="hero-deck"><img src="Visual Assets/CardBack.webp"  alt="Card Back" class="card-image-back" id="hero-deck-card-back" style="display:flex;"></div>
@@ -466,9 +472,8 @@
         <div class="cell-label"><span class="labeltext">PLAYER DECK: </span><span id="playerDeckCountNumber" class="game-board-bottom-row"></span></div>
       </div>
       <div class="row">
-
-<button id="healing-button" style="grid-column: span 2;"><span class="game-board-bottom-row">HEAL WOUNDS?</span></button>
-<div class="toggle-container">
+<button id="healing-button" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">HEAL WOUNDS?</span></button>
+<div id="superpowersToggle" class="toggle-container" class="player-controls">
     <span>SUPERPOWERS</span>
     <div class="toggle-button-container">
         <div id="autoButton" class="toggle-button">
@@ -479,10 +484,17 @@
         </div>
     </div>
 </div>
-<button id="confirm-actions" style="grid-column: span 2;"><span class="game-board-bottom-row">PLAY SELECTED</span></button>
-<button id="play-all-button" style="margin-top:1vh;"><span class="game-board-bottom-row">PLAY ALL GREYS</span></button>
-        <button id="end-turn" class="cell button-end-turn" style="grid-column: span 2;"><span class="game-board-bottom-row">END TURN</span></button>
-
+<button id="sort-player-cards" class="player-controls"><span class="game-board-bottom-row">SORT HAND</span></button>
+<button id="confirm-actions" class="player-controls"><span class="game-board-bottom-row">PLAY SELECTED</span></button>
+<button id="play-all-button" style="margin-top:1vh;" class="player-controls"><span class="game-board-bottom-row">PLAY ALL GREYS</span></button>
+        <button id="end-turn" class="cell button-end-turn" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">END TURN</span></button>
+     
+        <button class="reopen-popup-btn" aria-label="Reopen popup" style="grid-column: span 8; display:none;">
+  <span class="reopen-icon">▲</span>
+  <span class="reopen-text">OPEN POPUP</span>
+  <span class="reopen-icon">▲</span>
+        </button>
+     
       </div>
     </div>
   </div>
@@ -509,9 +521,13 @@
   <!-- Pop-up for recruiting S.H.I.E.L.D. Officer -->
   
 <div id="recruit-popup" class="popup" style="display:none;">
+  <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+    <div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-<span class="close-btn">&times;</span>
       <p>SPEND 3<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> TO RECRUIT A <span class="bold-spans">S.H.I.E.L.D. OFFICER</span> ?</p>
 <img src="Visual Assets/Heroes/SHIELD/shieldofficer.webp" alt="Shield Officer" class="recruit-officer-card-image">
     <button id="confirm-recruit">Confirm</button>
@@ -519,9 +535,13 @@
   </div>
 
   <div id="hero-recruit-popup" class="popup" style="display: none;">
+        <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+    <div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn">&times;</span>
       <p id="hero-recruit-text"></p>
 <img src="Visual Assets/CardBack.webp" alt="Card Image" id="recruit-hero-card-image">
       <button id="confirm-hero-recruit">Confirm</button>
@@ -530,9 +550,13 @@
 
   <!-- Pop-up for confirming attack -->
   <div id="attack-popup" class="popup" style="display:none;">
+    <div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn">&times;</span>
       <p id="confirm-attack-text"></p>
 <img src="Visual Assets/CardBack.webp" alt="Card Image" id="attack-villain-card-image">
       <button id="confirm-attack">Confirm</button>
@@ -540,9 +564,13 @@
   </div>
 
   <div id="popup" class="popup" style="display:none;">
+  <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn">&times;</span>
       <h2 id="popup-title"></h2>
 <div id="popup-single-image"></div>
       <button id="popup-confirm">Confirm</button>
@@ -560,8 +588,10 @@
   </div>
 
   <div id="hero-select-popup" class="popup" style="display:none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <div class="hero-text">
         <p>SCHEME TWIST: SELECT A HERO FROM THE HQ TO RETURN TO THE BOTTOM OF THE HERO DECK:</p>
       </div>
@@ -578,8 +608,10 @@
   
 
 <div id="hero-KO-popup" class="popup" style="display:none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <div class="hero-text">
         <p>A VILLAIN HAS ESCAPED! WHICH HERO DO THEY KO?</p>
       </div>
@@ -596,8 +628,10 @@
 </div>
 
   <div id="discard-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h2>The villain escaped with a bystander! Discard 1 card.</h2>
       <div id="discard-options" class="discard-options-container">
         <div class="discard-buttons"></div>
@@ -612,17 +646,20 @@
     </div>
   </div>
   <div id="healing-popup" class="popup">
-    <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
+        <div class="popup-content">
       <span id="healing-message">Healing Wounds and ending your turn.</span>
 <img src="Visual Assets/Other/Wound.webp" alt="Wound Card" id="healing-popup-card" style="display:flex;height: 35vh;">   
  </div>
   </div>
 
   <div id="mastermind-attack-confirmation-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+    <div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn">&times;</span>
       <h2>MASTERMIND ATTACK</h2>
       <p id="mastermind-confirm-attack-text"></p>
 <img src="Visual Assets/CardBack.webp" alt="Card Image" id="mastermind-confirm-attack-image">
@@ -632,8 +669,10 @@
 
   <!-- Popup for Revealing Tactic Card -->
   <div id="tactic-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h2>MASTERMIND TACTIC</h2>
       <p id="tactic-effect"></p>
 <img src="Visual Assets/CardBack.webp" alt="Card Image" id="mastermind-tactic-image">
@@ -642,8 +681,10 @@
   </div>
 
   <div id="message-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <p id="message-popup-text"></p>
       <button id="confirm-message-btn" onclick="closeMessagePopup()">Confirm</button>
     </div>
@@ -651,20 +692,21 @@
   
 
   <div id="draw-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h1>DRAW!</h1>
-      <p>You've run out of villains to battle. The Mastermind has not succeeded, but neither have you.</p>
-      <h2>Victory Points:</h2>
+      <p style="margin-bottom: 10px;">You've run out of villains to battle. The Mastermind has not succeeded, but neither have you.</p>
+      <h3>Victory Points:</h3>
       <p id="villainDRAWvictoryPointsTotal"></p>
-      <h2>Total Turns Taken:</h2>
+      <h3>Total Turns Taken:</h3>
       <p id="villainDRAWtotalTurnsTaken"></p>
-      <h2>Average VP Per Turn:</h2>
+      <h3>Average VP Per Turn:</h3>
       <p id="villainDRAWaverageVPPerTurn"></p>
-      <h2>Number of Escapes:</h2>
+      <h3>Number of Escapes:</h3>
       <p id="villainDRAWnumberOfEscapes"></p> 
       <button id="return-home-button">Return Home</button>
-<br>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
@@ -676,20 +718,21 @@
 
   <!-- Add this HTML near the other popups -->
   <div id="hero-deck-empty-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h1>DRAW!</h1>
-      <p>You've run out of heroes to recruit. The Mastermind has not succeeded, but neither have you.</p>
-      <h2>Victory Points:</h2>
+      <p style="margin-bottom: 10px;">You've run out of heroes to recruit. The Mastermind has not succeeded, but neither have you.</p>
+      <h3>Victory Points:</h3>
       <p id="heroDRAWvictoryPointsTotal"></p>
-      <h2>Total Turns Taken:</h2>
+      <h3>Total Turns Taken:</h3>
       <p id="heroDRAWtotalTurnsTaken"></p>
-      <h2>Average VP Per Turn:</h2>
+      <h3>Average VP Per Turn:</h3>
       <p id="heroDRAWaverageVPPerTurn"></p>
-      <h2>Number of Escapes:</h2>
+      <h3>Number of Escapes:</h3>
       <p id="heroDRAWnumberOfEscapes"></p>
       <button id="return-home-hero-button">Return Home</button>
-<br>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
@@ -700,20 +743,21 @@
   </div>
 
     <div id="defeat-popup" class="popup" style="display: none;">
+        <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h1>EVIL WINS!</h1>
-      <p>The Mastermind has succeeded in their scheme. All hope is lost!</p>
-      <h2>Victory Points:</h2>
+      <p style="margin-bottom: 10px;">The Mastermind has succeeded in their scheme. All hope is lost!</p>
+      <h3>Victory Points:</h3>
       <p id="LOSSvictoryPointsTotal"></p>
-      <h2>Total Turns Taken:</h2>
+      <h3>Total Turns Taken:</h3>
       <p id="LOSStotalTurnsTaken"></p>
-      <h2>Average VP Per Turn:</h2>
+      <h3>Average VP Per Turn:</h3>
       <p id="LOSSaverageVPPerTurn"></p>
-      <h2>Number of Escapes:</h2>
+      <h3>Number of Escapes:</h3>
       <p id="LOSSnumberOfEscapes"></p>      
       <button id="defeat-return-home-button">Return Home</button>
-<br>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
@@ -724,29 +768,32 @@
   </div>
 
   <div id="finish-turn-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h2>Well done!</h2>
-      <p>You have defeated the Mastermind. Finish your turn to maximise your Victory Points.</p>
+      <p>You have defeated the Mastermind. Finish your turn to maximize your Victory Points.</p>
       <button id="finish-turn-button">Confirm</button>
     </div>
   </div>
 
   <div id="win-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h1>GOOD WINS!</h1>
-      <p>You have defeated the Mastermind and prevented their nefarious scheme! Well done!</p>
-      <h2>Victory Points:</h2>
+      <p style="margin-bottom: 10px;">You have defeated the Mastermind and prevented their nefarious scheme! Well done!</p>
+      <h3>Victory Points:</h3>
       <p id="WINvictoryPointsTotal"></p>
-      <h2>Total Turns Taken:</h2>
+      <h3>Total Turns Taken:</h3>
       <p id="WINtotalTurnsTaken"></p>
-      <h2>Average VP Per Turn:</h2>
+      <h3>Average VP Per Turn:</h3>
       <p id="WINaverageVPPerTurn"></p>
-      <h2>Number of Escapes:</h2>
+      <h3>Number of Escapes:</h3>
       <p id="WINnumberOfEscapes"></p>
       <button id="win-return-home-button">Return Home</button>
-<br>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive and support future expansions.</p>
@@ -757,9 +804,13 @@
   </div>
 
   <div id="final-blow-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+    <div class="close-triangle-btn" aria-label="Close" onclick="closeFinalBlowPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closeFinalBlowPopup()">&times;</span>
       <h2>Final Blow!</h2>
       <p>The Mastermind is out of tactics! You only need to attack one more time!</p>
       <button onclick="closeFinalBlowPopup()">Confirm</button>
@@ -767,9 +818,13 @@
   </div>
 
   <div id="card-ko-popup" class="popup" style="display:none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div id="card-ko-popup-close" class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span id="card-ko-popup-close" class="close-btn">×</span>
       <h2 id="card-ko-popup-h2">Do you wish to KO a card from your Discard Pile or Hand to rescue a Bystander?</h2>
       <div class="card-selection">
         <div class="card-list">
@@ -794,7 +849,7 @@
 
       </div>
 <button id="close-ko-button" style="display:none;">KO Selected Cards</button>
-<button id="ko-third-option-button" style="display:none;">KO WITHOUT RECRUITING</button>
+<button id="ko-third-option-button" style="display:none;">KO WITHOUT GAINING</button>
       <button id="no-thanks-button">No Thanks!</button>
 
     </div>
@@ -802,8 +857,10 @@
   
 
   <div id="hero-ability-may-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h2 id="hero-ability-may-h2">Hero Ability!</h2>
       <p>Would you like to use this hero's ability?</p>
       <div class="card-display">
@@ -815,9 +872,55 @@
     </div>
   </div>
 
+
+      
+
+
+<div id="bribe-popup" class="popup" style="display:none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+      <div class="popup-content">
+      <h2 id="bribe-popup-h2">Attack or Recruit?</h2>
+<p>What combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> and <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> points would you like to use?</p>
+        <div class="countersAndDisplay">
+        <div class="counters">
+        <div class="counter">
+            <div class="counter-name"><img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="bribe-card-icons"></div>
+            <div style="display:flex;">
+            <button class="btn" id="decreaseA">-</button>
+            <span class="counter-value" id="counterA">0</span>
+            <button class="btn" id="increaseA">+</button>
+            </div>
+        </div>
+        
+        <div class="counter">
+            <div class="counter-name"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="bribe-card-icons"></div>
+            <div style="display:flex;">
+            <button class="btn" id="decreaseB">-</button>
+            <span class="counter-value" id="counterB">0</span>
+            <button class="btn" id="increaseB">+</button>
+            </div>
+        </div>
+        </div>
+          <div class="bribe-image">
+          <div class="bribe-image-placeholder">
+<img id="bribe-card-image" src="" alt="Card Image" style="display:none; max-width:100%; height:auto;" />
+        </div>
+        </div>
+        </div>
+               <button id="bribe-confirm-button" class="bribe-buttons">CONFIRM</button>
+<button id="bribe-cancel-button" class="bribe-buttons">CANCEL</button>
+      </div>
+      
+    </div>
+  </div>
+
 <div id="card-choice-one-location-popup" class="popup" style="display:none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
       <h2 id="cardChoiceh2">Hero Ability!</h2>
 <span id="context">Context</span>
       <div class="card-selection">
@@ -841,6 +944,12 @@
   </div>
 
 <div id="villain-movement-popup" class="popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close">
+  <span class="close-x"><b>✕</b></span>
+</div>
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2000;">
     <defs>
         <marker id="arrowhead" viewBox="0 0 10 10" refX="5" refY="5"
@@ -854,8 +963,6 @@
 </svg>
 
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-        <span class="close-btn">&times;</span>
         <h2>Hero Ability!</h2>
         <p>You may move a villain to a new city space (swapping two if needed). Rescue any bystanders captured by that villain.</p>
         
@@ -885,9 +992,13 @@
 </div>
 
   <div id="played-cards-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closePlayedCardsPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closePlayedCardsPopup()">&times;</span>
       <h2>PLAYED CARDS</h2>
       <div id="playedCardsTable" class="pile-table"></div>
       <button class="pile-button" onclick="closePlayedCardsPopup()">CLOSE</button>
@@ -895,9 +1006,13 @@
   </div>
 
   <div id="victory-pile-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeVictoryPilePopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closeVictoryPilePopup()">&times;</span>
       <h2>VICTORY PILE</h2>
       <div id="victoryPileTable" class="pile-table"></div>
       <button class="pile-button" onclick="closeVictoryPilePopup()">CLOSE</button>
@@ -905,9 +1020,13 @@
   </div>
 
   <div id="escaped-villains-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeEscapedVillainsPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closeEscapedVillainsPopup()">&times;</span>
       <h2>ESCAPED VILLAINS</h2>
       <div id="escapedVillainsTable" class="pile-table"></div>
       <button class="pile-button" onclick="closeEscapedVillainsPopup()">CLOSE</button>
@@ -915,9 +1034,13 @@
   </div>
 
   <div id="ko-pile-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeKOPilePopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closeKOPilePopup()">&times;</span>
       <h2>KO PILE</h2>
       <div id="KOPileTable" class="pile-table"></div>
       <button class="pile-button" onclick="closeKOPilePopup()">CLOSE</button>
@@ -925,9 +1048,13 @@
   </div>
 
   <div id="discard-pile-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeDiscardPilePopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
     <div class="popup-content">
-<span class="popup-visibility-btn" style="opacity:1;">_</span>
-      <span class="close-btn" onclick="closeDiscardPilePopup()">&times;</span>
       <h2>DISCARD PILE</h2>
       <div id="DiscardPileTable" class="pile-table"></div>
       <button class="pile-button" onclick="closeDiscardPilePopup()">CLOSE</button>
@@ -935,8 +1062,10 @@
   </div>
   
  <div id="investigate-popup" class="popup" style="display: none;">
+  <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
   <div class="popup-content">
-    <span class="popup-visibility-btn" style="opacity:1;">_</span>
     <h2 id="investigate-h2">INVESTIGATE!</h2>
     <p>Choose a team. Investigate for a card of that team.</p>
     <div class="card-display">
