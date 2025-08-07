@@ -1956,7 +1956,7 @@ onscreenConsole.log(`Whenever you defeat a Villain in the Sewers or Rooftops thi
 }
 
 function bladeNightHunter() {
-sewerRooftopBonusRecruit = true;
+sewerRooftopBonusRecruit += 2;
 onscreenConsole.log(`Whenever you defeat a Villain in the Sewers or Rooftops this turn, you get +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`);
 }
 
@@ -7864,11 +7864,12 @@ async function stryfeStrike() {
 
             document.getElementById('hero-ability-may-card').src = 'Visual Assets/Masterminds/DarkCity_Stryfe.webp';
             document.getElementById('hero-ability-may-card').style.display = 'block';
+            document.getElementById('heroAbilityHoverText').style.display = 'none';
 
             await new Promise((resolve) => {
                 confirmButton.onclick = () => {
                     const randomXForce = xForceHeroes[Math.floor(Math.random() * xForceHeroes.length)];
-                    onscreenConsole.log(`You revealed <span class="console-highlights">${randomXForce.name}</span> as a <img src="Visual Assets/Icons/XForce.svg" class="console-card-icons"> Hero.`);
+                    onscreenConsole.log(`You revealed <span class="console-highlights">${randomXForce.name}</span> as a <img src="Visual Assets/Icons/X-Force.svg" class="console-card-icons"> Hero.`);
                     hideHeroAbilityMayPopup();
                     resolve();
                 };
@@ -9191,10 +9192,10 @@ onscreenConsole.log(`Playing <span class="console-highlights">${selectedCard.nam
 
 async function apocalypseHorsemenAreDrawingNearer() {
     // Filter victory pile for Horsemen cards
-    const horsemenInVP = victoryPile.filter(card => card.team === "Four Horsemen");
+    const horsemenInVP = victoryPile.filter(card => card.alwaysLeads === "true");
     
     if (horsemenInVP.length === 0) {
-        onscreenConsole.log("There are no Four Horsemen cards available in your Victory Pile.");
+        onscreenConsole.log(`<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group; however, there are no suitable Villain cards available in your Victory Pile.`);
         return false;
     }
 
@@ -9203,7 +9204,7 @@ async function apocalypseHorsemenAreDrawingNearer() {
         const horsemen = horsemenInVP[0];
         const index = victoryPile.findIndex(card => card.id === horsemen.id);
         if (index !== -1) {
-onscreenConsole.log(`<span class="console-highlights">${horsemen.name}</span> was the only Four Horsemen Villain in your Victory Pile. Playing now.`);
+onscreenConsole.log(`<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: <span class="console-highlights">${horsemen.name}</span> was the only suitable Villain in your Victory Pile. Playing now.`);
             victoryPile.splice(index, 1);
             villainDeck.push(horsemen);
             await drawVillainCard(); // Trigger villain card draw
@@ -9225,7 +9226,7 @@ onscreenConsole.log(`<span class="console-highlights">${horsemen.name}</span> wa
 
         // Initialize UI
         popupTitle.textContent = 'TACTIC';
-        instructionsDiv.textContent = 'Select a Four Horsemen Villain from your Victory Pile to play.';
+        instructionsDiv.textContent = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
@@ -9243,7 +9244,7 @@ onscreenConsole.log(`<span class="console-highlights">${horsemen.name}</span> wa
 
         function updateInstructions() {
             if (selectedCard === null) {
-                instructionsDiv.textContent = 'Select a Four Horsemen Villain from your Victory Pile to play.';
+                instructionsDiv.textContent = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
             } else {
                 instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be played.`;
             }
@@ -10472,10 +10473,10 @@ if (villainCard.babyHope === true) {
             extraDraw();
         }
 
-        if (sewerRooftopBonusRecruit && (cityIndex === 2 || cityIndex === 4)) {
-            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-            totalRecruitPoints += 2;
-            cumulativeRecruitPoints += 2;
+        if (sewerRooftopBonusRecruit > 0 && (cityIndex === 2 || cityIndex === 4)) {
+            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. +${sewerRooftopBonusRecruit}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+            totalRecruitPoints += sewerRooftopBonusRecruit;
+            cumulativeRecruitPoints += sewerRooftopBonusRecruit;
         }
     } catch (error) {
         console.error('Error processing location bonuses:', error);
