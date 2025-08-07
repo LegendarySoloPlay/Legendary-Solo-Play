@@ -238,7 +238,7 @@ function lockjawPhasing() {
                         totalAttackPoints -= 2;
                         cumulativeAttackPoints -= 2;
 
-                        onscreenConsole.log(`Phasing activated. ${topCard.name} added to hand, <span class="console-highlights">Lockjaw</span> moved to the top of the deck.`);
+                        onscreenConsole.log(`Phasing activated. <span class="console-highlights">${topCard.name}</span> added to hand, <span class="console-highlights">Lockjaw</span> moved to the top of the deck.`);
                         
                     } else {
                         onscreenConsole.log("Phasing not possible. No cards available to draw.");
@@ -452,6 +452,12 @@ function zabuKOChoice() {
         if (koIndex !== -1) {
           koPile.push(selectedCard);
           onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd.`);
+if (twoRecruitFromKO) {
+totalRecruitPoints += 2;
+cumulativeRecruitPoints += 2;
+onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+updateGameBoard();
+}
           closePopup();
           updateGameBoard();
           resolve(selectedCard);
@@ -721,6 +727,12 @@ async function handleKoOrDiscardChoice(card) {
   if (action.value === 'ko') {
     koPile.push(card);
     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
+if (twoRecruitFromKO) {
+totalRecruitPoints += 2;
+cumulativeRecruitPoints += 2;
+onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+updateGameBoard();
+}
   } else {
     playerDiscardPile.push(card);
     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
@@ -812,6 +824,12 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card =>
     cardsPlayedThisTurn[index] = copy; // Keep the copy
     koPile.push(playedSidekick);      // Move original to KO pile
       onscreenConsole.log(`You chose to play <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Meltdown ability. You have gained +4 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and a Wound. <span class="console-highlights">${playedSidekick.name}</span> has been KO’d.`);
+if (twoRecruitFromKO) {
+totalRecruitPoints += 2;
+cumulativeRecruitPoints += 2;
+onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+updateGameBoard();
+}
   } else {
     console.error("playedSidekick not found in cardsPlayedThisTurn.");
   }
@@ -938,7 +956,7 @@ function skidsWoundInvulnerability(card) {
   updateGameBoard();
 }
 
-async function prodigyCopyPowers(currentPlayer) {
+async function prodigyCopyPowers() {
     return new Promise((resolve) => {
         // Check for eligible heroes
         if (!cardsPlayedThisTurn.some(card => card.cost <= 6)) {
@@ -1147,7 +1165,7 @@ async function prodigyCopyPowers(currentPlayer) {
                     const abilityFunction = window[prodigyCard.unconditionalAbility];
                     if (typeof abilityFunction === 'function') {
                         console.log(`Triggering ability: ${prodigyCard.unconditionalAbility}`);
-                        await abilityFunction(currentPlayer, prodigyCard);
+                        await abilityFunction(prodigyCard);
                     } else {
                         console.error(`Ability function ${prodigyCard.unconditionalAbility} not found`);
                     }
@@ -1167,12 +1185,18 @@ async function prodigyCopyPowers(currentPlayer) {
             }
         };
 
-        // Handle cancellation
-        closeButton.onclick = () => {
-            onscreenConsole.log("Prodigy did not copy any powers.");
-            closePopup();
-            resolve(false);
-        };
+closeButton.onclick = () => {
+    onscreenConsole.log(`You've cancelled <span class="console-highlights">Prodigy</span><span class="bold-spans">'s</span> ability.`);
+    const prodigyCardIndex = cardsPlayedThisTurn.findIndex(c => c.name === 'Prodigy' && !c.isCopied);
+    if (prodigyCardIndex !== -1) {
+        const prodigyCard = cardsPlayedThisTurn[prodigyCardIndex];
+        cardsPlayedThisTurn.splice(prodigyCardIndex, 1);  // <-- Corrected
+        playerHand.push(prodigyCard);
+    }
+    closePopup();
+    resolve(false);
+};
+
 
         function closePopup() {
             // Reset UI
@@ -1374,7 +1398,6 @@ function rockslideShatter() {
     });
 }
 
-// Ensure shatter() returns a Promise
 function shatter(card) {
     return new Promise((resolve) => {
         if (!card) {
@@ -1383,73 +1406,78 @@ function shatter(card) {
             return;
         }
 
-        console.log("Shattering card:", card.name);
-        // Your existing shatter logic here
-        // ...
-        
-        // When shatter effect is complete:
-        resolve();
-    });
-}
-
-function shatter(villain) {
-    return new Promise((resolve) => {
         const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
         const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
-        const shatteredVillainAttack = recalculateVillainAttack(villain, selectedScheme);
+        const shatteredVillainAttack = recalculateVillainAttack(card);
         const shatteredValue = Math.floor(shatteredVillainAttack / 2);
 
-        villain.shattered = (villain.shattered || 0) + shatteredValue;
+        card.shattered = (card.shattered || 0) + shatteredValue;
 
-        onscreenConsole.log(`Shatter! <span class="console-highlights">${villain.name}</span> loses ${shatteredValue}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+        onscreenConsole.log(`Shatter! <span class="console-highlights">${card.name}</span> loses ${shatteredValue}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
 
-        updateGameBoard().then(resolve); // Assuming updateGameBoard() is also promisified
+        // Make sure updateGameBoard() returns a Promise
+        updateGameBoard();
+        resolve();
     });
 }
 
 function laylaMillerInvestigate() {
   return new Promise((resolve) => {
-    // 1. Display the popup (unchanged)
+    // 1. Display the popup
     const popup = document.getElementById('investigate-popup');
     popup.style.display = 'block';
     
-    // 2. Set the card image (unchanged)
+    // 2. Set the card image
     const cardImage = document.getElementById('investigate-card');
     cardImage.src = "Visual Assets/Sidekicks/Layla_Miller.webp";
     cardImage.style.display = "block";
     
     document.getElementById('investigate-team-filter').style.display = "block";
     
-    // 3. Disable confirm button initially (unchanged)
+    // 3. Disable confirm button initially
     const confirmBtn = document.getElementById('investigate-confirm');
     confirmBtn.disabled = true;
     
-    // Enable confirm button when a team is selected (unchanged)
+    // Get team radios
     const teamRadios = document.querySelectorAll('input[name="investigate-team"]');
-    teamRadios.forEach(radio => {
-      radio.addEventListener('change', () => {
-        confirmBtn.disabled = false;
+    
+    // Cleanup function
+    function cleanup() {
+      // Remove all radio change listeners
+      teamRadios.forEach(radio => {
+        radio.onchange = null;
       });
+      // Remove confirm button listener
+      confirmBtn.onclick = null;
+      // Reset UI elements
+      popup.style.display = 'none';
+      document.getElementById('investigate-team-filter').style.display = "none";
+      cardImage.src = "";
+    }
+    
+    // Enable confirm button when a team is selected
+    teamRadios.forEach(radio => {
+      radio.onchange = () => {
+        confirmBtn.disabled = false;
+      };
     });
     
-    // Handle confirm button click - now with refactored selection logic
+    // Handle confirm button click
     confirmBtn.onclick = async () => {
       try {
-        // Get selected team (unchanged)
+        // Get selected team
         const selectedTeam = document.querySelector('input[name="investigate-team"]:checked')?.dataset.team;
         if (!selectedTeam) return;
         
-        popup.style.display = 'none';
-        document.getElementById('investigate-team-filter').style.display = "none";
-        cardImage.src = "";
+        cleanup(); // Clean up event listeners immediately
         
-        // Reset team selection (unchanged)
+        // Reset team selection
         teamRadios.forEach(radio => {
           radio.checked = false;
         });
 
-        // Find the played Layla Miller card (unchanged)
+        // Find the played Layla Miller card
         let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card => card.name === "Layla Miller");
         if (!playedSidekick) {
           console.error("No Layla Miller card found in cardsPlayedThisTurn.");
@@ -1457,10 +1485,10 @@ function laylaMillerInvestigate() {
           return;
         }
         
-        // Return to sidekick deck (unchanged)
+        // Return to sidekick deck
         returnToSidekickDeck(playedSidekick);
         
-        // Check top two cards, shuffling if needed (unchanged)
+        // Check top two cards, shuffling if needed
         let revealedCards = [];
         for (let i = 0; i < 2; i++) {
           if (playerDeck.length === 0) {
@@ -1479,7 +1507,6 @@ function laylaMillerInvestigate() {
         
         const [card1, card2] = revealedCards;
         
-        // REFACTORED SELECTION LOGIC STARTS HERE
         // Case 1: Both cards match selected team
         if (card1.team === selectedTeam && card2.team === selectedTeam) {
           const choice = await showCardSelectionPopup({
@@ -1513,7 +1540,7 @@ function laylaMillerInvestigate() {
           
           await handleCardPlacement(otherCard, {
             title: 'Investigation Results',
-            instructions: `You found and drew <span class="console-highlights">${matchingCard.name}</span>.  Where should <span class="console-highlights">${otherCard.name}</span> be returned?`,
+            instructions: `You found and drew <span class="console-highlights">${matchingCard.name}</span>. Where should <span class="console-highlights">${otherCard.name}</span> be returned?`,
             card: otherCard
           });
         }
@@ -1537,6 +1564,7 @@ function laylaMillerInvestigate() {
         resolve();
       } catch (error) {
         console.error("Error in Layla Miller investigation:", error);
+        cleanup();
         resolve();
       }
     };
