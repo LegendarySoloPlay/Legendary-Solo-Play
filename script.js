@@ -4271,7 +4271,7 @@ updateMastermindOverlay();
 const mastermind = getSelectedMastermind();
 
 if (city[i].alwaysLeads === 'true' && mastermind.name === 'Apocalypse') {
-    city[i].attack += 2;
+    city[i].attack = city[i].originalAttack + 2;
     city[i].overlayTextAttack = `${city[i].attack}`;
 }
 
@@ -7525,6 +7525,7 @@ document.getElementById('bribe-confirm-button').addEventListener('click', () => 
         });
     }
 });
+
 
 
 
