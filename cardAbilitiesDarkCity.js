@@ -9226,7 +9226,7 @@ onscreenConsole.log(`<span class="console-highlights">Apocalypse</span> always l
 
         // Initialize UI
         popupTitle.textContent = 'TACTIC';
-        instructionsDiv.textContent = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
+        instructionsDiv.innerHTML = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
@@ -9244,7 +9244,7 @@ onscreenConsole.log(`<span class="console-highlights">Apocalypse</span> always l
 
         function updateInstructions() {
             if (selectedCard === null) {
-                instructionsDiv.textContent = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
+                instructionsDiv.innerHTML = '<span class="console-highlights">Apocalypse</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to play.';
             } else {
                 instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be played.`;
             }
@@ -10635,3 +10635,4 @@ for (const bystander of mastermind.bystanders) {
         throw error; // Re-throw to be caught by the caller
     }
 }
+
