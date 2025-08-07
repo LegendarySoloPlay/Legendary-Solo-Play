@@ -412,7 +412,7 @@ let hasWoundAvoidance = false;
 let silentMeditationRecruit = false;
 let backflipRecruit = false;
 let sewerRooftopDefeats = false;
-let sewerRooftopBonusRecruit = false;
+let sewerRooftopBonusRecruit = 0;
 let twoRecruitFromKO = false;
 let trueVersatility = false;
 let hasProfessorXMindControl = false;
@@ -3364,14 +3364,21 @@ function showHeroSelectPopup() {
         const heroOptions = document.getElementById('hero-options');
         const heroImage = document.getElementById('hero-select-image');
         const hoverText = document.getElementById('selectHoverText');
-        const confirmButton = document.createElement('button'); // Create confirm button dynamically
+        
+        // Check if confirm button already exists and remove it first
+        const existingConfirm = document.getElementById('hero-select-confirm');
+        if (existingConfirm) {
+            heroSelectPopup.removeChild(existingConfirm);
+        }
+        
+        const confirmButton = document.createElement('button');
         confirmButton.id = 'hero-select-confirm';
         confirmButton.textContent = 'CONFIRM';
-        confirmButton.style.display = 'inline-block'; // Show button immediately
-        confirmButton.disabled = true; // Disabled by default
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
 
-heroImage.style.display = 'none';
-                    hoverText.style.display = 'block';
+        heroImage.style.display = 'none';
+        hoverText.style.display = 'block';
 
         heroOptions.innerHTML = ''; // Clear previous options
         let selectedHero = null;
@@ -4261,7 +4268,7 @@ if (city[i].babyHope === true) {
 
 updateMastermindOverlay();
 
-if (city[i].team === 'Four Horsemen' && mastermind.name === 'Apocalypse') {
+if (city[i].alwaysLeads === 'true' && mastermind.name === 'Apocalypse') {
     city[i].attack += 2;
     city[i].overlayTextAttack = `${city[i].attack}`;
 }
@@ -4513,17 +4520,29 @@ if (lastTurn && !lastTurnMessageShown) {
 
     // Check Mastermind end game conditions first (if any)
     if (mastermindEndGame) {
-        switch (mastermindEndGame) {
-case "fourHorsemen":
-    const hasWar = escapedVillainsDeck.some(card => card.name === 'War');
-    const hasFamine = escapedVillainsDeck.some(card => card.name === 'Famine');
-    const hasPestilence = escapedVillainsDeck.some(card => card.name === 'Pestilence');
-    const hasDeath = escapedVillainsDeck.some(card => card.name === 'Death');
-    
-    if (hasWar && hasFamine && hasPestilence && hasDeath) {
-        showDefeatPopup();
-        break;
-    }
+    switch (mastermindEndGame) {
+        case "fourHorsemen":
+            // Get all villainIds from escaped villains
+            const villainGroups = escapedVillainsDeck.reduce((acc, card) => {
+                if (card.villainId) {
+                    if (!acc[card.villainId]) {
+                        acc[card.villainId] = new Set(); // Using Set to track unique names
+                    }
+                    acc[card.villainId].add(card.name);
+                }
+                return acc;
+            }, {});
+
+            // Check if any villain group has at least 4 unique members
+            const hasFourUniqueFromSameGroup = Object.values(villainGroups).some(
+                uniqueNames => uniqueNames.size >= 4
+            );
+
+            if (hasFourUniqueFromSameGroup) {
+                document.getElementById('defeat-context').innerHTML = `<span class="console-highlights">Apocalypse</span><span class="bold-spans">'s</span> chosen Villain group have escaped!`;
+                showDefeatPopup();
+                break;
+            }
     break;
 
             default:
@@ -4537,84 +4556,98 @@ case "fourHorsemen":
         switch (selectedSchemeEndGame) {
             case "8BystandersCarriedAway":
                 if (escapedBystanderCount >= 8) {
+                    document.getElementById('defeat-context').innerHTML = `8 Bystanders have been carried away by escaping Villains!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "12VillainsEscape":
                 if (escapedVillainsCount >= 12) {
+                    document.getElementById('defeat-context').innerHTML = `12 Villains have escaped!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "7Twists":
                 if (twistCount >= 7) {
+                    document.getElementById('defeat-context').innerHTML = `All portals to the Dark Dimension have been opened!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "5Killbots":
                 if (escapedKillbotsCount >= 5) {
+                    document.getElementById('defeat-context').innerHTML = `5 Killbots have escaped!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "6EscapedSkrullHeroes":
                 if (escapedHeroesCount >= 6) {
+                    document.getElementById('defeat-context').innerHTML = `6 Heroes have escaped as Skrull Villains!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "heroDeckEmpty":
                 if (heroDeck.length === 0) {
+                    document.getElementById('defeat-context').innerHTML = `You've run out of Heroes to recruit!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "woundDeckEmpty":
                 if (woundDeck.length === 0) {
+                    document.getElementById('defeat-context').innerHTML = `You've run out of Wounds! The Legacy Virus runs rampant!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "8Twists":
                 if (twistCount >= 8) {
+                    document.getElementById('defeat-context').innerHTML = `8 Scheme Twists! The power of the Cosmic Cube has been unleashed!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "KOHeroesEqualThree":
                 if (koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length >= 3) {
+                    document.getElementById('defeat-context').innerHTML = `3 non grey Heroes have been KO'd!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "FiveGoonsEscape":
                 if (escapedVillainsDeck.filter(card => card.name === 'Maggia Goons').length >= 5) {
+                    document.getElementById('defeat-context').innerHTML = `5 <span class="console-highlights">Maggia Goons</span> have escaped!`;
                     showDefeatPopup();
                 }
                 break;
                 
             case "FourBystandersKOdOrEscaped":
                 if (KOdBystanders + escapedBystanders >= 4) {
+                    document.getElementById('defeat-context').innerHTML = `4 Bystanders have been KO'd or carried off!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "FourPlutoniumEscape":
                 if (escapedVillainsDeck.filter(card => card.plutonium === true).length >= 4) {
+                    document.getElementById('defeat-context').innerHTML = `The Villains have escaped with 4 Plutonium!`;
                     showDefeatPopup();
                 }
                 break;
                 
             case "FourGoblinQueenEscape":
                 if (escapedVillainsDeck.filter(card => card.goblinQueen === true).length >= 4) {
+                    document.getElementById('defeat-context').innerHTML = `4 Goblin Queens have escaped!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "NineHeroesKOdOrEscaped":
                 if (KOdHeroes + carriedOffHeroes >= 9) {
+                    document.getElementById('defeat-context').innerHTML = `9 non grey Heroes have been KO'd or carried off!`;
                     showDefeatPopup();
                 }
                 break;
@@ -4622,12 +4655,14 @@ case "fourHorsemen":
             case "hqDetonated":
                 if ((hqExplosion1 >= 6 && hqExplosion2 >= 6 && hqExplosion3 >= 6 && 
                     hqExplosion4 >= 6 && hqExplosion5 >= 6) || heroDeck.length === 0) {
+                    document.getElementById('defeat-context').innerHTML = `The HQ has been destroyed! The Villains have detonated the Helicarrier!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "babyThreeVillainEscape":
                 if (stackedTwistNextToMastermind >= 3) {
+                    document.getElementById('defeat-context').innerHTML = `3 Scheme Twists stacked next to the Mastermind! The Villains have captured Baby Hope!`;
                     showDefeatPopup();
                 }
                 break;
@@ -5118,7 +5153,7 @@ jeanGreyBystanderRecruit = false;
 jeanGreyBystanderDraw = false;
 jeanGreyBystanderAttack = false;
 sewerRooftopDefeats = false;
-sewerRooftopBonusRecruit = false;
+sewerRooftopBonusRecruit = 0;
 twoRecruitFromKO = false;
 hasProfessorXMindControl = false;
 trueVersatility = false;
@@ -5540,10 +5575,10 @@ if (villainCard.babyHope === true) {
             extraDraw();
         }
 
-        if (sewerRooftopBonusRecruit && (cityIndex === 2 || cityIndex === 4)) {
-            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-            totalRecruitPoints += 2;
-            cumulativeRecruitPoints += 2;
+        if (sewerRooftopBonusRecruit > 0 && (cityIndex === 2 || cityIndex === 4)) {
+            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. +${sewerRooftopBonusRecruit}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+            totalRecruitPoints += sewerRooftopBonusRecruit;
+            cumulativeRecruitPoints += sewerRooftopBonusRecruit;
         }
     } catch (error) {
         console.error('Error processing location bonuses:', error);
@@ -6601,6 +6636,7 @@ document.getElementById('modal-overlay').style.display = 'none';
 function hideHeroAbilityMayPopup() {
   // Hide the pop-up and overlay
   document.getElementById('hero-ability-may-popup').style.display = 'none';
+  document.getElementById('heroAbilityHoverText').style.display = 'block';
   document.getElementById('modal-overlay').style.display = 'none';
 }
 
