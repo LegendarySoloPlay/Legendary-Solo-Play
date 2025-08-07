@@ -1,5 +1,70 @@
 // updatesContent.js
 const updatesHTML = `
+<h3>🌃 <i>Version 2.0.0</i> - Dark City 🌃</h3>
+<p>Welcome to our first expansion! This update brings you full <strong>Dark City</strong> functionality - all new cards and mechanics! There have also been some patches to bugs in the Core game so see notes below.</p>
+<p>I just want to give a massive thanks to the players who've supported the game with donations, feedback, or just by being part of the community. This update is for you! Particular thanks go to Bageltop Games who has answered every one of my never-ending questions.</p>
+<p>Especially with a new expansion, I'm sure there are things I've missed so please keep your feedback coming.</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p>🌆 <span style="text-decoration:underline;"><strong>DARK CITY:</strong></span></p>
+<ul>
+<li><strong>New Heroes -</strong> 17 new Superheroes to recruit and play from X-Force, Marvel Knights and X-Men. 
+<li><strong>'Critical Hit' Superpowers -</strong> These abilities show two icons instead of one and require you to have played cards with both icons earlier in your turn.
+<li><strong>New Keywords -</strong> Be sure to have fun playing with <i>Teleport</i>, <i>Bribe</i> and <i>Versatile</i>. The rules for each will show in the Keywords panel.
+<li><strong>Unique Bystanders -</strong> You are now able to rescue News Reporters, Radiation Scientists and Paramedics, granting you special rewards upon rescue.
+<li><strong>New Schemes -</strong> 8 new schemes to dive into and try your best to survive.
+</ul>
+<p>🔁 <span style="text-decoration:underline;"><strong>GAME SETUP:</strong></span></p>
+<ul>
+<li><strong>Too many choices -</strong> Drop down filters are ready for Dark City. They can be applied in individual sections or overall if you'd like to randomize an entire Dark City game.
+<li><strong>Who to save?</strong> You will now find a new Bystander section on the Game Setup screen, allowing you to select which expansions' Bystanders are included in your game. By default, all are enabled.
+<li><strong>Am I seeing double?</strong> Those Villain groups with different numbers of each Villain (Enemies of Asgard, HYDRA and Skrulls) have now been accounted for when the game is initiated.
+</ul>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>Umm, actually...</strong> Offical errata have been added for all relevant cards and will display in the Keywords panel. 
+<li><strong>Who is that? </strong> You are now able to click on a Villain or Mastermind's overlays to see a list of captured Bystanders or other cards. Now you can be strategic about which Bystanders are worth saving first.
+<li><strong>Does anyone actually read these notes? </strong> If they did, they'd know you need to hold down the <i>End Turn</i> button. Luckily for newbies, the button now says 'Hold to End Turn' for your first turn.
+<li><strong>Slow down -</strong> The Heal Wounds popup will now complete before the turn is ended and the next Villain is drawn.
+<li><strong>For clarity -</strong> The 'Mastermind' count on the gameboard has been relabelled as 'Remaining Tactics'.
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>What just happened?</strong> Like Scheme Twists and Master Strikes, you will now see a popup for every Villain deck draw, alerting you to Escapes, Ambushes, Villains entering the city and Bystanders being captured.
+<li><strong>What exactly does that mean?</strong> Popups for Scheme Twists and Master Strikes now include the relevant card text.
+<li><strong>I swear I'm stronger!</strong> Issues with Attack points being incorrectly deducted have been resolved.
+<li><strong>Can we skip to the good part?</strong> Upon winning, the Victory popup should now show before a new turn begins and a Villain is drawn.
+<li><strong>But you said...</strong> The highlights that show you Villains elligible for attack are now conditional and corrected for Blob and Venom.
+<li><strong>Be precise now!</strong> There was a small error with the calculation and rounding of Victory Points - now corrected.
+<li><strong>Sort it out -</strong> The sorting of cards in your hand has been corrected - they are now sorted by color, then hero name, cost and card name.
+<li><strong>The bane of my existence -</strong> Once again, I hope I have fixed the issue of avoiding multiple Hero tucks after multiple Scheme Twists. We'll see!
+<li><strong>Sneak attack!</strong> All abilities and card effects that allow you to defeat a Villain for free have been checked to ensure they activate relevant fight effects.
+</ul>
+<p>🦹 <span style="text-decoration:underline;"><strong>MASTERMINDS:</strong></span></p>
+<ul>
+<li><strong>Dr Doom -</strong> His Master Strike popup now correctly says 'Return to the top of your deck' instead of 'Discard'.
+<li><strong>Loki -</strong> The <i>Cruel Ruler</i> Tactic now triggers Villain fight effects when they are defeated and no longer messes up your Attack points.
+<li><strong>Loki -</strong> The <i>Maniacal Tyrant</i> Tactic popup had an unnecessary second button - it has been removed.
+<li><strong>Magneto -</strong> If you had a card to reveal and avoid gaining a Wound from the <i>Crushing Shockwave</i> Tactic, it only worked for the first Wound. It will now work for both.
+<li><strong>Red Skull -</strong> The <i>Ruthless Dictator</i> Tactic was returning cards to the wrong place in the deck - now corrected.
+</ul>
+<p>🥷 <span style="text-decoration:underline;"><strong>VILLAINS:</strong></span></p>
+<ul>
+<li><strong>Paibok the Power Skrull -</strong> No longer says 'Recruit'.
+</ul>
+<p>👤 <span style="text-decoration:underline;"><strong>SIDEKICKS:</strong></span></p>
+<ul>
+<li><strong>Prodigy -</strong> Will now return to your hand if you press Cancel or Close on his ability.
+</ul>
+<p>🦸 <span style="text-decoration:underline;"><strong>HEROES:</strong></span></p>
+<ul>
+<li><strong>Captain America -</strong> <i>Avengers Assemble!</i> and <i>Perfect Teamwork</i> no longer count Wounds as a separate color.
+<li><strong>Nick Fury - Pure Fury -</strong> Popup now says 'defeat' instead of 'attack'.
+<li><strong>Storm - Spinning Cyclone -</strong> If there are no Villains in the city, the popup no longer opens.
+<li><strong>Rogue - Steal Abilities -</strong> If she copied a 'Rogue - Copy Powers' or 'Prodigy' card, you were unable to then copy a Hero you had played. This has been corrected.
+</ul>
+<p>I hope these changes improve your Marvel Legendary Solo Play experience. Look out for more updates soon!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3><i>Version 1.1.2</i> - UI Upgrade</h3>
 <p>Welcome to the latest patch of the digital <strong>Marvel Legendary</strong> Solo experience! This patch brings you an upgraded UI experience and greater mobile responsiveness. See all patch notes below.</p>
 <p>Thank you for all of the feedback and bug reports so far! Please keep them coming.</p>
