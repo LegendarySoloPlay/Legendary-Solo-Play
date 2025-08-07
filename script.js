@@ -340,7 +340,7 @@ let woundDeck = [...wounds];
 let villainDeck = [];
 let currentVillainLocation = null;
 let heroDeck = [];
-let skrullDeck = [];
+let capturedCardsDeck = [];
 let hq = [];
 let city = ["", "", "", "", ""];
 var city1TempBuff = 0;
@@ -385,7 +385,6 @@ let nextTurnsDraw = 6;
 let cardsToBeDrawnNextTurn = [];
 let rescueExtraBystanders = 0;
 let extraThreeRecruitAvailable = false;
-let bystanderDeck = shuffle(bystanders);
 let schemeTwistCount = 0;
 let turnCount = 1;
 let killbotSchemeTwistCount = 0;
@@ -405,6 +404,27 @@ let counterB = 0;
 let counterResolve;
 let counterReject;
 let lastTurnMessageShown = false;
+let jeanGreyBystanderRecruit = false;
+let jeanGreyBystanderDraw = false;
+let jeanGreyBystanderAttack = false;
+let hasDiscardAvoidance = false;
+let hasWoundAvoidance = false;
+let silentMeditationRecruit = false;
+let backflipRecruit = false;
+let sewerRooftopDefeats = false;
+let sewerRooftopBonusRecruit = false;
+let twoRecruitFromKO = false;
+let trueVersatility = false;
+let hasProfessorXMindControl = false;
+let demonGoblinDeck = [];
+let demonGoblinDeckInitialized = false;
+let hqExplosion1 = 0;
+let hqExplosion2 = 0;
+let hqExplosion3 = 0;
+let hqExplosion4 = 0;
+let hqExplosion5 = 0;
+let stackedTwistNextToMastermind = 0;
+let popupMinimized = false;
 
 window.victoryPile = [];
 
@@ -1070,6 +1090,17 @@ const sidekicksFromStartup = [
     }
 ];
 
+const bystandersFromStartup = [
+   {
+        name: "Dark City",
+        cards: [
+            { name: "News Reporter", image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+{ name: "Radiation Scientist", image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+{ name: "Paramedic", image: "Visual Assets/Other/Bystanders/paramedic.webp" }
+        ]
+    }
+];
+
 // Function to update the sidekick image based on the selected sidekick group
 function updateSidekickImage(selectedSidekickName) {
     // Find the corresponding sidekick group from the array
@@ -1211,6 +1242,147 @@ window.addEventListener('load', () => {
             updateSidekickImage(checkbox.value);
         }
     });
+});
+
+// State variables - PLACE WITH OTHER GAME STATE VARIABLES
+let bystanderDeck = [];
+let selectedBystanderGroups = [];
+let currentBystanderGroupIndex = 0;
+let currentBystanderIndex = 0;
+
+// Build the full bystander deck
+function buildBystanderDeck() {
+    let deck = [...bystanders];
+    const selectedExpansions = getSelectedBystanderExpansions();
+    
+    selectedExpansions.forEach(expansion => {
+        if (expansionBystanders[expansion]) {
+            deck.push(...expansionBystanders[expansion]);
+        }
+    });
+    
+    console.log("Built bystander deck with", deck.length, "cards");
+    return shuffle(deck);
+}
+
+// Get selected expansions from checkboxes
+function getSelectedBystanderExpansions() {
+    let selected = [];
+    document.querySelectorAll('#bystander-selection input[name="bystander"]:checked').forEach(checkbox => {
+        selected.push(checkbox.value);
+    });
+    return selected;
+}
+
+// Update displayed bystander image
+function updateBystanderImage(selectedBystanderName) {
+    const imgElement = document.querySelector('#chosen-bystander-image img');
+    
+    if (selectedBystanderName && expansionBystanders[selectedBystanderName]) {
+        // Get unique cards by filtering duplicates
+        const uniqueCards = [];
+        const seenImages = new Set();
+        
+        for (const card of expansionBystanders[selectedBystanderName]) {
+            if (!seenImages.has(card.image)) {
+                seenImages.add(card.image);
+                uniqueCards.push(card);
+            }
+        }
+        
+        const selectedGroup = {
+            name: selectedBystanderName,
+            cards: uniqueCards // Store only unique cards
+        };
+        
+        const existingIndex = selectedBystanderGroups.findIndex(g => g.name === selectedBystanderName);
+        
+        if (existingIndex === -1) {
+            selectedBystanderGroups.push(selectedGroup);
+        } else {
+            selectedBystanderGroups.push(...selectedBystanderGroups.splice(existingIndex, 1));
+        }
+        
+        currentBystanderGroupIndex = selectedBystanderGroups.length - 1;
+        currentBystanderIndex = 0;
+        imgElement.src = selectedBystanderGroups[currentBystanderGroupIndex].cards[currentBystanderIndex].image;
+        imgElement.alt = selectedBystanderGroups[currentBystanderGroupIndex].cards[currentBystanderIndex].name;
+        imgElement.onclick = cycleBystanderImages;
+    } else {
+        resetBystanderImage();
+    }
+    
+    updateBystanderFaceDownCards();
+}
+
+// Cycle through bystander images
+function cycleBystanderImages() {
+    if (selectedBystanderGroups.length > 0) {
+        currentBystanderIndex++;
+        
+        if (currentBystanderIndex >= selectedBystanderGroups[currentBystanderGroupIndex].cards.length) {
+            currentBystanderIndex = 0;
+            currentBystanderGroupIndex = (currentBystanderGroupIndex + 1) % selectedBystanderGroups.length;
+        }
+        
+        const imgElement = document.querySelector('#chosen-bystander-image img');
+        imgElement.src = selectedBystanderGroups[currentBystanderGroupIndex].cards[currentBystanderIndex].image;
+        imgElement.alt = selectedBystanderGroups[currentBystanderGroupIndex].cards[currentBystanderIndex].name;
+    }
+}
+
+// Update face-down card display
+function updateBystanderFaceDownCards() {
+    const faceDownCards = [
+        document.getElementById('bystanderfacedowncard1'),
+        document.getElementById('bystanderfacedowncard2')
+    ];
+    const imgElement = document.querySelector('#chosen-bystander-image img');
+
+    const shouldShow = selectedBystanderGroups.some(group => group.cards.length > 1);
+    
+    faceDownCards.forEach(card => {
+        card.style.display = shouldShow ? 'block' : 'none';
+    });
+    imgElement.style.cursor = shouldShow ? 'alias' : 'default';
+}
+
+// Reset bystander image
+function resetBystanderImage() {
+    const imgElement = document.querySelector('#chosen-bystander-image img');
+    imgElement.src = 'Visual Assets/Other/Bystander.webp';
+    imgElement.alt = 'Default Bystander';
+    imgElement.onclick = null;
+}
+
+// Remove bystander group
+function removeBystanderGroup(groupName) {
+    const index = selectedBystanderGroups.findIndex(g => g.name === groupName);
+    if (index !== -1) {
+        selectedBystanderGroups.splice(index, 1);
+        if (selectedBystanderGroups.length > 0) {
+            currentBystanderGroupIndex = currentBystanderGroupIndex % selectedBystanderGroups.length;
+            displayCurrentBystanderImage();
+        } else {
+            resetBystanderImage();
+        }
+    }
+    updateBystanderFaceDownCards();
+}
+
+document.querySelectorAll('#bystander-selection input[type=checkbox]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            updateBystanderImage(this.value);
+        } else {
+            removeBystanderGroup(this.value);
+        }
+    });
+    
+    // Initialize display for pre-checked boxes
+    if (checkbox.checked) {
+        updateBystanderImage(checkbox.value);
+    }
 });
 
 function randomizeScheme() {
@@ -1757,19 +1929,49 @@ function randomizeHenchmenWithRequirements(scheme) {
         return;
     }
 
-    // Randomly select the required number of henchmen
-    const shuffledCheckboxes = filteredCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
-    const selectedCheckboxes = shuffledCheckboxes.slice(0, scheme.requiredHenchmen); // Pick the required number
-
     // Clear the previously selected henchmen groups
     selectedHenchmenGroups = [];
 
-    // Add the selected henchmen groups
-    selectedCheckboxes.forEach(checkbox => {
-        checkbox.checked = true;
-        const henchmenGroup = henchmen.find(henchmenGroup => henchmenGroup.name === checkbox.value);
-        selectedHenchmenGroups.push(henchmenGroup);
-    });
+    // If the scheme has a specific henchmen requirement, ensure it's included
+    if (scheme.specificHenchmenRequirement) {
+        const requiredHenchmen = filteredCheckboxes.find(checkbox => checkbox.value === scheme.specificHenchmenRequirement);
+        if (requiredHenchmen) {
+            // Select the required henchmen
+            requiredHenchmen.checked = true;
+            const requiredHenchmenGroup = henchmen.find(henchmenGroup => henchmenGroup.name === requiredHenchmen.value);
+            selectedHenchmenGroups.push(requiredHenchmenGroup);
+
+            // Remove the required henchmen from the pool of available henchmen
+            const remainingCheckboxes = filteredCheckboxes.filter(checkbox => checkbox !== requiredHenchmen);
+
+            // Randomly select the remaining henchmen (if any are needed)
+            const remainingSlots = scheme.requiredHenchmen - 1; // Subtract 1 for the required henchmen
+            if (remainingSlots > 0 && remainingCheckboxes.length > 0) {
+                const shuffledCheckboxes = remainingCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+                const selectedCheckboxes = shuffledCheckboxes.slice(0, remainingSlots); // Pick the required number
+
+                // Add the selected henchmen groups
+                selectedCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                    const henchmenGroup = henchmen.find(henchmenGroup => henchmenGroup.name === checkbox.value);
+                    selectedHenchmenGroups.push(henchmenGroup);
+                });
+            }
+        } else {
+            console.error(`Required henchmen "${scheme.specificHenchmenRequirement}" not found in the filtered list.`);
+        }
+    } else {
+        // If no specific henchmen is required, randomly select the required number of henchmen
+        const shuffledCheckboxes = filteredCheckboxes.sort(() => 0.5 - Math.random()); // Shuffle the array
+        const selectedCheckboxes = shuffledCheckboxes.slice(0, scheme.requiredHenchmen); // Pick the required number
+
+        // Add the selected henchmen groups
+        selectedCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+            const henchmenGroup = henchmen.find(henchmenGroup => henchmenGroup.name === checkbox.value);
+            selectedHenchmenGroups.push(henchmenGroup);
+        });
+    }
 
     // Set the image to the first henchman in the list
     currentHenchmenGroupIndex = 0;
@@ -1777,9 +1979,14 @@ function randomizeHenchmenWithRequirements(scheme) {
 
     // Scroll to the first selected henchman checkbox
     const henchmenContainer = document.querySelector('#henchmen-section .scrollable-list');
-    if (henchmenContainer) {
-        const henchmenPosition = selectedCheckboxes[0].offsetTop - henchmenContainer.offsetTop;
-        henchmenContainer.scrollTop = henchmenPosition - henchmenContainer.clientHeight / 2;
+    if (henchmenContainer && selectedHenchmenGroups.length > 0) {
+        // Convert henchmenCheckboxes to an array to use .find()
+        const henchmenCheckboxesArray = Array.from(henchmenCheckboxes);
+        const firstHenchmenCheckbox = henchmenCheckboxesArray.find(checkbox => checkbox.value === selectedHenchmenGroups[0].name);
+        if (firstHenchmenCheckbox) {
+            const henchmenPosition = firstHenchmenCheckbox.offsetTop - henchmenContainer.offsetTop;
+            henchmenContainer.scrollTop = henchmenPosition - henchmenContainer.clientHeight / 2;
+        }
     }
 
     // Update face-down cards for the selected henchmen
@@ -1849,8 +2056,6 @@ function formatList(items) {
 }
 
 function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes) {
-
-
     document.getElementById('chosen-scheme').innerHTML = `Your Chosen Scheme: <span class="bold-spans">${scheme.name}</span>`;
     document.getElementById('chosen-mastermind').innerHTML = `Your Chosen Mastermind: <span class="bold-spans">${mastermind.name}</span>`;
 
@@ -1861,7 +2066,9 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
     let henchmenFeedback = '';
     let heroFeedback = '';
     let specificVillainRequirementMet = true;
+    let specificHenchmenRequirementMet = true;
 
+    // Check specific villain requirement
     if (scheme.specificVillainRequirement) {
         specificVillainRequirementMet = villains.some(villain => {
             const normalizedVillainName = villain.trim().toLowerCase();
@@ -1874,16 +2081,42 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
         }
     }
 
+    // Check specific henchmen requirement
+    if (scheme.specificHenchmenRequirement) {
+        specificHenchmenRequirementMet = henchmen.some(henchman => {
+            const normalizedHenchmanName = henchman.trim().toLowerCase();
+            const normalizedRequirement = scheme.specificHenchmenRequirement.trim().toLowerCase();
+            return normalizedHenchmanName === normalizedRequirement;
+        });
+
+        if (!specificHenchmenRequirementMet) {
+            henchmenFeedback += ` <br><span class="error-spans">You must include the ${scheme.specificHenchmenRequirement} henchmen group.</span>`;
+        }
+    }
+
+    // Villain count validation
     if (villains.length < scheme.requiredVillains) {
         villainFeedback += `<br><span class="error-spans">Please select ${scheme.requiredVillains - villains.length > 1 ? 'more villain groups' : 'another villain group'}.</span>`;
     } else if (villains.length > scheme.requiredVillains) {
         villainFeedback += `<br><span class="error-spans">Please select ${villains.length - scheme.requiredVillains > 1 ? 'fewer villain groups' : 'one less villain group'}.</span>`;
     }
 
-       if (heroes.length < scheme.requiredHeroes) {
+    // Hero count validation
+    if (heroes.length < scheme.requiredHeroes) {
         heroFeedback += `<br><span class="error-spans">Please select ${scheme.requiredHeroes - heroes.length > 1 ? 'more heroes' : 'another hero'}.</span>`;
     } else if (heroes.length > scheme.requiredHeroes) {
         heroFeedback += `<br><span class="error-spans">Please select ${heroes.length - scheme.requiredHeroes > 1 ? 'fewer heroes' : 'one less hero'}.</span>`;
+    }
+
+    // Henchmen count validation
+    if (henchmen.length < scheme.requiredHenchmen) {
+        if (henchmen.length === 0) {
+            henchmenFeedback = '<br><span class="error-spans">Please select a Henchmen group.</span>';
+        } else {
+            henchmenFeedback = `<br><span class="error-spans">Please select ${scheme.requiredHenchmen - henchmen.length} more Henchmen ${scheme.requiredHenchmen - henchmen.length > 1 ? 'groups' : 'group'}.</span>`;
+        }
+    } else if (henchmen.length > scheme.requiredHenchmen) {
+        henchmenFeedback = `<br><span class="error-spans">Please select ${henchmen.length - scheme.requiredHenchmen} fewer Henchmen ${henchmen.length - scheme.requiredHenchmen > 1 ? 'groups' : 'group'}.</span>`;
     }
 
     const formattedVillains = `<span class="bold-spans">${formatList(villains)}.</span>`;
@@ -1893,33 +2126,16 @@ function showConfirmChoicesPopup(scheme, mastermind, villains, henchmen, heroes)
     document.getElementById('required-villains-count').innerHTML = `<span class="bold-spans">${scheme.requiredVillains} Villain ${villainGroupText}</span>`;
     document.getElementById('villains-list').innerHTML = formattedVillains + villainFeedback;
 
-   
-// Check if the number of selected henchmen is incorrect
-if (henchmen.length < scheme.requiredHenchmen) {
-    // Not enough henchmen selected
-    if (henchmen.length === 0) {
-        henchmenFeedback = '<br><span class="error-spans">Please select a Henchmen group.</span>';
-    } else {
-        henchmenFeedback = `<br><span class="error-spans">Please select ${scheme.requiredHenchmen - henchmen.length} more Henchmen ${scheme.requiredHenchmen - henchmen.length > 1 ? 'groups' : 'group'}.</span>`;
-    }
-} else if (henchmen.length > scheme.requiredHenchmen) {
-    // Too many henchmen selected
-    henchmenFeedback = `<br><span class="error-spans">Please select ${henchmen.length - scheme.requiredHenchmen} fewer Henchmen ${henchmen.length - scheme.requiredHenchmen > 1 ? 'groups' : 'group'}.</span>`;
-}
-
-// Update the UI with the required number of henchmen and feedback
-const henchmenGroupText = scheme.requiredHenchmen === 1 ? 'group' : 'groups';
-document.getElementById('required-henchmen-count').innerHTML = `<span class="bold-spans">${scheme.requiredHenchmen} Henchmen ${henchmenGroupText}</span>`;
-
-// Display the selected henchmen and feedback
-document.getElementById('henchmen-list').innerHTML = henchmen.length > 0 ? formattedHenchmen + henchmenFeedback : henchmenFeedback;
+    const henchmenGroupText = scheme.requiredHenchmen === 1 ? 'group' : 'groups';
+    document.getElementById('required-henchmen-count').innerHTML = `<span class="bold-spans">${scheme.requiredHenchmen} Henchmen ${henchmenGroupText}</span>`;
+    document.getElementById('henchmen-list').innerHTML = henchmen.length > 0 ? formattedHenchmen + henchmenFeedback : henchmenFeedback;
 
     document.getElementById('required-heroes-count').innerHTML = `<span class="bold-spans">${scheme.requiredHeroes} ${heroGroupText}</span>`;
     document.getElementById('heroes-list').innerHTML = formattedHeroes + heroFeedback;
 
     const villainsCorrect = villains.length === scheme.requiredVillains && specificVillainRequirementMet;
+    const henchmenCorrect = henchmen.length === scheme.requiredHenchmen && specificHenchmenRequirementMet;
     const heroesCorrect = heroes.length === scheme.requiredHeroes;
-    const henchmenCorrect = henchmen.length === scheme.requiredHenchmen;
 
     const allRequirementsMet = villainsCorrect && henchmenCorrect && heroesCorrect;
 
@@ -1927,7 +2143,7 @@ document.getElementById('henchmen-list').innerHTML = henchmen.length > 0 ? forma
     beginButton.disabled = !allRequirementsMet;
 
     document.getElementById('confirm-start-up-choices').style.display = 'block';
-document.getElementById('modal-overlay').style.display = 'block';
+    document.getElementById('modal-overlay').style.display = 'block';
 }
 
 
@@ -1967,6 +2183,20 @@ document.getElementById('modal-overlay').style.display = 'none';
     }
 });
 
+document.getElementById('start-expansion').addEventListener('click', () => {
+    const expansionPopup = document.getElementById('expansion-popup-container');
+const expansionBackground = document.getElementById('background-for-expansion-popup');
+
+    expansionPopup.classList.add('hidden');
+    expansionBackground.classList.add('hidden');
+    
+    // Optional: Remove the element from DOM after fade completes
+    setTimeout(() => {
+        expansionPopup.style.display = 'none';
+	expansionBackground.style.display = 'none';
+    }, 1500); // Match this timeout with your transition duration
+});
+
 document.getElementById('start-game').addEventListener('click', () => {
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
     const selectedMastermind = document.querySelector('#mastermind-section input[type=radio]:checked').value;
@@ -1978,7 +2208,7 @@ document.getElementById('start-game').addEventListener('click', () => {
 
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
-    // Show the confirmation popup with the selected values
+        // Show the confirmation popup with the selected values
     showConfirmChoicesPopup(
         selectedScheme,
         { name: selectedMastermind },
@@ -2021,9 +2251,10 @@ function adjustWoundDeckForScheme(scheme) {
 
 function generateHeroDeck(selectedHeroes) {
     let deck = [];
+    
+    // Original hero deck generation
     selectedHeroes.forEach(heroName => {
         const hero = heroes.find(h => h.name === heroName);
-
         if (hero) {
             hero.cards.forEach(card => {
                 let count;
@@ -2047,24 +2278,44 @@ function generateHeroDeck(selectedHeroes) {
             });
         }
     });
-    return shuffle(deck);
+
+const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+const selectedSchemeForHeroDeck = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+// Add bystanders for specific scheme
+if (selectedSchemeForHeroDeck.name === "Save Humanity") {
+    const bystandersToAdd = Math.min(12, bystanderDeck.length); // Don't exceed available bystanders
+    for (let i = 0; i < bystandersToAdd; i++) {
+        const bystander = bystanderDeck.shift(); // Remove from bystander deck
+        if (bystander) {
+            bystander.cost = 2;
+            bystander.saveHumanityBystander = true;
+           
+            deck.push(bystander);
+        }
+    }
+}
+
+return shuffle(deck);
 }
 
 function generateVillainDeck(selectedVillains, selectedHenchmen, scheme, heroDeck) {
     let deck = [];
 
     // Add villain cards
-    selectedVillains.forEach(villainName => {
-        const villain = window.villains.find(v => v.name === villainName);
-        if (villain) {
-            villain.cards.forEach(card => {
+selectedVillains.forEach(villainName => {
+    const villain = window.villains.find(v => v.name === villainName);
+    if (villain) {
+        villain.cards.forEach(card => {
+            // Add the card to the deck the specified number of times
+            for (let i = 0; i < (card.quantity || 2); i++) { // Default to 2 if quantity is missing
                 deck.push({ ...card, type: 'Villain' });
-                deck.push({ ...card, type: 'Villain' });
-            });
-        } else {
-            console.warn(`Villain with name ${villainName} not found.`);
-        }
-    });
+            }
+        });
+    } else {
+        console.warn(`Villain with name ${villainName} not found.`);
+    }
+});
 
 const selectedSpecialHenchman = selectedHenchmen[Math.floor(Math.random() * selectedHenchmen.length)];
 let henchmenToPlaceOnTop = [];
@@ -2076,9 +2327,15 @@ let henchmenToPlaceOnTop = [];
         if (henchmanName === selectedSpecialHenchman) {
             // For the selected special henchman:
             // Add 2 copies to the deck
+            if (scheme.name === 'Organized Crime Wave') {
+                for (let i = 0; i < 8; i++) {
+                deck.push({ ...henchman, subtype: 'Henchman', ambushEffect: 'organizedCrimeAmbush' });
+            }
+            } else {
             for (let i = 0; i < 2; i++) {
                 deck.push({ ...henchman, subtype: 'Henchman' });
             }
+        }
             // Add 2 copies to the "to place on top" array
             for (let i = 0; i < 2; i++) {
                 henchmenToPlaceOnTop.push({ ...henchman, subtype: 'Henchman' });
@@ -2134,29 +2391,139 @@ const schemePlace = document.getElementById('scheme-place');
     // Append the image to the mastermind cell
     schemePlace.appendChild(schemeImage);
 
-   if (scheme.name === "Replace Earth's Leaders with Killbots") {
-
-killbotSchemeTwistCount += 3;
+  if (scheme.name === "Replace Earth's Leaders with Killbots") {
+    killbotSchemeTwistCount += 3;
     for (let i = 0; i < 18; i++) {
-        // Remove a random bystander from the bystander deck
         if (bystanderDeck.length > 0) {
             const randomIndex = Math.floor(Math.random() * bystanderDeck.length);
-            bystanderDeck.splice(randomIndex, 1); // Removes the randomly selected bystander
+            const originalBystander = bystanderDeck[randomIndex];
+            
+            // Create killbot with original bystander's image
+            const killbot = {
+                type: "Villain",
+                name: `${originalBystander.name} - Killbot`,
+                team: "None",
+                originalAttack: 0,
+                attack: 0,
+                cost: 0,
+                victoryPoints: 1,
+                killbot: true,
+                overlayTextAttack: `${killbotAttack}`,
+                // Use original bystander's image but with killbot overlay/effect
+                image: originalBystander.image,
+                // Store original bystander data
+                originalBystanderData: {
+                    ...originalBystander,
+                    // Preserve the image for when we revert
+                    image: originalBystander.image
+                },
+                // Convert bystander ability to fight effect
+                fightEffect: originalBystander.bystanderUnconditionalAbility || "None"
+            };
+            
+            bystanderDeck.splice(randomIndex, 1);
+            deck.push(killbot);
         }
+    }
+}
 
-        // Add a Killbot to the deck
-        deck.push({
-            type: "Villain",
-            name: "Killbot",
-            team: "None",
-	    originalAttack: 0,
-            attack: 0,
-            cost: 0,
-            victoryPoints: 1,
-            killbot: true,
-            overlayTextAttack: `${killbotAttack}`,
-            image: "Visual Assets/Other/Killbot.webp"
+if (scheme.name === "Transform Citizens Into Demons") {
+    const jeanGreyHero = heroes.find(h => h.name === 'Jean Grey');
+    
+    if (jeanGreyHero) {
+        jeanGreyHero.cards.forEach(card => {
+            let count;
+            switch(card.rarity) {
+                case 'Common':
+                case 'Common 2':
+                    count = 5;
+                    break;
+                case 'Uncommon':
+                    count = 3;
+                    break;
+                case 'Rare':
+                    count = 1;
+                    break;
+                default:
+                    count = 0;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                // Create a modified copy with additional attributes
+                const modifiedCard = { 
+                    ...card,
+                    goblinQueen: true,
+                    victoryPoints: 4,
+                };
+                deck.push(modifiedCard);
+            }
         });
+    } 
+} 
+
+if (scheme.name === "X-Cutioner's Song") {
+    console.log("Processing X-Cutioner's Song scheme");
+    
+    // Debug: Log all heroes first
+    console.log("All heroes:", heroes.map(h => h.name));
+    
+    // Get selected hero names - with better error handling
+    const heroCheckboxes = document.querySelectorAll('#hero-selection input[type=checkbox]:checked');
+    console.log("Found checkboxes:", heroCheckboxes.length);
+    
+    const selectedHeroNames = Array.from(heroCheckboxes).map(cb => {
+        console.log("Checkbox value:", cb.value);
+        return cb.value;
+    });
+    console.log("Selected heroes:", selectedHeroNames);
+    
+    // Filter available heroes - add strict equality check
+    const availableHeroes = heroes.filter(hero => {
+        const isAvailable = !selectedHeroNames.some(name => name === hero.name);
+        console.log(`Hero ${hero.name} available?`, isAvailable);
+        return isAvailable;
+    });
+    console.log("Available heroes:", availableHeroes.map(h => h.name));
+
+    if (availableHeroes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableHeroes.length);
+        const randomHero = availableHeroes[randomIndex];
+        console.log("Selected random hero:", randomHero.name);
+        
+        randomHero.cards.forEach(card => {
+            let copiesToAdd;
+            switch(card.rarity) {
+                case 'Common':
+                case 'Common 2':
+                    copiesToAdd = 5;
+                    break;
+                case 'Uncommon':
+                    copiesToAdd = 3;
+                    break;
+                case 'Rare':
+                    copiesToAdd = 1;
+                    break;
+                default:
+                    copiesToAdd = 0;
+            }
+
+            console.log(`Adding ${copiesToAdd} copies of ${card.name} (${card.rarity})`);
+            
+            for (let i = 0; i < copiesToAdd; i++) {
+                deck.push({
+                    ...card,
+                    type: 'Hero',
+                    capturedHero: true,
+                    capturedHeroAbility: "gainedByPlayer",
+                    originalHero: randomHero.name
+                });
+            }
+        });
+
+    } else {
+        console.warn("No available heroes to add to Villain Deck");
+        // Fallback - add a default hero if none available?
+        // Example: const defaultHero = heroes.find(h => h.name === 'Wolverine');
     }
 }
 
@@ -2164,9 +2531,16 @@ killbotSchemeTwistCount += 3;
         deck.push({ name: 'Master Strike', type: 'Master Strike', image: "Visual Assets/Other/MasterStrike.webp" });
     }
 
-    for (let i = 0; i < scheme.twistCount; i++) {
-        deck.push({ name: 'Scheme Twist', type: 'Scheme Twist', image: "Visual Assets/Other/SchemeTwist.webp" });
-    }
+for (let i = 0; i < scheme.twistCount; i++) {
+    const twistCard = { 
+        name: 'Scheme Twist', 
+        type: 'Scheme Twist', 
+        image: "Visual Assets/Other/SchemeTwist.webp",
+        // Add plutonium attribute conditionally
+        ...(scheme.name === "Steal the Weaponized Plutonium" && { plutonium: true })
+    };
+    deck.push(twistCard);
+}
 
     // Shuffle the deck
     deck = shuffle(deck);
@@ -2180,6 +2554,20 @@ killbotSchemeTwistCount += 3;
     return deck;
 }
 
+function initializeDemonGoblinDeck() {
+    if (demonGoblinDeckInitialized) return;
+    
+    const demonDeck = document.getElementById('demon-goblin-deck');
+    if (demonDeck) {
+        demonDeck.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDemonGoblinAttackButton();
+        });
+        demonGoblinDeckInitialized = true;
+    }
+}
+
+
 function initGame(heroes, villains, henchmen, mastermindName, scheme) {
     console.log('Initializing game with:');
     console.log('Heroes:', heroes);
@@ -2189,7 +2577,15 @@ function initGame(heroes, villains, henchmen, mastermindName, scheme) {
     console.log('Scheme:', scheme);
     console.log('Final Blow Enabled:', finalBlowEnabled);
 
+     bystanderDeck = buildBystanderDeck();
+
 let selectedExpansions = getSelectedExpansions();
+
+if (scheme.name === 'Capture Baby Hope') {
+    document.getElementById('scheme-token').style.display = 'flex';
+}
+
+initializeDemonGoblinDeck();
 
             // Filter the shuffled deck
             sidekickDeck = filterDeckByExpansions(sidekickDeck, selectedExpansions);
@@ -2257,7 +2653,7 @@ const mastermindCell = document.getElementById('mastermind');
 
     sortPlayerCards();
 
-    // Update the game board and draw the first villain card
+        // Update the game board and draw the first villain card
     updateGameBoard();
     drawVillainCard();
 
@@ -2269,6 +2665,9 @@ let isFirstTurn = true;
 
 async function drawVillainCard() {
     return new Promise((resolve, reject) => {
+        const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+        const scheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
         if (villainDeck.length === 0 && !impossibleToDraw) {
             showDrawPopup();
             resolve();
@@ -2300,17 +2699,20 @@ async function drawVillainCard() {
                 return;
             }
 
-            // Handle Master Strike and Scheme Twist before proceeding with any further draws
-            if (villainCard.name.includes('Master Strike')) {
-                handleMasterStrike(villainCard).then(() => {
-                    console.log('Master Strike handled.');
-                    drawVillainsRecursively(drawRemaining - 1); // Continue drawing villains after resolving Master Strike
-                }).catch((error) => {
-                    console.error('Error handling Master Strike:', error);
-                    drawVillainsRecursively(drawRemaining - 1); // Proceed even if there's an error
-                });
-            } else if (villainCard.name.includes('Scheme Twist')) {
-    await handleSchemeTwist(villainCard);
+if (villainCard.name.includes('Master Strike')) {
+    handleMasterStrike(villainCard).then(() => {
+        console.log('Master Strike handled.');
+        drawVillainsRecursively(drawRemaining - 1); // Continue drawing villains after resolving Master Strike
+    }).catch((error) => {
+        console.error('Error handling Master Strike:', error);
+        drawVillainsRecursively(drawRemaining - 1); // Proceed even if there's an error
+    });
+} else if (villainCard.name.includes('Scheme Twist')) {
+    if (villainCard.plutonium === true) {
+        await handlePlutoniumSchemeTwist(villainCard); // New function for plutonium Scheme Twists
+    } else {
+        await handleSchemeTwist(villainCard); // Original function for regular Scheme Twists
+    }
     
     // Check if we need to KO a hero after processing all Twists
     if (pendingHeroKO && schemeTwistChainDepth === 0) {
@@ -2321,10 +2723,13 @@ async function drawVillainCard() {
     await drawVillainsRecursively(drawRemaining - 1);
 } else {
                 // Handle Bystanders
-                if (villainCard.name === 'Bystander') {
+                if (villainCard.type === 'Bystander') {
                     handleBystander(villainCard);
                     drawVillainsRecursively(drawRemaining - 1);
-                } else {
+                }  else if (villainCard.type === 'Hero' && scheme.name === `X-Cutioner's Song`) {
+        handleXCutionerHero(villainCard);  // You'll need to implement this function
+        drawVillainsRecursively(drawRemaining - 1);
+    } else {
                     // Villain enters the city and we handle its movements and ambush effects
                     let sewersIndex = city.length - 1;
                     let previousCard = city[sewersIndex];
@@ -2336,7 +2741,7 @@ onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span>
                     // Move existing villains to the left
                     for (let j = sewersIndex - 1; j >= 0; j--) {
                         moveVillainsPromise = moveVillainsPromise.then(() => {
-                            return new Promise((resolveMove) => {
+                            return new Promise(async (resolveMove) => {
                                 if (city[j] === null) {
                                     city[j] = previousCard;
                                     previousCard = null;
@@ -2348,6 +2753,11 @@ onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span>
                                     previousCard = temp;
 
                                     if (j === 0 && previousCard) {
+                                            await new Promise((resolve) => {
+                                            showPopup('Villain Escape', previousCard, () => {
+                                              resolve();
+                                             });
+                                             });
                                         handleVillainEscape(previousCard).then(resolveMove).catch((error) => {
                                             console.error('Error in handleVillainEscape:', error);
                                             resolveMove();
@@ -2363,8 +2773,21 @@ onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span>
                     }
 
                     // Handle Ambush effects after moving villains
-                    moveVillainsPromise.then(() => {
+                    moveVillainsPromise.then(async () => {
+                        if (!villainCard.ambushEffect || villainCard.ambushEffect === "None") {
+                            await new Promise((resolve) => {
+                                            showPopup('Villain Arrival', villainCard, () => {
+                                              resolve();
+                                             });
+                                             });
+                                            }
+
                         if (villainCard.ambushEffect && villainCard.ambushEffect !== "None") {
+                                            await new Promise((resolve) => {
+                                            showPopup('Villain Ambush', villainCard, () => {
+                                              resolve();
+                                             });
+                                             });
                             const ambushEffectFunction = window[villainCard.ambushEffect];
                             if (typeof ambushEffectFunction === 'function') {
                                 let ambushEffectPromise = new Promise((resolveAmbush, rejectAmbush) => {
@@ -2418,14 +2841,19 @@ function handleBystander(bystanderCard) {
             attachBystanderToVillain(closestVillainIndex, bystanderCard);
         } else {
             // If no villains in the city, attach to the mastermind
-            attachBystanderToMastermind(bystanderCard);
+            attachBystanderToMastermindFromVillainDeck(bystanderCard);
         }
     }
 
     updateGameBoard();
 }
 
-function attachBystanderToVillain(villainIndex, bystanderCard) {
+async function attachBystanderToVillain(villainIndex, bystanderCard) {
+        await new Promise((resolve) => {
+        showPopup('Bystander to Villain', bystanderCard, () => {
+            resolve();
+        });
+    });
     if (city[villainIndex].bystander) {
         city[villainIndex].bystander.push(bystanderCard);
     } else {
@@ -2435,9 +2863,10 @@ function attachBystanderToVillain(villainIndex, bystanderCard) {
     // Access the villain object using the index to get its name
     const villain = city[villainIndex]; 
 
+updateGameBoard();
 
    // Log the villain's name correctly
-    onscreenConsole.log(`Bystander captured by <span class="console-highlights">${villain.name}</span>.`);
+    onscreenConsole.log(`<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${villain.name}</span>.`);
 
 }
 
@@ -2450,57 +2879,260 @@ function findClosestVillain() {
     return -1;
 }
 
-function attachBystanderToMastermind(bystanderCard) {
+async function attachBystanderToMastermindFromVillainDeck(bystanderCard) {
+    await new Promise((resolve) => {
+        showPopup('Bystander to Mastermind', bystanderCard, () => {
+            resolve();
+        });
+    });
 let mastermind = getSelectedMastermind();
     mastermind.bystanders.push(bystanderCard);
     updateMastermindOverlay();
 
-    onscreenConsole.log(`Bystander captured by <span class="console-highlights">${mastermind.name}</span>.`);
+    onscreenConsole.log(`<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${mastermind.name}</span>.`);
+
+}
+
+async function attachBystanderToMastermind(bystanderCard) {
+
+let mastermind = getSelectedMastermind();
+    mastermind.bystanders.push(bystanderCard);
+    updateMastermindOverlay();
+
+    onscreenConsole.log(`<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${mastermind.name}</span>.`);
 
 }
 
 function updateMastermindOverlay() {
     const mastermindCard = document.getElementById('mastermind');
     const overlay = mastermindCard.querySelector('.overlay');
-let mastermind = getSelectedMastermind();
-    const bystanderCount = mastermind.bystanders.length;
+    let mastermind = getSelectedMastermind();
+    const bystanderCount = mastermind.bystanders ? mastermind.bystanders.length : 0;
 
+    // Clear any existing bystander overlays
+    const existingBystanderOverlay = mastermindCard.querySelector('.bystander-overlay');
+    const existingBystanderExpanded = mastermindCard.querySelector('.expanded-bystanders');
+    if (existingBystanderOverlay) existingBystanderOverlay.remove();
+    if (existingBystanderExpanded) existingBystanderExpanded.remove();
 
+    // Clear any existing XCutioner overlays
+    const existingXCutionerOverlay = mastermindCard.querySelector('.XCutioner-overlay');
+    const existingXCutionerExpanded = mastermindCard.querySelector('.expanded-XCutionerHeroes');
+    if (existingXCutionerOverlay) existingXCutionerOverlay.remove();
+    if (existingXCutionerExpanded) existingXCutionerExpanded.remove();
 
+    // Update mastermindPermBuff for Mr. Sinister
+    if (mastermind.name === 'Mr. Sinister') {
+        mastermindPermBuff = bystanderCount;
+    }
+
+    // XCutioner Heroes section
+    if (mastermind.XCutionerHeroes && mastermind.XCutionerHeroes.length > 0) {
+        const XCutionerOverlay = document.createElement('div');
+        XCutionerOverlay.className = 'XCutioner-overlay';
+        
+        let XCutionerOverlayText = `${mastermind.XCutionerHeroes.length} Hero${mastermind.XCutionerHeroes.length > 1 ? 'es' : ''}`;
+        XCutionerOverlay.innerHTML = XCutionerOverlayText;
+        XCutionerOverlay.style.whiteSpace = 'pre-line';
+
+        const XCutionerExpandedContainer = document.createElement('div');
+        XCutionerExpandedContainer.className = 'expanded-XCutionerHeroes';
+        XCutionerExpandedContainer.style.display = 'none';
+        
+        mastermind.XCutionerHeroes.forEach(hero => {
+            const XCutionerHeroElement = document.createElement('span');
+            XCutionerHeroElement.className = 'XCutioner-hero-name';
+            XCutionerHeroElement.textContent = hero.name;
+            XCutionerHeroElement.dataset.image = hero.image;
+            
+            XCutionerHeroElement.addEventListener('mouseover', (e) => {
+                e.stopPropagation();
+                showZoomedImage(hero.image);
+                const card = cardLookup[normalizeImagePath(hero.image)];
+                if (card) updateRightPanel(card);
+            });
+            
+            XCutionerHeroElement.addEventListener('mouseout', (e) => {
+                e.stopPropagation();
+                if (!activeImage) hideZoomedImage();
+            });
+            
+            XCutionerHeroElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                activeImage = activeImage === hero.image ? null : hero.image;
+                showZoomedImage(activeImage || '');
+            });
+            
+            XCutionerExpandedContainer.appendChild(XCutionerHeroElement);
+        });
+
+        XCutionerOverlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            XCutionerExpandedContainer.style.display = XCutionerExpandedContainer.style.display === 'none' ? 'block' : 'none';
+            
+            if (XCutionerExpandedContainer.style.display === 'block') {
+                setTimeout(() => {
+                    document.addEventListener('click', (e) => {
+                        if (!XCutionerExpandedContainer.contains(e.target)) {
+                            XCutionerExpandedContainer.style.display = 'none';
+                        }
+                    }, { once: true });
+                }, 50);
+            }
+        });
+
+        mastermindCard.appendChild(XCutionerOverlay);
+        mastermindCard.appendChild(XCutionerExpandedContainer);
+    }
+
+    // Bystanders section
     if (bystanderCount > 0) {
-        overlay.innerText = bystanderCount === 1 ? `1 Bystander` : `${bystanderCount} Bystanders`;
-        overlay.classList.add('visible');
+        const bystanderOverlay = document.createElement('div');
+        bystanderOverlay.className = 'bystander-overlay';
+        
+        let bystanderOverlayText = `${bystanderCount} Bystander${bystanderCount > 1 ? 's' : ''}`;
+        bystanderOverlay.innerHTML = bystanderOverlayText;
+        bystanderOverlay.style.whiteSpace = 'pre-line';
+
+        const bystanderExpandedContainer = document.createElement('div');
+        bystanderExpandedContainer.className = 'expanded-bystanders';
+        bystanderExpandedContainer.style.display = 'none';
+        
+        mastermind.bystanders.forEach(bystander => {
+            const bystanderElement = document.createElement('span');
+            bystanderElement.className = 'bystander-name';
+            bystanderElement.textContent = bystander.name;
+            bystanderElement.dataset.image = bystander.image;
+            
+            bystanderElement.addEventListener('mouseover', (e) => {
+                e.stopPropagation();
+                showZoomedImage(bystander.image);
+                const card = cardLookup[normalizeImagePath(bystander.image)];
+                if (card) updateRightPanel(card);
+            });
+            
+            bystanderElement.addEventListener('mouseout', (e) => {
+                e.stopPropagation();
+                if (!activeImage) hideZoomedImage();
+            });
+            
+            bystanderElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                activeImage = activeImage === bystander.image ? null : bystander.image;
+                showZoomedImage(activeImage || '');
+            });
+            
+            bystanderExpandedContainer.appendChild(bystanderElement);
+        });
+
+        bystanderOverlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bystanderExpandedContainer.style.display = bystanderExpandedContainer.style.display === 'none' ? 'block' : 'none';
+            
+            if (bystanderExpandedContainer.style.display === 'block') {
+                setTimeout(() => {
+                    document.addEventListener('click', (e) => {
+                        if (!bystanderExpandedContainer.contains(e.target)) {
+                            bystanderExpandedContainer.style.display = 'none';
+                        }
+                    }, { once: true });
+                }, 50);
+            }
+        });
+
+        mastermindCard.appendChild(bystanderOverlay);
+        mastermindCard.appendChild(bystanderExpandedContainer);
     } else {
         overlay.classList.remove('visible');
     }
-updateGameBoard();
 }
+
 
 function handleMasterStrike(masterStrikeCard) {
     updateGameBoard();
-    return new Promise((resolve, reject) => {
-        koPile.push(masterStrikeCard); // Move Master Strike to KO Pile
+    
+    return new Promise(async (resolve) => {
+        // First handle Cable cards if any exist
+        const cableCards = playerHand.filter(card => card.name === 'Cable - Disaster Survivalist');
         
+        if (cableCards.length > 0) {
+            await processCableCards(cableCards);
+        }
+        
+        // Then always handle the Master Strike effect
+        await handleMasterStrikeEffect(masterStrikeCard);
+        
+        resolve();
+    });
+}
 
-        const mastermind = getSelectedMastermind();
-        const masterStrikeFunctionName = mastermind.masterStrike;
+async function processCableCards(cableCards) {
+    for (const card of cableCards) {
+        const choice = await askToDiscardCable(card);
+        if (choice) {
+            const cardIndex = playerHand.findIndex(c => c === card);
+            if (cardIndex !== -1) {
+                playerHand.splice(cardIndex, 1);
+                nextTurnsDraw += 3;
+                await checkDiscardForInvulnerability(card);
+                onscreenConsole.log(`Draw three extra cards at the end of this turn.`);
+            }
+        }
+        updateGameBoard();
+    }
+}
 
-onscreenConsole.log(`<span class="console-highlights">Master Strike!</span> ${mastermind.masterStrikeConsoleLog}`);
+function askToDiscardCable(card) {
+    return new Promise((resolve) => {
+        const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+            `A Master Strike is about to be played. Would you like to discard <span style="console-highlights">${card.name}</span> to draw 3 extra cards next turn?`,
+            "Yes",
+            "No"
+        );
 
-        // Call showPopup and pass a dynamic function based on the mastermind's masterStrike attribute
-        showPopup('Master Strike', () => {
+        const cardImage = document.getElementById('hero-ability-may-card');
+        cardImage.src = card.image;
+        cardImage.style.display = 'block';
+        document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+        confirmButton.onclick = function() {
+            cleanup();
+            resolve(true);
+        };
+
+        denyButton.onclick = function() {
+            cleanup();
+            resolve(false);
+        };
+
+        function cleanup() {
+            hideHeroAbilityMayPopup();
+            cardImage.src = '';
+            cardImage.style.display = 'none';
+            document.getElementById('heroAbilityHoverText').style.display = 'block';
+        }
+    });
+}
+
+async function handleMasterStrikeEffect(masterStrikeCard) {
+    koPile.push(masterStrikeCard);
+    const mastermind = getSelectedMastermind();
+    const masterStrikeFunctionName = mastermind.masterStrike;
+
+    onscreenConsole.log(`<span class="console-highlights">Master Strike!</span> ${mastermind.masterStrikeConsoleLog}`);
+
+    await new Promise((resolve) => {
+        showPopup('Master Strike', masterStrikeCard, () => {
             if (typeof window[masterStrikeFunctionName] === 'function') {
                 try {
-                    window[masterStrikeFunctionName](); // Dynamically call the function
-                    resolve();  // Resolve after the Master Strike effect is handled
+                    window[masterStrikeFunctionName]();
                 } catch (error) {
                     console.error(`Error executing Master Strike function: ${error}`);
-                    reject(error);
                 }
             } else {
                 console.error(`No function named ${masterStrikeFunctionName} found.`);
-                resolve();  // Resolve even if no function is found
             }
+            resolve();
         });
     });
 }
@@ -2525,7 +3157,7 @@ function handleSchemeTwist(schemeTwistCard) {
             onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
         }
 
-        showPopup('Scheme Twist', async () => {
+        showPopup('Scheme Twist', schemeTwistCard, async () => {
             updateGameBoard();
             
             // Mark that we're in a Scheme Twist chain
@@ -2556,11 +3188,68 @@ function handleSchemeTwist(schemeTwistCard) {
     });
 }
 
+function handlePlutoniumSchemeTwist(villainCard) {
+updateGameBoard();
+    return new Promise((resolve) => {
+        // Get selected scheme
+        const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+        const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+  
+        schemeTwistCount += 1;
+
+        // Log appropriate message
+        if (selectedScheme.variableTwist === false) {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
+        } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[`twistText${schemeTwistCount}`]}`);
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
+        }
+
+         showPopup('Scheme Twist', villainCard, async () => {
+            updateGameBoard();
+            
+            // Mark that we're in a Scheme Twist chain
+            schemeTwistChainDepth++;
+            
+            // Run the twist effect if it exists
+            if (selectedScheme.twistEffect && selectedScheme.twistEffect !== "None") {
+                const twistEffectFunction = window[selectedScheme.twistEffect];
+                if (typeof twistEffectFunction === 'function') {
+                    try {
+                        await twistEffectFunction(villainCard);
+                    } catch (error) {
+                        console.error('Error in twist effect:', error);
+                    }
+                }
+            }
+            
+            // Decrement depth and check if we're at the end of the chain
+            schemeTwistChainDepth--;
+            
+            // If this was the last Twist in the chain, trigger KO
+            if (schemeTwistChainDepth === 0) {
+                pendingHeroKO = true;
+            }
+            
+            resolve();
+        });
+    });
+}
+
+
   function defaultWoundDraw() {
   if (woundDeck.length > 0) {
     const gainedWound = woundDeck.pop();
-    playerDiscardPile.push(gainedWound);
-    onscreenConsole.log("Wound gained.");
+    const mastermind = getSelectedMastermind();
+
+    if (mastermind.name === 'Mephisto') {
+        playerDeck.push(gainedWound);
+        onscreenConsole.log("Wound gained and put on top of your deck.");
+    } else {
+        playerDiscardPile.push(gainedWound);
+        onscreenConsole.log("Wound gained.");
+    }
     updateGameBoard();
   } else {
     onscreenConsole.log("No wounds left. You've taken enough damage!");
@@ -2573,14 +3262,30 @@ function handleVillainEscape(escapedVillain) {
         // If the villain has bystanders attached, move them as well
         if (escapedVillain.bystander && escapedVillain.bystander.length > 0) {
             escapedVillain.bystander.forEach(bystander => {
-                escapedVillainsDeck.push(bystander); // Move the bystanders to the escaped villains deck
+                escapedVillainsDeck.push(bystander);
                 onscreenConsole.log(`Bystander escaped with <span class="console-highlights">${escapedVillain.name}</span>.`);
             });
         }
 
-if (escapedVillain.skrulled === true) {
-escapedVillain.type = 'Hero';
-} 
+        // If the villain has captured plutonium, move it as well
+        if (escapedVillain.plutoniumCaptured && escapedVillain.plutoniumCaptured.length > 0) {
+            escapedVillain.plutoniumCaptured.forEach(plutonium => {
+                escapedVillainsDeck.push(plutonium);
+                onscreenConsole.log(`Plutonium escaped with <span class="console-highlights">${escapedVillain.name}</span>.`);
+            });
+        }
+
+        if (escapedVillain.XCutionerHeroes && escapedVillain.XCutionerHeroes.length > 0) {
+            escapedVillain.XCutionerHeroes.forEach(hero => {
+                escapedVillainsDeck.push(hero);
+                onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> was carried off by <span class="console-highlights">${escapedVillain.name}</span>.`);
+            });
+        }
+
+        // Handle Skrull transformation if needed
+        if (escapedVillain.skrulled === true) {
+            escapedVillain.type = 'Hero';
+        } 
 
         // Move the villain itself to the Escaped Villains deck
         escapedVillainsDeck.push(escapedVillain);
@@ -2766,6 +3471,7 @@ heroImage.style.display = 'none';
         heroSelectPopup.style.display = 'block';
     });
 }
+
 function returnHeroToDeck(index) {
     const hero = hq[index];
     if (hero) {
@@ -2785,26 +3491,67 @@ function returnHeroToDeck(index) {
     }
 }
 
-function showPopup(type, confirmCallback) {
+function showPopup(type, drawnCard, confirmCallback) {
     const popup = document.getElementById('popup');
     const popupTitle = document.getElementById('popup-title');
+    const popupContext = document.getElementById('popup-context');
     const confirmBtn = document.getElementById('popup-confirm');
     const modalOverlay = document.getElementById('modal-overlay');
 const popupImage = document.getElementById('popup-single-image');
 
-    popupTitle.innerText = type;
     confirmBtn.innerText = getRandomConfirmText();
 
+    const mastermind = getSelectedMastermind();
+
+     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+        const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+  
     modalOverlay.style.display = 'block';
     popup.style.display = 'block';
 
     // Check and set image based on the type
-    if (type === 'Master Strike') {
+     if (type === 'Master Strike') {
+        popupTitle.innerText = `Master Strike`;
         popupImage.style.display = 'block';
-        popupImage.style.backgroundImage = "url('Visual Assets/Other/MasterStrike.webp')";
+        popupContext.innerHTML = mastermind.masterStrikeConsoleLog;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
     } else if (type === 'Scheme Twist') {
+        popupTitle.innerText = `Scheme Twist`;
         popupImage.style.display = 'block';
-        popupImage.style.backgroundImage = "url('Visual Assets/Other/SchemeTwist.webp')";
+        if (selectedScheme.variableTwist === false) {
+             popupContext.innerHTML = `<span class="console-highlights">Twist ${schemeTwistCount}:</span> ${selectedScheme.twistText}`;
+        } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
+             popupContext.innerHTML = `<span class="console-highlights">Twist ${schemeTwistCount}:</span> ${selectedScheme[`twistText${schemeTwistCount}`]}`;
+        } else {
+             popupContext.innerHTML = ``;
+        }
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Bystander to Mastermind') {
+        popupTitle.innerText = `Bystander`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `No Villains in the city. <span class="console-highlights">${drawnCard.name}</span> will be captured by <span class="console-highlights">${mastermind.name}</span>.`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Bystander to Villain') {
+        popupTitle.innerText = `Bystander`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `<span class="console-highlights">${drawnCard.name}</span> will be captured by the Villain closest to the Villain deck.`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Villain Escape') {
+        popupTitle.innerText = `Escape`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `A new Villain in the city means <span class="console-highlights">${drawnCard.name}</span> escapes!`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Villain Ambush') {
+        popupTitle.innerText = `Ambush`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `<span class="console-highlights">${drawnCard.name}</span> enters the city with an ambush!`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Villain Arrival') {
+        popupTitle.innerText = `Villain`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `<span class="console-highlights">${drawnCard.name}</span> enters the city.`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
     } else {
         popupImage.style.display = 'none'; // Hide image if the type is unknown
     }
@@ -2812,6 +3559,7 @@ const popupImage = document.getElementById('popup-single-image');
     const closePopup = () => {
         popup.style.display = 'none';
 popupImage.style.display = 'none';
+popupContext.innerHTML = ``;
         modalOverlay.style.display = 'none';
         confirmBtn.removeEventListener('click', onConfirm);
     };
@@ -2849,6 +3597,7 @@ function setupMinimizeSystem() {
 
 // Minimize a specific popup
 function minimizePopup(popup) {
+    popupMinimized = true;
     for (let i = 0; i < hq.length; i++) {
         const hqCell = document.querySelector(`#hq-${i + 1}`);
         if (hqCell && hqCell.clickHandler) {
@@ -2864,6 +3613,12 @@ function minimizePopup(popup) {
             cityCell.removeEventListener('click', cityCell.clickHandler);
             cityCell.clickHandler = null;
         }
+    }
+
+        if (demonGoblinDeck.length > 0) {
+        const demonDeck = document.getElementById('demon-goblin-deck');
+        demonDeck.removeEventListener('click', demonDeck.clickHandler);
+        demonDeck.clickHandler = null;
     }
 
     // Remove Player Hand click handlers
@@ -2914,6 +3669,7 @@ function minimizePopup(popup) {
 
 // Maximize all minimized popups
 function maximizeAllPopups() {
+    popupMinimized = false;
     // Re-enable HQ click handlers
     for (let i = 0; i < hq.length; i++) {
         const hqCell = document.querySelector(`#hq-${i + 1}`);
@@ -2936,6 +3692,12 @@ function maximizeAllPopups() {
                 cityCell.addEventListener('click', cityCell.clickHandler);
             }
         }
+    }
+
+    if (demonGoblinDeck.length > 0) {
+        const demonDeck = document.getElementById('demon-goblin-deck');
+        demonDeck.clickHandler = () => showDemonGoblinAttackButton();
+                demonDeck.addEventListener('click', demonDeck.clickHandler);
     }
 
     // Re-enable Player Hand click handlers
@@ -3092,49 +3854,85 @@ function updateHighlights() {
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
     // Highlight villains in city
-    for (let i = 0; i < city.length; i++) {
-        const cityCell = document.querySelector(`#city-${i + 1}`);
-        cityCell.classList.remove('attackable');
+for (let i = 0; i < city.length; i++) {
+    const cityCell = document.querySelector(`#city-${i + 1}`);
+    cityCell.classList.remove('attackable');
+    cityCell.classList.remove('needs-recruit');
+    
+    if (city[i]) {
+        // First check if fight condition is met (if it exists)
+        const hasFightCondition = city[i].fightCondition && city[i].fightCondition !== "None";
+        const conditionMet = !hasFightCondition || isVillainConditionMet(city[i]);
         
-        if (city[i]) {
+        if (conditionMet) {
             // Calculate effective attack value
-            const villainAttack = recalculateVillainAttack(city[i], selectedScheme);
+            const villainAttack = recalculateVillainAttack(city[i]);
             
             // Check if attackable with current points
             const canAttackWithAttackPoints = totalAttackPoints >= villainAttack;
-            const canAttackWithRecruitPoints = recruitUsedToAttack && 
-                                             (totalAttackPoints + totalRecruitPoints >= villainAttack) && 
-                                             (totalAttackPoints < villainAttack); // Only show if recruit is needed
+            const hasBribeKeyword = city[i].keyword1 === "Bribe" || 
+                        city[i].keyword2 === "Bribe" || 
+                        city[i].keyword3 === "Bribe";
+            const canAttackWithRecruitPoints = (recruitUsedToAttack || hasBribeKeyword) && 
+                                  (totalAttackPoints + totalRecruitPoints >= villainAttack);
             
             if (canAttackWithAttackPoints || canAttackWithRecruitPoints) {
                 cityCell.classList.add('attackable');
-                
+               
                 // Add special class if recruit points would be needed
                 if (canAttackWithRecruitPoints) {
                     cityCell.classList.add('needs-recruit');
-                } else {
-                    cityCell.classList.remove('needs-recruit');
                 }
             }
         }
     }
+}
+
+if (demonGoblinDeck.length > 0) {
+    const demonGoblinAttackCost = 2;
+    const demonDeck = document.getElementById('demon-goblin-deck');
+    
+    if (demonDeck) {
+        // Calculate available attack power
+        const availableAttack = recruitUsedToAttack 
+            ? totalAttackPoints + totalRecruitPoints 
+            : totalAttackPoints;
+        
+        // Check if attackable
+        const isAttackable = availableAttack >= demonGoblinAttackCost;
+        
+        // Toggle the 'attackable' class
+        if (isAttackable) {
+            demonDeck.classList.add('attackable');
+        } else {
+            demonDeck.classList.remove('attackable');
+        }
+    }
+}
 
   let mastermind = getSelectedMastermind();
-    let mastermindAttack = recalculateMastermindAttack(mastermind);
-    
-    const canAttackMastermind = totalAttackPoints >= mastermindAttack || 
-                              (recruitUsedToAttack && 
-                               (totalAttackPoints + totalRecruitPoints >= mastermindAttack) &&
-                               (totalAttackPoints < mastermindAttack));
-    
-    if (canAttackMastermind) {
-        document.getElementById("mastermind").classList.add('attackable');
-        if (totalAttackPoints < mastermindAttack) {
-            document.getElementById("mastermind").classList.add('needs-recruit');
-        }
-    } else {
-        document.getElementById("mastermind").classList.remove('attackable', 'needs-recruit');
+let mastermindAttack = recalculateMastermindAttack(mastermind);
+
+// Check if Mastermind has Bribe keyword (or if any of its cards do)
+const hasMastermindBribe = mastermind.keyword1 === "Bribe" || 
+                           mastermind.keyword2 === "Bribe" || 
+                           mastermind.keyword3 === "Bribe";
+
+const canAttackWithRecruitPoints = (recruitUsedToAttack || hasMastermindBribe) && 
+                                 (totalAttackPoints + totalRecruitPoints >= mastermindAttack) &&
+                                 (totalAttackPoints < mastermindAttack);
+
+const canAttackMastermind = totalAttackPoints >= mastermindAttack || 
+                          canAttackWithRecruitPoints;
+
+if (canAttackMastermind) {
+    document.getElementById("mastermind").classList.add('attackable');
+    if (totalAttackPoints < mastermindAttack) {
+        document.getElementById("mastermind").classList.add('needs-recruit');
     }
+} else {
+    document.getElementById("mastermind").classList.remove('attackable', 'needs-recruit');
+}
 }
 
 let isRecruiting = false; // Flag to track if a hero is being recruited
@@ -3188,29 +3986,77 @@ function updateGameBoard() {
     }
 }
 
+const stackedCardsByMastermind = document.getElementById('stacked-mastermind-cards');
+const stackedCardsByMastermindCount = document.getElementById('stacked-mastermind-cards-count');
+
+if (stackedTwistNextToMastermind > 0) {
+stackedCardsByMastermind.style.display = 'flex';
+stackedCardsByMastermindCount.style.display = 'block';
+stackedCardsByMastermindCount.textContent = stackedTwistNextToMastermind;
+} else {
+stackedCardsByMastermind.style.display = 'none';
+stackedCardsByMastermindCount.style.display = 'none'; 
+}
+
+// Define explosion values (modify if your variables are named differently)
+const explosionValues = [hqExplosion1, hqExplosion2, hqExplosion3, hqExplosion4, hqExplosion5];
+
+for (let i = 1; i <= 5; i++) {
+    const explosionIcon = document.getElementById(`hq-${i}-explosion`);
+    const explosionCount = document.getElementById(`hq-${i}-explosion-count`);
+    const value = explosionValues[i - 1] || 0; // Fallback to 0 if undefined
+
+    if (value > 0) {
+        // Always show icon/count if > 0
+        explosionIcon.style.display = 'block';
+        explosionCount.style.display = 'block';
+        explosionCount.textContent = value;
+
+        // Special styling when >= 6 explosions
+        if (value >= 6) {
+            explosionIcon.style.height = '100%';
+            explosionIcon.style.opacity = '1';
+            explosionIcon.style.filter = 'drop-shadow(0 0 8px red)';
+            explosionIcon.classList.add('max-explosions'); // Optional CSS class
+        } else {
+            // Reset to defaults if < 6
+            explosionIcon.style.height = '';
+            explosionIcon.style.opacity = '';
+            explosionIcon.style.filter = '';
+            explosionIcon.classList.remove('max-explosions');
+        }
+    } else {
+        // Hide if no explosions
+        explosionIcon.style.display = 'none';
+        explosionCount.style.display = 'none';
+    }
+}
+
 updateDeckCounts();
 
         for (let i = 0; i < city.length; i++) {
         const cityCell = document.querySelector(`#city-${i + 1}`);
         cityCell.innerHTML = ''; // Clear the existing content
 
-        const tempBuffOverlay = document.createElement('div');
-        const tempBuffVariableName = `city${i + 1}TempBuff`; // Construct the variable name (e.g., "city1TempBuff")
-        const currentTempBuff = window[tempBuffVariableName]; // Access the variable using window
-
-        if (currentTempBuff !== 0) {
-            tempBuffOverlay.className = 'temp-buff-overlay';
-            tempBuffOverlay.id = `city-${i + 1}-temp-buff`; // Assign the ID based on the city cell number
-            tempBuffOverlay.innerHTML = `<p>${currentTempBuff} <img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'></p>`; // Display the actual buff value
-            cityCell.appendChild(tempBuffOverlay);
-        }
+        cityCell.innerHTML = '';
+        const newCityCell = cityCell.cloneNode(false);
+        cityCell.parentNode.replaceChild(newCityCell, cityCell);
 
 victoryPile.forEach(item => {
-    if (item.name === 'Killbot') {
-        item.name = 'Bystander'; 
-        item.type = 'Bystander';
-item.attack = 0;
-item.image = "Visual Assets/Other/Bystander.webp"
+    if (item.killbot && item.originalBystanderData) {
+        // Restore original bystander with all properties
+        const original = item.originalBystanderData;
+        Object.keys(original).forEach(key => {
+            item[key] = original[key];
+        });
+        
+        // Clear killbot-specific properties
+        item.killbot = false;
+        item.overlayTextAttack = null;
+        item.fightEffect = "None"; // Reset fight effect
+        
+        // Ensure type is properly reset
+        item.type = "Bystander";
     }
 });
 
@@ -3314,17 +4160,19 @@ if (playedCardsPileImage) {
     console.warn('played-cards-deck-pile element not found');
 }
 
-const permBuffOverlay = document.createElement('div');
-        const permBuffVariableName = `city${i + 1}PermBuff`; // Construct the variable name (e.g., "city1TempBuff")
-        const currentPermBuff = window[permBuffVariableName]; // Access the variable using window
-
-        if (currentPermBuff !== 0) {
-            permBuffOverlay.className = 'perm-buff-overlay';
-            permBuffOverlay.id = `city-${i + 1}-perm-buff`; // Assign the ID based on the city cell number
-            permBuffOverlay.innerHTML = `<p>+${currentPermBuff} <img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'></p>`; // Display the actual buff value
-            cityCell.appendChild(permBuffOverlay);
-        }
-
+const demonGoblinDeckImage = document.getElementById('demon-goblin-deck');
+const demonGoblinCount = document.getElementById('demon-goblin-count');
+if (demonGoblinDeckImage) {
+    if (demonGoblinDeck.length > 0) {
+        demonGoblinDeckImage.style.display = 'flex';
+        demonGoblinCount.innerHTML = `${demonGoblinDeck.length}`;
+    } else {
+        demonGoblinDeckImage.style.display = 'none';
+        demonGoblinCount.innerHTML = ``;
+    }
+} else {
+    console.warn('demon-goblin-deck element not found');
+}
 
         const tempBuffOverlayMastermind = document.getElementById('mastermind-temp-buff');
 
@@ -3348,32 +4196,90 @@ if (city[i]) {
     // Create a container to hold the card image and overlays
     const cardContainer = document.createElement('div');
     cardContainer.classList.add('card-container'); // Add a class for styling the container
+    newCityCell.appendChild(cardContainer);
 
     // Create an image element
     const cardImage = document.createElement('img');
     cardImage.src = city[i].image; // Use the image property from the card object
     cardImage.alt = city[i].name; // Set alt text as the card name
     cardImage.classList.add('card-image'); // Add a class for styling if needed
-
-    // Append the image to the container
     cardContainer.appendChild(cardImage);
 
-    // Append the container to the city cell
-    cityCell.appendChild(cardContainer);
+                // Add buff overlays
+            const currentTempBuff = window[`city${i + 1}TempBuff`];
+            if (currentTempBuff !== 0) {
+                const tempBuffOverlay = document.createElement('div');
+                tempBuffOverlay.className = 'temp-buff-overlay';
+                tempBuffOverlay.innerHTML = `<p>${currentTempBuff} <img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'></p>`;
+                cardContainer.appendChild(tempBuffOverlay);
+            }
+
+            const currentPermBuff = window[`city${i + 1}PermBuff`];
+            if (currentPermBuff !== 0) {
+                const permBuffOverlay = document.createElement('div');
+                permBuffOverlay.className = 'perm-buff-overlay';
+                permBuffOverlay.innerHTML = `<p>+${currentPermBuff} <img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'></p>`;
+                cardContainer.appendChild(permBuffOverlay);
+            }
+
 
     // If the city[i].name is 'Killbot', set the overlayTextAttack
-    if (city[i].name === 'Killbot') {
+    if (city[i].killbot === true) {
         city[i].overlayTextAttack = `${killbotAttack}`;
+
+        const killbotOverlay = document.createElement('div');
+        killbotOverlay.className = 'killbot-overlay';
+        killbotOverlay.innerHTML = 'KILLBOT';
+
+        // Append the attack overlay directly to the container (over the image)
+        cardContainer.appendChild(killbotOverlay);
     }
+
+    if (city[i].goblinQueen === true) {
+        city[i].attack = city[i].cost + demonGoblinDeck.length;
+        city[i].overlayTextAttack = `${city[i].attack}`;
+    }
+
+if (city[i].babyHope === true && !city[i].babyBonusApplied) {
+    city[i].attack += 4;
+    city[i].babyBonusApplied = true; // Mark as processed
+}
+
+// Always re-add overlay if babyHope is true (even if bonus was already applied)
+if (city[i].babyHope === true) {
+    // Clear existing overlay to avoid duplicates
+    const existingOverlay = cardContainer.querySelector('.villain-baby-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    // Create and append new overlay
+    const babyOverlay = document.createElement('div');
+    babyOverlay.className = 'villain-baby-overlay';
+    babyOverlay.innerHTML = `Baby<br>Hope`;
+  
+    cardContainer.appendChild(babyOverlay);
+}
+
+updateMastermindOverlay();
+
+if (city[i].team === 'Four Horsemen' && mastermind.name === 'Apocalypse') {
+    city[i].attack += 2;
+    city[i].overlayTextAttack = `${city[i].attack}`;
+}
+
 
     // Check if the villain has an overlayText (indicating captured hero or attack)
     if (city[i].overlayText) {
         const villainOverlay = document.createElement('div');
         villainOverlay.className = 'skrull-overlay';
         villainOverlay.innerHTML = `${city[i].overlayText}`;
-
-        // Append the overlay directly to the container (over the image)
         cardContainer.appendChild(villainOverlay);
+    }
+
+        if (city[i].capturedOverlayText) {
+        const capturedVillainOverlay = document.createElement('div');
+        capturedVillainOverlay.className = 'captured-overlay';
+        capturedVillainOverlay.innerHTML = `${city[i].capturedOverlayText}`;
+        cardContainer.appendChild(capturedVillainOverlay);
     }
 
     // Check if the villain has an overlayTextAttack
@@ -3381,33 +4287,168 @@ if (city[i]) {
         const villainOverlayAttack = document.createElement('div');
         villainOverlayAttack.className = 'attack-overlay';
         villainOverlayAttack.innerHTML = city[i].overlayTextAttack;
-
-        // Append the attack overlay directly to the container (over the image)
         cardContainer.appendChild(villainOverlayAttack);
     }
 
 if (city[i].bystander) {
-    const overlay = document.createElement('div');
-    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                
+                // Create overlay text
+                let overlayText = `${city[i].bystander.length} Bystander${city[i].bystander.length > 1 ? 's' : ''}`;
+                const selectedScheme = schemes.find(s => s.name === document.querySelector('#scheme-section input[type=radio]:checked').value);
+                
+                if (selectedScheme.name === 'Midtown Bank Robbery') {
+                    overlayText += `<br>+${city[i].bystander.length} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
+                }
+                
+                if (city[i].bonusBystanderAttack > 0) {
+                    overlayText += `<br>+${city[i].bonusBystanderAttack * city[i].bystander.length} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
+                }
 
-    overlay.className = 'overlay';
+                overlay.innerHTML = overlayText;
+                overlay.style.whiteSpace = 'pre-line';
+
+                // Expanded container
+                const expandedContainer = document.createElement('div');
+                expandedContainer.className = 'expanded-bystanders';
+                expandedContainer.style.display = 'none';
+                
+                city[i].bystander.forEach(bystander => {
+                    const bystanderElement = document.createElement('span');
+                    bystanderElement.className = 'bystander-name';
+                    bystanderElement.textContent = bystander.name;
+                    bystanderElement.dataset.image = bystander.image;
+                    
+                    bystanderElement.addEventListener('mouseover', (e) => {
+                        e.stopPropagation();
+                        showZoomedImage(bystander.image);
+                        const card = cardLookup[normalizeImagePath(bystander.image)];
+                        if (card) updateRightPanel(card);
+                    });
+                    
+                    bystanderElement.addEventListener('mouseout', (e) => {
+                        e.stopPropagation();
+                        if (!activeImage) hideZoomedImage();
+                    });
+                    
+                    bystanderElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeImage = activeImage === bystander.image ? null : bystander.image;
+                        showZoomedImage(activeImage || '');
+                    });
+                    
+                    expandedContainer.appendChild(bystanderElement);
+                });
+
+                // Overlay click handler
+                overlay.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    expandedContainer.style.display = expandedContainer.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (expandedContainer.style.display === 'block') {
+                        setTimeout(() => {
+                            document.addEventListener('click', (e) => {
+                                if (!expandedContainer.contains(e.target)) {
+                                    expandedContainer.style.display = 'none';
+                                }
+                            }, { once: true });
+                        }, 50);
+                    }
+                });
+
+                cardContainer.appendChild(overlay);
+                cardContainer.appendChild(expandedContainer);
+            }
+
+if (city[i].XCutionerHeroes && city[i].XCutionerHeroes.length > 0) {
+                const XCutionerOverlay = document.createElement('div');
+                XCutionerOverlay.className = 'XCutioner-overlay';
+                
+                // Create overlay text
+                let XCutionerOverlayText = `${city[i].XCutionerHeroes.length} Hero${city[i].XCutionerHeroes.length > 1 ? 'es' : ''}`;
+                const selectedScheme = schemes.find(s => s.name === document.querySelector('#scheme-section input[type=radio]:checked').value);
+                
+                if (selectedScheme.name === `X-Cutioner's Song`) {
+                    XCutionerOverlayText += `<br>+${city[i].XCutionerHeroes.length * 2} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
+                }
+                
+                XCutionerOverlay.innerHTML = XCutionerOverlayText;
+                XCutionerOverlay.style.whiteSpace = 'pre-line';
+
+                // Expanded container
+                const XCutionerExpandedContainer = document.createElement('div');
+                XCutionerExpandedContainer.className = 'expanded-XCutionerHeroes';
+                XCutionerExpandedContainer.style.display = 'none';
+                
+                city[i].XCutionerHeroes.forEach(hero => {
+                    const XCutionerHeroElement = document.createElement('span');
+                    XCutionerHeroElement.className = 'XCutioner-hero-name';
+                    XCutionerHeroElement.textContent = hero.name;
+                    XCutionerHeroElement.dataset.image = hero.image;
+                    
+                    XCutionerHeroElement.addEventListener('mouseover', (e) => {
+                        e.stopPropagation();
+                        showZoomedImage(hero.image);
+                        const card = cardLookup[normalizeImagePath(hero.image)];
+                        if (card) updateRightPanel(card);
+                    });
+                    
+                    XCutionerHeroElement.addEventListener('mouseout', (e) => {
+                        e.stopPropagation();
+                        if (!activeImage) hideZoomedImage();
+                    });
+                    
+                    XCutionerHeroElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeImage = activeImage === hero.image ? null : hero.image;
+                        showZoomedImage(activeImage || '');
+                    });
+                    
+                    XCutionerExpandedContainer.appendChild(XCutionerHeroElement);
+                });
+
+                // Overlay click handler
+                XCutionerOverlay.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    XCutionerExpandedContainer.style.display = XCutionerExpandedContainer.style.display === 'none' ? 'block' : 'none';
+                    
+                    if (XCutionerExpandedContainer.style.display === 'block') {
+                        setTimeout(() => {
+                            document.addEventListener('click', (e) => {
+                                if (!XCutionerExpandedContainer.contains(e.target)) {
+                                    XCutionerExpandedContainer.style.display = 'none';
+                                }
+                            }, { once: true });
+                        }, 50);
+                    }
+                });
+
+                cardContainer.appendChild(XCutionerOverlay);
+                cardContainer.appendChild(XCutionerExpandedContainer);
+            }
+
+if (city[i].plutoniumCaptured) {
+    const plutoniumOverlay = document.createElement('div');
+    plutoniumOverlay.className = 'overlay plutonium-overlay';
     
-    // Create the base overlay text for bystanders
-    let overlayText = `${city[i].bystander.length} Bystander${city[i].bystander.length > 1 ? 's' : ''}`;
+    // Create overlay text
+    let overlayText = `${city[i].plutoniumCaptured.length} Plutonium`;
     
-    // Check if the selected scheme is "Midtown Bank Robbery"
-    if (selectedScheme.name === 'Midtown Bank Robbery') {
+    // Add attack bonus (always +1 per plutonium)
+    overlayText += `<br>+${city[i].plutoniumCaptured.length} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
+    
+    plutoniumOverlay.innerHTML = overlayText;
 
-        // Add the attack increase to the overlay text on a new line
-        overlayText += `<br>+${city[i].bystander.length} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">`;
-    }
-
-    // Set the overlay content and apply style for multiline text
-    overlay.innerHTML = overlayText;
-    overlay.style.whiteSpace = 'pre-line'; // Ensures the line breaks are respected
-
-    cityCell.appendChild(overlay);
+    // Corrected style properties (using camelCase)
+    plutoniumOverlay.style.whiteSpace = 'nowrap';
+    plutoniumOverlay.style.backgroundColor = '#90ee90b8';
+    plutoniumOverlay.style.color = '#202b20';
+    plutoniumOverlay.style.top = '50px';
+    plutoniumOverlay.style.fontSize = '12px';
+       
+    // Add to the card
+    cardContainer.appendChild(plutoniumOverlay);
 }
 
 if (city[i].shattered > 0) {
@@ -3416,95 +4457,178 @@ if (city[i].shattered > 0) {
     shatteredOverlay.innerHTML = `Shattered!<br><span>-${city[i].shattered}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"></span>`;
     
     // Clear existing overlay first to avoid duplicates
-    const existingOverlay = cityCell.querySelector('.shattered-overlay');
-    if (existingOverlay) cityCell.removeChild(existingOverlay);
+    const existingOverlay = cardContainer.querySelector('.shattered-overlay');
+    if (existingOverlay) cardContainer.removeChild(existingOverlay);
     
-    cityCell.appendChild(shatteredOverlay);
+    cardContainer.appendChild(shatteredOverlay);
 }
-
-cityCell.removeEventListener('click', cityCell.clickHandler);
 
 if (city[i].type !== 'Bystander' && city[i].type !== 'Attached to Mastermind') {
-        cityCell.clickHandler = () => showAttackButton(i);
-        cityCell.addEventListener('click', cityCell.clickHandler);
-    } else {
-        cityCell.clickHandler = null; // No click handler for these types
-    }
-} else {
-    const emptyText = document.createElement('div');
-    emptyText.innerText = "";
-    cityCell.appendChild(emptyText);
-    cityCell.clickHandler = null; // No click handler for empty cells
-}
+                cardImage.addEventListener('click', (e) => {
+                    if (!popupMinimized) {
+                        e.stopPropagation();
+                    showAttackButton(i);
+                    }
+                });
 
-cityCell.classList.add('city-cell');
-    }
+                const attackOverlay = cardContainer.querySelector('.attack-overlay');
+                if (attackOverlay) {
+                    attackOverlay.addEventListener('click', (e) => {
+                        if (!popupMinimized) {
+                        e.stopPropagation();
+                        showAttackButton(i);
+                        }
+                    });
+                }
+            }
+        }
+
+newCityCell.classList.add('city-cell');
+}
 
 if (lastTurn && !lastTurnMessageShown) {
     console.log('The Villains have completed their scheme but it is too late! You\'ve already defeated the Mastermind!');
     lastTurnMessageShown = true; // Prevent future logs
 } else {
+    // Check Scheme end game conditions
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-
     const selectedSchemeEndGame = selectedScheme ? selectedScheme.endGame : null;
 
-    if (!selectedSchemeEndGame) {
-        console.log(`Scheme End Game is not defined.`);
-    } else {
-        // Reusable calculations
-        const escapedVillainsCount = escapedVillainsDeck.filter(card => card.type === 'Villain').length;
-        const escapedBystanderCount = escapedVillainsDeck.filter(card => card.type === 'Bystander').length;
-        const twistCount = koPile.filter(card => card.type === 'Scheme Twist').length;
-        const escapedHeroesCount = escapedVillainsDeck.filter(card => card.type === 'Hero').length;
-        const escapedKillbotsCount = escapedVillainsDeck.filter(card => card.killbot === true).length;
+    // Check Mastermind end game conditions
+    const mastermind = getSelectedMastermind();
+    const mastermindEndGame = mastermind ? mastermind.endGame : null;
 
+    // Reusable calculations
+    const escapedVillainsCount = escapedVillainsDeck.filter(card => card.type === 'Villain').length;
+    const escapedBystanderCount = escapedVillainsDeck.filter(card => card.type === 'Bystander').length;
+    const twistCount = koPile.filter(card => card.type === 'Scheme Twist').length;
+    const escapedHeroesCount = escapedVillainsDeck.filter(card => card.type === 'Hero').length;
+    const escapedKillbotsCount = escapedVillainsDeck.filter(card => card.killbot === true).length;
+    const mastermindEscapesCount = escapedVillainsDeck.filter(card => card.mastermind === true).length;
+    const KOdBystanders = koPile.filter(card => card.type === 'Bystander').length;
+    const escapedBystanders = escapedVillainsDeck.filter(card => card.type === 'Bystander').length;
+    const KOdHeroes = koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
+    const carriedOffHeroes = escapedVillainsDeck.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
+
+    // Check Mastermind end game conditions first (if any)
+    if (mastermindEndGame) {
+        switch (mastermindEndGame) {
+case "fourHorsemen":
+    const hasWar = escapedVillainsDeck.some(card => card.name === 'War');
+    const hasFamine = escapedVillainsDeck.some(card => card.name === 'Famine');
+    const hasPestilence = escapedVillainsDeck.some(card => card.name === 'Pestilence');
+    const hasDeath = escapedVillainsDeck.some(card => card.name === 'Death');
+    
+    if (hasWar && hasFamine && hasPestilence && hasDeath) {
+        showDefeatPopup();
+        break;
+    }
+    break;
+
+            default:
+                console.log(`Mastermind End Game "${mastermindEndGame}" is not yet defined.`);
+                break;
+        }
+    }
+
+    // Then check Scheme end game conditions (if Mastermind conditions weren't met)
+    if (selectedSchemeEndGame) {
         switch (selectedSchemeEndGame) {
             case "8BystandersCarriedAway":
                 if (escapedBystanderCount >= 8) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "12VillainsEscape":
                 if (escapedVillainsCount >= 12) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "7Twists":
                 if (twistCount >= 7) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "5Killbots":
                 if (escapedKillbotsCount >= 5) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "6EscapedSkrullHeroes":
                 if (escapedHeroesCount >= 6) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "heroDeckEmpty":
                 if (heroDeck.length === 0) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "woundDeckEmpty":
                 if (woundDeck.length === 0) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
                 }
                 break;
 
             case "8Twists":
                 if (twistCount >= 8) {
-                    showDefeatPopup(); // Trigger the defeat popup
+                    showDefeatPopup();
+                }
+                break;
+
+            case "KOHeroesEqualThree":
+                if (koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length >= 3) {
+                    showDefeatPopup();
+                }
+                break;
+
+            case "FiveGoonsEscape":
+                if (escapedVillainsDeck.filter(card => card.name === 'Maggia Goons').length >= 5) {
+                    showDefeatPopup();
+                }
+                break;
+                
+            case "FourBystandersKOdOrEscaped":
+                if (KOdBystanders + escapedBystanders >= 4) {
+                    showDefeatPopup();
+                }
+                break;
+
+            case "FourPlutoniumEscape":
+                if (escapedVillainsDeck.filter(card => card.plutonium === true).length >= 4) {
+                    showDefeatPopup();
+                }
+                break;
+                
+            case "FourGoblinQueenEscape":
+                if (escapedVillainsDeck.filter(card => card.goblinQueen === true).length >= 4) {
+                    showDefeatPopup();
+                }
+                break;
+
+            case "NineHeroesKOdOrEscaped":
+                if (KOdHeroes + carriedOffHeroes >= 9) {
+                    showDefeatPopup();
+                }
+                break;
+
+            case "hqDetonated":
+                if ((hqExplosion1 >= 6 && hqExplosion2 >= 6 && hqExplosion3 >= 6 && 
+                    hqExplosion4 >= 6 && hqExplosion5 >= 6) || heroDeck.length === 0) {
+                    showDefeatPopup();
+                }
+                break;
+
+            case "babyThreeVillainEscape":
+                if (stackedTwistNextToMastermind >= 3) {
+                    showDefeatPopup();
                 }
                 break;
 
@@ -3512,6 +4636,8 @@ if (lastTurn && !lastTurnMessageShown) {
                 console.log(`Scheme End Game "${selectedSchemeEndGame}" is not yet defined.`);
                 break;
         }
+    } else if (!mastermindEndGame) {
+        console.log(`Neither Scheme nor Mastermind End Game is defined.`);
     }
 }
 
@@ -3685,42 +4811,45 @@ function updateSelectionOrder() {
 document.getElementById('sort-player-cards').addEventListener('click', sortPlayerCards);
 
 function sortPlayerCards() {
-  // Do nothing if hand is empty or has only one card
-  if (!playerHand || playerHand.length < 2) {
-    return;
-  }
+  if (!playerHand || playerHand.length < 2) return;
 
-  // Define the color priority order
   const colorOrder = {
     'Grey': 1,
-    'green': 2,
-    'yellow': 3,
-    'red': 4,
-    'black': 5,
-    'blue': 6
+    'Green': 2,
+    'Yellow': 3,
+    'Red': 4,
+    'Black': 5,
+    'Blue': 6
   };
 
   playerHand.sort((a, b) => {
-    // Get color values for comparison
-    const aColor = a.color || ''; // Treat undefined/null color as empty string
+    // 1. Sort by color
+    const aColor = a.color || '';
     const bColor = b.color || '';
-    
-    // Compare colors first
-    const aColorRank = colorOrder[aColor] || 7; // Default to 7 if color not in priority list
+    const aColorRank = colorOrder[aColor] || 7;
     const bColorRank = colorOrder[bColor] || 7;
-    
-    if (aColorRank !== bColorRank) {
-      return aColorRank - bColorRank;
-    }
-    
-    // If colors are equal, sort by name alphabetically
-    const aName = a.name || '';
-    const bName = b.name || '';
-    
-    return aName.localeCompare(bName);
+    if (aColorRank !== bColorRank) return aColorRank - bColorRank;
+
+    // 2. Sort by hero name (part before " - ")
+    const getHeroName = (name) => {
+      const fullName = name || '';
+      const separatorIndex = fullName.indexOf(' - ');
+      return separatorIndex === -1 ? fullName : fullName.substring(0, separatorIndex);
+    };
+    const aHero = getHeroName(a.name);
+    const bHero = getHeroName(b.name);
+    const heroCompare = aHero.localeCompare(bHero);
+    if (heroCompare !== 0) return heroCompare;
+
+    // 3. Sort by cost (numerical)
+    const aCost = a.cost || 0;
+    const bCost = b.cost || 0;
+    if (aCost !== bCost) return aCost - bCost;
+
+    // 4. Final tiebreaker: full card name
+    return (a.name || '').localeCompare(b.name || '');
   });
 
-  // Update the game board after sorting
   updateGameBoard();
 }
 
@@ -3728,10 +4857,13 @@ document.getElementById('confirm-actions').addEventListener('click', confirmActi
 
 function confirmActions() {
     const cardsToPlay = selectedCards.map(index => playerHand[index]);
-    const currentPlayer = getCurrentPlayer();
-
     cardsToPlay.reduce((promiseChain, card) => {
         return promiseChain.then(() => {
+if (card.keyword1 === 'Teleport' || card.keyword2 === 'Teleport' || card.keyword3 === 'Teleport') {
+playOrTeleport(card);
+return;
+}
+
             cardsPlayedThisTurn.push(card);
 
             const cardIndex = playerHand.indexOf(card);
@@ -3745,7 +4877,7 @@ function confirmActions() {
             cumulativeAttackPoints += card.attack || 0;
             cumulativeRecruitPoints += card.recruit || 0;
 
-            console.log('Confirm Actions Called:', card, currentPlayer);
+            console.log('Confirm Actions Called:', card);
 
           // Handle unconditional ability
             let abilityPromise = Promise.resolve();
@@ -3755,7 +4887,7 @@ function confirmActions() {
                     // Wrap the result in a Promise if it isn't one
                     abilityPromise = new Promise((resolve, reject) => {
                         try {
-                            const result = abilityFunction(currentPlayer, card);
+                            const result = abilityFunction(card);
                             resolve(result);
                         } catch (error) {
                             reject(error);
@@ -3776,7 +4908,7 @@ function confirmActions() {
                             if (typeof conditionalAbilityFunction === 'function') {
                                 return new Promise((resolve, reject) => {
                                     try {
-                                        const result = conditionalAbilityFunction(currentPlayer, card);
+                                        const result = conditionalAbilityFunction(card);
                                         resolve(result);
                                     } catch (error) {
                                         reject(error);
@@ -3803,7 +4935,7 @@ function confirmActions() {
                                     try {
                                         const conditionalAbilityFunction = window[card.conditionalAbility];
                                         if (typeof conditionalAbilityFunction === 'function') {
-                                            const result = conditionalAbilityFunction(currentPlayer, card);
+                                            const result = conditionalAbilityFunction(card);
                                             resolve(result);
                                         } else {
                                             console.error(`Conditional ability function ${card.conditionalAbility} not found`);
@@ -3846,9 +4978,17 @@ function isConditionMet(conditionType, condition) {
 
     switch (conditionType) {
         case 'playedCards':
-            return previousCards.some(playedCard => 
-                playedCard.class1 === condition || playedCard.class2 === condition || playedCard.team === condition
-            );
+const requiredTypes = condition.split('&');
+const typeCounts = [];
+requiredTypes.forEach(type => {typeCounts[type] = (typeCounts[type] || 0) + 1;
+});
+
+return Object.entries(typeCounts).every(([type, requiredCount]) => {
+const actualCount = previousCards.filter(playedCard => 
+playedCard.class1 === type || playedCard.class2 === type || playedCard.team === type
+).length;
+return actualCount >= requiredCount;
+});
         case 'unconditional':
             return condition === "None";
         case 'revealCardTeam':
@@ -3859,17 +4999,6 @@ function isConditionMet(conditionType, condition) {
             console.warn(`Unknown condition type: ${conditionType}`);
             return false;
     }
-}
-
-function getCurrentPlayer() {
-    return { 
-        name: "Player 1",
-        drawCards: function(count) { 
-            console.log(`${this.name} draws ${count} card(s)`); 
-            // Logic to draw cards from deck to hand
-        }
-        // other properties and methods as needed
-    };
 }
 
 function getOrdinalSuffix(number) {
@@ -3900,18 +5029,20 @@ function resolveVillainActions() {
 
 function endTurn() {
 
+document.getElementById('end-turn').innerHTML = `<span class="game-board-bottom-row">END TURN</span>`;
+
 updateDeckCounts();
 
-onscreenConsole.log("Turn ended.");
-
-if (lastTurn == true) {
+if (lastTurn === true) {
 showWinPopup()
 } 
 
 if (heroDeckHasRunOut === true && !delayEndGame) {
     showHeroDeckEmptyPopup();
+return;
 }
 
+onscreenConsole.log("Turn ended.");
 turnCount += 1;
 
 onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn&nbsp;</span><span class="console-highlights" style="text-decoration:underline;">${turnCount}</span><span class="console-highlights" style="text-decoration:underline;">:</span>`);
@@ -3941,6 +5072,11 @@ for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
         cardsPlayedThisTurn.splice(i, 1);
         console.log(`${card.name} was destroyed (markedToDestroy).`);
         continue; // Skip any further logic for this card
+    }
+
+        if (card.temporaryTeleport === true) {
+        delete card.temporaryTeleport;
+        card.keyword3 = "None";
     }
 
     // Handle sidekickToDestroy logic
@@ -3978,9 +5114,25 @@ city5TempBuff = 0;
 mastermindTempBuff = 0;
 rescueExtraBystanders = 0;
 rescueExtraBystanders = 0;
+jeanGreyBystanderRecruit = false;
+jeanGreyBystanderDraw = false;
+jeanGreyBystanderAttack = false;
+sewerRooftopDefeats = false;
+sewerRooftopBonusRecruit = false;
+twoRecruitFromKO = false;
+hasProfessorXMindControl = false;
+trueVersatility = false;
 secondDocOc = false;
 let schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
 let pendingHeroKO = false; 
+
+playerHand.forEach(card => {
+    if (card.temporaryTeleport === true) {
+        delete card.temporaryTeleport;
+        card.keyword3 = "None";
+    }
+});
+
     playerDiscardPile.push(...playerHand);
     playerHand = [];
 for (let i = 0; i < nextTurnsDraw; i++) {
@@ -4062,13 +5214,13 @@ endTurnButton.addEventListener("touchcancel", cancelHold);
 
 function isVillainConditionMet(villainCard) {
     const { fightCondition, conditionType, condition } = villainCard;
-const cardsYouHave = [
-    ...playerHand,
-    ...cardsPlayedThisTurn.filter(card => 
-        card.isCopied !== true && 
-        card.sidekickToDestroy !== true
-    )
-];
+    const cardsYouHave = [
+        ...playerHand,
+        ...cardsPlayedThisTurn.filter(card => 
+            card.isCopied !== true && 
+            card.sidekickToDestroy !== true
+        )
+    ];
 
     switch (fightCondition) {
         case 'heroYouHave':
@@ -4081,7 +5233,26 @@ const cardsYouHave = [
                 villain[conditionType] === condition
             );
 
-        // You can add more cases here for different types of fight conditions
+        case 'fourDifferentNames': {
+            const uniqueNames = new Set();
+            for (const card of cardsYouHave) {
+                if (card?.name) {
+                    uniqueNames.add(card.name);
+                    if (uniqueNames.size >= 4) return true;
+                }
+            }
+            return uniqueNames.size >= 4;
+        }
+
+        case 'zeroCostCards': {
+            // Count how many cards have cost === 0
+            const zeroCostCount = playerHand.reduce((count, card) => {
+                return count + (card.cost === 0 ? 1 : 0);
+            }, 0);
+            
+            return zeroCostCount >= 3;
+        }
+
         default:
             console.warn(`Unknown fight condition: ${fightCondition}`);
             return false;
@@ -4090,27 +5261,36 @@ const cardsYouHave = [
 
 function showAttackButton(cityIndex) {
     const villainCard = city[cityIndex];
-    const cityCell = document.querySelector(`#city-${cityIndex + 1}`);
-
-    // Calculate the villain's effective attack value
-    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-    let villainAttack = recalculateVillainAttack(villainCard, selectedScheme);
-
-    // Ensure villainAttack doesn't drop below 0
-    if (villainAttack < 0) {
-        villainAttack = 0;
-    }
-
-    // Check if the fight condition is met
-    if (villainCard.fightCondition && villainCard.fightCondition !== "None" && !isVillainConditionMet(villainCard)) {
-        onscreenConsole.log(`You have not met <span class="console-highlights">${villainCard.name}</span><span class="bold-spans">'s</span> fight condition.`);
+    if (!villainCard) {
         return;
     }
 
-    // Check if the player has enough attack points
+    const cityCell = document.querySelector(`#city-${cityIndex + 1}`);
+    if (!cityCell) return;
+
+    // Calculate attack synchronously first
+    const selectedScheme = getSelectedScheme(); // Extract this to a function
+    const villainAttack = recalculateVillainAttack(villainCard);
+
+     if (villainAttack < 0) {
+        villainAttack = 0;
+    }
+
+    // Check fight condition synchronously
+    if (villainCard.fightCondition && 
+        villainCard.fightCondition !== "None" && 
+        !isVillainConditionMet(villainCard)) {
+        onscreenConsole.log(`Fight condition not met for <span class="console-highlights">${villainCard.name}</span>.`);
+        return;
+    }
+
+       // Check if the player has enough attack points
     let playerAttackPoints = totalAttackPoints;
     if (recruitUsedToAttack === true) {
+        playerAttackPoints += totalRecruitPoints;
+    }
+
+    if (villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
         playerAttackPoints += totalRecruitPoints;
     }
 
@@ -4156,132 +5336,297 @@ function showAttackButton(cityIndex) {
             document.addEventListener('click', handleClickOutside);
         }, 0);
     } else {
+        if (recruitUsedToAttack === "true" || villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
+            onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
+    } else {
         onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
     }
 }
-
-function recalculateVillainAttack(villainCard, selectedScheme) {
-    if (!villainCard || typeof villainCard.attack === 'undefined') {
-        console.error('Error: Invalid or undefined villainCard encountered in recalculateVillainAttack.');
-        return 0; // Return 0 attack if the card is invalid
-    }
-
-    // Recalculate the attack as before (with buffs, etc.)
-    let attackValue = villainCard.attack || villainCard.originalAttack;
-
-    // Add any buffs or other conditions if applicable
-    const cityIndex = city.indexOf(villainCard);
-    const tempBuffVariableName = `city${cityIndex + 1}TempBuff`;
-    const tempBuffValue = window[tempBuffVariableName] || 0;
-    const permBuffVariableName = `city${cityIndex + 1}PermBuff`;
-    const permBuffValue = window[permBuffVariableName] || 0;
-    const shatteredAmount = villainCard.shattered || 0;
-
-    attackValue += tempBuffValue + permBuffValue - (villainCard.shattered || 0);
-
-    // Safely handle the "Midtown Bank Robbery" scheme adjustment
-    if (selectedScheme && selectedScheme.name === 'Midtown Bank Robbery' && Array.isArray(villainCard.bystander)) {
-        attackValue += villainCard.bystander.length;
-    }
-
-if (villainCard.name === 'Killbot') {
-attackValue += killbotAttack;
 }
 
-    return attackValue;
-    
+function recalculateVillainAttack(villainCard) {
+    // Extreme defensive checks
+    if (!villainCard || 
+        typeof villainCard !== 'object' || 
+        villainCard === null || 
+        Array.isArray(villainCard)) {
+        console.warn('Invalid villainCard in recalculateVillainAttack:', villainCard);
+        return 0;
+    }
+
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked')?.value;
+    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+    // Safely get attack value with multiple fallbacks
+    const attackValue = ('attack' in villainCard) ? villainCard.attack :
+                      ('originalAttack' in villainCard) ? villainCard.originalAttack :
+                      0;
+
+    let finalAttack = attackValue;
+
+    // Only calculate buffs if we can verify the card is in city
+    try {
+        const cityIndex = city.findIndex(card => card === villainCard);
+        if (cityIndex !== -1) {
+            const tempBuff = window[`city${cityIndex + 1}TempBuff`] || 0;
+            const permBuff = window[`city${cityIndex + 1}PermBuff`] || 0;
+            const shattered = villainCard.shattered || 0;
+            finalAttack += tempBuff + permBuff - shattered;
+        }
+    } catch (e) {
+        console.warn('Buff calculation error:', e);
+    }
+
+    // Midtown Bank Robbery - safe property access
+    try {
+        if (selectedScheme?.name === 'Midtown Bank Robbery' && 
+            Array.isArray(villainCard?.bystander)) {
+            finalAttack += villainCard.bystander.length;
+        }
+    } catch (e) {
+        console.warn('Scheme bonus error:', e);
+    }
+
+    try {
+        if (selectedScheme?.name === `X-Cutioner's Song` && 
+            Array.isArray(villainCard?.XCutionerHeroes)) {
+            finalAttack += villainCard.XCutionerHeroes.length * 2;
+        }
+    } catch (e) {
+        console.warn('Scheme bonus error:', e);
+    }
+
+    try {
+        if (selectedScheme?.name === 'Steal the Weaponized Plutonium' && 
+            Array.isArray(villainCard?.plutoniumCaptured)) {
+            finalAttack += villainCard.plutoniumCaptured.length;
+        }
+    } catch (e) {
+        console.warn('Scheme bonus error:', e);
+    }
+
+    if (villainCard.bonusBystanderAttack > 0 && 
+            Array.isArray(villainCard?.bystander)) {
+        finalAttack += villainCard.bonusBystanderAttack * villainCard.bystander.length;
+    }
+
+    // Killbot special case
+    if (villainCard.killbot === true && typeof killbotAttack === 'number') {
+        finalAttack += killbotAttack;
+    }
+
+    return Math.max(0, finalAttack);
 }
 
 async function confirmAttack(cityIndex) {
+    // Get fresh references
     const villainCard = city[cityIndex];
-console.log("Villain Card Object:", villainCard);
- const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+    if (!villainCard) {
+        console.error('Villain disappeared during attack');
+        onscreenConsole.log(`Error: Villain could not be targeted.`);
+        return;
+    }
 
-
- // Set the currentVillainLocation to the current location of the villain
+     // Set the currentVillainLocation to the current location of the villain
     currentVillainLocation = cityIndex; // Store the city index (location) of the villain
 console.log("Selected Villain's Location: ", currentVillainLocation);
 
-    // Calculate the villain's effective attack value
- let villainAttack = recalculateVillainAttack(villainCard, selectedScheme);
+    // Make a copy of critical data before any async operations
+    const villainCopy = {
+        name: villainCard.name,
+        attack: villainCard.attack,
+        originalAttack: villainCard.originalAttack,
+        bystander: [...(villainCard.bystander || [])],
+        fightEffect: villainCard.fightEffect,
+        shattered: villainCard.shattered,
+        fightCondition: villainCard.fightCondition,
+        image: villainCard.image,
+        captureCode: villainCard.captureCode
+    };
 
-    // Ensure villainAttack doesn't drop below 0
-    if (villainAttack < 0) {
-        villainAttack = 0;
+    // Calculate attack synchronously
+    const selectedScheme = getSelectedScheme();
+    const villainAttack = recalculateVillainAttack(villainCard);
+
+// Replace the forEach with a for...of loop which properly handles async/await
+if (Array.isArray(villainCard.bystander)) {
+    for (const bystander of villainCard.bystander) {
+        if (bystander) {
+            victoryPile.push(bystander);
+            if (jeanGreyBystanderRecruit) {
+                totalRecruitPoints += 1;
+                cumulativeRecruitPoints += 1;
+                onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
+            }
+
+            if (jeanGreyBystanderDraw) {
+                extraDraw();
+                onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
+            }
+
+            if (jeanGreyBystanderAttack) {
+                totalAttackPoints += 1;
+                cumulativeAttackPoints += 1;
+                onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
+            }
+            await rescueBystanderAbility(bystander);
+        }
     }
-
-    if (villainCard.bystander) {
-    villainCard.bystander.forEach(bystander => {
-        victoryPile.push(bystander); // Add each bystander object to the Victory Pile
-    });
 }
 
-    city[cityIndex] = null; // Clear the cell in the city array
+if (villainCard.babyHope === true) {
+    delete villainCard.babyHope;
+        villainCard.attack = villainCard.originalAttack;
+         const BabyHopeCard = { 
+                    name: "Baby Hope", 
+                    type: "Baby", 
+                    victoryPoints: 6, 
+                    image: 'Visual Assets/Schemes/DarkCity_CaptureBabyHope.webp'
+                };
+                victoryPile.push(BabyHopeCard);
+                updateGameBoard();
+}
+
+    if (villainCard.plutoniumCaptured && villainCard.plutoniumCaptured.length > 0) {
+        for (const plutonium of villainCard.plutoniumCaptured) {
+            villainDeck.push(plutonium);
+            onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
+        }
+        // Clear the plutonium from the defeated villain
+        villainCard.plutoniumCaptured = [];
+        shuffle(villainDeck); // Shuffle the villain deck
+    }
+
+     if (villainCard.XCutionerHeroes && villainCard.XCutionerHeroes.length > 0) {
+        for (const hero of villainCard.XCutionerHeroes) {
+            playerDiscardPile.push(hero);
+            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+        }
+        // Clear the plutonium from the defeated villain
+        villainCard.XCutionerHeroes = [];
+    }
+
+    // Handle extra bystander rescues
+    if (rescueExtraBystanders > 0) {
+        for (let i = 0; i < rescueExtraBystanders; i++) {
+            rescueBystander();
+        }
+    }
+
+
     victoryPile.push(villainCard);
 
-onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
- 
-        if (recruitUsedToAttack === true) {
-                // Show counter popup for point allocation
-                const result = await showCounterPopup(villainCard, villainAttack);
-                totalAttackPoints -= result.attackUsed;
-                totalRecruitPoints -= result.recruitUsed;
-                
-                onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points`);
-    
+    onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
+
+    // Handle point deduction
+    try {
+        if (recruitUsedToAttack === true || villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
+            const result = await showCounterPopup(villainCopy, villainAttack);
+            totalAttackPoints -= result.attackUsed || 0;
+            totalRecruitPoints -= result.recruitUsed || 0;
+            onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`);
         } else {
             totalAttackPoints -= villainAttack;
         }
+    } catch (error) {
+        console.error('Error handling point deduction:', error);
+    }
 
-if (rescueExtraBystanders > 0) {
-  for (let i = 0; i < rescueExtraBystanders; i++) {
-    rescueBystander();
-  }
-}
+    // Handle location-based bonuses
+    try {
+        if (sewerRooftopDefeats && (cityIndex === 2 || cityIndex === 4)) {
+            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. Drawing two cards.`);
+            extraDraw();
+            extraDraw();
+        }
 
+        if (sewerRooftopBonusRecruit && (cityIndex === 2 || cityIndex === 4)) {
+            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+            totalRecruitPoints += 2;
+            cumulativeRecruitPoints += 2;
+        }
+    } catch (error) {
+        console.error('Error processing location bonuses:', error);
+    }
+
+                // Clear the city slot and add to victory pile
+    city[cityIndex] = null;
+
+    // Handle extra recruit points
     if (extraThreeRecruitAvailable === true) {
         totalRecruitPoints += 3;
         cumulativeRecruitPoints += 3;
+        onscreenConsole.log(`You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
     }
 
-    // Handle fight effect if the villain has one
-let fightEffectPromise = Promise.resolve();
-if (villainCard.fightEffect && villainCard.fightEffect !== "None") {
-    const fightEffectFunction = window[villainCard.fightEffect];
-    console.log("Fight effect function found:", fightEffectFunction);
-    if (typeof fightEffectFunction === 'function') {
-        fightEffectPromise = new Promise((resolve, reject) => {
-            try {
-                const result = fightEffectFunction(villainCard); // Pass villainCard as an argument here
-                console.log("Fight effect executed:", result);
-                resolve(result);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    } else {
-        console.error(`Fight effect function ${villainCard.fightEffect} not found`);
+    // Handle Professor X Mind Control
+    if (hasProfessorXMindControl) {
+        try {
+            await new Promise((resolve) => {
+                const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                    "DO YOU WISH TO GAIN THIS VILLAIN?",
+                    "GAIN AS A HERO",
+                    "NO THANKS!"
+                );
+
+                document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+                const cardImage = document.getElementById('hero-ability-may-card');
+                cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
+                cardImage.style.display = 'block';
+
+                confirmButton.onclick = () => {
+                    const cardCopy = JSON.parse(JSON.stringify(villainCard));
+                    cardCopy.type = "Hero";
+                    cardCopy.color = "Grey";
+                    cardCopy.keyword1 = "None";
+                    cardCopy.keyword2 = "None";
+                    cardCopy.keyword3 = "None";
+                    
+                    playerDiscardPile.push(cardCopy);
+                    
+                    onscreenConsole.log(`You have chosen to add <span class="console-highlights">${villainCard.name}</span> to your discard pile as a grey Hero.`);
+                    updateGameBoard();
+                    
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(true);
+                };
+
+                denyButton.onclick = () => {
+                    onscreenConsole.log(`You declined to copy ${villainCard.name}.`);
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(false);
+                };
+            });
+        } catch (error) {
+            console.error('Error in mind control popup:', error);
+        }
     }
-} else {
-    console.log("No fight effect found for this villain.");
+
+    // Handle fight effects
+    try {
+        if (villainCopy.fightEffect && villainCopy.fightEffect !== "None") {
+            const fightEffectFunction = window[villainCopy.fightEffect];
+            if (typeof fightEffectFunction === 'function') {
+                await fightEffectFunction(villainCopy);
+            }
+        }
+    } catch (error) {
+        console.error(`Error in fight effect: ${error}`);
+    } finally {
+        currentVillainLocation = null;
+        updateGameBoard();
+    }
+
+    
 }
 
-    fightEffectPromise.then(() => {
-        updateGameBoard(); // Update the game board after fight effect is handled
-    }).catch(error => {
-        console.error(`Error in fight effect: ${error}`);
-        updateGameBoard(); // Ensure the game board is updated even if the fight effect fails
-
-// Reset the currentVillainLocation after the attack is resolved
-        currentVillainLocation = null;
-    }).catch(error => {
-        console.error(`Error in fight effect: ${error}`);
-        updateGameBoard(); // Ensure the game board is updated even if the fight effect fails
-
-        // Reset the currentVillainLocation even if an error occurs
-        currentVillainLocation = null;
-    });
+// Helper function
+function getSelectedScheme() {
+    const schemeName = document.querySelector('#scheme-section input[type=radio]:checked')?.value;
+    return schemes.find(s => s.name === schemeName);
 }
 
 function showHeroKOPopup() {
@@ -4398,12 +5743,48 @@ function showHeroKOPopup() {
 
 function koHeroInHQ(index) {
     const hero = hq[index];
-    if (hero) {
-        koPile.push(hero); // Add the Hero to the KO pile
+    if (!hero) return;
+
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+    const scheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+    if (scheme.name === 'Detonate the Helicarrier') {
+        // Special handling for Detonate the Helicarrier
+        deleteHeroFromHQ(index);
         
-        // Get the new card before placing it in HQ
+        // Update the correct explosion counter
+        switch(index) {
+            case 0: hqExplosion1++; break;
+            case 1: hqExplosion2++; break;
+            case 2: hqExplosion3++; break;
+            case 3: hqExplosion4++; break;
+            case 4: hqExplosion5++; break;
+        }
+        
+        // Get current explosion count
+        const currentExplosions = [hqExplosion1, hqExplosion2, hqExplosion3, hqExplosion4, hqExplosion5][index];
+        
+        // Only refill if we haven't reached 6 explosions
+        if (currentExplosions < 6) {
+            const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+            hq[index] = newCard;
+            
+        if (newCard) {
+                onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd during a Helicarrier explosion.`);
+                onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+            } else {
+                onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd during a Helicarrier explosion.`);
+            }
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd during a Helicarrier explosion. This HQ space has been Destroyed.`);
+            hq[index] = null; // Ensure the slot is empty
+        }
+        
+    } else {
+        // Normal KO handling (unchanged)
+        koPile.push(hero);
         const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
-        hq[index] = newCard; // Fill the HQ slot with the top card of the Hero deck
+        hq[index] = newCard;
         
         if (newCard) {
             onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
@@ -4411,13 +5792,20 @@ function koHeroInHQ(index) {
         } else {
             onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
         }
-        
-        updateGameBoard();
-
-        if (!hq[index] && heroDeck.length === 0) {
-            showHeroDeckEmptyPopup();
-        }
     }
+    
+    updateGameBoard();
+
+    if (!hq[index] && heroDeck.length === 0) {
+        showHeroDeckEmptyPopup();
+    }
+}
+
+// Helper function to properly remove a hero from HQ
+function deleteHeroFromHQ(index) {
+    // This might need to be more sophisticated depending on your game's architecture
+    hq[index] = null;
+    // Add any other cleanup needed for your specific game implementation
 }
 
 function showDiscardCardPopup() {
@@ -4476,10 +5864,10 @@ onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has be
     updateGameBoard();
 }
 
-document.getElementById('healing-button').addEventListener('click', () => {
+document.getElementById('healing-button').addEventListener('click', async () => {
 console.log("Healing Button Clicked");
+    await showHealingPopup();
     healWounds();
-    showHealingPopup();
 });
 
 function healWounds() {
@@ -4490,6 +5878,12 @@ onscreenConsole.log('<span style="font-style:italic;">Healing Wounds...</span>')
         const card = playerHand[index];
         if (card.name === "Wound") {
             koPile.push(card);
+if (twoRecruitFromKO) {
+totalRecruitPoints += 2;
+cumulativeRecruitPoints += 2;
+onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+updateGameBoard();
+}
         } else {
             playerDiscardPile.push(card);
         }
@@ -4514,29 +5908,30 @@ function updateHealWoundsButton() {
 }
 
 function showHealingPopup() {
-    const healingPopup = document.getElementById('healing-popup');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const healingPopupCard = document.getElementById('healing-popup-card'); // Get the card element
+    return new Promise((resolve) => {
+        const healingPopup = document.getElementById('healing-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const healingPopupCard = document.getElementById('healing-popup-card');
 
-    // Show the popup and overlay
-    healingPopup.style.display = 'block';
-    modalOverlay.style.display = 'block';
+        // Show the popup and overlay
+        healingPopup.style.display = 'block';
+        modalOverlay.style.display = 'block';
+        healingPopupCard.style.opacity = '1';
 
-    // Make the healing popup card visible with full opacity
-    healingPopupCard.style.opacity = '1';
+        console.log('Showing Healing Popup');
 
-    console.log('Showing Healing Popup');
+        // Start fade out after 100ms
+        setTimeout(() => {
+            healingPopupCard.style.opacity = '0';
+        }, 100);
 
-    // Gradually fade out the healing popup card over 3 seconds
-    setTimeout(() => {
-        healingPopupCard.style.opacity = '0'; // Set opacity to 0 to start the fade-out effect
-    }, 100); // Slight delay before starting the fade to ensure it starts after showing
-
-    // Hide the popup and overlay after 3 seconds
-    setTimeout(() => {
-        healingPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-    }, 3000); // Hide the popup after 3 seconds
+        // Hide popup and resolve promise after 2000ms
+        setTimeout(() => {
+            healingPopup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            resolve(); // This tells the await that we're done
+        }, 2000);
+    });
 }
 
 function recalculateMastermindAttack(mastermind) {
@@ -4563,10 +5958,21 @@ const handleMastermindClick = () => {
     let mastermindAttack = recalculateMastermindAttack(mastermind);
     let playerAttackPoints = totalAttackPoints;
 
+    // Calculate effective attack points considering recruit usage and Bribe
     if (recruitUsedToAttack === true) {
         playerAttackPoints += totalRecruitPoints;
     }
 
+    // Check for Bribe keyword on Mastermind or its tactics
+    const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
+                           mastermind.keyword2 === "Bribe" || 
+                           mastermind.keyword3 === "Bribe";
+
+    if (hasBribeKeyword) {
+        playerAttackPoints += totalRecruitPoints;
+    }
+
+    // Handle different attack scenarios
     if (mastermind.tactics.length === 0) {
         const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
         
@@ -4582,7 +5988,6 @@ const handleMastermindClick = () => {
         onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
     }
 };
-
 // Add the initial listener
 document.getElementById('mastermind').addEventListener('click', handleMastermindClick);
 
@@ -4638,8 +6043,12 @@ async function confirmMastermindAttack() {
             delayEndGame = (mastermindDefeatTurn === turnCount);
         }
 
+const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
+                           mastermind.keyword2 === "Bribe" || 
+                           mastermind.keyword3 === "Bribe";
+
         // Handle point deduction
-        if (recruitUsedToAttack) {
+        if (recruitUsedToAttack || hasBribeKeyword) {
             const result = await showCounterPopup(mastermind, mastermindAttack);
             totalAttackPoints -= result.attackUsed;
             totalRecruitPoints -= result.recruitUsed;
@@ -4658,16 +6067,43 @@ async function confirmMastermindAttack() {
         if (extraThreeRecruitAvailable) {
             totalRecruitPoints += 3;
             cumulativeRecruitPoints += 3;
+            onscreenConsole.log(`You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
         }
 
+             if (mastermind.XCutionerHeroes && mastermind.XCutionerHeroes.length > 0) {
+        for (const hero of mastermind.XCutionerHeroes) {
+            playerDiscardPile.push(hero);
+            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+        }
+   
+        mastermind.XCutionerHeroes = [];
+    }
+
         // Handle mastermind defeat
-        mastermind.bystanders.forEach(bystander => {
-            victoryPile.push(bystander);
-        });
+for (const bystander of mastermind.bystanders) {
+    victoryPile.push(bystander);
+    if (jeanGreyBystanderRecruit) {
+        totalRecruitPoints += 1;
+        cumulativeRecruitPoints += 1;
+        onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
+    }
+    if (jeanGreyBystanderDraw) {
+        extraDraw();
+        onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
+    }
+    if (jeanGreyBystanderAttack) {
+        totalAttackPoints += 1;
+        cumulativeAttackPoints += 1;
+        onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
+    }
+    await rescueBystanderAbility(bystander); // Now works properly
+}
         mastermind.bystanders = [];
 
         updateMastermindOverlay();
         updateGameBoard();
+
+        onscreenConsole.log(`You attacked <span class="console-highlights">${mastermind.name}</span>. Revealing tactic now!`);
 
         // Check win condition
         if (mastermind.tactics.length === 0) {
@@ -4694,10 +6130,11 @@ async function confirmMastermindAttack() {
 
 function revealMastermindTactic(mastermind) {
     const tacticCard = mastermind.tactics.pop();
-    showTacticPopup(tacticCard);
+    
 
     // Push the tactic to the victory pile
     victoryPile.push(tacticCard);
+showTacticPopup(tacticCard);
 updateGameBoard();
 
 }
@@ -4708,7 +6145,7 @@ function showTacticPopup(tacticCard) {
         const modalOverlay = document.getElementById('modal-overlay');
         const resolveButton = document.getElementById('resolve-tactic');
 
-
+const mastermind = getSelectedMastermind();
 
         document.getElementById('tactic-effect').innerHTML = tacticCard.effect;
 document.getElementById('mastermind-tactic-image').src = tacticCard.image;
@@ -4725,7 +6162,7 @@ document.getElementById('mastermind-tactic-image').src = tacticCard.image;
 popup.style.display = 'none';
                 modalOverlay.style.display = 'none';
             resolveTacticEffects(tacticCard).then(() => {
-                
+                onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has ${mastermind.tactics.length} tactics remaining!`); 
                 resolve(); // Resolve the promise after the tactic effects are resolved
             });
         });
@@ -4818,9 +6255,9 @@ if (delayEndGame) {
     const totalTurnsTaken = turnCount;
     document.getElementById('villainDRAWtotalTurnsTaken').innerText = totalTurnsTaken;
    
-    const averageVPPerTurn = totalTurnsTaken > 0 
-    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
-    : "0.0"; // Handle division by zero case
+const averageVPPerTurn = totalTurnsTaken > 0 
+    ? Math.ceil((totalVictoryPoints / totalTurnsTaken) * 10) / 10 
+    : 0.0;
 document.getElementById('villainDRAWaverageVPPerTurn').innerText = averageVPPerTurn;
 
 const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
@@ -4862,7 +6299,7 @@ woundDeck = [...wounds];
 villainDeck = [];
 currentVillainLocation = null;
 heroDeck = [];
-skrullDeck = [];
+capturedCardsDeck = [];
 hq = [];
 city = ["", "", "", "", ""];
 city1TempBuff = 0;
@@ -5229,11 +6666,12 @@ function showHeroAbilityMayPopup(promptText, confirmLabel = "Confirm", denyLabel
 const zoomedImage = document.getElementById('zoomed-image');
 let activeImage = null; // Track the currently locked image
 
-const excludedZoomClasses = ['console-card-icons', 'card-image-back', 'card-icons', 'overlay-recruit-icons', 'overlay-attack-icons', 'bribe-card-icons' ];
+const excludedZoomClasses = ['console-card-icons', 'card-image-back', 'card-icons', 'overlay-recruit-icons', 'overlay-attack-icons', 'bribe-card-icons', 'hq-explosions' ];
 
 // Combine all card lists into a single array
 const allCards = [
     ...(bystanders ?? []),
+    ...(bystanderKillbots ?? []),
     ...(shieldCards ?? []),
     ...(shieldOfficers ?? []),
     ...(wounds ?? []),
@@ -5242,7 +6680,9 @@ const allCards = [
     ...(sidekicks ?? []),
     ...(masterminds),
     ...[].concat(...(heroes?.map(group => group.cards) ?? [])), 
-    ...[].concat(...(villains?.map(group => group.cards) ?? [])) 
+    ...[].concat(...(villains?.map(group => group.cards) ?? [])),
+    // Add expansion bystanders by flattening the object values
+    ...[].concat(...Object.values(expansionBystanders ?? {}))
 ];
 
 // Create a lookup table for faster access
@@ -5342,14 +6782,17 @@ document.addEventListener('mouseout', (e) => {
         const keyword1Display = document.getElementById("keyword1");
         const keyword2Display = document.getElementById("keyword2");
         const keyword3Display = document.getElementById("keyword3");
+	const errataDisplay = document.getElementById("errata");
         keyword1Display.textContent = "";
         keyword2Display.textContent = "";
         keyword3Display.textContent = "";
+	errataDisplay.textContent = "";
 
         // Clear keyword descriptions
         updateKeywordDescriptions(null, "keyword1Description");
         updateKeywordDescriptions(null, "keyword2Description");
         updateKeywordDescriptions(null, "keyword3Description");
+	updateKeywordDescriptions(null, "errataDescription");
     }
 });
 
@@ -5410,6 +6853,17 @@ function updateRightPanel(card) {
         updateKeywordDescriptions(null, "keyword3Description"); // Clear description
     }
 
+ // Update errata and its description
+    const errataDisplay = document.getElementById("errata");
+    if (card.errata && card.errata !== "None") {
+        errataDisplay.textContent = `${card.errata}: `; // Add colon after keyword3
+        updateKeywordDescriptions(card.errata, "errataDescription"); // Update description
+    } else {
+        errataDisplay.textContent = ""; // Clear if errata is missing or "None"
+        updateKeywordDescriptions(null, "errataDescription"); // Clear description
+    }
+
+
 }
 
 
@@ -5433,27 +6887,116 @@ function hideModalOverlay() {
 }
 
 function openPlayedCardsPopup() {
-    // Clear the playedCardsTable content before adding new cards
     const playedCardsTable = document.getElementById('playedCardsTable');
-    playedCardsTable.innerHTML = ''; 
+    playedCardsTable.innerHTML = '';
 
-    // Populate the playedCardsTable with images
-cardsPlayedThisTurn.forEach(card => {
-    const imgElement = document.createElement('img');
-    imgElement.src = card.image;
-    imgElement.alt = 'Played card';
-    imgElement.classList.add('pile-card-image');
-    
-    // Apply 50% opacity if any of these conditions are true
-    if (card.markedToDestroy || card.sidekickToDestroy || card.isCopied) {
-        imgElement.style.opacity = '0.5';
-    }
-    
-    playedCardsTable.appendChild(imgElement);
-});
+    // Close popup when clicking outside
+    const popup = document.getElementById('played-cards-popup');
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            closePlayedCardsPopup();
+        }
+    });
 
-    // Show the popup and modal overlay
-    document.getElementById('played-cards-popup').style.display = 'block';
+    cardsPlayedThisTurn.forEach((card) => {
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'played-card-container';
+        
+        const imgElement = document.createElement('img');
+        imgElement.src = card.image;
+        imgElement.alt = card.name;
+        imgElement.classList.add('pile-card-image');
+        
+        // Apply visual effects for special states
+        if (card.markedToDestroy || card.sidekickToDestroy || card.isCopied) {
+            imgElement.style.opacity = '0.5';
+        }
+
+        const topCard = villainDeck[villainDeck.length - 1];
+        
+        // Handle Telepathic Probe with matching villain on top
+if (card.name === "Professor X - Telepathic Probe" && 
+    card.villain && 
+    topCard?.name === card.villain.name && 
+    villainDeck.length === card.villain.deckLength) {
+            imgElement.classList.add('clickable-card', 'telepathic-probe-active');
+            imgElement.style.cursor = 'pointer';
+            imgElement.style.border = '3px solid rgb(235 43 58 / 100%)';
+                     
+            // Add visual indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'villain-indicator';
+            indicator.innerHTML = `
+                <span style="filter:drop-shadow(0vh 0vh 0.3vh black);">FIGHT</span>
+                <img src="${topCard.image}" alt="${topCard.name}" class="villain-image-overlay">
+            `;
+            
+            // Create attack button (hidden by default)
+            const attackButton = document.createElement('div');
+            attackButton.className = 'played-cards-attack-button';
+            attackButton.innerHTML = `
+                <span style="filter: drop-shadow(0vh 0vh 0.3vh black);">
+                    <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="overlay-attack-icons">
+                </span>
+            `;
+            attackButton.style.display = 'none';
+            indicator.appendChild(attackButton);
+
+            // Indicator click handler
+            indicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const selectedScheme = getSelectedScheme();
+                let villainAttack = recalculateVillainAttack(topCard);
+                villainAttack = Math.max(0, villainAttack);
+
+                // Check fight condition
+                if (topCard.fightCondition && topCard.fightCondition !== "None" && 
+                    !isVillainConditionMet(topCard)) {
+                    onscreenConsole.log(`Fight condition not met for <span class="console-highlights">${topCard.name}</span>.`);
+                    return;
+                }
+
+                // Calculate available attack points
+                let playerAttackPoints = totalAttackPoints;
+                if (recruitUsedToAttack || 
+                    topCard.keyword1 === "Bribe" || 
+                    topCard.keyword2 === "Bribe" || 
+                    topCard.keyword3 === "Bribe") {
+                    playerAttackPoints += totalRecruitPoints;
+                }
+
+                // Toggle attack button visibility
+                if (playerAttackPoints >= villainAttack) {
+                    attackButton.style.display = attackButton.style.display === 'none' ? 'block' : 'none';
+                } else {
+                    onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to fight ${topCard.name}`);
+                }
+            });
+
+            // Attack button click handler
+            attackButton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                attackButton.style.display = 'none'; // Hide button immediately
+                
+                try {
+                    await initiateTelepathicVillainFight(topCard, card);
+                    closePlayedCardsPopup();
+                } catch (error) {
+                    console.error('Error handling Telepathic Probe:', error);
+                    onscreenConsole.log(`Error fighting ${card.villain}`);
+                }
+            });
+
+            cardContainer.appendChild(indicator);
+        }
+
+        cardContainer.appendChild(imgElement);
+        playedCardsTable.appendChild(cardContainer);
+    });
+
+    // Show the popup
+    popup.style.display = 'block';
     showModalOverlay();
 }
 
@@ -5595,9 +7138,19 @@ function resetOpacity() {
 function recruitSidekick() {
     if (sidekickDeck.length > 0 && totalRecruitPoints >= 2) {
         const sidekick = sidekickDeck.pop();
-        playerDiscardPile.push(sidekick);
+	if (silentMeditationRecruit === true) {
+ 	playerHand.push(sidekick);
+	silentMeditationRecruit = false;
+onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to your hand.`);
+} else if (backflipRecruit === true) {
+playerDeck.push(sidekick);
+onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to the top of your deck.`);
+backflipRecruit = false;
+} else {
+playerDiscardPile.push(sidekick);
+onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to your discard pile.`);
+}        
         totalRecruitPoints -= 2;
-        onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to your discard pile.`);
         sidekickRecruited = true;
         healingPossible = false;
         updateGameBoard();
@@ -5662,9 +7215,19 @@ document.getElementById('sidekick-deck-card-back').addEventListener('click', sho
 function recruitOfficer() {
     if (shieldDeck.length > 0 && totalRecruitPoints >= 3) {
         const officer = shieldDeck.pop();
-        playerDiscardPile.push(officer);
+       	if (silentMeditationRecruit === true) {
+ 	playerHand.push(officer);
+	silentMeditationRecruit = false;
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.name}</span> has been added to your hand.`);
+} else if (backflipRecruit === true) {
+playerDeck.push(officer);
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.name}</span> has been added to the top of your deck.`);
+backflipRecruit = false;
+} else {
+playerDiscardPile.push(officer);
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.name}</span> has been added to your discard pile.`);
+}      
         totalRecruitPoints -= 3;
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">S.H.I.E.L.D. Officer</span> has been added to your discard pile.`);
         updateGameBoard();
     }
 }
@@ -5770,8 +7333,24 @@ function showHeroRecruitButton(hqIndex, hero) {
     }
 }
 
-function recruitHeroConfirmed(hero, hqIndex) {
-    playerDiscardPile.push(hero);
+async function recruitHeroConfirmed(hero, hqIndex) {
+
+if (hero.saveHumanityBystander === true) {
+victoryPile.push(hero);
+await rescueBystanderAbility(hero);
+} else if (silentMeditationRecruit === true) {
+ 	playerHand.push(hero);
+	silentMeditationRecruit = false;
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your hand.`);
+} else if (backflipRecruit === true) {
+playerDeck.push(hero);
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to the top of your deck.`);
+backflipRecruit = false;
+} else {
+playerDiscardPile.push(hero);
+onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
+}      
+
     totalRecruitPoints -= hero.cost;
     
     // Get the new card before placing it in HQ
@@ -5779,11 +7358,8 @@ function recruitHeroConfirmed(hero, hqIndex) {
     hq[hqIndex] = newCard;
     
     if (newCard) {
-        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your Discard pile.`);
         onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
-    } else {
-        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your Discard pile.`);
-    }
+    } 
     
     healingPossible = false;
 
@@ -5910,4 +7486,6 @@ document.getElementById('bribe-confirm-button').addEventListener('click', () => 
         });
     }
 });
+
+
 
