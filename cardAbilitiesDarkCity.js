@@ -9287,31 +9287,30 @@ onscreenConsole.log(`<span class="console-highlights">Apocalypse</span> always l
             updateInstructions();
         }
 
-        // Populate the list with Henchmen
-        henchmenInVP.forEach((card, index) => {
-            const li = document.createElement('li');
-            li.textContent = card.name;
-            li.setAttribute('data-card-id', card.id);
+horsemenInVP.forEach((card, index) => {
+    const li = document.createElement('li');
+    li.textContent = card.name;
+    li.setAttribute('data-card-id', card.id);
 
-            li.onmouseover = () => {
-                if (!activeImage) {
-                    heroImage.src = card.image;
-                    heroImage.style.display = 'block';
-                    oneChoiceHoverText.style.display = 'none';
-                }
-            };
+    li.onmouseover = () => {
+        if (!activeImage) {
+            heroImage.src = card.image;
+            heroImage.style.display = 'block';
+            oneChoiceHoverText.style.display = 'none';
+        }
+    };
 
-            li.onmouseout = () => {
-                if (!activeImage) {
-                    heroImage.src = '';
-                    heroImage.style.display = 'none';
-                    oneChoiceHoverText.style.display = 'block';
-                }
-            };
+    li.onmouseout = () => {
+        if (!activeImage) {
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+        }
+    };
 
-            li.onclick = () => toggleCardSelection(card, index, li);
-            cardsList.appendChild(li);
-        });
+    li.onclick = () => toggleCardSelection(card, index, li);
+    cardsList.appendChild(li);
+});
 
         // Handle confirmation
         confirmButton.onclick = async function() {
