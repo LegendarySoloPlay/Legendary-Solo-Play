@@ -32,6 +32,30 @@ const bystanders = [
 { id: 30, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" }
 ]
 
+
+const expansionBystanders = {
+    "Dark City": [
+        {name: 'News Reporter', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderNewsReporter', image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+        {name: 'News Reporter', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderNewsReporter', image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+        {name: 'News Reporter', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderNewsReporter', image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+        {name: 'News Reporter', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderNewsReporter', image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+        {name: 'Radiation Scientist', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderRadiationScientist', image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+        {name: 'Radiation Scientist', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderRadiationScientist', image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+        {name: 'Radiation Scientist', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderRadiationScientist', image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+        {name: 'Radiation Scientist', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderRadiationScientist', image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+        {name: 'Paramedic', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderParamedic', image: "Visual Assets/Other/Bystanders/paramedic.webp" },
+        {name: 'Paramedic', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderParamedic', image: "Visual Assets/Other/Bystanders/paramedic.webp" },
+        {name: 'Paramedic', type: 'Bystander', expansion: 'Dark City', victoryPoints: 1, bystanderUnconditionalAbility: 'bystanderParamedic', image: "Visual Assets/Other/Bystanders/paramedic.webp" }
+    ]
+};
+
+const bystanderKillbots = [
+{ name: 'Bystander - Killbot', image: "Visual Assets/Other/Bystander.webp" },
+{ name: 'News Reporter - Killbot', image: "Visual Assets/Other/Bystanders/newsReporter.webp" },
+{ name: 'Radiation Scientist - Killbot', image: "Visual Assets/Other/Bystanders/radiationScientist.webp" },
+{ name: 'Paramedic - Killbot', image: "Visual Assets/Other/Bystanders/paramedic.webp" }
+]
+
 const wounds = [
 { id: 1, name: 'Wound', type: 'Wound', victoryPoints: 0, cost: 0, attack: 0, recruit: 0, class1: "None", color: "None", team: "none", image: "Visual Assets/Other/Wound.webp" },
 { id: 2, name: 'Wound', type: 'Wound', victoryPoints: 0, cost: 0, attack: 0, recruit: 0, class1: "None", color: "None", team: "none", image: "Visual Assets/Other/Wound.webp" },
@@ -66,41 +90,41 @@ const wounds = [
 ]
 
 const shieldCards = [
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
-    { type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  }
+    { id: 'SHIELD1', type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp" },
+    { id: 'SHIELD2', type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
+    { id: 'SHIELD3', type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
+    { id: 'SHIELD4', type: "Hero", name: "S.H.I.E.L.D. Trooper", team: "S.H.I.E.L.D.", attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldtrooper.webp"  },
+    { id: 'SHIELD5', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD6', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD7', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD8', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD9', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD10', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD11', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  },
+    { id: 'SHIELD12', type: "Hero", name: "S.H.I.E.L.D. Agent", team: "S.H.I.E.L.D.", attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, cost: 0, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldagent.webp"  }
 ]
 
 const shieldOfficers = [
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
-    { type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD13', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD14', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD15', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD16', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD17', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD18', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD19', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD20', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD21', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD22', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD23', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD24', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD25', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD26', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD27', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD28', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD29', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD30', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD31', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
+    { id: 'SHIELD32', type: "Hero", name: "S.H.I.E.L.D. Officer", team: "S.H.I.E.L.D.", attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, cost: 3, class1: "None", color: "Grey", unconditionalAbility: "None", image: "Visual Assets/Heroes/SHIELD/shieldofficer.webp" },
 ]
 
 const schemes = [
@@ -235,8 +259,122 @@ twistText8: "Evil Wins!",
 twistText9: "Extra Twist. No effect.",
 twistText10: "Extra Twist. No effect.",
 image: "Visual Assets/Schemes/cosmiccube.webp"
+    },
+    {
+        id: 9,
+        name: "Capture Baby Hope",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "babyThreeVillainEscape",
+        twistEffect: "babyKidnap",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: " If a Villain has the baby, that Villain escapes. Otherwise, the baby is captured by the closest Villain to the Villain Deck. (If there are no Villains, do nothing.)",
+        image: "Visual Assets/Schemes/DarkCity_captureBabyHope.webp"
+    },
+    {
+        id: 10,
+        name: "Detonate the Helicarrier",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "hqDetonated",
+        twistEffect: "explosionKO",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 6,
+        variableTwist: false,
+        twistText: "Stack this Twist next to the Scheme. Then for each Twist in that stack, KO the leftmost Hero in the HQ and immediately refill that space.",
+        image: "Visual Assets/Schemes/DarkCity_detonateTheHelicarrier.webp"
+    },
+    {
+        id: 11,
+        name: "Massive Earthquake Generator",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "KOHeroesEqualThree",
+        twistEffect: "strengthOrKOTop",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: "Each player reveals a <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='console-card-icons'> Hero or KOs the top card of their deck.",
+        image: "Visual Assets/Schemes/DarkCity_massiveEarthquakeGenerator.webp"
+    },
+    {
+        id: 12,
+        name: "Organized Crime Wave",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "FiveGoonsEscape",
+        twistEffect: "GoonsEscape",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        specificHenchmenRequirement: "Maggia Goons",
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: `Each <span class="console-highlights">Maggia Goons</span> in the city escapes. Shuffle all <span class="console-highlights">Maggia Goons</span> from each players' Victory Piles into the Villain Deck.`,
+        image: "Visual Assets/Schemes/DarkCity_organizedCrimeWave.webp"
+    },
+    {
+        id: 13,
+        name: "Save Humanity",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "FourBystandersKOdOrEscaped",
+        twistEffect: "KOAllHQBystanders",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: "KO all Bystanders in the HQ. Then each player reveals an <img src='Visual Assets/Icons/Instinct.svg' alt='Instinct Icon' class='console-card-icons'> Hero or KOs a Bystander from their Victory Pile.",
+        image: "Visual Assets/Schemes/DarkCity_saveHumanity.webp"
+    },
+    {
+        id: 14,
+        name: "Steal the Weaponized Plutonium",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "FourPlutoniumEscape",
+        twistEffect: "plutoniumCaptured",
+        requiredVillains: 2,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: "This Plutonium is captured by the closest Villain to the Villain Deck. If there are no Villains in the city, KO this Plutonium. Either way, play another card from the Villain Deck.",
+        image: "Visual Assets/Schemes/DarkCity_stealTheWeaponizedPlutonium.webp"
+    },
+    {
+        id: 15,
+        name: "Transform Citizens Into Demons",
+        bystanderCount: 0,
+        twistCount: 8,
+        endGame: "FourGoblinQueenEscape",
+        twistEffect: "BystanderstToDemonGoblins",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: `Stack 5 Bystanders face down next to the Scheme. Bystanders stacked here are "Demon Goblin" Villains. They have 2<img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'>. Players can fight these Demon Goblins to rescue them as Bystanders.`,
+        image: "Visual Assets/Schemes/DarkCity_transformCitizensIntoDemons.webp"
+    },
+    {
+        id: 16,
+        name: "X-Cutioner's Song",
+        bystanderCount: 0,
+        twistCount: 8,
+        endGame: "NineHeroesKOdOrEscaped",
+        twistEffect: "KOCapturedHeroes",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: "KO all Heroes captured by enemies. Then play another card from the Villain Deck.",
+        image: "Visual Assets/Schemes/DarkCity_xcutionersSong.webp"
     }
 ];
+
 
 const masterminds = [
     {
@@ -244,7 +382,7 @@ const masterminds = [
         name: "Dr. Doom",
         attack: 9,
         bonusAttack: 3,
-        fightCondition: "Condition for Dr Doom",
+        fightCondition: "None",
         victoryPoints: 5,
 masterStrike: "doomStrike",
 masterStrikeConsoleLog: "Each player with exactly six cards in hand reveals a <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='console-card-icons'> Hero or puts two cards from their hand on top of their deck.", 
@@ -261,7 +399,7 @@ image: "Visual Assets/Masterminds/DrDoom_1.webp",
         name: "Loki",
         attack: 10,
         bonusAttack: 2,
-        fightCondition: "Condition for Loki",
+        fightCondition: "None",
         victoryPoints: 5,
 masterStrike: "LokiRevealStrengthOrWound",
 masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='console-card-icons'> Hero or gains a Wound.", 
@@ -278,7 +416,7 @@ image: "Visual Assets/Masterminds/Loki_1.webp",
         name: "Red Skull",
         attack: 7,
         bonusAttack: 1,
-        fightCondition: "Condition for Red Skull",
+        fightCondition: "None",
         victoryPoints: 5,
 masterStrike: "RedSkullKOHandHero",
 masterStrikeConsoleLog: "Each player KOs a Hero from their hand.", 
@@ -295,7 +433,7 @@ image: "Visual Assets/Masterminds/RedSkull_1.webp",
         name: "Magneto",
         attack: 8,
         bonusAttack: 2,
-        fightCondition: "Condition for Magneto",
+        fightCondition: "None",
         victoryPoints: 5,
 masterStrike: "magnetoStrike",
 masterStrikeConsoleLog: "Each player reveals an <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='console-card-icons'> Hero or discards down to four cards.", 
@@ -307,7 +445,100 @@ image: "Visual Assets/Masterminds/Magneto_1.webp",
             { id: 15, mastermindId: 4, fightEffect: "XMen7thDraw", victoryPoints: 5, name: "Electromagnetic Bubble", type: "Mastermind", effect: "Choose one of your <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Heroes. When you draw a new hand of cards at the end of this turn, add that Hero to your hand as a seventh card.", image: "Visual Assets/Masterminds/Magneto_4.webp" },
             { id: 16, mastermindId: 4, fightEffect: "XMenToBystanders", victoryPoints: 5, name: "Xavier's Nemesis", type: "Mastermind", effect: "For each of your <img src='Visual Assets/Icons/X-Men.svg' alt='X-Men Icon' class='card-icons'> Heroes, rescue a Bystander.", image: "Visual Assets/Masterminds/Magneto_5.webp" }
         ]
+    },
+    {
+        id: 5,
+        name: "Apocalypse",
+        attack: 12,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "apocalypseStrike",
+masterStrikeConsoleLog: "Each player reveals their hand and puts all their Heroes that cost 1 <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='console-card-icons'> or more on top of their deck.",
+endGame: "fourHorsemen", 
+image: "Visual Assets/Masterminds/DarkCity_Apocalypse.webp",
+
+        tactics: [
+            { id: 13, mastermindId: 5, fightEffect: "apocalypseApocalypticDestruction", victoryPoints: 6, name: "Apocalyptic Destruction", type: "Mastermind", effect: "Each other player KOs two Heroes from their discard pile that each cost 1 <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='card-icons'> or more.", image: "Visual Assets/Masterminds/DarkCity_Apocalypse_ApocalypticDestruction.webp" },
+            { id: 14, mastermindId: 5, fightEffect: "apocalypseHorsemenAreDrawingNearer", victoryPoints: 6, name: "Horsemen Are Drawing Nearer", type: "Mastermind", effect: `Each other player plays a <span class="bold-spans">Four Horsemen</span> Villain from their Victory Pile as if playing it from the Villain Deck.`, image: "Visual Assets/Masterminds/DarkCity_Apocalypse_HorsemenAreDrawingNearer.webp" },
+            { id: 15, mastermindId: 5, fightEffect: "apocalypseImmortalAndUndefeated", victoryPoints: 6, name: "Immortal and Undefeated", type: "Mastermind", effect: "If this is not the final Tactic, rescue six Bystanders and shuffle this Tactic back into the other Tactics.", image: "Visual Assets/Masterminds/DarkCity_Apocalypse_ImmortalAndUndefeated.webp" },
+            { id: 16, mastermindId: 5, fightEffect: "apocalypseTheEndOfAllThings", victoryPoints: 6, name: "The End Of All Things", type: "Mastermind", effect: "Each other player reveals the top three cards of their deck, KOs each one of those cards that cost 1 <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='card-icons'> or more, and puts the rest back in any order.", image: "Visual Assets/Masterminds/DarkCity_Apocalypse_TheEndOfAllThings.webp" }
+        ]
+    },
+    {
+        id: 6,
+        name: "Kingpin",
+        attack: 13,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "kingpinStrike",
+masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/MarvelKnights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or discards their hand and draws 5 cards.", 
+keyword1: "Bribe", 
+image: "Visual Assets/Masterminds/DarkCity_Kingpin.webp",
+
+        tactics: [
+            { id: 17, mastermindId: 6, fightEffect: "kingpinCallAHit", victoryPoints: 6, name: "Call A Hit", type: "Mastermind", effect: "Choose a Hero from each player's discard pile and KO it.", image: "Visual Assets/Masterminds/DarkCity_Kingpin_CallAHit.webp" },
+            { id: 18, mastermindId: 6, fightEffect: "kingpinCriminalEmpire", victoryPoints: 6, name: "Criminal Empire", type: "Mastermind", effect: "If this is not the final Tactic, reveal the top three cards of the Villain Deck. Play all the Villains you revealed. Put the rest back in random order.", image: "Visual Assets/Masterminds/DarkCity_Kingpin_CriminalEmpire.webp" },
+            { id: 19, mastermindId: 6, fightEffect: "kingpinDirtyCops", victoryPoints: 6, name: "Dirty Cops", type: "Mastermind", effect: "Put a 0 <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='card-icons'> Hero from the KO pile on top of each other player's deck.", image: "Visual Assets/Masterminds/DarkCity_Kingpin_DirtyCops.webp" },
+            { id: 20, mastermindId: 6, fightEffect: "kingpinMobWar", victoryPoints: 6, name: "Mob War", type: "Mastermind", effect: "Each other player plays a Henchman Villain from their Victory Pile as if playing it from the Villain Deck.", image: "Visual Assets/Masterminds/DarkCity_Kingpin_MobWar.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Mephisto",
+        attack: 10,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "mephistoStrike",
+masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/MarvelKnights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or gains a Wound.",
+image: "Visual Assets/Masterminds/DarkCity_Mephisto.webp",
+
+        tactics: [
+            { id: 21, mastermindId: 7, fightEffect: "mephistoDamnedIfYouDo", victoryPoints: 6, name: "Damned If You Do...", type: "Mastermind", effect: "Each other player KOs a Bystander from their Victory Pile or gains a Wound.", image: "Visual Assets/Masterminds/DarkCity_Mephisto_DamnedIfYouDo.webp" },
+            { id: 22, mastermindId: 7, fightEffect: "mephistoDevilishTorment", victoryPoints: 6, name: "Devilish Torment", type: "Mastermind", effect: "Each other player puts all 0 <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='card-icons'> cards from their discard pile on top of their deck in any order.", image: "Visual Assets/Masterminds/DarkCity_Mephisto_DevilishTorment.webp" },
+            { id: 23, mastermindId: 7, fightEffect: "mephistoPainBegetsPain", victoryPoints: 6, name: "Pain Begets Pain", type: "Mastermind", effect: "Choose any number of Wounds from your hand and discard pile. The player to your right gains them.", image: "Visual Assets/Masterminds/DarkCity_Mephisto_PainBegetsPain.webp" },
+            { id: 24, mastermindId: 7, fightEffect: "mephistoThePriceOfFailure", victoryPoints: 6, name: "The Price of Failure", type: "Mastermind", effect: "Each other player without a Mastermind Tactic in their Victory Pile gains a Wound.", image: "Visual Assets/Masterminds/DarkCity_Mephisto_ThePriceOfFailure.webp" }
+        ]
+    },
+    {
+        id: 8,
+        name: "Mr. Sinister",
+        attack: 8,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "mrSinisterStrike",
+masterStrikeConsoleLog: `<span class="console-highlights">Mr. Sinister</span> captures a Bystander. Then each player with exactly 6 cards reveals a <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='console-card-icons'> Hero or discards cards equal to the number of Bystanders <span class="console-highlights">Mr. Sinister</span> has.`,
+image: "Visual Assets/Masterminds/DarkCity_MrSinister.webp",
+
+        tactics: [
+            { id: 25, mastermindId: 8, fightEffect: "mrSinisterHumanExperimentation", victoryPoints: 6, name: "Human Experimentation", type: "Mastermind", effect: `<span class="console-highlights">Mr. Sinister</span> captures Bystanders equal to the number of Villains in the city.`, image: "Visual Assets/Masterminds/DarkCity_MrSinister_HumanExperimentation.webp" },
+            { id: 26, mastermindId: 8, fightEffect: "mrSinisterMasterGeneticist", victoryPoints: 6, name: "Master Geneticist", type: "Mastermind", effect: `Reveal the top seven cards of the Villain Deck. <span class="console-highlights">Mr. Sinister</span> captures all of the Bystanders you revealed. Put the rest back in random order.`, image: "Visual Assets/Masterminds/DarkCity_MrSinister_MasterGeneticist.webp" },
+            { id: 27, mastermindId: 8, fightEffect: "mrSinisterPlansWithinPlans", victoryPoints: 6, name: "Plans Within Plans", type: "Mastermind", effect: `<span class="console-highlights">Mr. Sinister</span> captures a Bystander for each <span class="console-highlights">Mr. Sinister</span> Tactic in players' Victory Piles, including this Tactic.`, image: "Visual Assets/Masterminds/DarkCity_MrSinister_PlansWithinPlans.webp" },
+            { id: 28, mastermindId: 8, fightEffect: "mrSinisterTelepathicManipulation", victoryPoints: 6, name: "Telepathic Manipulation", type: "Mastermind", effect: `<span class="console-highlights">Mr. Sinister</span> captures a Bystander from each other player's Victory Pile.`, image: "Visual Assets/Masterminds/DarkCity_MrSinister_TelepathicManipulation.webp" }
+        ]
+    },
+    {
+        id: 9,
+        name: "Stryfe",
+        attack: 7,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "stryfeStrike",
+masterStrikeConsoleLog: `Stack this Master Strike next to <span class="console-highlights">Stryfe</span>. <span class="console-highlights">Stryfe</span> gets +1<img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'> for each Master Strike stacked next to him. Each player reveals a <img src='Visual Assets/Icons/X-Force.svg' alt='X-Force Icon' class='console-card-icons'> Hero or discards a card at random.`,
+image: "Visual Assets/Masterminds/DarkCity_Stryfe.webp",
+
+        tactics: [
+            { id: 29, mastermindId: 9, fightEffect: "stryfeFuriousWrath", victoryPoints: 6, name: "Furious Wrath", type: "Mastermind", effect: "Reveal the top six cards of the Villain Deck. Play all the Master Strikes you revealed. Put the rest back in random order.", image: "Visual Assets/Masterminds/DarkCity_Stryfe_FuriousWrath.webp" },
+            { id: 30, mastermindId: 9, fightEffect: "stryfePsychicTorment", victoryPoints: 6, name: "Psychic Torment", type: "Mastermind", effect: "Look at the top five cards of your deck. Put one into your hand and discard the rest.", image: "Visual Assets/Masterminds/DarkCity_Stryfe_PsychicTorment.webp" },
+            { id: 31, mastermindId: 9, fightEffect: "stryfeSwiftVengeance", victoryPoints: 6, name: "Swift Vengeance", type: "Mastermind", effect: "A Wound from the Wound Stack becomes a Master Strike that takes effect immediately.", image: "Visual Assets/Masterminds/DarkCity_Stryfe_SwiftVengeance.webp" },
+            { id: 32, mastermindId: 9, fightEffect: "stryfeTideOfRetribution", victoryPoints: 6, name: "Tide of Retribution", type: "Mastermind", effect: "Each other player reveals an <img src='Visual Assets/Icons/X-Force.svg' alt='X-Force Icon' class='card-icons'> Hero or gains a Wound.", image: "Visual Assets/Masterminds/DarkCity_Stryfe_TideOfRetribution.webp" }
+        ]
     }
+
 ];
 
 const henchmen = [
@@ -316,6 +547,7 @@ const henchmen = [
         name: "Doombot Legion",
 team: "Doombot Legion",
 type: "Villain",
+henchmen: true,
         attack: 3,
 originalAttack: 3,
         victoryPoints: 1,
@@ -327,6 +559,7 @@ image: "Visual Assets/Henchmen/doombot.webp"
         name: "Hand Ninjas",
 team: "Hand Ninjas",
 type: "Villain",
+henchmen: true,
         attack: 3,
 originalAttack: 3,
         victoryPoints: 1,
@@ -338,6 +571,7 @@ image: "Visual Assets/Henchmen/handninjas.webp"
         name: "Savage Land Mutates",
 team: "Savage Land Mutates",
 type: "Villain",
+henchmen: true,
         attack: 3,
 originalAttack: 3,
         victoryPoints: 1,
@@ -349,11 +583,37 @@ image: "Visual Assets/Henchmen/savagelandmutates.webp"
         name: "Sentinel",
 team: "Sentinel",
 type: "Villain",
+henchmen: true,
         attack: 3,
 originalAttack: 3,
         victoryPoints: 1,
-fightEffect: "SentinelKOHeroYouHave", 
+fightEffect: "HenchmenKOHeroYouHave", 
 image: "Visual Assets/Henchmen/sentinel.webp"  
+  },
+    {
+        id: 5,
+        name: "Maggia Goons",
+team: "Maggia Goons",
+type: "Villain",
+henchmen: true,
+        attack: 4,
+originalAttack: 4,
+        victoryPoints: 1,
+fightEffect: "HenchmenKOHeroYouHave", 
+keyword1: "Bribe",
+image: "Visual Assets/Henchmen/DarkCity_maggiaGoons.webp"  
+  },
+    {
+        id: 6,
+        name: "Phalanx",
+team: "Phalanx",
+type: "Villain",
+henchmen: true,
+        attack: 3,
+originalAttack: 3,
+        victoryPoints: 1,
+fightEffect: "PhalanxTechOrKOAttack", 
+image: "Visual Assets/Henchmen/DarkCity_phalanx.webp"  
   }
 ];
 
@@ -372,20 +632,20 @@ const villains = [
         id: 2,
         name: "Enemies of Asgard",
         cards: [
-            { id: 5, villainId: 2, team: "Enemies of Asgard", name: "Frost Giant", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "FightRevealRangeOrWound", escapeEffect: "EscapeRevealRangeOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_FrostGiant.webp" },
-            { id: 6, villainId: 2, team: "Enemies of Asgard", name: "Destroyer", type: "Villain", attack: 7, originalAttack: 7, victoryPoints: 5, ambushEffect: "None", fightEffect: "KOAllSHIELD", escapeEffect: "EscapeChooseHeroesToKO", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Destroyer.webp" },
-            { id: 7, villainId: 2, team: "Enemies of Asgard", name: "Enchantress", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "None", fightEffect: "FightDrawThree", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Enchantress.webp" },
-            { id: 8, villainId: 2, team: "Enemies of Asgard", name: "Ymir, Frost Giant King", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "AmbushRevealRangeOrWound", fightEffect: "koAnyNumberOfWounds", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Ymir.webp" }
+            { id: 5, villainId: 2, team: "Enemies of Asgard", name: "Frost Giant", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "FightRevealRangeOrWound", escapeEffect: "EscapeRevealRangeOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_FrostGiant.webp" },
+            { id: 6, villainId: 2, team: "Enemies of Asgard", name: "Destroyer", type: "Villain", quantity: 1, attack: 7, originalAttack: 7, victoryPoints: 5, ambushEffect: "None", fightEffect: "KOAllSHIELD", escapeEffect: "EscapeChooseHeroesToKO", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Destroyer.webp" },
+            { id: 7, villainId: 2, team: "Enemies of Asgard", name: "Enchantress", type: "Villain", quantity: 2, attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "None", fightEffect: "FightDrawThree", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Enchantress.webp" },
+            { id: 8, villainId: 2, team: "Enemies of Asgard", name: "Ymir, Frost Giant King", type: "Villain", quantity: 2, attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "AmbushRevealRangeOrWound", fightEffect: "koAnyNumberOfWounds", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/EnemiesOfAsgard_Ymir.webp" }
         ]
     },
     {
         id: 3,
         name: "HYDRA",
         cards: [
-            { id: 9, villainId: 3, team: "HYDRA", name: "Viper", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "FightHYDRAVPOrWound", escapeEffect: "EscapeHYDRAVPOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_Viper.webp" },
-            { id: 10, villainId: 3, team: "HYDRA", name: "Supreme HYDRA", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 0, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_SupremeHYDRA.webp" },
-            { id: 11, villainId: 3, team: "HYDRA", name: "Endless Armies of HYDRA", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 3, ambushEffect: "None", fightEffect: "villainDrawX2", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_EndlessArmies.webp" },
-            { id: 12, villainId: 3, team: "HYDRA", name: "HYDRA Kidnappers", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 1, ambushEffect: "None", fightEffect: "chooseToGainSHIELDOfficer", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_HYDRAKidnappers.webp" }
+            { id: 9, villainId: 3, team: "HYDRA", name: "Viper", type: "Villain", quantity: 1, attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "FightHYDRAVPOrWound", escapeEffect: "EscapeHYDRAVPOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_Viper.webp" },
+            { id: 10, villainId: 3, team: "HYDRA", name: "Supreme HYDRA", type: "Villain", quantity: 1, attack: 6, originalAttack: 6, victoryPoints: 0, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_SupremeHYDRA.webp" },
+            { id: 11, villainId: 3, team: "HYDRA", name: "Endless Armies of HYDRA", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 3, ambushEffect: "None", fightEffect: "villainDrawX2", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_EndlessArmies.webp" },
+            { id: 12, villainId: 3, team: "HYDRA", name: "HYDRA Kidnappers", type: "Villain", quantity: 3, attack: 3, originalAttack: 3, victoryPoints: 1, ambushEffect: "None", fightEffect: "chooseToGainSHIELDOfficer", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_HYDRAKidnappers.webp" }
         ]
     },
     {
@@ -412,10 +672,10 @@ const villains = [
         id: 6,
         name: "Skrulls",
         cards: [
-            { id: 21, villainId: 6, team: "Skrulls", name: "Super-Skrull", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "FightKOHeroYouHave", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SuperSkrull.webp" },
-            { id: 22, villainId: 6, team: "Skrulls", name: "Skrull Shapeshifters", type: "Villain", attack: 0, originalAttack: 0, victoryPoints: 2, ambushEffect: "AmbushRightHeroSkrull", fightEffect: "fightSkrullShapeshifters", escapeEffect: "escapeSkrullShapeshifter", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SkrullShapeshifters.webp" },
-            { id: 23, villainId: 6, team: "Skrulls", name: "Skrull Queen Veranke", type: "Villain", attack: 0, originalAttack: 0, victoryPoints: 4, ambushEffect: "highestCostHeroSkrullQueen", fightEffect: "fightSkrullQueen", escapeEffect: "escapeSkrullQueen", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SkrullQueen.webp" },
-            { id: 24, villainId: 6, team: "Skrulls", name: "Paibok the Power Skrull", type: "Villain", attack: 8, originalAttack: 8, victoryPoints: 3, ambushEffect: "None", fightEffect: "freeHeroRecruit", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_Paibok.webp" }
+            { id: 21, villainId: 6, team: "Skrulls", name: "Super-Skrull", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "FightKOHeroYouHave", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SuperSkrull.webp" },
+            { id: 22, villainId: 6, team: "Skrulls", name: "Skrull Shapeshifters", type: "Villain", quantity: 3, attack: 0, originalAttack: 0, victoryPoints: 2, ambushEffect: "AmbushRightHeroSkrull", fightEffect: "fightSkrullShapeshifters", escapeEffect: "escapeSkrullShapeshifter", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SkrullShapeshifters.webp" },
+            { id: 23, villainId: 6, team: "Skrulls", name: "Skrull Queen Veranke", type: "Villain", quantity: 1, attack: 0, originalAttack: 0, victoryPoints: 4, ambushEffect: "highestCostHeroSkrullQueen", fightEffect: "fightSkrullQueen", escapeEffect: "escapeSkrullQueen", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_SkrullQueen.webp" },
+            { id: 24, villainId: 6, team: "Skrulls", name: "Paibok the Power Skrull", type: "Villain", quantity: 1, attack: 8, originalAttack: 8, victoryPoints: 3, ambushEffect: "None", fightEffect: "freeHeroGain", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/Skrulls_Paibok.webp" }
         ]
     },
     {
@@ -426,6 +686,66 @@ const villains = [
             { id: 26, villainId: 7, team: "Spider-Foes", name: "Green Goblin", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "ambushBystander", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/SpiderFoes_GreenGoblin.webp" },
             { id: 27, villainId: 7, team: "Spider-Foes", name: "The Lizard", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 2, ambushEffect: "None", fightEffect: "sewersWound", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/SpiderFoes_TheLizard.webp" },
             { id: 28, villainId: 7, team: "Spider-Foes", name: "Doctor Octopus", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "DrOctopusNextDraw2", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/SpiderFoes_DrOctopus.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Emissaries of Evil",
+        cards: [
+            { id: 29, villainId: 8, team: "Emissaries of Evil", name: "Rhino", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "rhinoAmbush", fightEffect: "None", escapeEffect: "rhinoEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_EmissariesOfEvil_Rhino.webp" },
+            { id: 30, villainId: 8, team: "Emissaries of Evil", name: "Electro", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "electroAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_EmissariesOfEvil_Electro.webp" },
+            { id: 31, villainId: 8, team: "Emissaries of Evil", name: "Egghead", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "eggheadAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_EmissariesOfEvil_Egghead.webp" },
+            { id: 32, villainId: 8, team: "Emissaries of Evil", name: "Gladiator", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "gladiatorAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_EmissariesOfEvil_Gladiator.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Four Horsemen",
+        cards: [
+            { id: 33, villainId: 9, team: "Four Horsemen", name: "War", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "None", fightEffect: "warFight", escapeEffect: "warEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_FourHorsemen_War.webp" },
+            { id: 34, villainId: 9, team: "Four Horsemen", name: "Famine", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "famineFight", escapeEffect: "famineEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_FourHorsemen_Famine.webp" },
+            { id: 35, villainId: 9, team: "Four Horsemen", name: "Pestilence", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "pestilenceFight", escapeEffect: "pestilenceEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_FourHorsemen_Pestilence.webp" },
+            { id: 36, villainId: 9, team: "Four Horsemen", name: "Death", type: "Villain", attack: 7, originalAttack: 7, victoryPoints: 5, ambushEffect: "None", fightEffect: "deathFight", escapeEffect: "deathEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_FourHorsemen_Death.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Marauders",
+        cards: [
+            { id: 37, villainId: 10, team: "Marauders", name: "Scalphunter", type: "Villain", attack: 4, originalAttack: 4, bonusBystanderAttack: 1, victoryPoints: 2, ambushEffect: "scalphunterAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Marauders_Scalphunter.webp" },
+            { id: 38, villainId: 10, team: "Marauders", name: "Chimera", type: "Villain", attack: 3, originalAttack: 3, bonusBystanderAttack: 3, victoryPoints: 3, ambushEffect: "chimeraAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Marauders_Chimera.webp" },
+            { id: 39, villainId: 10, team: "Marauders", name: "Blockbuster", type: "Villain", attack: 4, originalAttack: 4, bonusBystanderAttack: 2, victoryPoints: 2, ambushEffect: "blockbusterAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Marauders_Blockbuster.webp" },
+            { id: 40, villainId: 10, team: "Marauders", name: "Vertigo", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "vertigoFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", errata: "Vertigo - Errata", image: "Visual Assets/Villains/DarkCity_Marauders_Vertigo.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Mutant Liberation Front",
+        cards: [
+            { id: 41, villainId: 11, team: "Mutant Liberation Front", name: "Zero", type: "Villain", attack: 0, originalAttack: 0, victoryPoints: 2, ambushEffect: "None", fightEffect: "zeroFight", escapeEffect: "None", fightCondition: "zeroCostCards", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_MLF_Zero.webp" },
+            { id: 42, villainId: 11, team: "Mutant Liberation Front", name: "Wildside", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "wildsideFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_MLF_Wildside.webp" },
+            { id: 43, villainId: 11, team: "Mutant Liberation Front", name: "Forearm", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 4, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "fourDifferentNames", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_MLF_Forearm.webp" },
+            { id: 44, villainId: 11, team: "Mutant Liberation Front", name: "Reignfire", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "None", fightEffect: "None", escapeEffect: "reignfireEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_MLF_Reignfire.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Streets of New York",
+        cards: [
+            { id: 45, villainId: 12, team: "Streets of New York", name: "Bullseye", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "None", fightEffect: "bullseyeFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_StreetsOfNewYork_Bullseye.webp" },
+            { id: 46, villainId: 12, team: "Streets of New York", name: "Jigsaw", type: "Villain", attack: 11, originalAttack: 11, victoryPoints: 5, ambushEffect: "jigsawAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Bribe", image: "Visual Assets/Villains/DarkCity_StreetsOfNewYork_Jigsaw.webp" },
+            { id: 47, villainId: 12, team: "Streets of New York", name: "Hammerhead", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 2, ambushEffect: "None", fightEffect: "hammerheadFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Bribe", image: "Visual Assets/Villains/DarkCity_StreetsOfNewYork_Hammerhead.webp" },
+            { id: 48, villainId: 12, team: "Streets of New York", name: "Tombstone", type: "Villain", attack: 8, originalAttack: 8, victoryPoints: 4, ambushEffect: "None", fightEffect: "None", escapeEffect: "tombstoneEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Bribe", image: "Visual Assets/Villains/DarkCity_StreetsOfNewYork_Tombstone.webp" }
+        ]
+    },
+    {
+        id: 7,
+        name: "Underworld",
+        cards: [
+            { id: 49, villainId: 13, team: "Underworld", name: "Blackheart", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "blackheartAmbush", fightEffect: "blackheartFight", escapeEffect: "blackheartEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Blackheart.webp" },
+            { id: 50, villainId: 13, team: "Underworld", name: "Dracula", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 4, ambushEffect: "draculaAmbush", fightEffect: "draculaFight", escapeEffect: "draculaEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Dracula.webp" },
+            { id: 51, villainId: 13, team: "Underworld", name: "Azazel", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "azazelFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Azazel.webp" },
+            { id: 52, villainId: 13, team: "Underworld", name: "Lilith, Daughter of Dracula", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "lilithEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_LilithDaughterOfDracula.webp" }
         ]
     }
 ];
@@ -523,9 +843,9 @@ const heroes = [
         name: "Emma Frost",
         cards: [
 {id:17, name: "Emma Frost - Mental Discipline", type: "Hero", rarity: "Common", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 3, attack: 0, recruit: 1, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_MentalDiscipline.webp"},
-{id:18, name: "Emma Frost - Shadowed Thoughts", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 2, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "EmmaFrostVoluntaryVillainForAttack", conditionType: "playedCards", condition: "Covert", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_ShadowedThoughts.webp"},
+{id:18, name: "Emma Frost - Shadowed Thoughts", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 2, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "EmmaFrostVoluntaryVillainForAttack", conditionType: "playedCards", condition: "Covert", errata: "Emma Frost - Shadowed Thoughts Errata", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_ShadowedThoughts.webp"},
 {id:19, name: "Emma Frost - Psychic Link", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 5, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "EmmaFrostExtraDraw", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp"},
-{id:20, name: "Emma Frost - Diamond Form", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Strength", class2: "None", color: "Green", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "EmmaFrostExtraThreeRecruit", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_DiamondForm.webp"}
+{id:20, name: "Emma Frost - Diamond Form", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Strength", class2: "None", color: "Green", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "EmmaFrostExtraThreeRecruit", conditionalAbility: "None", conditionType: "None", condition: "None", errata: "Emma Frost - Diamond Form Errata", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_DiamondForm.webp"}
         ]
     },
     {
@@ -575,7 +895,7 @@ const heroes = [
         name: "Nick Fury",
         cards: [
 {id:37, name: "Nick Fury - Battlefield Promotion", type: "Hero", rarity: "Common", team: "S.H.I.E.L.D.", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "NickFuryRecruitShieldOfficerByKO", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_NickFury_BattlefieldPromotion.webp"},
-{id:38, name: "Nick Fury - High-Tech Weaponry", type: "Hero", rarity: "Common 2", team: "S.H.I.E.L.D.", class1: "Tech", class2: "None", color: "Black", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "NickFuryBonusAttack", conditionType: "playedCards", condition: "Tech", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_NickFury_HighTechWeaponry.webp"},
+{id:38, name: "Nick Fury - High-Tech Weaponry", type: "Hero", rarity: "Common 2", team: "S.H.I.E.L.D.", class1: "Tech", class2: "None", color: "Black", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "NickFuryBonusAttack", conditionType: "playedCards", condition: "Tech", errata: "Nick Fury - High Tech Weaponry Errata", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_NickFury_HighTechWeaponry.webp"},
 {id:39, name: "Nick Fury - Legendary Commander", type: "Hero", rarity: "Uncommon", team: "S.H.I.E.L.D.", class1: "Strength", class2: "None", color: "Green", cost: 6, attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "S.H.I.E.L.D.", multiplierAttribute: "team", multiplierLocation: "playedCards", unconditionalAbility: "NickFuryCommanderBonusAttack", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_NickFury_LegendaryCommander.webp"},
 {id:40, name: "Nick Fury - Pure Fury", type: "Hero", rarity: "Rare", team: "S.H.I.E.L.D.", class1: "Tech", class2: "None", color: "Black", cost: 8, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "NickFuryFindEligibleVillains", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_NickFury_PureFury.webp"}
         ]
@@ -637,22 +957,209 @@ const heroes = [
 {
 
         id: 16,
-        name: "Test Hero",
+        name: "Angel",
         cards: [
-{id:61, name: "Card 1", type: "Hero", rarity: "Common", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelHighSpeedChase", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_Wolverine_HealingFactor.webp"},
-{id:62, name: "Card 2", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 2, attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelDivingCatch", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_Wolverine_KeenSenses.webp"},
-{id:63, name: "Card 3", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 5, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelDropOffAFriend", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_Wolverine_FrenziedSlashing.webp"},
-{id:64, name: "Card 4", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 8, attack: 0, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelStrengthOfSpirit", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Reskinned Core/Core_Wolverine_BerserkerRage.webp"}
+{id:61, name: "Angel - Diving Catch", type: "Hero", rarity: "Common", team: "X-Men", class1: "Strength", class2: "None", color: "Green", cost: 4, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "Discard", image: "Visual Assets/Heroes/Dark City/DarkCity_Angel_DivingCatch.webp"},
+{id:62, name: "Angel - High-Speed Chase", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 3, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelHighSpeedChase", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Angel_High-SpeedChase.webp"},
+{id:63, name: "Angel - Drop Off A Friend", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 5, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelDropOffAFriend", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Angel_DropOffAFriend.webp"},
+{id:64, name: "Angel - Strength of Spirit", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Strength", class2: "None", color: "Green", cost: 7, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "angelStrengthOfSpirit", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Angel_StrengthOfSpirit.webp"}
+        ]
+    },
+{
+
+        id: 17,
+        name: "Bishop",
+        cards: [
+{id:65, name: "Bishop - Absorb Energies", type: "Hero", rarity: "Common", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bishopAbsorbEnergies", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Bishop_AbsorbEnergies.webp"},
+{id:66, name: "Bishop - Whatever the Cost", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 2, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "bishopWhateverTheCost", conditionType: "playedCards", condition: "Covert", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Bishop_WhateverTheCost.webp"},
+{id:67, name: "Bishop - Concussive Blast", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 5, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 3, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "bishopConcussiveBlast", conditionType: "playedCards", condition: "Range&Range", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Bishop_ConcussiveBlast.webp"},
+{id:68, name: "Bishop - Firepower From the Future", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Tech", class2: "None", color: "Black", cost: 7, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bishopFirepowerFromTheFuture", conditionalAbility: "None", conditionType: "playedCards", condition: "X-Men", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Bishop_FirepowerFromTheFuture.webp"}
+        ]
+    },
+{
+
+        id: 18,
+        name: "Blade",
+        cards: [
+{id:69, name: "Blade - Stalk the Prey", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Covert", class2: "None", color: "Red", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bladeStalkThePrey", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Blade_StalkThePrey.webp"},
+{id:70, name: "Blade - Night Hunter", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bladeNightHunter", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Blade_NightHunter.webp"},
+{id:71, name: "Blade - Nowhere To Hide", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Tech", class2: "None", color: "Black", cost: 6, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bladeNowhereToHide", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Blade_NowhereToHide.webp"},
+{id:72, name: "Blade - Vampiric Surge", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 7, attack: 0, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "bladeVampiricSurge", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Blade_VampiricSurge.webp"}
+        ]
+    },
+{
+
+        id: 19,
+        name: "Cable",
+        cards: [
+{id:73, name: "Cable - Strike at the Heart of Evil", type: "Hero", rarity: "Common", team: "X-Force", class1: "Range", class2: "None", color: "Blue", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "cableStrike", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Cable_StrikeAtTheHeartOfEvil.webp"},
+{id:74, name: "Cable - Disaster Survivalist", type: "Hero", rarity: "Common 2", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Cable_DisasterSurvivalist.webp"},
+{id:75, name: "Cable - Rapid Response Force", type: "Hero", rarity: "Uncommon", team: "X-Force", class1: "Covert", class2: "None", color: "Red", cost: 6, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "X-Force", multiplierAttribute: "team", multiplierLocation: "playedCards", keyword1: "Teleport", unconditionalAbility: "None", conditionalAbility: "cableRapidResponseForce", conditionType: "playedCards", condition: "X-Force", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Cable_RapidResponseForce.webp"},
+{id:76, name: "Cable - Army of One", type: "Hero", rarity: "Rare", team: "X-Force", class1: "Range", class2: "None", color: "Blue", cost: 8, attack: 5, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 1, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "cableArmyOfOne", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Cable_ArmyOfOne.webp"}
+        ]
+    },
+{
+
+        id: 20,
+        name: "Colossus",
+        cards: [
+{id:77, name: "Colossus - Draw Their Fire", type: "Hero", rarity: "Common", team: "X-Force", class1: "Strength", class2: "None", color: "Green", cost: 1, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "drawWound", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Colossus_DrawTheirFire.webp"},
+{id:78, name: "Colossus - Invulnerability", type: "Hero", rarity: "Common 2", team: "X-Force", class1: "Strength", class2: "None", color: "Green", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "discardWound", image: "Visual Assets/Heroes/Dark City/DarkCity_Colossus_Invulnerability.webp"},
+{id:79, name: "Colossus - Silent Statue", type: "Hero", rarity: "Uncommon", team: "X-Force", class1: "Covert", class2: "None", color: "Red", cost: 6, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 2, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "colossusSilentStatue", conditionType: "playedCards", condition: "Strength", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Colossus_SilentStatue.webp"},
+{id:80, name: "Colossus - Russian Heavy Tank", type: "Hero", rarity: "Rare", team: "X-Force", class1: "Strength", class2: "None", color: "Green", cost: 8, attack: 6, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Colossus_RussianHeavyTank.webp"}
+        ]
+    },
+{
+
+        id: 21,
+        name: "Daredevil",
+        cards: [
+{id:81, name: "Daredevil - Backflip", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "daredevilBackflip", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Daredevil_Backflip.webp"},
+{id:82, name: "Daredevil - Radar Sense", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "daredevilRadarSense", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Daredevil_RadarSense.webp"},
+{id:83, name: "Daredevil - Blind Justice", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Covert", class2: "None", color: "Red", cost: 6, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "daredevilBlindJustice", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Daredevil_BlindJustice.webp"},
+{id:84, name: "Daredevil - The Man Without Fear", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 8, attack: 7, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "daredevilTheManWithoutFear", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Daredevil_TheManWithoutFear.webp"}
+        ]
+    },
+{
+
+        id: 22,
+        name: "Domino",
+        cards: [
+{id:85, name: "Domino - Lucky Break", type: "Hero", rarity: "Common", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 1, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Versatile", errata: "Domino - Lucky Break Errata", unconditionalAbility: "extraDraw", conditionalAbility: "dominoLuckyBreak", conditionType: "playedCards", condition: "X-Force", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Domino_LuckyBreak.webp"},
+{id:86, name: "Domino - Ready For Anything", type: "Hero", rarity: "Common 2", team: "X-Force", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Versatile", unconditionalAbility: "dominoReadyForAnything", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Domino_ReadyForAnything.webp"},
+{id:87, name: "Domino - Specialized Ammunition", type: "Hero", rarity: "Uncommon", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 5, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "dominoSpecializedAmmunition", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Domino_SpecializedAmmunition.webp"},
+{id:88, name: "Domino - Against All Odds", type: "Hero", rarity: "Rare", team: "X-Force", class1: "Covert", class2: "None", color: "Red", cost: 7, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Versatile", unconditionalAbility: "dominoAgainstAllOdds", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Domino_AgainstAllOdds.webp"}
+        ]
+    },
+{
+
+        id: 23,
+        name: "Elektra",
+        cards: [
+{id:89, name: "Elektra - First Strike", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Covert", class2: "None", color: "Red", cost: 1, attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "elektraFirstStrike", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Elektra_FirstStrike.webp"},
+{id:90, name: "Elektra - Ninjitsu", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 2, attack: 0, recruit: 0, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 2, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "elektraNinjitsu", conditionType: "playedCards", condition: "Covert", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Elektra_Ninjitsu.webp"},
+{id:91, name: "Elektra - Sai Blades", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 6, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "elektraSaiBlades", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Elektra_SaiBlades.webp"},
+{id:92, name: "Elektra - Silent Meditation", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 7, attack: 0, recruit: 5, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 2, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "elektraSilentMeditation", conditionalAbility: "elektraSilentMeditationRecruit", conditionType: "playedCards", condition: "Marvel Knights", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Elektra_SilentMeditation.webp"}
+        ]
+    },
+{
+
+        id: 24,
+        name: "Forge",
+        cards: [
+{id:93, name: "Forge - Reboot", type: "Hero", rarity: "Common", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 4, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "forgeReboot", conditionType: "playedCards", condition: "Tech", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Forge_Reboot.webp"},
+{id:94, name: "Forge - Dirty Work", type: "Hero", rarity: "Common 2", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "forgeDirtyWork", conditionType: "playedCards", condition: "Tech", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Forge_DirtyWork.webp"},
+{id:95, name: "Forge - Overdrive", type: "Hero", rarity: "Uncommon", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 5, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Versatile", unconditionalAbility: "forgeOverdrive", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Forge_Overdrive.webp"},
+{id:96, name: "Forge - B.F.G.", type: "Hero", rarity: "Rare", team: "X-Force", class1: "Tech", class2: "None", color: "Black", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "forgeBFG", conditionType: "playedCards", condition: "Tech&Tech", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Forge_BFG.webp"}
+        ]
+    },
+{
+
+        id: 25,
+        name: "Ghost Rider",
+        cards: [
+{id:97, name: "Ghost Rider - Hell On Wheels", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Tech", class2: "None", color: "Black", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 2, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "ghostRiderHellOnWheels", conditionType: "playedCards", condition: "Marvel Knights", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_GhostRider_HellOnWheels.webp"},
+{id:98, name: "Ghost Rider - Blazing Hellfire", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Range", class2: "None", color: "Blue", cost: 5, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 2, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "ghostRiderBlazingHellfire", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_GhostRider_BlazingHellfire.webp"},
+{id:99, name: "Ghost Rider - Infernal Chains", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 2, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "ghostRiderInfernalChains", conditionType: "playedCards", condition: "Strength", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_GhostRider_InfernalChains.webp"},
+{id:100, name: "Ghost Rider - Penance Stare", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Range", class2: "None", color: "Blue", cost: 8, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "ghostRiderPenanceStare", conditionalAbility: "ghostRiderPenanceStareConditional", conditionType: "playedCards", condition: "Marvel Knights", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_GhostRider_PenanceStare.webp"}
+        ]
+    },
+{
+
+        id: 26,
+        name: "Iceman",
+        cards: [
+{id:101, name: "Iceman - Ice Slide", type: "Hero", rarity: "Common", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "icemanIceSlide", conditionType: "playedCards", condition: "Range", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Iceman_IceSlide.webp"},
+{id:102, name: "Iceman - Deep Freeze", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 2, attack: 0, recruit: 0, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "icemanDeepFreeze", conditionType: "playedCards", condition: "Range", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Iceman_DeepFreeze.webp"},
+{id:103, name: "Iceman - Frost Spike Armor", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Strength", class2: "None", color: "Green", cost: 5, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "icemanFrostSpikeArmor", conditionType: "playedCards", condition: "Range", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Iceman_FrostSpikeArmor.webp"},
+{id:104, name: "Iceman - Impenetrable Ice Wall", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 8, attack: 7, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "discardAndWound", image: "Visual Assets/Heroes/Dark City/DarkCity_Iceman_ImpenetrableIceWall.webp"}
+        ]
+    },
+{
+
+        id: 27,
+        name: "Iron Fist",
+        cards: [
+{id:105, name: "Iron Fist - Focus Chi", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 0, recruit: 0, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "ironfistFocusChi", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_IronFist_FocusChi.webp"},
+{id:106, name: "Iron Fist - Wield the Iron Fist", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 4, attack: 0, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "ironfistWieldTheIronFist", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_IronFist_WieldTheIronFist.webp"},
+{id:107, name: "Iron Fist - Ancient Legacy", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 1, attack: 0, recruit: 0, attackIcon: true, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Versatile", unconditionalAbility: "extraDraw", conditionalAbility: "ironfistAncientLegacy", conditionType: "playedCards", condition: "Strength&Strength", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_IronFist_AncientLegacy.webp"},
+{id:108, name: "Iron Fist - Living Weapon", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 9, attack: 8, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "ironfistLivingWeapon", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_IronFist_LivingWeapon.webp"}
+        ]
+    },
+{
+
+        id: 28,
+        name: "Jean Grey",
+        cards: [
+{id:109, name: "Jean Grey - Read Your Thoughts", type: "Hero", rarity: "Common", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 5, attack: 0, recruit: 3, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "jeangreyReadYourThoughts", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_JeanGrey_ReadYourThoughts.webp"},
+{id:110, name: "Jean Grey - Psychic Search", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 3, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "jeangreyPsychicSearch", conditionType: "playedCards", condition: "X-Men", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_JeanGrey_PsychicSearch.webp"},
+{id:111, name: "Jean Grey - Mind Over Matter", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 6, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "jeangreyMindOverMatter", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_JeanGrey_MindOverMatter.webp"},
+{id:112, name: "Jean Grey - Telekinetic Mastery", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "jeangreyTelekineticMastery", conditionalAbility: "jeanGreyXMenBystanders", conditionType: "playedCards", condition: "X-Men", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_JeanGrey_TelekineticMastery.webp"}
+        ]
+    },
+{
+
+        id: 29,
+        name: "Nightcrawler",
+        cards: [
+{id:113, name: "Nightcrawler - Bamf!", type: "Hero", rarity: "Common", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Teleport", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Nightcrawler_Bamf.webp"},
+{id:114, name: "Nightcrawler - Blend Into Shadows", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Teleport", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Nightcrawler_BlendIntoShadows.webp"},
+{id:115, name: "Nightcrawler - Swashbuckler", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 5, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 3, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "nightcrawlerSwashbuckler", conditionType: "playedCards", condition: "Instinct&Covert", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Nightcrawler_Swashbuckler.webp"},
+{id:116, name: "Nightcrawler - Along for the Ride", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", keyword1: "Teleport", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Nightcrawler_AlongForTheRide.webp"}
+        ]
+    },
+{
+
+        id: 30,
+        name: "Professor X",
+        cards: [
+{id:117, name: "Professor X - Class Dismissed", type: "Hero", rarity: "Common", team: "X-Men", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "professorXClassDismissed", conditionalAbility: "professorXClassDismissedKO", conditionType: "playedCards", condition: "Instinct", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_ClassDismissed.webp"},
+{id:118, name: "Professor X - Psionic Astral Form", type: "Hero", rarity: "Common 2", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 2, attack: 1, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 2, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "professorXPsionicAstralForm", conditionType: "playedCards", condition: "X-Men", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_PsionicAstralForm.webp"},
+{id:119, name: "Professor X - Telepathic Probe", type: "Hero", rarity: "Uncommon", team: "X-Men", class1: "Range", class2: "None", color: "Blue", cost: 5, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "professorXTelepathicProbe", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_TelepathicProbe.webp"},
+{id:120, name: "Professor X - Mind Control", type: "Hero", rarity: "Rare", team: "X-Men", class1: "Covert", class2: "None", color: "Red", cost: 8, attack: 6, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "professorXMindControl", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp"}
+        ]
+    },
+{
+
+        id: 31,
+        name: "Punisher",
+        cards: [
+{id:121, name: "Punisher - Boom Goes the Dynamite", type: "Hero", rarity: "Common", team: "Marvel Knights", class1: "Tech", class2: "None", color: "Black", cost: 2, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "punisherBoomGoesTheDynamite", conditionalAbility: "punisherBoomGoesTheDynamiteConditional", conditionType: "playedCards", condition: "Tech", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Punisher_BoomGoesTheDynamite.webp"},
+{id:122, name: "Punisher - Hail of Bullets", type: "Hero", rarity: "Common 2", team: "Marvel Knights", class1: "Tech", class2: "None", color: "Black", cost: 5, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "punisherHailOfBullets", conditionalAbility: "punisherHailOfBulletsDefeat", conditionType: "playedCards", condition: "Tech&Tech", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Punisher_HailOfBullets.webp"},
+{id:123, name: "Punisher - Hostile Interrogation", type: "Hero", rarity: "Uncommon", team: "Marvel Knights", class1: "Strength", class2: "None", color: "Green", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "punisherHostileInterrogation", conditionType: "playedCards", condition: "Strength", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Punisher_HostileInterrogation.webp"},
+{id:124, name: "Punisher - The Punisher", type: "Hero", rarity: "Rare", team: "Marvel Knights", class1: "Tech", class2: "None", color: "Black", cost: 8, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "punisherThePunisher", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_Punisher_ThePunisher.webp"}
+        ]
+    },
+{
+
+        id: 32,
+        name: "X-Force Wolverine",
+        cards: [
+{id:125, name: "X-Force Wolverine - Sudden Ambush", type: "Hero", rarity: "Common", team: "X-Force", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "xforcewolverineSuddenAmbush", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_X-ForceWolverine_SuddenAmbush.webp"},
+{id:126, name: "X-Force Wolverine - Animal Instincts", type: "Hero", rarity: "Common 2", team: "X-Force", class1: "Instinct", class2: "None", color: "Yellow", cost: 2, attack: 0, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 2, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "extraDraw", conditionalAbility: "xforcewolverineAnimalInstincts", conditionType: "playedCards", condition: "Instinct", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_X-ForceWolverine_AnimalInstincts.webp"},
+{id:127, name: "X-Force Wolverine - No Mercy", type: "Hero", rarity: "Uncommon", team: "X-Force", class1: "Strength", class2: "None", color: "Green", cost: 4, attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "xforcewolverineNoMercy", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_X-ForceWolverine_NoMercy.webp"},
+{id:128, name: "X-Force Wolverine - Reckless Abandon", type: "Hero", rarity: "Rare", team: "X-Force", class1: "Covert", class2: "None", color: "Red", cost: 7, attack: 3, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "xforcewolverineRecklessAbandon", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Dark City/DarkCity_X-ForceWolverine_RecklessAbandon.webp"}
         ]
     }
 
 ];
 
 
+
+
+
 const keywordDescriptions = {
-    "Investigate": "Look at the top two cards of your deck. If you find the right card, draw it. Put the rest of the cards back on the top and/or bottom of your deck in any order.",
-    "Phasing": "You may swap this card with the top card of your deck. This is not counted as playing or drawing a card.",
-    "Shatter": `Halve that enemy's current <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> (rounding up to the nearest whole number) until the end of this turn.`
+    "Investigate": `Look at the top two cards of your deck. If you find the right card, draw it. Put the rest of the cards back on the top and/or bottom of your deck in any order.`,
+    "Phasing": `You may swap this card with the top card of your deck. This is not counted as playing or drawing a card.`,
+    "Shatter": `Halve that enemy's current <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> (rounding up to the nearest whole number) until the end of this turn.`,
+    "Teleport": `Instead of playing this card, you may set it aside. At the end of this turn, add it to your new hand as an extra card.`,
+    "Versatile": `Choose to use the specified amount as <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">`,
+    "Bribe": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
+"Domino - Lucky Break Errata": `There should be a printed <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> icon behind the top "0+" on the side of the card.`,
+"Emma Frost - Diamond Form Errata": `There should be a <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> icon on this card that reads "0+.`,
+"Emma Frost - Shadowed Thoughts Errata": `This card's <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> should read "2+" instead of "2".`,
+"Nick Fury - High Tech Weaponry Errata": `This card's <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> should read "2+" instead of "2".`,
+"Vertigo - Errata": `The text on this card is a Fight effect.`
 };
 
 
