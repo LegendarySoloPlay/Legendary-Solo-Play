@@ -5476,7 +5476,8 @@ console.log("Selected Villain's Location: ", currentVillainLocation);
         shattered: villainCard.shattered,
         fightCondition: villainCard.fightCondition,
         image: villainCard.image,
-        captureCode: villainCard.captureCode
+        captureCode: villainCard.captureCode,
+		alwaysLeads: villainCard.alwaysLeads
     };
 
     // Calculate attack synchronously
@@ -7522,6 +7523,7 @@ document.getElementById('bribe-confirm-button').addEventListener('click', () => 
         });
     }
 });
+
 
 
 
