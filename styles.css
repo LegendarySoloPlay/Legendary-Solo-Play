@@ -443,6 +443,20 @@ content: '';
     animation: pulseGlowAttack 2s infinite ease-in-out;
 }
 
+#demon-goblin-deck.attackable::after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 32%;
+    right: 32%;
+    bottom: 0px;
+    border: 2px solid #d7182a;
+    border-radius: inherit;
+    box-shadow: 0 0 15px rgb(215 24 42 / 70%);
+    pointer-events: none;
+    animation: pulseGlowAttack 2s infinite ease-in-out;
+}
+
 #mastermind {
     position: relative;
     border: 2px solid transparent; /* Reserve space for the border */
@@ -783,13 +797,15 @@ font-weight: bold;
 
 .city-cell .overlay {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0px;
+    right: -1px;
     background-color: rgba(255, 0, 0, 0.7);
     color: white;
     padding: 2px 5px;
     border-radius: 5px;
     font-size: 12px;
+    width: 80%;
+    cursor: pointer;
 }
 
 .card.selected .overlay {
@@ -816,7 +832,6 @@ margin-top: 1vh;
     background-color: #ffab0f;
     color: white;
     border: none;
-    padding: 10px;
     border-radius: 1vh;
     cursor: pointer;
     height: 5vh;
@@ -1162,6 +1177,17 @@ font-size: clamp(0.7em, 2vh, 1.5em);
 height:calc(2vh + 2vw);
 max-height:5vh;
 margin-top: 2vh;
+margin-left: auto;
+    margin-right: auto;
+}
+
+.heroSelectNoThanksButton {
+  
+font-size: clamp(0.7em, 2vh, 1.5em);
+height:calc(2vh + 2vw);
+max-height:5vh;
+margin-top: 2vh;
+width: 50%;
 }
 
 .hero-text {
@@ -1641,7 +1667,6 @@ height: 1.8vh;
 .selected {
 z-index: 800;
 animation: filter-animation 1s infinite;
-
 }
 
 .skrull-overlay {
@@ -1663,11 +1688,62 @@ right: -5%;
 font-family: 'Percolator';
 }
 
+.captured-overlay {
+  position: absolute;
+  top: 3%;
+bottom: 75%;
+  left: -5%;
+right: -5%;
+  background-color: rgb(215 24 42 / 70%);
+  color: white;
+  padding: 2px 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: calc(0.6vh + 0.6vw);
+  display: grid; 
+  align-items: center; 
+  height: auto; 
+  line-height: 1.6;
+font-family: 'Percolator';
+}
+
+.villain-indicator {
+    position: relative;
+    top: 0;
+    background-color: rgb(235 43 58 / 85%);
+    color: white;
+    padding: 2px 5px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    font-size: calc(0.6vh + 0.6vw);
+    display: grid;
+    align-items: center;
+    height: 12%;
+    line-height: 1.6;
+    font-family: 'Percolator';
+    z-index: 1001;
+}
+
+.villain-image-overlay {
+    width: 2vw;
+    height: auto;
+    display: inline-block;
+    border-style: solid;
+    border-color: rgb(235 43 58);
+    border-radius: 5px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -3px;
+    z-index: 1001;
+
+}
+
 .attack-overlay {
   position: absolute;
   bottom: 4px;
   right: 0;
-  background-color: rgb(137 176 37);
+  background-color: rgb(226 222 218);
   color: #fdfdfd;
   box-sizing: border-box;
   border-radius: 2.5px;
@@ -1686,6 +1762,23 @@ background-image: url("Visual Assets/Icons/AttackNoOutline.svg");
     font-family: 'Matrix';
     font-weight: 300;
 padding-bottom:0.6vh;
+}
+
+.killbot-overlay {
+    position: absolute;
+    top: 33%;
+    left: 0%;
+    right: 0%;
+    background-color: rgb(225 24 28 / 79%);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: calc(0.6vh + 0.6vw);
+    align-items: center;
+    height: auto;
+    cursor: pointer;
+    font-family: 'Percolator';
+
 }
 
 #intro-popup-container {
@@ -1781,7 +1874,8 @@ flex: 1;
 height: clamp(208px, 38vh, 980px);
   overflow-y: auto;
   display: none;
-font-size:clamp(0.8em, 1.7vh, 1.5em)
+font-size:clamp(0.8em, 1.7vh, 1.5em);
+color: #3d3d3d;
 }
 
 .tab-content.active {
@@ -2026,7 +2120,7 @@ padding-bottom:2vh;
     mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 
-.sidekick-scrollable-list {
+.sidekick-scrollable-list, .bystander-scrollable-list {
     max-height: 25vh; /* Adjust the height as needed */
     overflow-y: auto;
     padding: 10px;
@@ -2051,7 +2145,13 @@ display: flex;
     padding: 5px 0;
 display: flex;
   align-items: center; /* Vertically centers checkbox, image, and text */
+}
 
+.bystander-scrollable-list label {
+    display: block;
+    padding: 5px 0;
+display: flex;
+  align-items: center; /* Vertically centers checkbox, image, and text */
 }
 
 .items label {
@@ -2106,7 +2206,7 @@ position:relative;
 position:relative;
 }
 
-#chosen-sidekick-image {
+#chosen-sidekick-image, #chosen-bystander-image {
     display: flex;
     justify-content: center;  /* Horizontally center the image */
     align-items: center;  /* Vertically center the image */
@@ -2315,7 +2415,7 @@ max-width: 100%;
 z-index:2;
 }
 
-#sidekickfacedowncard1 {
+#sidekickfacedowncard1, #bystanderfacedowncard1 {
 display:block;
 width:auto;
 height:100%;
@@ -2328,7 +2428,7 @@ max-width: 100%;
 z-index:1;
 }
 
-#sidekickfacedowncard2 {
+#sidekickfacedowncard2, #bystanderfacedowncard2 {
 display:block;
 width:auto;
 height:100%;
@@ -2448,15 +2548,15 @@ filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
 
 @keyframes filter-animation {
   0% {
-    filter: sepia(0) drop-shadow(0vh 0vh 0vh #ffab0f);
+    filter: sepia(0) drop-shadow(0vh 0vh 0vh #ffd483);
   }
 
   50% {
-    filter: sepia(0) drop-shadow(0vh 0vh 0.7vh #ffab0f) saturate(1.3);
+    filter: sepia(0) drop-shadow(0vh 0vh 0.7vh #ffd483) saturate(1.3);
   }
 
   100% {
-    filter: sepia(0) drop-shadow(0vh 0vh 0vh #ffab0f);
+    filter: sepia(0) drop-shadow(0vh 0vh 0vh #ffd483);
   }
 }
 
@@ -2515,6 +2615,10 @@ margin-left: auto;
     margin-right: auto;
 }
 
+.played-card-container {
+    position:relative;
+}
+
 #popup-confirm {
 width:50%;
 margin-left: auto;
@@ -2523,7 +2627,7 @@ text-transform:uppercase;
 }
 
 #popup-single-image {
-height: clamp(200px, 35vh, 35vh);
+height: clamp(150px, 30vh, 35vh);
     aspect-ratio: 738 / 1039;
     background-size: cover;
     margin-left: auto;
@@ -2577,10 +2681,24 @@ width: 94%;
 }
 
 #cards-to-choose-from .selected {
-        outline: #ffab0f;
-    outline-width: thick;
-    outline-style: solid;
+outline: #ffe9bf;
+outline-style: solid;
 animation: filter-animation 1s infinite;
+    }
+
+#card-ko-popup .selected {
+outline: #ffe9bf;
+outline-style: solid;
+animation: filter-animation 1s infinite;
+    }
+
+    #card-ko-instructions {
+    padding: 1vh;
+    }
+
+.hero-option .selected {
+outline: #ffe9bf;
+outline-style: solid;
     }
 
 
@@ -2775,14 +2893,20 @@ font-size: calc(0.7vh + 0.7vw);
     margin-top: 10px;
 }
 
-#defeat-popup, #hero-deck-empty-popup, #draw-popup, #win-popup h3 {
+#defeat-popup h3, 
+#hero-deck-empty-popup h3, 
+#draw-popup h3, 
+#win-popup h3 {
     font-size: calc(0.7vh + 0.7vw);
     text-transform: uppercase;
     margin-top: 0px;
     margin-bottom: 0px;
 }
 
-#defeat-popup, #hero-deck-empty-popup, #draw-popup, #win-popup p {
+#defeat-popup p, 
+#hero-deck-empty-popup p, 
+#draw-popup p, 
+#win-popup p {
     text-transform: uppercase;
     font-weight: 400;
     font-size: clamp(9pt, 2vh, 1.5em);
@@ -3022,16 +3146,14 @@ width: 50%;
 }
 
 #card-ko-popup li .selected {
-        outline: #ffab0f;
-    outline-width: thick;
-    outline-style: solid;
+        outline: #ffe9bf;
+      outline-style: solid;
 animation: filter-animation 1s infinite;
     }
     
     .selected-wound {
-        outline: #ffab0f;
-    outline-width: thick;
-    outline-style: solid;
+        outline: #ffe9bf;
+       outline-style: solid;
 animation: filter-animation 1s infinite;
     }
 
@@ -3066,7 +3188,7 @@ margin-left: 0.5vw;
 .console-card-icons {
 width: auto;
 height:2vh;
-vertical-align: text-top;
+vertical-align: baseline;
 margin-top:0.2vh;
 }
 
@@ -3076,7 +3198,7 @@ color:#ffab0f;
 }
 
 .popup .card-icons {
-vertical-align: text-top;
+vertical-align: baseline;
 }
 
 
@@ -3136,6 +3258,19 @@ font-size:1vh;
     display: inline-block;
    border-style: solid;
     border-color: rgb(137 176 37 / 85%);
+border-radius: 5px;
+position: absolute;
+left:50%;
+transform: translateX(-50%);
+top:100%;
+}
+
+.captured-hero-image-overlay {
+    width: 2vw;
+    height: auto;
+    display: inline-block;
+   border-style: solid;
+    border-color: rgb(215 24 42 / 70%);
 border-radius: 5px;
 position: absolute;
 left:50%;
@@ -3354,6 +3489,23 @@ filter: drop-shadow(0vh 0vh 0.3vh black);
 .cell #mastermind-attack-button:hover .overlay-attack-icons {
     filter: drop-shadow(0px 0px 6px #b52525);
 }
+
+.played-cards-attack-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    z-index: 1002;
+    transform: translateY(-60%);
+    cursor: pointer;
+}
+.played-cards-attack-button:hover .overlay-attack-icons {
+    filter: drop-shadow(0px 0px 6px #b52525);
+}
+
 
 .cell.mastermind {
     position: relative;
@@ -3680,3 +3832,313 @@ position: absolute;
   }
 }
 
+#number-selection-dropdown {
+    width: 30%;
+    padding: 8px;
+    margin: 10px 0;
+    font-size: calc(0.6vh + 0.6vw);
+    text-align: center;
+}
+
+.bystander-name {
+    display: block;
+    cursor: pointer;
+    padding: 2px 5px;
+    margin: 2px 0;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+}
+
+.bystander-name:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.expanded-bystanders {
+    position: absolute;
+    top: 44px;
+    right: -1px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    width:75%;
+    cursor:default;
+}
+
+#scheme-token {
+    height: 3vw;
+    width: 3vw;
+    background-color: #cd7b78;
+    position: absolute;
+    z-index: 1;
+    border-radius: 100%;
+    color: white;
+    font-family: 'Percolator';
+font-size: calc(0.6vh + 0.6vw);
+    filter: drop-shadow(0vh 0vh 1.3vh black);
+    display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#demon-goblin-deck {
+    position: absolute;
+    width: 8%;
+    height: 8%;
+    display: flex;
+    background-image: url('Visual Assets/CardBack.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+    margin-right: -5%;
+}
+
+#demon-goblin-count {
+    margin-top: auto;
+    position: relative;
+    z-index: 1;
+    margin-left: auto;
+    margin-right: auto;
+    color: #ffffff;
+    font-family: 'Percolator';
+    font-size: calc(3vh + 3vh);
+    margin-bottom: auto;
+    filter: drop-shadow(0vh 0vh 1.1vh red);
+    cursor: pointer;
+}
+
+.city-cell .XCutioner-overlay {
+position: absolute;
+    top: 33%;
+    right: -1px;
+    background-color: rgb(4 0 255 / 70%);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: calc(0.55vh + 0.55vw);
+    width: 80%;
+    cursor: pointer;
+}
+
+.mastermind .XCutioner-overlay {
+position: absolute;
+    top: 33%;
+    right: -1px;
+    background-color: rgb(4 0 255 / 70%);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: calc(0.55vh + 0.55vw);
+    width: 40%;
+    cursor: pointer;
+}
+
+.expanded-XCutionerHeroes {
+position: absolute;
+    top: 63%;
+    right: -2px;
+    background-color: rgb(4 0 255 / 70%);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: calc(0.55vh + 0.55vw);
+    width: 80%;
+    cursor: default;
+}
+
+#hq-1-explosion, #hq-2-explosion, #hq-3-explosion, #hq-4-explosion, #hq-5-explosion {
+    height: 60%;
+    width: auto;
+    position: absolute;
+    z-index: 1;
+    filter: drop-shadow(0 0 1vh #ffab0f);
+    transition: all 0.3s ease;
+}
+
+#hq-1-explosion-count, #hq-2-explosion-count, #hq-3-explosion-count, #hq-4-explosion-count, #hq-5-explosion-count {
+    position: absolute;
+    z-index: 1;
+    color: #f2d80f;
+    font-family: 'PERCOLATOR';
+    font-size: calc(1.5vh + 1.5vh);
+}
+
+.max-explosions {
+    height: 100% !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 8px red) !important;
+    animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
+
+#stacked-mastermind-cards {
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    display: flex;
+    background-image: url('Visual Assets/CardBack.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+    margin-right: -40%;
+}
+
+#stacked-mastermind-cards-count {
+    margin-top: auto;
+    position: relative;
+    z-index: 1;
+    margin-left: auto;
+    margin-right: auto;
+    color: #ffffff;
+    font-family: 'Percolator';
+    font-size: calc(3vh + 3vh);
+    margin-bottom: auto;
+    filter: drop-shadow(0vh 0vh 1.1vh black);
+    cursor: default;
+}
+
+.villain-baby-overlay {
+    height: 3vw;
+    width: 3vw;
+    background-color: #cd7b78;
+    position: absolute;
+    z-index: 1;
+    border-radius: 100%;
+    color: white;
+    font-family: 'Percolator';
+    font-size: calc(0.6vh + 0.6vw);
+    filter: drop-shadow(0vh 0vh 1.3vh black);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 25%;
+    left: 25%;
+    cursor: default;
+}
+
+#popup-context {
+    font-size: calc(1vh + 1vh);
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+#expansion-popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+opacity: 1;
+    transition: opacity 1s ease-out;
+}
+
+#expansion-popup-container.hidden {
+    opacity: 0;
+    pointer-events: none; /* This prevents interaction with the invisible element */
+}
+
+#background-for-expansion-popup {
+  position: fixed; /* Covers entire viewport */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('Visual Assets/Backgrounds/blackSmudge.webp');
+  background-size: cover; /* Ensures full coverage */
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1001; /* Above page but below popup (1002) */
+  pointer-events: none; /* Ignore clicks */
+  opacity: 0.8;
+transition: opacity 1.5s ease-out;
+}
+
+#background-for-expansion-popup.hidden {
+    opacity: 0;
+    pointer-events: none; /* This prevents interaction with the invisible element */
+}
+
+
+#expansion-banner {
+  background-image: url('Visual Assets/Backgrounds/DarkCity.webp');
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+  height: clamp(330px, 57vh, 1000px);
+  width: clamp(320px, 56vw, 990px);
+border-radius:1vh;
+  overflow: hidden;
+  
+}
+
+#expansion-banner-border {
+width: clamp(320px, 56vw, 990px);
+height: clamp(330px, 57vh, 1000px);
+background: linear-gradient(to top, #2e6283, transparent 50%);
+background-repeat: no-repeat; 
+background-size: calc(100%);
+background-position: left, right, top, bottom; 
+padding: 10px; 
+box-sizing: border-box;
+border-radius:1vh; 
+}
+
+#expansion-intro {
+font-size:clamp(0.8em, 1.8vh, 1.6em);
+color: black;
+text-align:center;
+margin-top:23%;
+margin-left:10%;
+margin-right:10%;
+}
+
+#start-expansion {
+margin-top: 3vh;
+margin-left: auto;
+margin-right: auto;
+width: 30%;
+}
+
+.pulsing-glow-text {
+  color: black;
+  text-align: center;
+  text-shadow: 0 0 5px #ffab0f, 0 0 10px #ffab0f;
+  animation: pulse-glow 2s infinite ease-in-out;
+  font-size: 1.2em; /* Starting size */
+  display: block; /* For center alignment */
+  margin: 0 auto; /* For center alignment */
+  padding: 10px;
+}
+
+.pulsing-glow-updates {
+  text-shadow: 0 0 5px #ffab0f, 0 0 10px #ffab0f;
+  animation: pulse-glow 2s infinite ease-in-out;
+  display: block; /* For center alignment */
+}
+
+@keyframes pulse-glow {
+  0% {
+    text-shadow: 0 0 5px #ffab0f, 0 0 10px #ffab0f;
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 15px #ffab0f, 0 0 20px #ffab0f, 0 0 25px #ffab0f;
+    transform: scale(1.03);
+  }
+  100% {
+    text-shadow: 0 0 5px #ffab0f, 0 0 10px #ffab0f;
+    transform: scale(1);
+  }
+}
