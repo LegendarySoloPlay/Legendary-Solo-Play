@@ -404,16 +404,16 @@ let counterB = 0;
 let counterResolve;
 let counterReject;
 let lastTurnMessageShown = false;
-let jeanGreyBystanderRecruit = false;
-let jeanGreyBystanderDraw = false;
-let jeanGreyBystanderAttack = false;
+let jeanGreyBystanderRecruit = 0;
+let jeanGreyBystanderDraw = 0;
+let jeanGreyBystanderAttack = 0;
 let hasDiscardAvoidance = false;
 let hasWoundAvoidance = false;
 let silentMeditationRecruit = false;
 let backflipRecruit = false;
 let sewerRooftopDefeats = false;
 let sewerRooftopBonusRecruit = 0;
-let twoRecruitFromKO = false;
+let twoRecruitFromKO = 0;
 let trueVersatility = false;
 let hasProfessorXMindControl = false;
 let demonGoblinDeck = [];
@@ -425,6 +425,7 @@ let hqExplosion4 = 0;
 let hqExplosion5 = 0;
 let stackedTwistNextToMastermind = 0;
 let popupMinimized = false;
+let deadpoolRare = false;
 
 window.victoryPile = [];
 
@@ -2352,25 +2353,52 @@ let henchmenToPlaceOnTop = [];
     }
 });
 
-    // Adjust for the scheme "Secret Invasion of the Skrull Shapeshifters"
-    if (scheme.name === 'Secret Invasion of the Skrull Shapeshifters' && heroDeck) {
-        const skrulledHeroes = heroDeck.splice(0, 12).map(hero => {
-            return {
-                ...hero,
-                skrulled: true,
-                originalAttack: hero.attack,
-                cost: hero.cost,
-                attack: hero.cost + 2, // Assign the increased cost to attack
-                type: 'Villain',
-                fightEffect: 'unskrull',
-overlayText: `<span style="filter:drop-shadow(0vh 0vh 0.3vh black);">SKRULL</span>`,
-overlayTextAttack: `${hero.cost + 2}`
+if (scheme.name === 'Secret Invasion of the Skrull Shapeshifters' && heroDeck) {
+    const skrulledHeroes = heroDeck.splice(0, 12).map(hero => {
+        // Create a complete copy of all hero attributes
+        const skrull = {
+            // Copy all original properties
+            id: hero.id,
+            name: hero.name,
+            type: 'Villain', // Changed to Villain
+            rarity: hero.rarity,
+            team: hero.team,
+            class1: hero.class1,
+            class2: hero.class2,
+            color: hero.color,
+            cost: hero.cost,
+            attack: hero.cost + 2, // Modified attack
+            recruit: hero.recruit,
+            attackIcon: hero.attackIcon,
+            recruitIcon: hero.recruitIcon,
+            bonusAttack: hero.bonusAttack,
+            bonusRecruit: hero.bonusRecruit,
+            multiplier: hero.multiplier,
+            multiplierAttribute: hero.multiplierAttribute,
+            multiplierLocation: hero.multiplierLocation,
+            unconditionalAbility: hero.unconditionalAbility,
+            conditionalAbility: hero.conditionalAbility,
+            conditionType: hero.conditionType,
+            condition: hero.condition,
+            invulnerability: hero.invulnerability,
+            image: hero.image,
+            
+            // Add Skrull-specific properties
+            skrulled: true,
+            originalAttack: hero.attack,
+            originalType: hero.type,
+            fightEffect: 'unskrull',
+            overlayText: `<span style="filter:drop-shadow(0vh 0vh 0.3vh black);">SKRULL</span>`,
+            overlayTextAttack: `${hero.cost + 2}`
         };
-        });
-        deck.push(...skrulledHeroes);
-    } else if (!heroDeck) {
-        console.error("Hero deck is undefined or not passed correctly.");
-    }
+        
+        return skrull;
+    });
+    
+    deck.push(...skrulledHeroes);
+} else if (!heroDeck) {
+    console.error("Hero deck is undefined or not passed correctly.");
+}
 
     adjustWoundDeckForScheme(scheme);
 
@@ -2452,6 +2480,7 @@ if (scheme.name === "Transform Citizens Into Demons") {
                 // Create a modified copy with additional attributes
                 const modifiedCard = { 
                     ...card,
+                    type: 'Villain',
                     goblinQueen: true,
                     victoryPoints: 4,
                 };
@@ -2664,168 +2693,59 @@ const mastermindCell = document.getElementById('mastermind');
 let isFirstTurn = true;
 
 async function drawVillainCard() {
-    return new Promise((resolve, reject) => {
-        const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-        const scheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+    const drawCount = isFirstTurn ? 3 : 1;
+    isFirstTurn = false;
 
-        if (villainDeck.length === 0 && !impossibleToDraw) {
-            showDrawPopup();
-            resolve();
-            return;
-        }
-
-        const drawCount = isFirstTurn ? 3 : 1;
-        isFirstTurn = false;
-
-        const drawVillainsRecursively = async (drawRemaining) => {
-            if (drawRemaining === 0) {
-                updateGameBoard();
-                resolve(); // Resolve after all villains are drawn and processed
-                return;
-            }
-
-            if (villainDeck.length === 0 && !impossibleToDraw) {
-                showDrawPopup();
-                resolve();
-                return;
-            }
-
-            const villainCard = villainDeck.pop();
-            console.log(`Drew villain card:`, villainCard);
-
-            if (!villainCard || !villainCard.name) {
-                console.error('Drew an undefined or malformed card:', villainCard);
-                drawVillainsRecursively(drawRemaining - 1);
-                return;
-            }
-
-if (villainCard.name.includes('Master Strike')) {
-    handleMasterStrike(villainCard).then(() => {
-        console.log('Master Strike handled.');
-        drawVillainsRecursively(drawRemaining - 1); // Continue drawing villains after resolving Master Strike
-    }).catch((error) => {
-        console.error('Error handling Master Strike:', error);
-        drawVillainsRecursively(drawRemaining - 1); // Proceed even if there's an error
-    });
-} else if (villainCard.name.includes('Scheme Twist')) {
-    if (villainCard.plutonium === true) {
-        await handlePlutoniumSchemeTwist(villainCard); // New function for plutonium Scheme Twists
-    } else {
-        await handleSchemeTwist(villainCard); // Original function for regular Scheme Twists
+    for (let i = 0; i < drawCount; i++) {
+        await processVillainCard();
     }
-    
-    // Check if we need to KO a hero after processing all Twists
-    if (pendingHeroKO && schemeTwistChainDepth === 0) {
-        pendingHeroKO = false;
-        await showHeroSelectPopup();
-    }
-    
-    await drawVillainsRecursively(drawRemaining - 1);
-} else {
-                // Handle Bystanders
-                if (villainCard.type === 'Bystander') {
-                    handleBystander(villainCard);
-                    drawVillainsRecursively(drawRemaining - 1);
-                }  else if (villainCard.type === 'Hero' && scheme.name === `X-Cutioner's Song`) {
-        handleXCutionerHero(villainCard);  // You'll need to implement this function
-        drawVillainsRecursively(drawRemaining - 1);
-    } else {
-                    // Villain enters the city and we handle its movements and ambush effects
-                    let sewersIndex = city.length - 1;
-                    let previousCard = city[sewersIndex];
-                    city[sewersIndex] = villainCard;
-onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> enters the city.`);
-
-                    let moveVillainsPromise = Promise.resolve();
-
-                    // Move existing villains to the left
-                    for (let j = sewersIndex - 1; j >= 0; j--) {
-                        moveVillainsPromise = moveVillainsPromise.then(() => {
-                            return new Promise(async (resolveMove) => {
-                                if (city[j] === null) {
-                                    city[j] = previousCard;
-                                    previousCard = null;
-                                    resolveMove();
-                                    return;
-                                } else if (previousCard !== null) {
-                                    let temp = city[j];
-                                    city[j] = previousCard;
-                                    previousCard = temp;
-
-                                    if (j === 0 && previousCard) {
-                                            await new Promise((resolve) => {
-                                            showPopup('Villain Escape', previousCard, () => {
-                                              resolve();
-                                             });
-                                             });
-                                        handleVillainEscape(previousCard).then(resolveMove).catch((error) => {
-                                            console.error('Error in handleVillainEscape:', error);
-                                            resolveMove();
-                                        });
-                                    } else {
-                                        resolveMove();
-                                    }
-                                } else {
-                                    resolveMove();
-                                }
-                            });
-                        });
-                    }
-
-                    // Handle Ambush effects after moving villains
-                    moveVillainsPromise.then(async () => {
-                        if (!villainCard.ambushEffect || villainCard.ambushEffect === "None") {
-                            await new Promise((resolve) => {
-                                            showPopup('Villain Arrival', villainCard, () => {
-                                              resolve();
-                                             });
-                                             });
-                                            }
-
-                        if (villainCard.ambushEffect && villainCard.ambushEffect !== "None") {
-                                            await new Promise((resolve) => {
-                                            showPopup('Villain Ambush', villainCard, () => {
-                                              resolve();
-                                             });
-                                             });
-                            const ambushEffectFunction = window[villainCard.ambushEffect];
-                            if (typeof ambushEffectFunction === 'function') {
-                                let ambushEffectPromise = new Promise((resolveAmbush, rejectAmbush) => {
-                                    try {
-                                        const result = ambushEffectFunction(villainCard);
-                                        if (result instanceof Promise) {
-                                            result.then(resolveAmbush).catch(rejectAmbush);
-                                        } else {
-                                            resolveAmbush(result);
-                                        }
-                                    } catch (error) {
-                                        console.error('Error in ambushEffectFunction:', error);
-                                        rejectAmbush(error);
-                                    }
-                                });
-                                ambushEffectPromise.then(() => drawVillainsRecursively(drawRemaining - 1)).catch((error) => {
-                                    console.error('Error in ambushEffectPromise:', error);
-                                    drawVillainsRecursively(drawRemaining - 1);
-                                });
-                            } else {
-                                console.error(`Ambush effect function ${villainCard.ambushEffect} not found`);
-                                drawVillainsRecursively(drawRemaining - 1);
-                            }
-                        } else {
-                            console.log("No Ambush Effect");
-                            drawVillainsRecursively(drawRemaining - 1);
-                        }
-                    }).catch((error) => {
-                        console.error('Error in moveVillainsPromise:', error);
-                        drawVillainsRecursively(drawRemaining - 1);
-                    });
-                }
-            }
-        };
-
-        drawVillainsRecursively(drawCount);
-    });
 }
+
+async function processRegularVillainCard(villainCard) {
+    let sewersIndex = city.length - 1;
+    let previousCard = city[sewersIndex];
+    city[sewersIndex] = villainCard;
+    onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> enters the city.`);
+
+    // Move existing villains to the left
+    for (let j = sewersIndex - 1; j >= 0; j--) {
+        if (city[j] === null) {
+            city[j] = previousCard;
+            previousCard = null;
+            break;
+        } else if (previousCard !== null) {
+            let temp = city[j];
+            city[j] = previousCard;
+            previousCard = temp;
+
+            if (j === 0 && previousCard) {
+                await new Promise(resolve => {
+                    showPopup('Villain Escape', previousCard, resolve);
+                });
+                await handleVillainEscape(previousCard);
+            }
+        }
+    }
+
+    // Show arrival popup if no ambush
+    if (!villainCard.ambushEffect || villainCard.ambushEffect === "None") {
+        await new Promise(resolve => {
+            showPopup('Villain Arrival', villainCard, resolve);
+        });
+    }
+
+    // Handle Ambush effects
+    if (villainCard.ambushEffect && villainCard.ambushEffect !== "None") {
+        await new Promise(resolve => {
+            showPopup('Villain Ambush', villainCard, resolve);
+        });
+        const ambushEffectFunction = window[villainCard.ambushEffect];
+        if (typeof ambushEffectFunction === 'function') {
+            await ambushEffectFunction(villainCard);
+        }
+    }
+}
+
 
 function handleBystander(bystanderCard) {
     let sewersIndex = city.length - 1;
@@ -2854,6 +2774,23 @@ async function attachBystanderToVillain(villainIndex, bystanderCard) {
             resolve();
         });
     });
+    if (city[villainIndex].bystander) {
+        city[villainIndex].bystander.push(bystanderCard);
+    } else {
+        city[villainIndex].bystander = [bystanderCard];
+    }
+
+    // Access the villain object using the index to get its name
+    const villain = city[villainIndex]; 
+
+updateGameBoard();
+
+   // Log the villain's name correctly
+    onscreenConsole.log(`<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${villain.name}</span>.`);
+
+}
+
+async function deadpoolAttachBystanderToVillain(villainIndex, bystanderCard) {
     if (city[villainIndex].bystander) {
         city[villainIndex].bystander.push(bystanderCard);
     } else {
@@ -3074,7 +3011,12 @@ async function processCableCards(cableCards) {
             if (cardIndex !== -1) {
                 playerHand.splice(cardIndex, 1);
                 nextTurnsDraw += 3;
-                await checkDiscardForInvulnerability(card);
+                
+                const { returned } = await checkDiscardForInvulnerability(card);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                 onscreenConsole.log(`Draw three extra cards at the end of this turn.`);
             }
         }
@@ -3139,12 +3081,8 @@ async function handleMasterStrikeEffect(masterStrikeCard) {
 
 function handleSchemeTwist(schemeTwistCard) {
     updateGameBoard();
-    return new Promise((resolve) => {
-        // Get selected scheme
-        const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-        const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-
-        // Update game state
+    return new Promise(async (resolve) => {
+        const selectedScheme = getSelectedScheme();
         koPile.push(schemeTwistCard);
         schemeTwistCount += 1;
 
@@ -3153,38 +3091,34 @@ function handleSchemeTwist(schemeTwistCard) {
             onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
         } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
             onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[`twistText${schemeTwistCount}`]}`);
-        } else {
-            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
         }
 
-        showPopup('Scheme Twist', schemeTwistCard, async () => {
-            updateGameBoard();
-            
-            // Mark that we're in a Scheme Twist chain
-            schemeTwistChainDepth++;
-            
-            // Run the twist effect if it exists
+        await new Promise(popupResolve => {
+            showPopup('Scheme Twist', schemeTwistCard, popupResolve);
+        });
+        
+        updateGameBoard();
+        schemeTwistChainDepth++;
+        
+        try {
             if (selectedScheme.twistEffect && selectedScheme.twistEffect !== "None") {
                 const twistEffectFunction = window[selectedScheme.twistEffect];
                 if (typeof twistEffectFunction === 'function') {
-                    try {
-                        await twistEffectFunction();
-                    } catch (error) {
-                        console.error('Error in twist effect:', error);
-                    }
+                    // IMPORTANT: Await the twist effect which might trigger more draws
+                    await twistEffectFunction();
                 }
             }
-            
-            // Decrement depth and check if we're at the end of the chain
-            schemeTwistChainDepth--;
-            
-            // If this was the last Twist in the chain, trigger KO
-            if (schemeTwistChainDepth === 0) {
-                pendingHeroKO = true;
-            }
-            
-            resolve();
-        });
+        } catch (error) {
+            console.error('Error in twist effect:', error);
+        }
+        
+        schemeTwistChainDepth--;
+        
+        if (schemeTwistChainDepth === 0) {
+            pendingHeroKO = true;
+        }
+        
+        resolve();
     });
 }
 
@@ -3243,8 +3177,13 @@ updateGameBoard();
     const gainedWound = woundDeck.pop();
     const mastermind = getSelectedMastermind();
 
-    if (mastermind.name === 'Mephisto') {
+if (deadpoolRare === true) {
+playerHand.push(gainedWound);
+	onscreenConsole.log("Wound gained and put in your hand.");
+    deadpoolRare = false;
+  } else if (mastermind.name === 'Mephisto') {
         playerDeck.push(gainedWound);
+	gainedWound.revealed = true;
         onscreenConsole.log("Wound gained and put on top of your deck.");
     } else {
         playerDiscardPile.push(gainedWound);
@@ -3387,8 +3326,10 @@ function showHeroSelectPopup() {
         // Add confirm button to popup
         heroSelectPopup.appendChild(confirmButton);
 
-        // Filter eligible heroes
-        const eligibleHeroes = hq.filter(hero => hero && hero.cost <= 6);
+        // Filter eligible heroes - now checks for null/undefined first
+        const eligibleHeroes = hq.filter(hero => 
+            hero && hero.type === 'Hero' && hero.cost <= 6
+        );
 
         if (eligibleHeroes.length === 0) {
             onscreenConsole.log('No Heroes available with a cost of 6 or less.');
@@ -3452,26 +3393,26 @@ function showHeroSelectPopup() {
         });
 
         // Confirm button handler
-       confirmButton.onclick = (e) => {
-    e.stopPropagation(); // Stop event bubbling
-    e.preventDefault();  // Prevent default behavior
-    
-    if (selectedHero === null) return;
+        confirmButton.onclick = (e) => {
+            e.stopPropagation(); // Stop event bubbling
+            e.preventDefault();  // Prevent default behavior
+            
+            if (selectedHero === null) return;
 
-    // Add a small delay before closing to block ghost clicks
-    setTimeout(() => {
-        const hero = eligibleHeroes[selectedHero];
-        onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
-        returnHeroToDeck(selectedHero);
-        updateGameBoard();
-        
-        // Clean up
-        heroSelectPopup.removeChild(confirmButton);
-        heroSelectPopup.style.display = 'none';
-        modalOverlay.style.display = 'none';
-        resolve();
-    }, 100); // 100ms delay blocks ghost clicks
-};
+            // Add a small delay before closing to block ghost clicks
+            setTimeout(() => {
+                const hero = eligibleHeroes[selectedHero];
+                onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
+                returnHeroToDeck(selectedHero);
+                updateGameBoard();
+                
+                // Clean up
+                heroSelectPopup.removeChild(confirmButton);
+                heroSelectPopup.style.display = 'none';
+                modalOverlay.style.display = 'none';
+                resolve();
+            }, 100); // 100ms delay blocks ghost clicks
+        };
 
         // Show popup
         modalOverlay.style.display = 'block';
@@ -3558,6 +3499,16 @@ const popupImage = document.getElementById('popup-single-image');
         popupTitle.innerText = `Villain`;
         popupImage.style.display = 'block';
         popupContext.innerHTML = `<span class="console-highlights">${drawnCard.name}</span> enters the city.`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'X-Cutioner Hero to Villain') {
+        popupTitle.innerText = `Hero`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `<span class="console-highlights">${drawnCard.name}</span> will be captured by the Villain closest to the Villain deck.`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'X-Cutioner Hero to Mastermind') {
+        popupTitle.innerText = `Hero`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `No Villains in the city. <span class="console-highlights">${drawnCard.name}</span> will be captured by <span class="console-highlights">${mastermind.name}</span>.`;
         popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
     } else {
         popupImage.style.display = 'none'; // Hide image if the type is unknown
@@ -3807,23 +3758,23 @@ const mastermindTacticCountNumber = document.getElementById('mastermindTacticCou
 
 let mastermind = getSelectedMastermind();
 
-twistCountNumber.innerHTML = `&nbsp;${koPile.filter(card => card.type === 'Scheme Twist').length + killbotSchemeTwistCount}`;
-masterStrikeCountNumber.innerHTML = `&nbsp;${koPile.filter(card => card.type === 'Master Strike').length}`;
-escapePileCountNumber.innerHTML = `&nbsp;${escapedVillainsDeck.length}`;
-koPileCountNumber.innerHTML = `&nbsp;${koPile.length}`;
-woundDeckCountNumber.innerHTML = `&nbsp;${woundDeck.length}`;
-bystanderDeckCountNumber.innerHTML = `&nbsp;${bystanderDeck.length}`;
-sidekickCountNumber.innerHTML = `&nbsp;${sidekickDeck.length}`;
-shieldCountNumber.innerHTML = `&nbsp;${shieldDeck.length}`;
-discardCountNumber.innerHTML = `&nbsp;${playerDiscardPile.length}`;
-playedCardsCountNumber.innerHTML = `&nbsp;${cardsPlayedThisTurn.length}`;
-villainDeckCountNumber.innerHTML = `&nbsp;${villainDeck.length}`;
-heroDeckCountNumber.innerHTML = `&nbsp;${heroDeck.length}`;
-playerDeckCountNumber.innerHTML = `&nbsp;${playerDeck.length}`;
-mastermindTacticCountNumber.innerHTML = `&nbsp;${mastermind.tactics.length}`;
+twistCountNumber.innerHTML = `${koPile.filter(card => card.type === 'Scheme Twist').length + killbotSchemeTwistCount}`;
+masterStrikeCountNumber.innerHTML = `${koPile.filter(card => card.type === 'Master Strike').length}`;
+escapePileCountNumber.innerHTML = `${escapedVillainsDeck.length}`;
+koPileCountNumber.innerHTML = `${koPile.length}`;
+woundDeckCountNumber.innerHTML = `${woundDeck.length}`;
+bystanderDeckCountNumber.innerHTML = `${bystanderDeck.length}`;
+sidekickCountNumber.innerHTML = `${sidekickDeck.length}`;
+shieldCountNumber.innerHTML = `${shieldDeck.length}`;
+discardCountNumber.innerHTML = `${playerDiscardPile.length}`;
+playedCardsCountNumber.innerHTML = `${cardsPlayedThisTurn.length}`;
+villainDeckCountNumber.innerHTML = `${villainDeck.length}`;
+heroDeckCountNumber.innerHTML = `${heroDeck.length}`;
+playerDeckCountNumber.innerHTML = `${playerDeck.length}`;
+mastermindTacticCountNumber.innerHTML = `${mastermind.tactics.length}`;
 
 const currentVictoryPoints = calculateVictoryPoints(victoryPile);
-document.getElementById('currentVictoryPointsTally').innerHTML = `&nbsp;${currentVictoryPoints}`;
+document.getElementById('currentVictoryPointsTally').innerHTML = `${currentVictoryPoints}`;
 
 }
 
@@ -3917,10 +3868,10 @@ if (demonGoblinDeck.length > 0) {
     }
 }
 
-  let mastermind = getSelectedMastermind();
+let mastermind = getSelectedMastermind();
 let mastermindAttack = recalculateMastermindAttack(mastermind);
 
-// Check if Mastermind has Bribe keyword (or if any of its cards do)
+// Check if Mastermind has Bribe keyword
 const hasMastermindBribe = mastermind.keyword1 === "Bribe" || 
                            mastermind.keyword2 === "Bribe" || 
                            mastermind.keyword3 === "Bribe";
@@ -3929,10 +3880,24 @@ const canAttackWithRecruitPoints = (recruitUsedToAttack || hasMastermindBribe) &
                                  (totalAttackPoints + totalRecruitPoints >= mastermindAttack) &&
                                  (totalAttackPoints < mastermindAttack);
 
-const canAttackMastermind = totalAttackPoints >= mastermindAttack || 
-                          canAttackWithRecruitPoints;
+// Count defeated mastermind cards (tactics + final blow if applicable)
+const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
+const maxDefeatsAllowed = finalBlowEnabled ? 5 : 4;
 
-if (canAttackMastermind) {
+// Determine if mastermind can still be attacked
+const canStillBeAttacked = defeatedMasterminds.length < maxDefeatsAllowed;
+const hasEnoughPoints = totalAttackPoints >= mastermindAttack || canAttackWithRecruitPoints;
+const hasTacticsRemaining = mastermind.tactics.length > 0;
+
+// Mastermind is attackable if:
+// 1. Player has enough points AND
+// 2. Either: a) Has tactics remaining OR b) Final Blow is enabled and at exactly 4 defeats
+const canAttackMastermind = hasEnoughPoints && 
+                          (hasTacticsRemaining || 
+                           (finalBlowEnabled && defeatedMasterminds.length === 4));
+
+// Update UI
+if (canAttackMastermind && canStillBeAttacked) {
     document.getElementById("mastermind").classList.add('attackable');
     if (totalAttackPoints < mastermindAttack) {
         document.getElementById("mastermind").classList.add('needs-recruit');
@@ -3943,6 +3908,20 @@ if (canAttackMastermind) {
 }
 
 let isRecruiting = false; // Flag to track if a hero is being recruited
+
+const CARD_BACK_PATH = 'Visual Assets/CardBack.webp';
+
+function updateDeckImage(element, card) {
+    element.src = card?.revealed ? card.image : CARD_BACK_PATH;
+}
+
+function showRevealedCards() {
+    updateDeckImage(document.getElementById('player-deck-card-back'), playerDeck.at(-1));
+    updateDeckImage(document.getElementById('hero-deck-card-back'), heroDeck.at(-1));
+    updateDeckImage(document.getElementById('villain-deck-card-back'), villainDeck.at(-1));
+updateDeckImage(document.getElementById('shield-deck-card-back'), shieldDeck.at(-1));
+updateDeckImage(document.getElementById('sidekick-deck-card-back'), sidekickDeck.at(-1));
+}
 
 function updateGameBoard() {
     for (let i = 0; i < hq.length; i++) {
@@ -4040,6 +4019,7 @@ for (let i = 1; i <= 5; i++) {
 }
 
 updateDeckCounts();
+showRevealedCards();
 
         for (let i = 0; i < city.length; i++) {
         const cityCell = document.querySelector(`#city-${i + 1}`);
@@ -4495,6 +4475,8 @@ if (city[i].type !== 'Bystander' && city[i].type !== 'Attached to Mastermind') {
 newCityCell.classList.add('city-cell');
 }
 
+updateEvilWinsTracker();
+
 if (lastTurn && !lastTurnMessageShown) {
     console.log('The Villains have completed their scheme but it is too late! You\'ve already defeated the Mastermind!');
     lastTurnMessageShown = true; // Prevent future logs
@@ -4558,98 +4540,98 @@ if (lastTurn && !lastTurnMessageShown) {
         switch (selectedSchemeEndGame) {
             case "8BystandersCarriedAway":
                 if (escapedBystanderCount >= 8) {
-                    document.getElementById('defeat-context').innerHTML = `8 Bystanders have been carried away by escaping Villains!`;
+                    document.getElementById('defeat-context').innerHTML = `8 Bystanders have been carried away by escaping Villains. ${mastermind.name} has vanished into the city with the loot!`;
                     showDefeatPopup();
                 }
                 break;
 
             case "12VillainsEscape":
                 if (escapedVillainsCount >= 12) {
-                    document.getElementById('defeat-context').innerHTML = `12 Villains have escaped!`;
+                    document.getElementById('defeat-context').innerHTML = `12 Villains have escaped from the Negative Zone prison. ${mastermind.name} now commands an army of freed inmates, ready to strike at Earth. All hope is lost.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "7Twists":
                 if (twistCount >= 7) {
-                    document.getElementById('defeat-context').innerHTML = `All portals to the Dark Dimension have been opened!`;
+                    document.getElementById('defeat-context').innerHTML = `The final Dark Portal has opened. ${mastermind.name} stands triumphant as the Dark Dimension's power seeps into our world. All hope is lost.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "5Killbots":
                 if (escapedKillbotsCount >= 5) {
-                    document.getElementById('defeat-context').innerHTML = `5 Killbots have escaped!`;
+                    document.getElementById('defeat-context').innerHTML = `5 Killbots have escaped. Earth's leaders have been replaced with merciless automata, plunging the planet into a new age of tyranny.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "6EscapedSkrullHeroes":
                 if (escapedHeroesCount >= 6) {
-                    document.getElementById('defeat-context').innerHTML = `6 Heroes have escaped as Skrull Villains!`;
+                    document.getElementById('defeat-context').innerHTML = `6 Heroes have entered the escape pile. Earth's champions have been replaced by Skrull infiltrators and no one knows who to trust. All hope is lost.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "heroDeckEmpty":
                 if (heroDeck.length === 0) {
-                    document.getElementById('defeat-context').innerHTML = `You've run out of Heroes to recruit!`;
+                    document.getElementById('defeat-context').innerHTML = `The Hero Deck has run out. The superhero community lies fractured beyond repair, and ${mastermind.name} stands triumphant in the chaos.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "woundDeckEmpty":
                 if (woundDeck.length === 0) {
-                    document.getElementById('defeat-context').innerHTML = `You've run out of Wounds! The Legacy Virus runs rampant!`;
+                    document.getElementById('defeat-context').innerHTML = `The Wound stack has run out. Too many have fallen to the Legacy Virus, and mutantkind faces extinction. ${mastermind.name} has won.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "8Twists":
                 if (twistCount >= 8) {
-                    document.getElementById('defeat-context').innerHTML = `8 Scheme Twists! The power of the Cosmic Cube has been unleashed!`;
+                    document.getElementById('defeat-context').innerHTML = `The Cosmic Cube is fully charged. With a single thought, ${mastermind.name} reshapes all of existence and the universe will never be the same.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "KOHeroesEqualThree":
                 if (koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length >= 3) {
-                    document.getElementById('defeat-context').innerHTML = `3 non grey Heroes have been KO'd!`;
+                    document.getElementById('defeat-context').innerHTML = `The number of non-grey Heroes in the KO pile has reached critical levels. ${mastermind.name}'s earthquake has leveled entire cities, leaving nothing but rubble and ruin. Civilization may never recover.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "FiveGoonsEscape":
                 if (escapedVillainsDeck.filter(card => card.name === 'Maggia Goons').length >= 5) {
-                    document.getElementById('defeat-context').innerHTML = `5 <span class="console-highlights">Maggia Goons</span> have escaped!`;
+                    document.getElementById('defeat-context').innerHTML = `5 Maggia Goons have escaped. ${mastermind.name}'s crime empire spreads through the city and no one is beyond their reach.`;
                     showDefeatPopup();
                 }
                 break;
                 
             case "FourBystandersKOdOrEscaped":
                 if (KOdBystanders + escapedBystanders >= 4) {
-                    document.getElementById('defeat-context').innerHTML = `4 Bystanders have been KO'd or carried off!`;
+                    document.getElementById('defeat-context').innerHTML = `The number of Bystanders KO'd or carried off has reached critical levels. ${mastermind.name}'s plan succeeds and humanity faces extinction. The world now belongs to ${mastermind.name}.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "FourPlutoniumEscape":
                 if (escapedVillainsDeck.filter(card => card.plutonium === true).length >= 4) {
-                    document.getElementById('defeat-context').innerHTML = `The Villains have escaped with 4 Plutonium!`;
+                    document.getElementById('defeat-context').innerHTML = `4 Plutonium have been carried off by Villains. ${mastermind.name} now holds the power to unleash nuclear devastation and the world trembles under the threat.`;
                     showDefeatPopup();
                 }
                 break;
                 
             case "FourGoblinQueenEscape":
                 if (escapedVillainsDeck.filter(card => card.goblinQueen === true).length >= 4) {
-                    document.getElementById('defeat-context').innerHTML = `4 Goblin Queens have escaped!`;
+                    document.getElementById('defeat-context').innerHTML = `4 Goblin Queens have escaped. ${mastermind.name}'s army of demons overrun the city and darkness grips the world. Humanity's final days have begun.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "NineHeroesKOdOrEscaped":
                 if (KOdHeroes + carriedOffHeroes >= 9) {
-                    document.getElementById('defeat-context').innerHTML = `9 non grey Heroes have been KO'd or carried off!`;
+                    document.getElementById('defeat-context').innerHTML = `9 non-grey Heroes have been KO'd or carried off. ${mastermind.name}'s plan has shattered the ranks of the world's defenders and mutantkind's future hangs by a thread. The age of heroes is over.`;
                     showDefeatPopup();
                 }
                 break;
@@ -4657,14 +4639,14 @@ if (lastTurn && !lastTurnMessageShown) {
             case "hqDetonated":
                 if ((hqExplosion1 >= 6 && hqExplosion2 >= 6 && hqExplosion3 >= 6 && 
                     hqExplosion4 >= 6 && hqExplosion5 >= 6) || heroDeck.length === 0) {
-                    document.getElementById('defeat-context').innerHTML = `The HQ has been destroyed! The Villains have detonated the Helicarrier!`;
+                    document.getElementById('defeat-context').innerHTML = `All HQ spaces have been destroyed or the Hero Deck has run out. The Helicarrier erupts in a chain of explosions, plunging into the ocean in a fiery wreck.`;
                     showDefeatPopup();
                 }
                 break;
 
             case "babyThreeVillainEscape":
                 if (stackedTwistNextToMastermind >= 3) {
-                    document.getElementById('defeat-context').innerHTML = `3 Scheme Twists stacked next to the Mastermind! The Villains have captured Baby Hope!`;
+                    document.getElementById('defeat-context').innerHTML = `Three twists have been stacked next to ${mastermind.name}. Hope Summers has been taken, her future stolen, and the fate of mutantkind has changed forever.`;
                     showDefeatPopup();
                 }
                 break;
@@ -4784,6 +4766,106 @@ document.addEventListener('click', function(event) {
     }
 });
 
+function updateEvilWinsTracker() {
+    const evilWinsText = document.getElementById('evilWinsTracker');
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked')?.value;
+    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+        // Check Mastermind end game conditions
+    const mastermind = getSelectedMastermind();
+    const mastermindEndGame = mastermind ? mastermind.endGame : null;
+
+    // Reusable calculations
+    const escapedVillainsCount = escapedVillainsDeck.filter(card => card.type === 'Villain').length;
+    const escapedBystanderCount = escapedVillainsDeck.filter(card => card.type === 'Bystander').length;
+    const twistCount = koPile.filter(card => card.type === 'Scheme Twist').length;
+    const escapedHeroesCount = escapedVillainsDeck.filter(card => card.type === 'Hero').length;
+    const escapedKillbotsCount = escapedVillainsDeck.filter(card => card.killbot === true).length;
+    const mastermindEscapesCount = escapedVillainsDeck.filter(card => card.mastermind === true).length;
+    const KOdBystanders = koPile.filter(card => card.type === 'Bystander').length;
+    const escapedBystanders = escapedVillainsDeck.filter(card => card.type === 'Bystander').length;
+    const KOdHeroes = koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
+    const carriedOffHeroes = escapedVillainsDeck.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
+
+    switch (selectedScheme.name) {
+        case "Midtown Bank Robbery":
+      evilWinsText.innerHTML = `${escapedBystanderCount}/8 Bystanders Carried Away`;
+      break;
+
+        case "Negative Zone Prison Breakout":
+      evilWinsText.innerHTML = `${escapedVillainsCount}/12 Escaped Villains`;
+      break;
+
+        case "Portals to the Dark Dimension":
+      evilWinsText.innerHTML = `${twistCount}/7 Portals Opened`;
+      break;
+
+        case "Replace Earth's Leaders with Killbots":
+      evilWinsText.innerHTML = `${escapedKillbotsCount}/5 Escaped Killbots`;
+      break;
+
+        case "Secret Invasion of the Skrull Shapeshifters":
+      evilWinsText.innerHTML = `${escapedHeroesCount}/6 Escaped Skrull Heroes `;
+      break;
+
+        case "Superhero Civil War":
+      evilWinsText.innerHTML = `${heroDeck.length} ${heroDeck.length === 1 ? 'Hero Remains' : 'Heroes Remain'}`;
+      break;
+
+        case "The Legacy Virus":
+      evilWinsText.innerHTML = `${woundDeck.length} ${woundDeck.length === 1 ? 'Wound Remains' : 'Wounds Remain'}`;
+      break;
+
+        case "Unleash the Power of the Cosmic Cube":
+      evilWinsText.innerHTML = `${twistCount}/8 Twists`;
+      break;
+
+        case "Capture Baby Hope":
+      evilWinsText.innerHTML = `${stackedTwistNextToMastermind}/3 Stacked Twists`;
+      break;
+
+        case "Detonate the Helicarrier":
+        const explodedSpaces = [
+        hqExplosion1 >= 6,
+        hqExplosion2 >= 6,
+        hqExplosion3 >= 6,
+        hqExplosion4 >= 6,
+        hqExplosion5 >= 6
+        ].filter(Boolean).length; // Count how many are true (exploded)
+        const remainingHqSpaces = 5 - explodedSpaces;
+    evilWinsText.innerHTML = `${remainingHqSpaces} HQ Space${remainingHqSpaces !== 1 ? 's' : ''} and ${heroDeck.length} ${heroDeck.length === 1 ? 'Hero Remains' : 'Heroes Remain'}`;
+    break;
+   
+        case "Massive Earthquake Generator":
+      evilWinsText.innerHTML = `${koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length}/3 Non Grey Heroes KO'd`;
+      break;
+
+        case "Organized Crime Wave":
+      evilWinsText.innerHTML = `${escapedVillainsDeck.filter(card => card.name === 'Maggia Goons').length}/5 Escaped Goons`;
+      break;
+
+        case "Save Humanity":
+      evilWinsText.innerHTML = `${KOdBystanders + escapedBystanders}/4 Bystanders KO'd or Carried Off`;
+      break;
+
+        case "Steal the Weaponized Plutonium":
+      evilWinsText.innerHTML = `${escapedVillainsDeck.filter(card => card.plutonium === true).length}/4 Plutonium Carried Off`;
+      break;
+
+        case "Transform Citizens Into Demons":
+      evilWinsText.innerHTML = `${escapedVillainsDeck.filter(card => card.goblinQueen === true).length}/4 Escaped Goblin Queens`;
+      break;
+
+        case "X-Cutioner's Song":
+      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/9 Non Grey Heroes KO'd or Carried Off`;
+      break;
+
+        default:
+      evilWinsText.innerHTML = `See Scheme`;
+  }
+
+
+}
 
 function drawCard() {
     if (playerDeck.length === 0) {
@@ -4852,19 +4934,29 @@ function sortPlayerCards() {
 
   const colorOrder = {
     'Grey': 1,
-    'Green': 2,
-    'Yellow': 3,
-    'Red': 4,
-    'Black': 5,
-    'Blue': 6
+    'GreyVillain': 2,  // New category for grey villain heroes
+    'Green': 3,
+    'Yellow': 4,
+    'Red': 5,
+    'Black': 6,
+    'Blue': 7
   };
 
   playerHand.sort((a, b) => {
-    // 1. Sort by color
-    const aColor = a.color || '';
-    const bColor = b.color || '';
-    const aColorRank = colorOrder[aColor] || 7;
-    const bColorRank = colorOrder[bColor] || 7;
+    // Determine color category (modified for grey villains)
+    const getColorCategory = (card) => {
+      const color = card.color || '';
+      if (color === 'Grey' && card.wasAVillain === true) {
+        return 'GreyVillain';
+      }
+      return color;
+    };
+
+    // 1. Sort by modified color order
+    const aColorCat = getColorCategory(a);
+    const bColorCat = getColorCategory(b);
+    const aColorRank = colorOrder[aColorCat] || 8;  // Increased from 7 to 8
+    const bColorRank = colorOrder[bColorCat] || 8;
     if (aColorRank !== bColorRank) return aColorRank - bColorRank;
 
     // 2. Sort by hero name (part before " - ")
@@ -5064,18 +5156,39 @@ function resolveVillainActions() {
     console.log('Resolving villain actions...');
 }
 
+function hideRevealedCards() {
+    const deckNames = [
+        'playerDeck', 'heroDeck', 'villainDeck', 'shieldDeck', 'woundDeck',
+        'victoryPile', 'playerDiscardPile', 'cardsPlayedThisTurn', 'playerHand',
+        'escapedVillainsDeck', 'koPile', 'capturedCardsDeck', 'hq', 'city',
+        'demonGoblinDeck', 'mastermindDeck', 'bystanderDeck', 'sidekickDeck'
+    ];
+    
+    deckNames.forEach(deckName => {
+        if (Array.isArray(this[deckName])) {
+            this[deckName].forEach(card => {
+                if (card && card.revealed === true) {
+                    card.revealed = false;
+                }
+            });
+        }
+    });
+}
+
 function endTurn() {
 
 document.getElementById('end-turn').innerHTML = `<span class="game-board-bottom-row">END TURN</span>`;
 
 updateDeckCounts();
 
+hideRevealedCards();
+
 if (lastTurn === true) {
 showWinPopup()
 } 
 
 if (heroDeckHasRunOut === true && !delayEndGame) {
-    showHeroDeckEmptyPopup();
+    showDrawPopup();
 return;
 }
 
@@ -5105,7 +5218,7 @@ for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
     const card = cardsPlayedThisTurn[i];
 
     // If the card is marked to destroy, remove it
-    if (card.markedToDestroy === true) {
+    if (card.markedToDestroy === true || card.markedToDrawNextTurn === true) {
         cardsPlayedThisTurn.splice(i, 1);
         console.log(`${card.name} was destroyed (markedToDestroy).`);
         continue; // Skip any further logic for this card
@@ -5126,6 +5239,36 @@ for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
         }
     } else {
         playerDiscardPile.push(card);
+    }
+}
+
+for (let i = playerDiscardPile.length - 1; i >= 0; i--) {
+    const card = playerDiscardPile[i];
+
+    // If the card is marked to destroy, remove it
+    if (card.markedToDrawNextTurn === true) {
+        playerDiscardPile.splice(i, 1);
+        console.log(`${card.name} was destroyed (markedToDestroy).`);
+    }
+}
+
+for (let i = koPile.length - 1; i >= 0; i--) {
+    const card = koPile[i];
+
+    // If the card is marked to destroy, remove it
+    if (card.markedToDrawNextTurn === true) {
+        koPile.splice(i, 1);
+        console.log(`${card.name} was destroyed (markedToDestroy).`);
+    }
+}
+
+for (let i = victoryPile.length - 1; i >= 0; i--) {
+    const card = victoryPile[i];
+
+    // If the card is marked to destroy, remove it
+    if (card.markedToDrawNextTurn === true) {
+        victoryPile.splice(i, 1);
+        console.log(`${card.name} was destroyed (markedToDestroy).`);
     }
 }
 
@@ -5151,17 +5294,18 @@ city5TempBuff = 0;
 mastermindTempBuff = 0;
 rescueExtraBystanders = 0;
 rescueExtraBystanders = 0;
-jeanGreyBystanderRecruit = false;
-jeanGreyBystanderDraw = false;
-jeanGreyBystanderAttack = false;
+jeanGreyBystanderRecruit = 0;
+jeanGreyBystanderDraw = 0;
+jeanGreyBystanderAttack = 0;
 sewerRooftopDefeats = false;
 sewerRooftopBonusRecruit = 0;
-twoRecruitFromKO = false;
+twoRecruitFromKO = 0;
 hasProfessorXMindControl = false;
 trueVersatility = false;
 secondDocOc = false;
-let schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
-let pendingHeroKO = false; 
+deadpoolRare = false;
+schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
+pendingHeroKO = false; 
 
 playerHand.forEach(card => {
     if (card.temporaryTeleport === true) {
@@ -5464,97 +5608,337 @@ async function confirmAttack(cityIndex) {
         return;
     }
 
-     // Set the currentVillainLocation to the current location of the villain
-    currentVillainLocation = cityIndex; // Store the city index (location) of the villain
-console.log("Selected Villain's Location: ", currentVillainLocation);
+    // Store location and make copy
+    currentVillainLocation = cityIndex;
+    const villainCopy = createVillainCopy(villainCard);
+    const villainAttack = recalculateVillainAttack(villainCard);
 
-    // Make a copy of critical data before any async operations
-    const villainCopy = {
-        name: villainCard.name,
-        attack: villainCard.attack,
+        const rescueOperations = await collectRescueOperations(villainCopy);
+    
+    // Execute rescue operations in player-chosen order if multiple
+    if (rescueOperations.length > 1) {
+        await executeRescuesInPlayerOrder(rescueOperations);
+    } else if (rescueOperations.length === 1) {
+        await rescueOperations[0].execute();
+    }
+    
+    // Then always trigger fight effect last if it exists
+    if (villainCopy.fightEffect && villainCopy.fightEffect !== "None") {
+        const fightEffectFunction = window[villainCopy.fightEffect];
+        if (typeof fightEffectFunction === 'function') {
+            await fightEffectFunction(villainCopy);
+        }
+    }
+    
+    // Continue with post-defeat logic
+    await handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex);
+}
+
+// Helper function to create a deep copy of villain data
+function createVillainCopy(villainCard) {
+    return {
+        id: villainCard.id,
+            name: villainCard.name,
+            type: villainCard.type,
+            rarity: villainCard.rarity,
+            team: villainCard.team,
+            class1: villainCard.class1,
+            class2: villainCard.class2,
+            color: villainCard.color,
+            cost: villainCard.cost,
+            attack: villainCard.attack,
+            recruit: villainCard.recruit,
+            attackIcon: villainCard.attackIcon,
+            recruitIcon: villainCard.recruitIcon,
+            bonusAttack: villainCard.bonusAttack,
+            bonusRecruit: villainCard.bonusRecruit,
+            multiplier: villainCard.multiplier,
+            multiplierAttribute: villainCard.multiplierAttribute,
+            multiplierLocation: villainCard.multiplierLocation,
+            unconditionalAbility: villainCard.unconditionalAbility,
+            conditionalAbility: villainCard.conditionalAbility,
+            conditionType: villainCard.conditionType,
+            condition: villainCard.condition,
+            invulnerability: villainCard.invulnerability,
+            image: villainCard.image,
+
+        
         originalAttack: villainCard.originalAttack,
         bystander: [...(villainCard.bystander || [])],
         fightEffect: villainCard.fightEffect,
         shattered: villainCard.shattered,
         fightCondition: villainCard.fightCondition,
-        image: villainCard.image,
         captureCode: villainCard.captureCode,
 		alwaysLeads: villainCard.alwaysLeads
     };
+}
 
-    // Calculate attack synchronously
-    const selectedScheme = getSelectedScheme();
-    const villainAttack = recalculateVillainAttack(villainCard);
-
-// Replace the forEach with a for...of loop which properly handles async/await
-if (Array.isArray(villainCard.bystander)) {
-    for (const bystander of villainCard.bystander) {
-        if (bystander) {
-            victoryPile.push(bystander);
-            if (jeanGreyBystanderRecruit) {
-                totalRecruitPoints += 1;
-                cumulativeRecruitPoints += 1;
-                onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
+async function collectRescueOperations(villainCopy) {
+    const operations = [];
+    
+    // Only collect bystander rescues
+    if (Array.isArray(villainCopy.bystander)) {
+        villainCopy.bystander.forEach(bystander => {
+            if (bystander) {
+                operations.push({
+                    name: `Rescue ${bystander.name}`,
+                    image: bystander.image,
+                    execute: async () => {
+                        victoryPile.push(bystander);
+                        bystanderBonuses();
+                        await rescueBystanderAbility(bystander);
+                    }
+                });
             }
+        });
+    }
+    
+    // Baby Hope is automatic and happens in post-defeat
+    return operations;
+}
 
-            if (jeanGreyBystanderDraw) {
-                extraDraw();
-                onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-            }
 
-            if (jeanGreyBystanderAttack) {
-                totalAttackPoints += 1;
-                cumulativeAttackPoints += 1;
-                onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-            }
-            await rescueBystanderAbility(bystander);
+async function executeRescuesInPlayerOrder(rescueOperations) {
+    const remainingOperations = [...rescueOperations];
+    
+    while (remainingOperations.length > 0) {
+        // For single operation left, just execute it
+        if (remainingOperations.length === 1) {
+            await remainingOperations[0].execute();
+            break;
         }
+
+        // Show popup for player to choose next rescue
+        const choice = await showOperationSelectionPopup({
+            title: 'Choose Rescue Order',
+            instructions: 'Select next bystander to rescue:',
+            items: remainingOperations,
+            confirmText: 'CONFIRM SELECTION'
+        });
+
+        if (!choice) {
+            // If player cancels, execute remaining in default order
+            for (const op of remainingOperations) {
+                await op.execute();
+            }
+            break;
+        }
+
+        // Execute selected rescue and remove from remaining
+        const selectedIndex = remainingOperations.findIndex(op => op.name === choice.name);
+        const [selectedOperation] = remainingOperations.splice(selectedIndex, 1);
+        await selectedOperation.execute();
+        updateGameBoard();
     }
 }
 
-if (villainCard.babyHope === true) {
-    delete villainCard.babyHope;
-        villainCard.attack = villainCard.originalAttack;
-         const BabyHopeCard = { 
-                    name: "Baby Hope", 
-                    type: "Baby", 
-                    victoryPoints: 6, 
-                    image: 'Visual Assets/Schemes/DarkCity_CaptureBabyHope.webp'
+
+async function showOperationSelectionPopup(options) {
+    return new Promise((resolve) => {
+        try {
+            // Get the popup elements (reusing your existing popup structure)
+            const popup = document.getElementById('card-choice-one-location-popup');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const cardsList = document.getElementById('cards-to-choose-from');
+            const confirmButton = document.getElementById('card-choice-confirm-button');
+            const popupTitle = popup.querySelector('h2');
+            const instructionsDiv = document.getElementById('context');
+            const heroImage = document.getElementById('hero-one-location-image');
+            const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+            // Initialize UI
+            popupTitle.textContent = options.title || 'Choose Operation Order';
+            instructionsDiv.innerHTML = options.instructions || 'Select next action to resolve:';
+            cardsList.innerHTML = '';
+            confirmButton.style.display = 'inline-block';
+            confirmButton.disabled = true;
+            confirmButton.textContent = options.confirmText || 'CONFIRM';
+            modalOverlay.style.display = 'block';
+            popup.style.display = 'block';
+
+            let selectedOperation = null;
+            let activeImage = null;
+
+            // Cleanup function
+            const cleanup = () => {
+                confirmButton.onclick = null;
+                const listItems = cardsList.querySelectorAll('li');
+                listItems.forEach(li => {
+                    li.onmouseover = null;
+                    li.onmouseout = null;
+                    li.onclick = null;
+                });
+            };
+
+            // Update the confirm button state
+            function updateConfirmButton() {
+                confirmButton.disabled = selectedOperation === null;
+            }
+
+            // Update instructions with styled selection
+            function updateInstructions() {
+                if (selectedOperation === null) {
+                    instructionsDiv.innerHTML = options.instructions || 'Select next action to resolve:';
+                } else {
+                    instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedOperation.name}</span> will be resolved next.`;
+                }
+            }
+
+            // Show operation image
+            function updateOperationImage(operation) {
+                if (operation) {
+                    heroImage.src = operation.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                    activeImage = operation.image;
+                } else {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                    activeImage = null;
+                }
+            }
+
+            // Toggle operation selection
+            function toggleOperationSelection(operation, listItem) {
+                if (selectedOperation === operation) {
+                    // Deselect if same operation clicked
+                    selectedOperation = null;
+                    listItem.classList.remove('selected');
+                    updateOperationImage(null);
+                } else {
+                    // Clear previous selection if any
+                    if (selectedOperation) {
+                        const prevListItem = document.querySelector('li.selected');
+                        if (prevListItem) prevListItem.classList.remove('selected');
+                    }
+                    // Select new operation
+                    selectedOperation = operation;
+                    listItem.classList.add('selected');
+                    updateOperationImage(operation);
+                }
+
+                updateConfirmButton();
+                updateInstructions();
+            }
+
+            // Populate the list with available operations
+            options.items.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                li.setAttribute('data-operation-id', index);
+
+                li.onmouseover = () => {
+                    if (!activeImage) {
+                        heroImage.src = item.image;
+                        heroImage.style.display = 'block';
+                        oneChoiceHoverText.style.display = 'none';
+                    }
                 };
-                victoryPile.push(BabyHopeCard);
-                updateGameBoard();
+
+                li.onmouseout = () => {
+                    if (!activeImage) {
+                        heroImage.src = '';
+                        heroImage.style.display = 'none';
+                        oneChoiceHoverText.style.display = 'block';
+                    }
+                };
+
+                li.onclick = () => toggleOperationSelection(item, li);
+
+                cardsList.appendChild(li);
+            });
+
+            // Handle confirmation
+            confirmButton.onclick = async () => {
+                if (selectedOperation) {
+                    try {
+                        closePopup();
+                        cleanup();
+                        resolve(selectedOperation);
+                    } catch (error) {
+                        cleanup();
+                        throw error;
+                    }
+                }
+            };
+
+            function closePopup() {
+                // Reset UI
+                popupTitle.textContent = 'Hero Ability!';
+                instructionsDiv.textContent = 'Context';
+                cardsList.innerHTML = '';
+                confirmButton.style.display = 'none';
+                confirmButton.disabled = true;
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+
+                // Hide popup
+                popup.style.display = 'none';
+                modalOverlay.style.display = 'none';
+            }
+
+            // Close popup when clicking outside (optional)
+            modalOverlay.onclick = () => {
+                closePopup();
+                cleanup();
+                resolve(null);
+            };
+
+        } catch (error) {
+            console.error('Error in operation selection popup:', error);
+            resolve(null);
+        }
+    });
 }
 
+async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex) {
+    // Handle Baby Hope first (moved back here from operations)
+    if (villainCard.babyHope === true) {
+        delete villainCard.babyHope;
+        villainCard.attack = villainCard.originalAttack;
+        const BabyHopeCard = { 
+            name: "Baby Hope", 
+            type: "Baby", 
+            victoryPoints: 6, 
+            image: 'Visual Assets/Schemes/DarkCity_CaptureBabyHope.webp'
+        };
+        victoryPile.push(BabyHopeCard);
+        updateGameBoard();
+    }
+
+    // Rest of the post-defeat handling remains the same
     if (villainCard.plutoniumCaptured && villainCard.plutoniumCaptured.length > 0) {
         for (const plutonium of villainCard.plutoniumCaptured) {
             villainDeck.push(plutonium);
-            onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
         }
-        // Clear the plutonium from the defeated villain
         villainCard.plutoniumCaptured = [];
-        shuffle(villainDeck); // Shuffle the villain deck
+        shuffle(villainDeck);
+        onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
     }
 
-     if (villainCard.XCutionerHeroes && villainCard.XCutionerHeroes.length > 0) {
+    // Handle XCutioner Heroes
+    if (villainCard.XCutionerHeroes && villainCard.XCutionerHeroes.length > 0) {
         for (const hero of villainCard.XCutionerHeroes) {
             playerDiscardPile.push(hero);
-            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
         }
-        // Clear the plutonium from the defeated villain
         villainCard.XCutionerHeroes = [];
+        onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
     }
 
-    // Handle extra bystander rescues
+    // Handle extra bystanders
     if (rescueExtraBystanders > 0) {
         for (let i = 0; i < rescueExtraBystanders; i++) {
             rescueBystander();
         }
     }
 
-
+    // Add villain to victory pile
     victoryPile.push(villainCard);
-
     onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
+    city[cityIndex] = null;
 
     // Handle point deduction
     try {
@@ -5570,7 +5954,7 @@ if (villainCard.babyHope === true) {
         console.error('Error handling point deduction:', error);
     }
 
-    // Handle location-based bonuses
+    // Handle location bonuses
     try {
         if (sewerRooftopDefeats && (cityIndex === 2 || cityIndex === 4)) {
             onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. Drawing two cards.`);
@@ -5587,79 +5971,66 @@ if (villainCard.babyHope === true) {
         console.error('Error processing location bonuses:', error);
     }
 
-                // Clear the city slot and add to victory pile
-    city[cityIndex] = null;
-
-    // Handle extra recruit points
-    if (extraThreeRecruitAvailable === true) {
-        totalRecruitPoints += 3;
-        cumulativeRecruitPoints += 3;
-        onscreenConsole.log(`You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-    }
-
     // Handle Professor X Mind Control
     if (hasProfessorXMindControl) {
         try {
-            await new Promise((resolve) => {
-                const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-                    "DO YOU WISH TO GAIN THIS VILLAIN?",
-                    "GAIN AS A HERO",
-                    "NO THANKS!"
-                );
-
-                document.getElementById('heroAbilityHoverText').style.display = 'none';
-
-                const cardImage = document.getElementById('hero-ability-may-card');
-                cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
-                cardImage.style.display = 'block';
-
-                confirmButton.onclick = () => {
-                    const cardCopy = JSON.parse(JSON.stringify(villainCard));
-                    cardCopy.type = "Hero";
-                    cardCopy.color = "Grey";
-                    cardCopy.keyword1 = "None";
-                    cardCopy.keyword2 = "None";
-                    cardCopy.keyword3 = "None";
-                    
-                    playerDiscardPile.push(cardCopy);
-                    
-                    onscreenConsole.log(`You have chosen to add <span class="console-highlights">${villainCard.name}</span> to your discard pile as a grey Hero.`);
-                    updateGameBoard();
-                    
-                    hideHeroAbilityMayPopup();
-                    document.getElementById('heroAbilityHoverText').style.display = 'block';
-                    resolve(true);
-                };
-
-                denyButton.onclick = () => {
-                    onscreenConsole.log(`You declined to copy ${villainCard.name}.`);
-                    hideHeroAbilityMayPopup();
-                    document.getElementById('heroAbilityHoverText').style.display = 'block';
-                    resolve(false);
-                };
-            });
+            await handleMindControlOption(villainCard);
         } catch (error) {
             console.error('Error in mind control popup:', error);
         }
     }
 
-    // Handle fight effects
-    try {
-        if (villainCopy.fightEffect && villainCopy.fightEffect !== "None") {
-            const fightEffectFunction = window[villainCopy.fightEffect];
-            if (typeof fightEffectFunction === 'function') {
-                await fightEffectFunction(villainCopy);
-            }
-        }
-    } catch (error) {
-        console.error(`Error in fight effect: ${error}`);
-    } finally {
-        currentVillainLocation = null;
-        updateGameBoard();
-    }
-
-    
+    // Final cleanup
+    defeatBonuses();
+    currentVillainLocation = null;
+    updateGameBoard();
 }
+
+
+// Handle Professor X Mind Control option
+async function handleMindControlOption(villainCard) {
+    return new Promise((resolve) => {
+        const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+            "DO YOU WISH TO GAIN THIS VILLAIN?",
+            "GAIN AS A HERO",
+            "NO THANKS!"
+        );
+
+        document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+        const cardImage = document.getElementById('hero-ability-may-card');
+        cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
+        cardImage.style.display = 'block';
+
+        confirmButton.onclick = () => {
+            const cardCopy = JSON.parse(JSON.stringify(villainCard));
+            cardCopy.type = "Hero";
+            cardCopy.color = "Grey";
+            cardCopy.cost = villainCard.attack;
+            cardCopy.keyword1 = "None";
+            cardCopy.keyword2 = "None";
+            cardCopy.keyword3 = "None";
+            cardCopy.wasAVillain = true;
+            
+            playerDiscardPile.push(cardCopy);
+            
+            onscreenConsole.log(`You have chosen to add <span class="console-highlights">${villainCard.name}</span> to your discard pile as a grey Hero.`);
+            updateGameBoard();
+            
+            hideHeroAbilityMayPopup();
+            document.getElementById('heroAbilityHoverText').style.display = 'block';
+            resolve(true);
+        };
+
+        denyButton.onclick = () => {
+            onscreenConsole.log(`You declined to copy ${villainCard.name}.`);
+            hideHeroAbilityMayPopup();
+            document.getElementById('heroAbilityHoverText').style.display = 'block';
+            resolve(false);
+        };
+    });
+}
+
 
 // Helper function
 function getSelectedScheme() {
@@ -5835,7 +6206,7 @@ function koHeroInHQ(index) {
     updateGameBoard();
 
     if (!hq[index] && heroDeck.length === 0) {
-        showHeroDeckEmptyPopup();
+        showDrawPopup();
     }
 }
 
@@ -5847,6 +6218,12 @@ function deleteHeroFromHQ(index) {
 }
 
 function showDiscardCardPopup() {
+
+    if (playerHand.length === 0) {
+        onscreenConsole.log(`You have no cards available to discard.`);
+        return;
+    }
+    
     return new Promise((resolve, reject) => {
         const discardPopup = document.getElementById('discard-popup');
         const modalOverlay = document.getElementById('modal-overlay');
@@ -5916,12 +6293,7 @@ onscreenConsole.log('<span style="font-style:italic;">Healing Wounds...</span>')
         const card = playerHand[index];
         if (card.name === "Wound") {
             koPile.push(card);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+            koBonuses();
         } else {
             playerDiscardPile.push(card);
         }
@@ -6071,97 +6443,130 @@ function showMastermindAttackButton() {
 
 async function confirmMastermindAttack() {
     try {
-        const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
-        let mastermind = getSelectedMastermind();
+        const mastermind = getSelectedMastermind();
         healingPossible = false;
-        let mastermindAttack = recalculateMastermindAttack(mastermind);
+        const mastermindAttack = recalculateMastermindAttack(mastermind);
 
         // Handle doom delay logic
         if (doomDelayEndGameFinalBlow) {
             delayEndGame = (mastermindDefeatTurn === turnCount);
         }
 
-const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
-                           mastermind.keyword2 === "Bribe" || 
-                           mastermind.keyword3 === "Bribe";
+        // Create a copy of the mastermind data
+        const mastermindCopy = createMastermindCopy(mastermind);
 
-        // Handle point deduction
-        if (recruitUsedToAttack || hasBribeKeyword) {
-            const result = await showCounterPopup(mastermind, mastermindAttack);
-            totalAttackPoints -= result.attackUsed;
-            totalRecruitPoints -= result.recruitUsed;
-            onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points`);
-        } else {
-            totalAttackPoints -= mastermindAttack;
+        // Collect all possible operations
+        const operations = await collectMastermindRescueOperations(mastermindCopy);
+
+        // Execute operations in player-chosen order if needed
+        if (operations.length > 1) {
+            await executeRescuesInPlayerOrder(operations, mastermindCopy);
+        } else if (operations.length === 1) {
+            await operations[0].execute();
         }
 
-        // Handle bystanders and recruit points
-        if (rescueExtraBystanders > 0) {
-            for (let i = 0; i < rescueExtraBystanders; i++) {
-                rescueBystander();
-            }
-        }
-
-        if (extraThreeRecruitAvailable) {
-            totalRecruitPoints += 3;
-            cumulativeRecruitPoints += 3;
-            onscreenConsole.log(`You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-        }
-
-             if (mastermind.XCutionerHeroes && mastermind.XCutionerHeroes.length > 0) {
-        for (const hero of mastermind.XCutionerHeroes) {
-            playerDiscardPile.push(hero);
-            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
-        }
-   
-        mastermind.XCutionerHeroes = [];
-    }
-
-        // Handle mastermind defeat
-for (const bystander of mastermind.bystanders) {
-    victoryPile.push(bystander);
-    if (jeanGreyBystanderRecruit) {
-        totalRecruitPoints += 1;
-        cumulativeRecruitPoints += 1;
-        onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-    }
-    if (jeanGreyBystanderDraw) {
-        extraDraw();
-        onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-    }
-    if (jeanGreyBystanderAttack) {
-        totalAttackPoints += 1;
-        cumulativeAttackPoints += 1;
-        onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-    }
-    await rescueBystanderAbility(bystander); // Now works properly
-}
-        mastermind.bystanders = [];
-
-        updateMastermindOverlay();
-        updateGameBoard();
-
-        onscreenConsole.log(`You attacked <span class="console-highlights">${mastermind.name}</span>. Revealing tactic now!`);
-
-        // Check win condition
-        if (mastermind.tactics.length === 0) {
-            if (finalBlowEnabled) {
-                const finalBlowCard = { 
-                    name: "Final Blow", 
-                    type: "Mastermind", 
-                    victoryPoints: mastermind.victoryPoints, 
-                    image: mastermind.image
-                };
-                victoryPile.push(finalBlowCard);
-                updateGameBoard();
-            }
-            checkWinCondition();
-        } else {
-            revealMastermindTactic(mastermind);
-        }
+        // Handle common post-defeat logic
+        await handleMastermindPostDefeat(mastermind, mastermindCopy, mastermindAttack);
     } catch (error) {
         console.error("Mastermind attack error:", error);
-        throw error; // Re-throw to be caught by the caller
+        throw error;
+    }
+}
+
+function createMastermindCopy(mastermind) {
+    return {
+        ...mastermind,
+        bystanders: [...(mastermind.bystanders || [])],
+        XCutionerHeroes: [...(mastermind.XCutionerHeroes || [])]
+    };
+}
+
+async function collectMastermindRescueOperations(mastermindCopy) {
+    const operations = [];
+
+    // Add bystander rescues as individual operations
+    if (Array.isArray(mastermindCopy.bystanders)) {
+        mastermindCopy.bystanders.forEach(bystander => {
+            if (bystander) {
+                operations.push({
+                    name: `Rescue ${bystander.name}`,
+                    image: bystander.image,
+                    execute: async () => {
+                        victoryPile.push(bystander);
+                        bystanderBonuses();
+                        await rescueBystanderAbility(bystander);
+                    }
+                });
+            }
+        });
+    }
+
+    // Add XCutioner heroes rescue as one operation
+    if (mastermindCopy.XCutionerHeroes && mastermindCopy.XCutionerHeroes.length > 0) {
+        operations.push({
+            name: `Rescue XCutioner Heroes`,
+            image: 'Visual Assets/Icons/Recruit.svg', // Or use a specific image
+            execute: async () => {
+                for (const hero of mastermindCopy.XCutionerHeroes) {
+                    playerDiscardPile.push(hero);
+                    onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+                }
+                mastermindCopy.XCutionerHeroes = [];
+            }
+        });
+    }
+
+    return operations;
+}
+
+async function handleMastermindPostDefeat(mastermind, mastermindCopy, mastermindAttack) {
+    const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
+                          mastermind.keyword2 === "Bribe" || 
+                          mastermind.keyword3 === "Bribe";
+
+    // Handle point deduction
+    if (recruitUsedToAttack || hasBribeKeyword) {
+        const result = await showCounterPopup(mastermind, mastermindAttack);
+        totalAttackPoints -= result.attackUsed;
+        totalRecruitPoints -= result.recruitUsed;
+        onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points`);
+    } else {
+        totalAttackPoints -= mastermindAttack;
+    }
+
+    // Handle extra bystanders
+    if (rescueExtraBystanders > 0) {
+        for (let i = 0; i < rescueExtraBystanders; i++) {
+            rescueBystander();
+        }
+    }
+
+    // Clear bystanders (they were already handled in operations)
+    mastermind.bystanders = [];
+    mastermind.XCutionerHeroes = [];
+
+    // Apply defeat bonuses
+    defeatBonuses();
+    updateMastermindOverlay();
+    updateGameBoard();
+
+    onscreenConsole.log(`You attacked <span class="console-highlights">${mastermind.name}</span>. Revealing tactic now!`);
+
+    // Check win condition
+    if (mastermind.tactics.length === 0) {
+        if (finalBlowEnabled) {
+            const finalBlowCard = { 
+                name: "Final Blow", 
+                type: "Mastermind", 
+                victoryPoints: mastermind.victoryPoints, 
+                image: mastermind.image
+            };
+            victoryPile.push(finalBlowCard);
+            updateGameBoard();
+        }
+        checkWinCondition();
+    } else {
+        revealMastermindTactic(mastermind);
     }
 }
 
@@ -6284,8 +6689,76 @@ if (delayEndGame) {
 
     const drawPopup = document.getElementById('draw-popup');
     const modalOverlay = document.getElementById('modal-overlay');
+    const drawText = document.getElementById('draw-context');
     drawPopup.style.display = 'block';
     modalOverlay.style.display = 'block';
+
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+const mastermind = getSelectedMastermind();
+
+// Then check Scheme end game conditions (if Mastermind conditions weren't met)
+if (selectedScheme) {
+    switch (selectedScheme.name) {
+        case "Midtown Bank Robbery":
+            drawText.innerHTML = `You've stopped the robbery at Midtown Bank, but ${mastermind.name} escaped before being caught.`;
+            break;
+
+        case "Negative Zone Prison Breakout":
+            drawText.innerHTML = `You've stopped ${mastermind.name} from freeing more inmates, but they slipped away into the antimatter realm.`;
+            break;
+
+        case "Replace Earth's Leaders with Killbots":
+            drawText.innerHTML = `The Killbot takeover has been stopped, but ${mastermind.name} escaped to plot their next attack.`;
+            break;
+
+        case "Secret Invasion of the Skrull Shapeshifters":
+            drawText.innerHTML = `You've stopped more Heroes from being replaced, but ${mastermind.name} escaped with some Skrull agents still in hiding.`;
+            break;
+
+        case "Super Hero Civil War":
+            drawText.innerHTML = `The civil war among Heroes has ended, but ${mastermind.name} escaped to stir division another day.`;
+            break;
+
+        case "The Legacy Virus":
+            drawText.innerHTML = `You've stopped the Legacy Virus, but ${mastermind.name} escaped before justice could be served.`;
+            break;
+
+        case "Capture Baby Hope":
+            drawText.innerHTML = `You've kept Hope out of ${mastermind.name}'s grasp for now, but they escaped to try again another day.`;
+            break;
+
+        case "Massive Earthquake Generator":
+            drawText.innerHTML = `The earthquake generator has been shut down, but ${mastermind.name} escaped to rebuild their device.`;
+            break;
+
+        case "Organized Crime Wave":
+            drawText.innerHTML = `The crime wave has been broken, but ${mastermind.name} escaped to rebuild their network.`;
+            break;
+
+        case "Save Humanity":
+            drawText.innerHTML = `The plan to destroy humanity has been stopped, but ${mastermind.name} escaped to try again.`;
+            break;
+
+        case "Steal the Weaponized Plutonium":
+            drawText.innerHTML = `The last of the stolen plutonium has been recovered, but ${mastermind.name} escaped with the plans to strike again.`;
+            break;
+
+        case "Transform Citizens into Demons":
+            drawText.innerHTML = `The demonic transformation has been halted, but ${mastermind.name} escaped to spread their corruption another day.`;
+            break;
+
+        case "X-Cutioner's Song":
+            drawText.innerHTML = `The X-Cutioner's Song has been silenced, but ${mastermind.name} escaped with allies still loyal to their cause.`;
+            break;
+        
+        default:
+            drawText.innerHTML = ``;
+            break;
+
+        }
+    }
 
     const totalVictoryPoints = calculateVictoryPoints(victoryPile);
     document.getElementById('villainDRAWvictoryPointsTotal').innerText = totalVictoryPoints;
@@ -6393,46 +6866,6 @@ function returnHome() {
     location.reload();
 }
 
-function showHeroDeckEmptyPopup() {
-    const heroDeckEmptyPopup = document.getElementById('hero-deck-empty-popup');
-    const modalOverlay = document.getElementById('modal-overlay'); // Corrected ID
-    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-
-    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
-    document.getElementById('heroDRAWvictoryPointsTotal').innerText = totalVictoryPoints;
-
-    const totalTurnsTaken = turnCount;
-    document.getElementById('heroDRAWtotalTurnsTaken').innerText = totalTurnsTaken;
-   
-    const averageVPPerTurn = totalTurnsTaken > 0 
-    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
-    : "0.0"; // Handle division by zero case
-document.getElementById('heroDRAWaverageVPPerTurn').innerText = averageVPPerTurn;
-
-const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
-document.getElementById('heroDRAWnumberOfEscapes').innerText = numberOfEscapes;
-
-    if (selectedScheme.name === 'Super Hero Civil War') { 
-        console.log('Defeat popup should display instead of draw.');
-    } else {
-        heroDeckEmptyPopup.style.display = 'block';
-        modalOverlay.style.display = 'block';
-    }
-}
-
-function closeHeroDeckEmptyPopup() {
-    const heroDeckEmptyPopup = document.getElementById('hero-deck-empty-popup');
-    const modalOverlay = document.getElementById('modal-overlay');
-    heroDeckEmptyPopup.style.display = 'none';
-    modalOverlay.style.display = 'none';
-}
-
-document.getElementById('return-home-hero-button').addEventListener('click', () => {
-    closeHeroDeckEmptyPopup();
-    returnHome();
-});
-
 function showDefeatPopup() {
 if (finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 5) {
     onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind. Finish your turn to finalise your victory!`);
@@ -6526,8 +6959,89 @@ if (delayEndGame) {
     return;
 }
 
-    const winPopup = document.getElementById('win-popup');
+const winPopup = document.getElementById('win-popup');
 const modalOverlay = document.getElementById('modal-overlay');
+
+const winText = document.getElementById('win-context');
+
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+const mastermind = getSelectedMastermind();
+
+// Then check Scheme end game conditions (if Mastermind conditions weren't met)
+if (selectedScheme) {
+    switch (selectedScheme.name) {
+        case "Midtown Bank Robbery":
+            winText.innerHTML = `You've defeated ${mastermind.name} and recovered every last dollar stolen from Midtown Bank. The city is safe. Excellent work!`;
+            break;
+
+        case "Negative Zone Prison Breakout":
+            winText.innerHTML = `You've stopped ${mastermind.name} from breaking prisoners out of the Negative Zone. All escaped inmates have been returned to their cells. Excellent work!`;
+            break;
+
+        case "Portals to the Dark Dimension":
+            winText.innerHTML = `You've stopped ${mastermind.name} from opening any more gateways to the Dark Dimension. All Dark Portals have been sealed. Excellent work!`;
+            break;
+
+        case "Replace Earth's Leaders with Killbots":
+            winText.innerHTML = `You've stopped ${mastermind.name} from unleashing Killbots on Earth's leadership. The threat is contained and global order is intact. Excellent work!`;
+            break;
+
+        case "Secret Invasion of the Skrull SHapeshifters":
+            winText.innerHTML = `You've stopped ${mastermind.name} from replacing Earth's heroes with Skrull imposters. All abducted heroes have been freed and returned to the fight. Excellent work!`;
+            break;
+
+        case "Superhero Civil War":
+            winText.innerHTML = `You've stopped ${mastermind.name} from tearing the superhero community apart. Earth's heroes stand united once more. Excellent work!`;
+            break;
+
+        case "The Legacy Virus":
+            winText.innerHTML = `You've defeated ${mastermind.name} and eradicated the last traces of the Legacy Virus. Mutantkind lives on. Excellent work!`;
+            break;
+
+        case "Unleash the Power of the Cosmic Cube":
+            winText.innerHTML = `You've stopped ${mastermind.name} from harnessing the power of the Cosmic Cube. Its reality-warping energy is secured once more. Excellent work!`;
+            break;
+
+        case "Capture Baby Hope":
+            winText.innerHTML = `You've stopped ${mastermind.name} from taking Hope Summers. She is safe from harm and free to fulfill her destiny. Excellent work!`;
+            break;
+
+        case "Detonate the Helicarrier":
+            winText.innerHTML = `You've stopped ${mastermind.name} from destroying the Helicarrier. The explosions are contained and the ship remains operational. Excellent work!`;
+            break;
+
+        case "Massive Earthquake Generator":
+            winText.innerHTML = `You've stopped ${mastermind.name} from activating the massive earthquake generator. The tremors subside and the cities are safe. Excellent work!`;
+            break;
+
+        case "Organized Crime Wave":
+            winText.innerHTML = `You've stopped ${mastermind.name} from unleashing a wave of organized crime. The Maggia Goons are behind bars and the streets are safe. Excellent work!`;
+            break;
+
+        case "Save Humanity":
+            winText.innerHTML = `You've stopped ${mastermind.name} from wiping out humanity. Every bystander is safe from harm. Excellent work!`;
+            break;
+
+        case "Steal the Weaponized Plutonium":
+            winText.innerHTML = `You've stopped ${mastermind.name} from stealing the weaponized plutonium. Every ounce is out of enemy hands and secured. Excellent work!`;
+            break;
+
+        case "Transform Citizens into Demons":
+            winText.innerHTML = `You've stopped ${mastermind.name} from transforming citizens into Demon Goblins. All who were taken have been freed from their curse. Excellent work!`;
+            break;
+
+        case "X-Cutioner's Song":
+            winText.innerHTML = `You've stopped ${mastermind.name} from carrying out the X-Cutioner's Song. All captured heroes have been freed from their captors. Excellent work!`;
+            break;
+        
+        default:
+            winText.innerHTML = `You have defeated the Mastermind and prevented their nefarious scheme! Excellent work!`;
+            break;
+
+        }
+    }
 
 const totalVictoryPoints = calculateVictoryPoints(victoryPile);
     document.getElementById('WINvictoryPointsTotal').innerText = totalVictoryPoints;
@@ -7183,6 +7697,7 @@ function recruitSidekick() {
 onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to your hand.`);
 } else if (backflipRecruit === true) {
 playerDeck.push(sidekick);
+sidekick.revealed = true;
 onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${sidekick.name}</span> has been added to the top of your deck.`);
 backflipRecruit = false;
 } else {
@@ -7260,6 +7775,7 @@ function recruitOfficer() {
 onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.name}</span> has been added to your hand.`);
 } else if (backflipRecruit === true) {
 playerDeck.push(officer);
+officer.revealed = true;
 onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.name}</span> has been added to the top of your deck.`);
 backflipRecruit = false;
 } else {
@@ -7383,6 +7899,7 @@ await rescueBystanderAbility(hero);
 onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your hand.`);
 } else if (backflipRecruit === true) {
 playerDeck.push(hero);
+hero.revealed = true;
 onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to the top of your deck.`);
 backflipRecruit = false;
 } else {
@@ -7525,7 +8042,6 @@ document.getElementById('bribe-confirm-button').addEventListener('click', () => 
         });
     }
 });
-
 
 
 

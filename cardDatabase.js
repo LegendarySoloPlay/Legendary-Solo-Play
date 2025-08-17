@@ -183,7 +183,7 @@ image: "Visual Assets/Schemes/darkdimension.webp"
     {
         id: 4,
         name: "Replace Earth's Leaders with Killbots",
-        bystanderCount: 1,
+        bystanderCount: 0,
         twistCount: 5,
         endGame: "5Killbots",
         twistEffect: "killbotAttackIncrease",
@@ -643,7 +643,7 @@ const villains = [
         name: "HYDRA",
         cards: [
             { id: 9, villainId: 3, team: "HYDRA", name: "Viper", type: "Villain", quantity: 1, attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "FightHYDRAVPOrWound", escapeEffect: "EscapeHYDRAVPOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_Viper.webp" },
-            { id: 10, villainId: 3, team: "HYDRA", name: "Supreme HYDRA", type: "Villain", quantity: 1, attack: 6, originalAttack: 6, victoryPoints: 0, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_SupremeHYDRA.webp" },
+            { id: 10, villainId: 3, team: "HYDRA", name: "Supreme HYDRA", type: "Villain", quantity: 1, attack: 6, originalAttack: 6, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_SupremeHYDRA.webp" },
             { id: 11, villainId: 3, team: "HYDRA", name: "Endless Armies of HYDRA", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 3, ambushEffect: "None", fightEffect: "villainDrawX2", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_EndlessArmies.webp" },
             { id: 12, villainId: 3, team: "HYDRA", name: "HYDRA Kidnappers", type: "Villain", quantity: 3, attack: 3, originalAttack: 3, victoryPoints: 1, ambushEffect: "None", fightEffect: "chooseToGainSHIELDOfficer", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/HYDRA_HYDRAKidnappers.webp" }
         ]

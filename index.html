@@ -42,7 +42,7 @@
       <div id="intro-popup-content">
         <div id="intro" class="tab-content active">
 <h3 class="pulsing-glow-text">
-  <strong>DARK CITY UPDATE -</strong> Please see the <i>Updates</i> tab for patch notes.
+  <strong>DARK CITY BUG FIXES -</strong> Please see the <i>Updates</i> tab for patch notes.
 </h3>
   <p>Get ready to dive into the <strong>Marvel Legendary</strong> universe in this fan-made digital adaptation of the classic deck-building game! Assemble a team of heroes, take down powerful villains, and stop the mastermind’s nefarious schemes—all in <strong>solo mode</strong>, optimised with the latest <i>"What If...?"</i> variations to the Advanced Solo rules.</p>
 
@@ -455,16 +455,16 @@
       </div>
       <!-- Row of 7 Cells -->
       <div class="row">
-<div class="top-row-cell-label"><p class="labeltext">TWISTS: </p><p id="drawnTwistCount" class="labeltext"></p></div>
-<div class="top-row-cell-label"><p class="labeltext">MASTER STRIKES:  </p><p id="drawnMasterStrikeCount" class="labeltext"></p></div>
-               <button id="escape-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">ESCAPE PILE: </span><span id="escapePileCount" class="game-board-bottom-row"></span></button>
+<div class="top-row-cell-label"><span class="labeltext">TWISTS:</span><span id="drawnTwistCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext">MASTER STRIKES:</span><span id="drawnMasterStrikeCount" class="labeltext"></span></div>
+               <button id="escape-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">ESCAPE PILE:</span><span id="escapePileCount" class="game-board-bottom-row"></span></button>
 
-        <button id="ko-pile-button" class="cell top-row-buttons" style="grid-column: span 2;"><span class="game-board-bottom-row">KO PILE: </span><span id="koPileCount" class="game-board-bottom-row"></span></button>
+        <button id="ko-pile-button" class="cell top-row-buttons" style="grid-column: span 2;"><span class="game-board-bottom-row">KO PILE:</span><span id="koPileCount" class="game-board-bottom-row"></span></button>
 
 
-        <button id="victory-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">VICTORY PILE: </span><span id="currentVictoryPointsTally" class="game-board-bottom-row"></span></button>
-<div class="top-row-cell-label"><p class="labeltext">WOUNDS:  </p><p id="woundDeckCount" class="labeltext"></p></div>
-<div class="top-row-cell-label"><p class="labeltext">BYSTANDERS:  </p><p id="bystanderDeckCount" class="labeltext"></p></div>
+        <button id="victory-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">VICTORY PILE:</span><span id="currentVictoryPointsTally" class="game-board-bottom-row"></span></button>
+<div class="top-row-cell-label"><span class="labeltext">WOUNDS:</span><span id="woundDeckCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext">BYSTANDERS:</span><span id="bystanderDeckCount" class="labeltext"></span></div>
 </div>
       <div class="row">
 <div class="cell scheme" id="scheme-place"><div id="scheme-token" style="display:none;">Baby<br>Hope</div><div id="demon-goblin-deck" style="display:none;"><span id="demon-goblin-count"></span></div></div>
@@ -485,8 +485,8 @@
     
 </div>
 <div class="row">
-<div class="cell-label"><p class="labeltext">SCHEME</p></div>
-        <div class="cell-label"><p class="labeltext">REMAINING TACTICS:  </p><p id="mastermindTacticCountNumber" class="labeltext"></p></div>
+<div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">EVIL WINS:</span><span id="evilWinsTracker"></span></div>
+        <div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">REMAINING TACTICS:</span><span id="mastermindTacticCountNumber" class="labeltext"></span></div>
         <div class="cell-label"><p class="labeltext">BRIDGE</p></div>
         <div class="cell-label"><p class="labeltext">STREETS</p></div>
         <div class="cell-label"><p class="labeltext">ROOFTOPS</p></div>
@@ -778,7 +778,7 @@
 </div>
     <div class="popup-content">
       <h1>DRAW!</h1>
-      <p style="margin-bottom: 10px;">You've run out of villains to battle. The Mastermind has not succeeded, but neither have you.</p>
+      <p style="margin-bottom: 10px;" id="defeat-context">You've run out of Villains to battle. The Mastermind has not succeeded, but neither have you.</p>
       <h3>Victory Points:</h3>
       <p id="villainDRAWvictoryPointsTotal"></p>
       <h3>Total Turns Taken:</h3>
@@ -797,33 +797,7 @@
     </div>
   </div>
 
-  <!-- Add this HTML near the other popups -->
-  <div id="hero-deck-empty-popup" class="popup" style="display: none;">
-      <div class="minimize-triangle-btn" aria-label="Minimize">
-  <span class="inner-triangle"></span>
-</div>
-    <div class="popup-content">
-      <h1>DRAW!</h1>
-      <p style="margin-bottom: 10px;">You've run out of heroes to recruit. The Mastermind has not succeeded, but neither have you.</p>
-      <h3>Victory Points:</h3>
-      <p id="heroDRAWvictoryPointsTotal"></p>
-      <h3>Total Turns Taken:</h3>
-      <p id="heroDRAWtotalTurnsTaken"></p>
-      <h3>Average VP Per Turn:</h3>
-      <p id="heroDRAWaverageVPPerTurn"></p>
-      <h3>Number of Escapes:</h3>
-      <p id="heroDRAWnumberOfEscapes"></p>
-      <button id="return-home-hero-button">Return Home</button>
-<br>
-<h3>💖 Support the Project 💖</h3>
-  <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive.</p>
-
-  <p style="text-align: center;">➡️ <a href="https://www.paypal.me/benjaminb21" target="_blank" class="donate-button"><strong>SUPPORT FUTURE EXPANSIONS</strong></a> ⬅️</p>
-
-    </div>
-  </div>
-
-    <div id="defeat-popup" class="popup" style="display: none;">
+     <div id="defeat-popup" class="popup" style="display: none;">
         <div class="minimize-triangle-btn" aria-label="Minimize">
   <span class="inner-triangle"></span>
 </div>
@@ -865,7 +839,7 @@
 </div>
     <div class="popup-content">
       <h1>GOOD WINS!</h1>
-      <p style="margin-bottom: 10px;">You have defeated the Mastermind and prevented their nefarious scheme! Well done!</p>
+      <p style="margin-bottom: 10px;" id="win-context">You have defeated the Mastermind and prevented their nefarious scheme! Excellent work!</p>
       <h3>Victory Points:</h3>
       <p id="WINvictoryPointsTotal"></p>
       <h3>Total Turns Taken:</h3>
@@ -915,7 +889,7 @@
           </ul>
         </div>
         <div class="card-list">
-          <h3>Hand</h3>
+          <h3 id="card-list-hand">Hand</h3>
           <ul id="hand-cards">
             <!-- Hand cards will be listed here -->
           </ul>

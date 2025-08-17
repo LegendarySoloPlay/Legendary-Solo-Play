@@ -322,8 +322,8 @@ function zabuKOChoice() {
     confirmButton.style.display = 'inline-block';
     confirmButton.disabled = true;
     confirmButton.textContent = 'KO Card';
-    closeButton.style.display = 'inline-block';
-    closeButton.textContent = 'Cancel';
+    closeButton.style.display = 'none';
+    xcloseButton.style.display = 'none';
     modalOverlay.style.display = 'block';
     popup.style.display = 'block';
 
@@ -452,12 +452,7 @@ function zabuKOChoice() {
         if (koIndex !== -1) {
           koPile.push(selectedCard);
           onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
           closePopup();
           updateGameBoard();
           resolve(selectedCard);
@@ -466,22 +461,6 @@ updateGameBoard();
       }
       resolve(null);
     };
-
-    // Handle cancellation
-    closeButton.onclick = () => {
-      console.log('No card was KO\'d.');
-      onscreenConsole.log('You chose not to KO any cards.');
-      closePopup();
-      resolve(null);
-    };
-    
-        xcloseButton.onclick = () => {
-      console.log('No card was KO\'d.');
-      onscreenConsole.log('You chose not to KO any cards.');
-      closePopup();
-      resolve(null);
-    };
-
 
     function closePopup() {
       context.innerHTML = 'Select a card to KO.';
@@ -727,12 +706,7 @@ async function handleKoOrDiscardChoice(card) {
   if (action.value === 'ko') {
     koPile.push(card);
     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
   } else {
     playerDiscardPile.push(card);
     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
@@ -824,12 +798,7 @@ let playedSidekick = [...cardsPlayedThisTurn].reverse().find(card =>
     cardsPlayedThisTurn[index] = copy; // Keep the copy
     koPile.push(playedSidekick);      // Move original to KO pile
       onscreenConsole.log(`You chose to play <span class="console-highlights">${playedSidekick.name}</span><span class="bold-spans">’s</span> Meltdown ability. You have gained +4 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and a Wound. <span class="console-highlights">${playedSidekick.name}</span> has been KO’d.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
   } else {
     console.error("playedSidekick not found in cardsPlayedThisTurn.");
   }

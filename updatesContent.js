@@ -1,5 +1,69 @@
 // updatesContent.js
 const updatesHTML = `
+<h3>🌃 <i>Version 2.0.1</i> - Dark City Fixes 🌃</h3>
+<p>Thanks again for all the feedback! Thanks to you I've found and fixed a lot of initial Dark City bugs. Keep the reports coming!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>I thought we were finished?</strong> The Mastermind was staying highlighted after being fully defeated. Now they will no longer appear attackable once you have finished. 
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>Short term memory -</strong> Cards you reveal or return to the top of a deck will now appear face up so that a quick glance will remind you.
+<li><strong>Be specific!</strong> Details have been added to the End Game popups whether you win, lose or draw. Flavour text suited to your chosen Mastermind and Scheme will describe the outcome of your game.
+<li><strong>Eeny, meeny, miny, moe!</strong> When attacking a Villain or Mastermind with multiple Bystanders, you will now be able to select the order in which they are rescued before any Fight effects or Tactics are carried out.
+<li><strong>Can I get a countdown?</strong> The gameboard now features an 'Evil Wins' tracker beneath the Scheme, letting you know just how much danger you're in.
+<li><strong>You can't sit with us!</strong> Any Villains gained as Heroes (by way of Professor X) will now be sorted together within your hand.
+<li><strong>But no-one is left!</strong> If a Villain escaped with a Bystander and forced you to discard, the game would softlock if you had no cards to discard. Now fixed.
+</ul>
+<p>📋 <span style="text-decoration:underline;"><strong>SCHEMES:</strong></span></p>
+<ul>
+<li><strong>Negative Zone Prison Breakout -</strong> An extra card was being drawn sometimes - now corrected.
+<li><strong>Replace Earth's Leaders with Killbots -</strong> Was accidentally adding one additional non-Killbot Bystander to the Villain Deck. Now removed.
+<li><strong>Save Humanity -</strong> If able to reveal a card on a Scheme Twist, the reveal popup will now trigger first and the image is no longer broken.
+<li><strong>Secret Invasion of the Skrull Shapeshifters -</strong> Heroes gained from the city now possess their correct abilities. 
+<li><strong>Steal the Weaponized Plutonium -</strong> Scheme Twists kept adding confirm buttons.
+<li><strong>Transform Citizens Into Demons -</strong> The Demon Goblin stack now features the token images. 
+<li><strong>X-Cutioner's Song -</strong> Heroes played from the Villain deck now generate popups upon being drawn. Scheme Twists will now draw an extra card correctly.
+</ul>
+<p>🧛 <span style="text-decoration:underline;"><strong>MASTERMINDS:</strong></span></p>
+<ul>
+<li><strong>Apocalypse -</strong> Apocalypse Wins and Always Leads effects apply to your chosen Adversary group whether they are Four Horsemen or not.
+<li><strong>Apocalypse -</strong> Master Strike will now take into account Villains gained as Heroes since their attack becomes their cost.
+<li><strong>Apocalypse -</strong> <i>The End of All Things</i> Tactic now lets you select the order to return cards when necessary, rather than randomizing.
+<li><strong>Kingpin -</strong> The <i>Mob War</i> Tactic was forcing you to play all Henchmen in your Victory Pile - it will now only make you select one.
+<li><strong>Magento -</strong> The <i>Electromagnetic Bubble</i> Tactic no longer removes your chosen card from play - it can still be selected by other cards and effects but will be added to your next draw regardless.
+<li><strong>Magento -</strong> Corrected the occassional appearance of an additional button when playing with Nightcrawler.
+<li><strong>Stryfe -</strong> The <i>Furious Wrath</i> Tactic was acting as if a Scheme Twist was played - fixed now.
+<li><strong>Stryfe -</strong> The <i>Tide of Retribution</i> Tactic had an image error - fixed now.
+</ul>
+<p>🦹 <span style="text-decoration:underline;"><strong>VILLAINS:</strong></span></p>
+<ul>
+<li><strong>Chimera -</strong> If Chimera is played as a result of Kingpin's <i>Criminal Empire</i> Tactic, her Ambush no longer counts the cards revealed at the same time as her. They are now returned to the top of the Villain deck after her Ambush.
+<li><strong>Supreme HYDRA -</strong> Victory Points were not correctly identified when Punisher - Hail of Bullets was played. Now corrected.
+</ul>
+<p>👤 <span style="text-decoration:underline;"><strong>BYSTANDERS + SIDEKICKS:</strong></span></p>
+<ul>
+<li><strong>Radiation Scientist -</strong> Card image now appears when the popup opens so you know it is that effect being triggered. Also corrected the list title from 'Hand' to 'Cards You Have'.
+<li><strong>Zabu -</strong> Previously had Cancel and Close buttons - they have been removed so that if you play Zabu, you must KO a card.
+</ul>
+<p>🦸 <span style="text-decoration:underline;"><strong>HEROES:</strong></span></p>
+<ul>
+<li><strong>Angel - Diving Catch -</strong> Completes the Bystander rescue, including any effects, before the two cards are drawn.
+<li><strong>Bishop - Absorb Energies -</strong> Now correctly increments if you play more than one.
+<li><strong>Blade - Night Hunter -</strong> Now correctly increments if you play more than one.
+<li><strong>Cyclops - Unending Energy -</strong> Issues when having multiple copies to discard have been fixed. A specific issue with Vertigo completing deleting Unending Energy has been fixed.
+<li><strong>Deadpool - Here, Hold This for a Second -</strong> No longer triggers the popup saying the Bystander will be captured by the Villain closest to the Villain deck. Bystanders can also be attached to Jean Grey Goblin Queens now.
+<li><strong>Deadpool - Random Acts of Unkindness -</strong> Wounds are correctly gained to your hand now.
+<li><strong>Emma Frost - Diamond Form -</strong> Will now correctly add +3 Recruit for defeated Demon Goblins in the <i>Transform Citizens into Demons</i> Schemes.
+<li><strong>Iron Fist - Living Weapon -</strong> Was not comparing or drawing cards correctly but now fixed.
+<li><strong>Jean Grey -</strong> Various effects now increment correctly if playing more than one card.
+<li><strong>Professor X - Class Dismissed -</strong> Will no longer allow you to send a Bystander to the bottom of the Hero deck if playing the <i>Save Humanity</i> Scheme. Also corrected an issue where card selection wouldn't work if a HQ space has been destroyed during the <i>Detonate the Helicarrier</i> Scheme.
+<li><strong>Punisher - Hail of Bullets -</strong> Occasional issues in adding attack have been corrected.
+</ul>
+<p>I hope these changes improve your Marvel Legendary Solo Play experience. Look out for more updates soon!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3>🌃 <i>Version 2.0.0</i> - Dark City 🌃</h3>
 <p>Welcome to our first expansion! This update brings you full <strong>Dark City</strong> functionality - all new cards and mechanics! There have also been some patches to bugs in the Core game so see notes below.</p>
 <p>I just want to give a massive thanks to the players who've supported the game with donations, feedback, or just by being part of the community. This update is for you! Particular thanks go to Bageltop Games who has answered every one of my never-ending questions.</p>
@@ -47,7 +111,7 @@ const updatesHTML = `
 <li><strong>Magneto -</strong> If you had a card to reveal and avoid gaining a Wound from the <i>Crushing Shockwave</i> Tactic, it only worked for the first Wound. It will now work for both.
 <li><strong>Red Skull -</strong> The <i>Ruthless Dictator</i> Tactic was returning cards to the wrong place in the deck - now corrected.
 </ul>
-<p>🥷 <span style="text-decoration:underline;"><strong>VILLAINS:</strong></span></p>
+<p>🦹 <span style="text-decoration:underline;"><strong>VILLAINS:</strong></span></p>
 <ul>
 <li><strong>Paibok the Power Skrull -</strong> No longer says 'Recruit'.
 </ul>

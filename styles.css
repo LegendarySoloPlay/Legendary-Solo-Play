@@ -479,6 +479,7 @@ content: '';
 
 .cell-label {
 display: flex;
+flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 3px;
@@ -487,18 +488,24 @@ display: flex;
 height:1.5vh;
 margin-bottom:0.5vh;
 font-family:'Percolator';
-white-space: nowrap;
 }
 
 .top-row-cell-label {
 display: flex;
+flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 3px;
     text-align: center;
     cursor: default;
 height:5vh;
+margin-bottom:0.5vh;
 font-family:'Percolator';
-white-space: nowrap;
+}
+
+#escape-pile-button, #ko-pile-button, #victory-pile-button {
+    display: flex;
+    flex-direction: column;
 }
 
 #card-back {
@@ -3887,7 +3894,7 @@ font-size: calc(0.6vh + 0.6vw);
     width: 8%;
     height: 8%;
     display: flex;
-    background-image: url('Visual Assets/CardBack.webp');
+    background-image: url('Visual Assets/Other/demonGoblin.webp');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -4141,4 +4148,20 @@ width: 30%;
     text-shadow: 0 0 5px #ffab0f, 0 0 10px #ffab0f;
     transform: scale(1);
   }
+}
+
+#evilWinsTracker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    text-align: center;
+    cursor: default;
+    height: 1.5vh;
+    margin-bottom: 0.5vh;
+    font-family: 'Percolator';
+    color: white;
+    filter: drop-shadow(0vh 0vh 0.3vh black);
+    font-size: calc(0.5vh + 0.5vw);
+    margin-top: 0.5vh;
 }

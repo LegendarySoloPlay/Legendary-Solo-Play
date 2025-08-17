@@ -1,5 +1,43 @@
 // cardAbilities.js
 
+function koBonuses() {
+    if (twoRecruitFromKO > 0) {
+totalRecruitPoints += twoRecruitFromKO;
+cumulativeRecruitPoints += twoRecruitFromKO;
+onscreenConsole.log(`A card you owned was KO'd. +${twoRecruitFromKO}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+updateGameBoard();
+}
+}
+
+function defeatBonuses() {
+    if (extraThreeRecruitAvailable === true) {
+        totalRecruitPoints += 3;
+        cumulativeRecruitPoints += 3;
+        onscreenConsole.log(`You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
+    }
+}
+
+function bystanderBonuses() {
+    if (jeanGreyBystanderRecruit > 0) {
+  totalRecruitPoints += jeanGreyBystanderRecruit;
+  cumulativeRecruitPoints += jeanGreyBystanderRecruit;
+onscreenConsole.log(`<span style='padding-left: 40px'>+${jeanGreyBystanderRecruit} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing ${jeanGreyBystanderRecruit === 1 ? 'a Bystander' : 'Bystanders'}.</span>`);
+}
+
+if (jeanGreyBystanderDraw > 0) {
+onscreenConsole.log(`<span style='padding-left: 40px'>Rescued Bystander. Drawing ${jeanGreyBystanderDraw} extra card${jeanGreyBystanderDraw > 1 ? 's' : ''}.</span>`);
+  for (let i = 0; i < jeanGreyBystanderDraw; i++) {
+    extraDraw();
+  }
+}
+
+if (jeanGreyBystanderAttack > 0) {
+  totalAttackPoints += jeanGreyBystanderAttack;
+  cumulativeAttackPoints += jeanGreyBystanderAttack;
+onscreenConsole.log(`<span style='padding-left: 40px'>+${jeanGreyBystanderAttack} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing ${jeanGreyBystanderAttack === 1 ? 'a Bystander' : 'Bystanders'}.</span>`);
+}
+}
+
 function extraDraw(hero) {
     // Check if both playerDeck and playerDiscardPile are empty
     if (playerDeck.length === 0 && playerDiscardPile.length === 0) {
@@ -121,20 +159,8 @@ async function SpiderManRevealTopCardToDrawAndBystander() {
   if (bystanderDeck.length > 0) {
     const rescuedBystander = bystanderDeck.pop();
     victoryPile.push(rescuedBystander);
-if (jeanGreyBystanderRecruit) {
-  totalRecruitPoints += 1;
-  cumulativeRecruitPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
-if (jeanGreyBystanderDraw) {
-  extraDraw();
-onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-}
-if (jeanGreyBystanderAttack) {
-  totalAttackPoints += 1;
-  cumulativeAttackPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
+    bystanderBonuses();
+
     console.log("Bystander rescued:", rescuedBystander);
     console.log("Current Victory Pile:", victoryPile);
     onscreenConsole.log('<span class="console-highlight">${rescuedBystander.name}</span> rescued.');
@@ -162,6 +188,7 @@ onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Ic
     onscreenConsole.log(`You revealed <span class="console-highlights">${topCardPlayerDeck.name}</span> and it cost 2 or less. It has been added to your hand.`);
   } else {
     onscreenConsole.log(`You revealed <span class="console-highlights">${topCardPlayerDeck.name}</span> and it cost more than 2. It has been returned to the top of your deck.`);
+topCardPlayerDeck.revealed = true;
     updateGameBoard();
   }
 }
@@ -183,6 +210,7 @@ extraCardsDrawnThisTurn++;
     onscreenConsole.log(`You revealed <span class="console-highlights">${topCardPlayerDeck.name}</span> and it cost 2 or less. It has been added to your Hand.`);
   } else {
     onscreenConsole.log(`You revealed <span class="console-highlights">${topCardPlayerDeck.name}</span> and it cost more than 2. It has been returned to the top of your Deck.`);
+topCardPlayerDeck.revealed = true;
     updateGameBoard();
   }
 }
@@ -432,20 +460,7 @@ async function rescueBystander(hero) {
         onscreenConsole.log(`<span class="console-highlights">${rescuedBystander.name}</span> rescued.`);
     }
     
-    if (jeanGreyBystanderRecruit) {
-      totalRecruitPoints += 1;
-      cumulativeRecruitPoints += 1;
-      onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-    }
-    if (jeanGreyBystanderDraw) {
-      extraDraw();
-      onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-    }
-    if (jeanGreyBystanderAttack) {
-      totalAttackPoints += 1;
-      cumulativeAttackPoints += 1;
-      onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-    }
+    bystanderBonuses();
 
     await rescueBystanderAbility(rescuedBystander);
     updateGameBoard();
@@ -459,20 +474,7 @@ async function BlackWidowRescueBystander() {
   if (bystanderDeck.length > 0) {
     const rescuedBystander = bystanderDeck.pop();
     victoryPile.push(rescuedBystander);
-if (jeanGreyBystanderRecruit) {
-  totalRecruitPoints += 1;
-  cumulativeRecruitPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
-if (jeanGreyBystanderDraw) {
-  extraDraw();
-onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-}
-if (jeanGreyBystanderAttack) {
-  totalAttackPoints += 1;
-  cumulativeAttackPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
+bystanderBonuses();
 onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 onscreenConsole.log('<span class="console-highlight">${rescuedBystander.name}</span> rescued.');
 await rescueBystanderAbility(rescuedBystander);
@@ -649,28 +651,10 @@ function BlackWidowRescueBystanderByKO() {
             koPile.push(selectedCard);
             const bystanderCard = bystanderDeck.pop();
             victoryPile.push(bystanderCard);
-if (jeanGreyBystanderRecruit) {
-  totalRecruitPoints += 1;
-  cumulativeRecruitPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
-if (jeanGreyBystanderDraw) {
-  extraDraw();
-onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-}
-if (jeanGreyBystanderAttack) {
-  totalAttackPoints += 1;
-  cumulativeAttackPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
-            
+          
             onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd. <span class="console-highlight">${bystanderCard.name}</span> rescued.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+            bystanderBonuses();
+koBonuses();
 
 await rescueBystanderAbility(bystanderCard);
 
@@ -977,6 +961,8 @@ return;
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
   const topCardCost = topCardPlayerDeck.cost;
 
+topCardPlayerDeck.revealed = true;
+
   totalAttackPoints += topCardCost;
   cumulativeAttackPoints += topCardCost;
 
@@ -997,6 +983,8 @@ return;
   }
 
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
+
+topCardPlayerDeck.revealed = true;
 
   if (topCardPlayerDeck.team === "X-Men") {
     playerDeck.pop();
@@ -1251,6 +1239,7 @@ function DeadpoolChooseToGainWound() {
 
     // Confirm button handling
     confirmButton.onclick = async function() {
+        deadpoolRare = true;
       await drawWound(); // Let drawWound handle all the logic
       hideHeroAbilityMayPopup();
       if (WoundImage && imageText) {
@@ -1291,6 +1280,8 @@ onscreenConsole.log("No cards available to be drawn.");
 
     const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
 
+topCardPlayerDeck.revealed = true;
+
     const { confirmButton, denyButton } = showHeroAbilityMayPopup(
       `You revealed the top card of your deck: <span class="bold-spans">${topCardPlayerDeck.name}</span>. Do you wish to discard or return to deck?`,
       "Discard",
@@ -1306,7 +1297,12 @@ hoverText.style.display = 'none';
 
     confirmButton.onclick = async function() {
       playerDeck.pop();
-      await checkDiscardForInvulnerability(topCardPlayerDeck);
+      
+      const { returned } = await checkDiscardForInvulnerability(topCardPlayerDeck);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
       console.log(`You discarded ${topCardPlayerDeck.name}.`);
 onscreenConsole.log(`<span class="console-highlights">${topCardPlayerDeck.name}</span> has been discarded.`);
      updateGameBoard();
@@ -1360,12 +1356,7 @@ imageHoverText.style.display = 'none';
       playerDeck.pop();
       koPile.push(topCardPlayerDeck);
       onscreenConsole.log(`<span class="console-highlights">${topCardPlayerDeck.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
      updateGameBoard();
       hideHeroAbilityMayPopup();
       popupTitle.innerHTML = `Hero Ability!`;
@@ -1378,6 +1369,7 @@ imageHoverText.style.display = 'block';
 
     denyButton.onclick = function() {
       onscreenConsole.log(`<span class="console-highlights">${topCardPlayerDeck.name}</span> has been returned to the top of your deck.`);
+	topCardPlayerDeck.revealed = true;
       updateGameBoard();
       hideHeroAbilityMayPopup();
       popupTitle.innerHTML = `Hero Ability!`;
@@ -1577,12 +1569,7 @@ function WolverineKoWoundToDraw() {
                 extraDraw();
 
                 onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedWound.name}</span> from your ${selectedLocation} and drew a card.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
 
                 closePopup();
                 updateGameBoard();
@@ -1764,12 +1751,7 @@ function HulkKoWoundToGainAttack() {
                 cumulativeAttackPoints += 2;
 
                 onscreenConsole.log(`You KO'd a <span class="console-highlights">${selectedWound.name}</span> from your ${selectedLocation}. +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
 
                 closePopup();
                 updateGameBoard();
@@ -1854,6 +1836,7 @@ function SpiderManRevealTopThreeAndReorder() {
       const card = holdingArray[0];
       playerDeck.push(card);
       onscreenConsole.log(`<span class="console-highlights">${card.name}</span> cost more than 2 and was returned to the deck.`);
+	card.revealed = true;
       updateGameBoard();
       resolve();
       return;
@@ -1894,6 +1877,7 @@ async function handleCardReturnOrder(cards) {
   // Add all cards to deck in chosen order (last selected will be on top)
   returnedOrder.forEach(card => {
     playerDeck.push(card);
+	card.revealed = true;
   });
 
   // Format console message
@@ -2333,7 +2317,12 @@ function CyclopsOpticBlastDiscardToPlay() {
 
                 closePopup();
                 // Handle the discard logic
-                await checkDiscardForInvulnerability(discardedCard);
+                
+                const { returned } = await checkDiscardForInvulnerability(discardedCard);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                 updateGameBoard();
                 resolve(true);
             }
@@ -2377,153 +2366,97 @@ function CyclopsOpticBlastDiscardToPlay() {
 }
 
 async function checkDiscardForInvulnerability(cards) {
-  // Always start with fresh state
-  const cardsArray = Array.isArray(cards) ? [...cards] : [cards];
-  const actuallyDiscarded = [];
-  const returnedCards = []; // Local scope only
+    const cardsArray = Array.isArray(cards) ? [...cards] : [cards];
+    const actuallyDiscarded = [];
+    const returnedCards = [];
   
-  console.group(`[checkDiscard] Processing ${cardsArray.length} card(s)`);
+    console.group(`[checkDiscard] Processing ${cardsArray.length} card(s)`);
   
-  // Process cards in sequence
-  for (const card of cardsArray) {
-    try {
-      console.log(`Processing card: ${card.name}, Invulnerability: ${card.invulnerability}`);
-      
-      if (!card.invulnerability || card.invulnerability === "None") {
-        // Normal discard
-        playerDiscardPile.push(card);
-        actuallyDiscarded.push(card);
-        console.log(`→ ${card.name} discarded normally`);
-        onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
-        updateGameBoard();
-        await new Promise(resolve => setTimeout(resolve, 100));
-        continue;
-      }
-
-      // Handle invulnerability cases
-      if (card.invulnerability === "Discard") {
-        switch (card.name) {
-          case "Cyclops - Unending Energy":
-            console.log(`→ Triggering Cyclops effect`);
-            const returnedCard = await cyclopsDiscardInvulnerability(card);
-            if (returnedCard) {
-              returnedCards.push(returnedCard);
-              console.log(`→ ${card.name} returned to hand`);
-            } else {
-              playerDiscardPile.push(card);
-              actuallyDiscarded.push(card);
-              console.log(`→ ${card.name} discarded after effect`);
+    for (const card of cardsArray) {
+        try {
+            console.log(`Processing card: ${card.name}, Invulnerability: ${card.invulnerability}`);
+            
+            if (!card.invulnerability || card.invulnerability === "None") {
+                playerDiscardPile.push(card);
+                actuallyDiscarded.push(card);
+                console.log(`→ ${card.name} discarded normally`);
+                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
+                continue;
             }
-            break;
 
-          case "Angel - Diving Catch":
-            console.log(`→ Triggering Angel effect`);
-            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
-            await angelDivingCatch(card);
+            if (card.invulnerability === "Discard") {
+                switch (card.name) {
+                    case "Cyclops - Unending Energy":
+                        console.log(`→ Triggering Cyclops effect`);
+                        const shouldReturn = await cyclopsDiscardInvulnerability(card);
+                        if (shouldReturn) {
+                            returnedCards.push(card); // Just track the decision here
+                            console.log(`→ ${card.name} will be returned to hand`);
+                        } else {
+                            playerDiscardPile.push(card);
+                            actuallyDiscarded.push(card);
+                            console.log(`→ ${card.name} discarded after effect`);
+                        }
+                        break;
+
+                    // Other cases...
+                    default:
+                        playerDiscardPile.push(card);
+                        actuallyDiscarded.push(card);
+                        console.log(`→ ${card.name} discarded (no special effect)`);
+                        break;
+                }
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+            console.error(`Error processing ${card.name}:`, error);
             playerDiscardPile.push(card);
             actuallyDiscarded.push(card);
-            break;
-
-          default:
-            playerDiscardPile.push(card);
-            actuallyDiscarded.push(card);
-            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
-            console.log(`→ ${card.name} discarded (no special effect)`);
-            break;
         }
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-    } catch (error) {
-      console.error(`Error processing ${card.name}:`, error);
-      // Fail-safe: discard the card if processing fails
-      playerDiscardPile.push(card);
-      actuallyDiscarded.push(card);
-      updateGameBoard();
     }
-  }
 
-  // Handle any returned cards
-  if (returnedCards.length > 0) {
-    console.log(`Returning ${returnedCards.length} cards to hand`);
-    for (const card of returnedCards) {
-      if (!playerHand.some(c => c.id === card.id)) {
-        playerHand.push(card);
-        console.log(`↩ ${card.name} returned to hand`);
-      }
-      updateGameBoard();
-    }
-  }
-
-  console.groupEnd();
-  return { discarded: actuallyDiscarded, returned: returnedCards };
+    console.groupEnd();
+    return { discarded: actuallyDiscarded, returned: returnedCards };
 }
 
 function cyclopsDiscardInvulnerability(card) {
-  return new Promise((resolve) => {
-    const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-      `Would you like to return <span style="font-weight:600;">${card.name}</span> to your hand?`,
-      "Yes",
-      "No - Discard"
-    );
+    return new Promise((resolve) => {
+        const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+            `Would you like to return <span style="font-weight:600;">${card.name}</span> to your hand?`,
+            "Yes",
+            "No - Discard"
+        );
 
-    const cardImage = document.getElementById('hero-ability-may-card');
-    const imageHoverText = document.getElementById('heroAbilityHoverText');
-document.getElementById('hero-ability-may-popup').style.zIndex = 1500;
-    cardImage.src = card.image;
-    cardImage.style.display = 'block';
-    imageHoverText.style.display = 'none';
+        const cardImage = document.getElementById('hero-ability-may-card');
+        cardImage.src = card.image;
+        cardImage.style.display = 'block';
+        document.getElementById('heroAbilityHoverText').style.display = 'none';
+        document.getElementById('hero-ability-may-popup').style.zIndex = 1500;
 
-    // Remove existing event listeners to avoid duplicates
-    confirmButton.onclick = null;
-    denyButton.onclick = null;
+        // Cleanup function
+        const cleanup = () => {
+            cardImage.src = '';
+            cardImage.style.display = 'none';
+            document.getElementById('heroAbilityHoverText').style.display = 'block';
+            document.getElementById('hero-ability-may-popup').style.zIndex = 1000;
+            hideHeroAbilityMayPopup();
+        };
 
-    // Debounce mechanism: Disable buttons temporarily after click
-    function disableButtons() {
-      confirmButton.disabled = true;
-      denyButton.disabled = true;
-      setTimeout(() => {
-        confirmButton.disabled = false;
-        denyButton.disabled = false;
-      }, 200); // Reduced delay for better user experience
-    }
+        confirmButton.onclick = function() {
+            cleanup();
+            console.log(`${card.name} will be returned to hand`);
+            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> will be returned to your hand.`);
+            resolve(true); // Just return the decision
+        };
 
-    confirmButton.onclick = function () {
-      disableButtons();
-      playerHand.push(card); // Return the card to the player's hand
-      console.log(`${card.name} returned to hand. Updated playerHand:`, playerHand); // Debugging: Log updated playerHand
-      onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been returned to your hand.`);
-      hideHeroAbilityMayPopup();
-      cardImage.src = ''; // Clear the image source
-      cardImage.style.display = 'none';
-      imageHoverText.style.display = 'block';
-      document.getElementById('hero-ability-may-popup').style.zIndex = 1000;
-
-      // Update the game state after the popup is fully hidden
-      setTimeout(() => {
-        updateGameBoard(); // Ensure the UI is updated
-        resolve(card); // Return the card to be added to the temporary array
-      }, 100); // Adjust the delay as needed
-    };
-
-    denyButton.onclick = function () {
-      disableButtons();
-      playerDiscardPile.push(card); // Discard the card
-      console.log(`${card.name} remains in the discard pile.`);
-      onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
-      hideHeroAbilityMayPopup();
-      document.getElementById('hero-ability-may-popup').style.zIndex = 1000;
-      cardImage.src = ''; // Clear the image source
-      cardImage.style.display = 'none';
-      imageHoverText.style.display = 'block';
-
-      // Update the game state after the popup is fully hidden
-      setTimeout(() => {
-        updateGameBoard(); // Ensure the UI is updated
-        resolve(null); // Resolve with null (no card returned)
-      }, 100); // Adjust the delay as needed
-    };
-  });
+        denyButton.onclick = function() {
+            cleanup();
+            console.log(`${card.name} will be discarded`);
+            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> will be discarded.`);
+            resolve(false);
+        };
+    });
 }
 
 function CyclopsDeterminationDiscardToPlay() {
@@ -2663,7 +2596,12 @@ function CyclopsDeterminationDiscardToPlay() {
 
                 closePopup();
                  // Handle the discard logic
-                 await checkDiscardForInvulnerability(discardedCard);
+                 
+                 const { returned } = await checkDiscardForInvulnerability(discardedCard);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                 updateGameBoard();
                 resolve(true);
             }
@@ -2840,7 +2778,7 @@ function DeadpoolAssignBystanderToVillain() {
                 const bystander = bystanderDeck.pop();
 
                 // Assign the bystander to the selected villain
-                attachBystanderToVillain(selectedVillain.originalIndex, bystander);
+                deadpoolAttachBystanderToVillain(selectedVillain.originalIndex, bystander);
 
                 console.log(`Bystander assigned to ${selectedVillain.name}.`);
                 onscreenConsole.log(`Bystander captured by <span class="console-highlights">${selectedVillain.name}</span>.`);
@@ -3006,6 +2944,8 @@ function GambitDrawTwoPutOneBack() {
                 
                 // Add the card to the top of the deck
                 playerDeck.push(selectedCard);
+
+		selectedCard.revealed = true;
 
                 onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been returned to the top of your deck.`);
                 
@@ -3232,7 +3172,12 @@ hasDiscardAvoidance = false;
                     closeDiscardPopup();
                     updateGameBoard();
                     resolve(true);
-                    await checkDiscardForInvulnerability(discardedCard);
+                    
+                    const { returned } = await checkDiscardForInvulnerability(discardedCard);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                 }
             };
 
@@ -3341,12 +3286,17 @@ oneChoiceHoverText.style.display = 'block';
                 cardsList.appendChild(li);
             });
 
-            function discardSelectedCard(cardIndex) {
+            async function discardSelectedCard(cardIndex) {
                 const selectedCard = playerHand[cardIndex];
                 console.log('Card selected for discard:', selectedCard);
                 
                 playerHand.splice(cardIndex, 1);
-                checkDiscardForInvulnerability(selectedCard);
+                
+                const { returned } = await checkDiscardForInvulnerability(selectedCard);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
             
 
 onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been discarded.`);
@@ -3757,12 +3707,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
 
                 onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
 
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
 
                 closePopup();
                 updateGameBoard();
@@ -3785,12 +3730,7 @@ updateGameBoard();
                 koPile.push(selectedCard);
                 
                 onscreenConsole.log(`You KO'd <span class="console-highlights">${selectedCard.name}</span> from your ${selectedLocation} and chose not to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 closePopup();
                 updateGameBoard();
                 resolve(true);
@@ -4008,12 +3948,7 @@ const xcloseButton = document.getElementById('card-ko-popup-close');
                     cumulativeRecruitPoints += 1;
                     
                     onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd from your ${selectedLocation}. +1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                     closePopup();
                     updateGameBoard();
                     resolve(true);
@@ -4613,20 +4548,7 @@ if (city[firstIndex] && city[firstIndex].bystander && city[firstIndex].bystander
     // Add bystanders to the player's victory pile
     victoryPile.push(...city[firstIndex].bystander);
     onscreenConsole.log(`${city[firstIndex].bystander.length} ${bystanderText} added to Victory Pile.`);
-if (jeanGreyBystanderRecruit) {
-  totalRecruitPoints += 1;
-  cumulativeRecruitPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
-if (jeanGreyBystanderDraw) {
-  extraDraw();
-onscreenConsole.log(`A Bystander has been rescued. Draw an extra card.`);
-}
-if (jeanGreyBystanderAttack) {
-  totalAttackPoints += 1;
-  cumulativeAttackPoints += 1;
-onscreenConsole.log(`+1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained from rescuing a Bystander.`);
-}
+bystanderBonuses();
 
 await rescueBystanderAbility(...city[firstIndex].bystander);
     
@@ -4806,12 +4728,7 @@ function HenchmenKOHeroYouHave() {
             const { card, index, isFromHand } = selectedCard;
             console.log(`${card.name} has been KO'd.`);
             onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             
             // Remove the card from the correct array (hand or played)
             if (isFromHand) {
@@ -4977,12 +4894,7 @@ confirmButton.textContent = 'Confirm';
 
             const { card, index, isFromHand } = selectedCard;
             onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             
             // Remove the card from the correct array (hand or played)
             if (isFromHand) {
@@ -5102,12 +5014,7 @@ function topTwoCardsKOChoice() {
         const singleCard = holdingArray[0];
         koPile.push(singleCard);
         onscreenConsole.log(`<span class="console-highlights">Doombot Legion</span> Fight effect carried out: Only 1 card was available. <span class="console-highlights">${singleCard.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
         updateGameBoard();
         resolve(true);
       } else {
@@ -5227,14 +5134,10 @@ updateGameBoard();
       
       koPile.push(cardToKO);
       playerDeck.push(cardToReturn);
+	cardToReturn.revealed = true;
       
       onscreenConsole.log(`<span class="console-highlights">Doombot Legion</span> Fight effect: KO'd <span class="console-highlights">${cardToKO.name}</span>, returned <span class="console-highlights">${cardToReturn.name}</span> to deck.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
       
       closePopup();
       updateGameBoard();
@@ -5424,6 +5327,8 @@ function handleNoTechRevealed(resolve) {
         playerHand.splice(firstIndex, 1);
         playerHand.splice(secondIndex > firstIndex ? secondIndex - 1 : secondIndex, 1);
         playerDeck.push(secondCard, firstCard);
+secondCard.revealed = true;
+firstCard.revealed = true;
 
         onscreenConsole.log(
             `Returned to deck: <span class="console-highlights">${secondCard.name}</span> ` +
@@ -5632,7 +5537,12 @@ function handleNoXMenRevealed(resolve) {
         if (selectedCards.includes(i)) {
             const card = tempHand[i];
             discardedCardNames.push(card.name);
-            await checkDiscardForInvulnerability(card);
+            
+            const { returned } = await checkDiscardForInvulnerability(card);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
         } else {
             playerHand.push(tempHand[i]); // Put back non-selected cards
         }
@@ -5812,12 +5722,7 @@ function RedSkullKOHandHero() {
 
                 console.log(`${selectedCard.name} has been KO'd.`);
                 onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 
                 // Remove from correct array
                 if (isFromHand) {
@@ -6640,12 +6545,7 @@ function KO1To4FromDiscard() {
                         koPile.push(card);
                         console.log(`${card.name} KO'd from discard pile.`);
                         onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                     }
                 });
             } else {
@@ -6803,12 +6703,7 @@ function chooseVillainKOFromVP() {
                 
                 console.log(`${selectedVillain.name} KO'd from Victory Pile.`);
                 onscreenConsole.log(`<span class="console-highlights">${selectedVillain.name}</span> has been KO'd from your Victory Pile.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
 
                 closePopup();
                 updateGameBoard();
@@ -6859,12 +6754,7 @@ function chooseBystanderKOFromVP() {
                 victoryPile.splice(card.index, 1);
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             updateGameBoard();
             resolve();
@@ -6980,12 +6870,7 @@ updateGameBoard();
                     victoryPile.splice(card.index, 1);
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> KO'd from Victory Pile.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 });
                 
                 closePopup();
@@ -7476,7 +7361,7 @@ function XMen7thDraw() {
                 nextTurnsDraw++;
                 
                 // Mark the original card to be destroyed later
-                selectedCard.markedToDestroy = true;
+                selectedCard.markedToDrawNextTurn = true;
                 
                 console.log(`${selectedCard.name} has been reserved for next turn.`);
                 onscreenConsole.log(`You have selected <span class="console-highlights">${selectedCard.name}</span> to be added to your next draw as a seventh card.`);
@@ -7690,12 +7575,7 @@ function revealTop3AndChooseActions() {
                 case 'KO':
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                     break;
                 case 'Discard':
 		await discardAvoidance();
@@ -7703,11 +7583,16 @@ updateGameBoard();
 		onscreenConsole.log(`You have revealed <span class="console-highlights">Iceman - Impenetrable Ice Wall</span> and avoided discarding.`);
 		hasDiscardAvoidance = false;
 		}
-                    await checkDiscardForInvulnerability(card);
-                    onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
+                    
+        const { returned } = await checkDiscardForInvulnerability(card);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                     break;
                 case 'Return':
                     playerDeck.push(card);
+			card.revealed = true;
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been returned to your deck.`);
                     break;
             }
@@ -7779,12 +7664,7 @@ onscreenConsole.log("Escape! You must KO two Heroes from your hand.");
 
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been automatically chosen and KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             updateGameBoard();
             resolve();
@@ -7912,12 +7792,7 @@ updateGameBoard();
 
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 });
                 closePopup();
                 updateGameBoard();
@@ -7974,12 +7849,7 @@ function chooseHeroesToKO() {
 
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been automatically chosen and KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             updateGameBoard();
             resolve();
@@ -8107,12 +7977,7 @@ updateGameBoard();
 
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 });
                 closePopup();
                 updateGameBoard();
@@ -8222,12 +8087,7 @@ function chooseHeroesToKOFromDiscardPile() {
                 if (index !== -1) playerDiscardPile.splice(index, 1);
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> automatically KO'd from discard.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             updateGameBoard();
             resolve();
@@ -8347,12 +8207,7 @@ updateGameBoard();
                 if (index !== -1) playerDiscardPile.splice(index, 1);
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> KO'd from discard.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
 
             closePopup();
@@ -8664,7 +8519,7 @@ function escapeSkrullQueen(escapedVillain) {
     escapedVillainsDeck.push(hero);  // You could push this to a deck for escaped villains
 
 escapedVillain.overlayTextAttack = '';
-villainCard.attack = villainCard.originalAttack;
+escapedVillain.attack = escapedVillain.originalAttack;
 
     // Update the game board to reflect the changes
     updateGameBoard();
@@ -8957,12 +8812,7 @@ onscreenConsole.log(`Fight! KO all your <img src="Visual Assets/Icons/SHIELD.svg
             // Move the card to the KO pile
             koPile.push(playerHand.splice(i, 1)[0]);
             shieldKOCounter++; // Increment the counter
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
         }
     }
 
@@ -8982,12 +8832,7 @@ for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
         koPile.push(originalCard);
         
         shieldKOCounter++; // Increment the counter
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
     }
 }
 
@@ -9058,12 +8903,7 @@ function strengthHeroesNumberToKO() {
 
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             updateGameBoard();
             resolve();
@@ -9216,12 +9056,7 @@ updateGameBoard();
 
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
                 });
                 closePopup();
                 updateGameBoard();
@@ -9355,12 +9190,7 @@ function koAnyNumberOfWounds() {
 
                 koPile.push(card);
                 onscreenConsole.log(`<span class="console-highlight">${card.name}</span> has been KO'd.`);
-if (twoRecruitFromKO) {
-totalRecruitPoints += 2;
-cumulativeRecruitPoints += 2;
-onscreenConsole.log(`A card you owned was KO'd. +2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`);
-updateGameBoard();
-}
+koBonuses();
             });
             closePopup();
             koButton.style.display = 'none';
@@ -9437,22 +9267,6 @@ function drawMultipleVillainCards(count) {
 
   return promiseChain;
 }
-
-function doubleVillainDraw() {
-  return new Promise((resolve) => {  // Make it return a Promise
-    onscreenConsole.log(`<span style="font-style:italic">Playing the top two cards of the Villain Deck...</span>`);
-
-    drawMultipleVillainCards(2).then(() => {
-      console.log("Both villain cards have been played.");
-      resolve();  // Resolve when done
-    }).catch((error) => {
-      console.error("Error during double villain draw:", error);
-      resolve();  // Still resolve on error
-    });
-  });
-}
-
-
 
 function darkPortal() {
     const twistCount = koPile.filter(item => item.type === 'Scheme Twist').length;
@@ -9551,7 +9365,7 @@ function killbotAttackIncrease() {
 async function highestCostHeroSkrulled() {
     // Identify the heroes in HQ
     const heroesInHQ = hq.filter(card => card && card.type === 'Hero');
-
+    
     // Find the highest cost among the heroes
     const maxCost = Math.max(...heroesInHQ.map(hero => hero.cost));
 
@@ -9954,7 +9768,12 @@ hasDiscardAvoidance = false;
                 if (selectedCard) {
                     const discardedCard = playerHand.splice(selectedIndex, 1)[0];
                     console.log('Card discarded:', discardedCard);
-                   await checkDiscardForInvulnerability(discardedCard);
+                   
+                    const { returned } = await checkDiscardForInvulnerability(discardedCard);
+                        if (returned.length) {
+                        playerHand.push(...returned);
+                        }
+
                     closeDiscardPopup();
                     updateGameBoard();
                     resolve(true);
