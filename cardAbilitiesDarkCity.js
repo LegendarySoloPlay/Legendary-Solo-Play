@@ -1,4 +1,5 @@
 // Card Abilities for Dark City
+//18.08.2025 10.30
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -4411,36 +4412,32 @@ defeatBonuses();
 
 // Card Abilities for Dark City Henchmen
 
-function PhalanxTechOrKOAttack() {
-return new Promise((resolve, reject) => {
-        // Add a small delay to allow the modalOverlay to re-render
-        setTimeout(() => {
-                const hasTech = playerHand.some(card => card.class1 === 'Tech') || 
-                cardsPlayedThisTurn.some(card => 
-                    card.class1 === 'Tech' && 
-                    card.isCopied !== true && 
-                    card.sidekickToDestroy !== true
-                );
-                
-                
-            if (!hasTech) {
-                onscreenConsole.log(`You are unable to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero.`);
-
-                // Ensure modalOverlay is visible before showing the next popup
-                document.getElementById('modal-overlay').style.display = 'block';
-                handlePhalanxNoTechRevealed(resolve);
-            } else {
-                // Ensure modalOverlay is visible before showing the next popup
-                document.getElementById('modal-overlay').style.display = 'block';
-                handlePhalanxTechRevealed(resolve);
-            }
-        }, 10); // 10ms delay
+async function PhalanxTechOrKOAttack() {
+    return new Promise((resolve) => {  // Remove reject since it's not used
+        // Remove the setTimeout - it's not needed and can cause issues
+        const hasTech = playerHand.some(card => card.class1 === 'Tech') || 
+            cardsPlayedThisTurn.some(card => 
+                card.class1 === 'Tech' && 
+                card.isCopied !== true && 
+                card.sidekickToDestroy !== true
+            );
+            
+        if (!hasTech) {
+            onscreenConsole.log(`You are unable to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero.`);
+            document.getElementById('modal-overlay').style.display = 'block';
+            // Properly chain the Promise
+            handlePhalanxNoTechRevealed().then(resolve);
+        } else {
+            document.getElementById('modal-overlay').style.display = 'block';
+            // Properly chain the Promise
+            handlePhalanxTechRevealed().then(resolve);
+        }
     });
 }
 
 
 function handlePhalanxNoTechRevealed(resolve) {
-    return new Promise((resolve) => {
+return new Promise((resolve) => {
         const cardsYouHave = [
             ...playerHand,
             ...cardsPlayedThisTurn.filter(card => 
@@ -4578,9 +4575,7 @@ function handlePhalanxNoTechRevealed(resolve) {
 
                     koPile.push(selectedCard);
 
-                
-                console.log(`${selectedCard.name} has been reserved for next turn.`);
-                onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
+onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
 koBonuses();
                 closePopup();
                 updateGameBoard();
@@ -4607,37 +4602,36 @@ koBonuses();
 }
 
 
-function handlePhalanxTechRevealed(resolve) {
-    const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-        "DO YOU WISH TO REVEAL A CARD?",
-        "Yes",
-        "No"
-    );
+function handlePhalanxTechRevealed() {
+    return new Promise((resolve) => {
+        const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+            "DO YOU WISH TO REVEAL A CARD?",
+            "Yes",
+            "No"
+        );
 
-    // Ensure modalOverlay is visible
-    document.getElementById('modal-overlay').style.display = 'block';
-
-    const cardImage = document.getElementById('hero-ability-may-card');
-    cardImage.src = 'Visual Assets/Henchmen/DarkCity_phalanx.webp';
-    cardImage.style.display = 'block';
-document.getElementById('heroAbilityHoverText').style.display = 'none';
-
-    confirmButton.onclick = () => {
-        onscreenConsole.log(`You are able to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero and have escaped <span class="console-highlights">Phalanx</span><span class="bold-spans">'s</span> fight effect!`);
-        hideHeroAbilityMayPopup();
-        document.getElementById('heroAbilityHoverText').style.display = 'block';
-        resolve();
-    };
-
-    denyButton.onclick = () => {
-        onscreenConsole.log(`You have chosen not to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero.`);
-        hideHeroAbilityMayPopup();
-        document.getElementById('oneChoiceHoverText').style.display = 'block';
-
-        // Ensure modalOverlay is visible before showing the next popup
         document.getElementById('modal-overlay').style.display = 'block';
-        handlePhalanxNoTechRevealed(resolve);
-    };
+        const cardImage = document.getElementById('hero-ability-may-card');
+        cardImage.src = 'Visual Assets/Henchmen/DarkCity_phalanx.webp';
+        cardImage.style.display = 'block';
+        document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+        confirmButton.onclick = () => {
+            onscreenConsole.log(`You are able to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero and have escaped <span class="console-highlights">Phalanx</span><span class="bold-spans">'s</span> fight effect!`);
+            hideHeroAbilityMayPopup();
+            document.getElementById('heroAbilityHoverText').style.display = 'block';
+            resolve(true);  // Explicitly resolve
+        };
+
+        denyButton.onclick = () => {
+            onscreenConsole.log(`You have chosen not to reveal a <img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero.`);
+            hideHeroAbilityMayPopup();
+            document.getElementById('oneChoiceHoverText').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+            // Chain to the next handler and resolve when it completes
+            handlePhalanxNoTechRevealed().then(resolve);
+        };
+    });
 }
 
 // Card Abilities for Dark City Bystanders

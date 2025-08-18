@@ -1,4 +1,5 @@
 // updatesContent.js
+//18.08.2025 10.30
 const updatesHTML = `
 <h3>🌃 <i>Version 2.0.1</i> - Dark City Fixes 🌃</h3>
 <p>Thanks again for all the feedback! Thanks to you I've found and fixed a lot of initial Dark City bugs. Keep the reports coming!</p>

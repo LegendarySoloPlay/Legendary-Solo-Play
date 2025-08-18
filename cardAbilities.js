@@ -1,4 +1,5 @@
 // cardAbilities.js
+//18.08.2025 10.30
 
 function koBonuses() {
     if (twoRecruitFromKO > 0) {
@@ -163,7 +164,7 @@ async function SpiderManRevealTopCardToDrawAndBystander() {
 
     console.log("Bystander rescued:", rescuedBystander);
     console.log("Current Victory Pile:", victoryPile);
-    onscreenConsole.log('<span class="console-highlight">${rescuedBystander.name}</span> rescued.');
+    onscreenConsole.log(`<span class="console-highlight">${rescuedBystander.name}</span> rescued.`);
     await rescueBystanderAbility(rescuedBystander);
     updateGameBoard();
   } else {
@@ -476,7 +477,7 @@ async function BlackWidowRescueBystander() {
     victoryPile.push(rescuedBystander);
 bystanderBonuses();
 onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
-onscreenConsole.log('<span class="console-highlight">${rescuedBystander.name}</span> rescued.');
+onscreenConsole.log(`<span class="console-highlight">${rescuedBystander.name}</span> rescued.`);
 await rescueBystanderAbility(rescuedBystander);
     updateGameBoard();
   } else {
@@ -4019,7 +4020,7 @@ function RogueCopyPowers() {
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
         confirmButton.textContent = 'Confirm';
-        closeButton.style.display = 'inline-block';
+        closeButton.style.display = 'none';
         closeButton.textContent = 'Cancel';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';

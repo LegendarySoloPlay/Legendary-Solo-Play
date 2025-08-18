@@ -1,3 +1,4 @@
+//18.08.2025 10.30
 
 const bystanders = [
 { id: 1, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" },

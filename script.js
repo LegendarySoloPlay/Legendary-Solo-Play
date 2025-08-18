@@ -1,3 +1,5 @@
+//18.08.2025 10.30
+
 console.log('Script loaded');
 console.log(window.henchmen);
 console.log(window.villains);

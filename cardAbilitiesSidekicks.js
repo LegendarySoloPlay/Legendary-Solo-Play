@@ -1,3 +1,5 @@
+//18.08.2025 10.30
+
 function returnToSidekickDeck(card) {
     if (!card) {
         console.error("No card provided to returnToSidekickDeck.");
