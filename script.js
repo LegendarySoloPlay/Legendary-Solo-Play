@@ -1,4 +1,4 @@
-//18.08.2025 10.30
+//18.08.2025 16.00
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -3124,54 +3124,45 @@ function handleSchemeTwist(schemeTwistCard) {
     });
 }
 
-function handlePlutoniumSchemeTwist(villainCard) {
-updateGameBoard();
-    return new Promise((resolve) => {
-        // Get selected scheme
-        const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-        const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
-  
-        schemeTwistCount += 1;
+async function handlePlutoniumSchemeTwist(villainCard) {
+    updateGameBoard();
+    const selectedScheme = getSelectedScheme();
+    schemeTwistCount += 1;
 
-        // Log appropriate message
-        if (selectedScheme.variableTwist === false) {
-            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
-        } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
-            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[`twistText${schemeTwistCount}`]}`);
-        } else {
-            onscreenConsole.log(`<span class="console-highlights">Scheme Twist!</span>`);
+    // Log twist message
+    if (selectedScheme.variableTwist === false) {
+        onscreenConsole.log(`<span class="console-highlight">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme.twistText}`);
+    } else if (selectedScheme[`twistText${schemeTwistCount}`]) {
+        onscreenConsole.log(`<span class="console-highlight">Scheme Twist!</span> Twist ${schemeTwistCount}: ${selectedScheme[`twistText${schemeTwistCount}`]}`);
+    }
+
+    await new Promise(resolve => showPopup('Scheme Twist', villainCard, resolve));
+    updateGameBoard();
+
+    schemeTwistChainDepth++;  // Mark that we're in a twist chain
+
+    try {
+        if (selectedScheme.twistEffect && selectedScheme.twistEffect !== "None") {
+            const twistEffectFunction = window[selectedScheme.twistEffect];
+            if (typeof twistEffectFunction === 'function') {
+                await twistEffectFunction(villainCard);  // This will handle plutonium attachment/KO
+            }
         }
+        
+        // **Force a new villain draw here** (before resolving the twist)
+        await drawVillainCard();  // If this is another twist, it will recursively process
+    } catch (error) {
+        console.error('Error in twist effect:', error);
+    }
 
-         showPopup('Scheme Twist', villainCard, async () => {
-            updateGameBoard();
-            
-            // Mark that we're in a Scheme Twist chain
-            schemeTwistChainDepth++;
-            
-            // Run the twist effect if it exists
-            if (selectedScheme.twistEffect && selectedScheme.twistEffect !== "None") {
-                const twistEffectFunction = window[selectedScheme.twistEffect];
-                if (typeof twistEffectFunction === 'function') {
-                    try {
-                        await twistEffectFunction(villainCard);
-                    } catch (error) {
-                        console.error('Error in twist effect:', error);
-                    }
-                }
-            }
-            
-            // Decrement depth and check if we're at the end of the chain
-            schemeTwistChainDepth--;
-            
-            // If this was the last Twist in the chain, trigger KO
-            if (schemeTwistChainDepth === 0) {
-                pendingHeroKO = true;
-            }
-            
-            resolve();
-        });
-    });
+    schemeTwistChainDepth--;
+
+    // If this was the last twist in the chain, trigger pending KO
+    if (schemeTwistChainDepth === 0) {
+        pendingHeroKO = true;
+    }
 }
+
 
 
   function defaultWoundDraw() {

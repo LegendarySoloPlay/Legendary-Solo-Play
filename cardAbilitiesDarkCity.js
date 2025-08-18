@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//18.08.2025 10.30
+//18.08.2025 16.00
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -7275,7 +7275,7 @@ onscreenConsole.log(`<span class="console-highlights">Azazel</span> - fight effe
 return new Promise((resolve) => {
         // Check if there are any cards to select
         if (playerHand.length === 0) {
-            console.log("No cards in Hand to gain Teleport.");
+            onscreenConsole.log("No cards in Hand to gain Teleport.");
             resolve(false);
             return;
         }
@@ -10038,42 +10038,39 @@ async function saveHumanityInstinctKO() {
 }
 
 async function plutoniumCaptured(twistCard) {
-    let sewersIndex = city.length - 1;
+    const sewersIndex = city.length - 1;
 
-    // Check if there's a villain in the sewers
+    // If villain in sewers, attach there
     if (city[sewersIndex]) {
-        attachPlutoniumToVillain(sewersIndex, twistCard);
-    } else {
-        // Find the next closest villain to the villain deck
-        let closestVillainIndex = findClosestVillain();
-        
+        await attachPlutoniumToVillain(sewersIndex, twistCard);
+    } 
+    // Otherwise, find the closest villain
+    else {
+        const closestVillainIndex = findClosestVillain();
         if (closestVillainIndex !== -1) {
-            attachPlutoniumToVillain(closestVillainIndex, twistCard);
-        } else {
-            // If no villains in the city, attach to the mastermind
+            await attachPlutoniumToVillain(closestVillainIndex, twistCard);
+        } 
+        // If no villains, KO the plutonium
+        else {
             koPile.push(twistCard);
-            onscreenConsole.log(`There are no Villains in the city. Plutonium KO'd. Playing another card from the Villain deck now...`)
-            await drawVillainCard();
+            onscreenConsole.log(`No Villains in city. Plutonium KO'd.`);
         }
     }
 
     updateGameBoard();
+    // **Note:** The villain draw happens in `handlePlutoniumSchemeTwist`, not here!
 }
 
+
 async function attachPlutoniumToVillain(villainIndex, twistCard) {
-    if (city[villainIndex].plutoniumCaptured) {
-        city[villainIndex].plutoniumCaptured.push(twistCard);
-    } else {
-        city[villainIndex].plutoniumCaptured = [twistCard];
+    if (!city[villainIndex].plutoniumCaptured) {
+        city[villainIndex].plutoniumCaptured = [];
     }
-    // Access the villain object using the index to get its name
-    const villain = city[villainIndex]; 
-
-   // Log the villain's name correctly
-    onscreenConsole.log(`<span class="console-highlights">${villain.name}</span> has captured the Plutonium. Playing another card from the Villain deck now...`);
-
-    await drawVillainCard();
-
+    city[villainIndex].plutoniumCaptured.push(twistCard);
+    
+    const villain = city[villainIndex];
+    onscreenConsole.log(`<span class="console-highlight">${villain.name}</span> captured Plutonium.`);
+    updateGameBoard();
 }
 
 function BystanderstToDemonGoblins() {
