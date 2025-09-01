@@ -775,7 +775,7 @@ cursor:pointer;
 
 .card-image:hover {
 transform: scale(1.5);
-z-index:999;
+z-index:997;
 position:relative;
 }
 
@@ -974,14 +974,15 @@ margin-bottom: calc(0.3vh + 0.3vw);
 }
 
 .banner {
-    background-color: #e6ebefeb;
-    color: #ffab0f;
-    text-align: center;
-    padding: 20px;
-    width: 60%;
-    font-family: 'Percolator', serif;
-    font-size: calc(2vh + 2vw);
-  border-radius:2vh;
+  position: relative; /* Needed for absolute positioning of the icon */
+  background-color: #e6ebefeb;
+  color: #ffab0f;
+  text-align: center;
+  padding: 20px;
+  width: 60%;
+  font-family: 'Percolator', serif;
+  font-size: calc(2vh + 2vw);
+  border-radius: 2vh;
 }
 
 .content {
@@ -1256,6 +1257,7 @@ flex-direction:row;
 #hero-select-popup .popup-content button {
     margin: 1vh;
     width: 75%; /* Makes the button width 100% of its container */
+	justify-content: left;
 }
 
 .hero-buttons {
@@ -1320,6 +1322,7 @@ margin-left:-1vh;
     width:75%;
 font-size: clamp(0.7em, 2vh, 1.5em);
 height:6vh;
+justify-content: start;
 }
 
 #hero-ko-confirm {
@@ -2553,6 +2556,19 @@ filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
     text-shadow: 0.2vh 0.2vh #2a2a2a;
 }
 
+.banner-settings-icon {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.banner-settings-icon img {
+  width: 4.5vh;
+  filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
+}
+
 @keyframes filter-animation {
   0% {
     filter: sepia(0) drop-shadow(0vh 0vh 0vh #ffd483);
@@ -2599,6 +2615,8 @@ transform: scale(1.5) translateY(-20%);
     gap: 0.7vh;  /* Adds space between the images */
 margin-top:2.5vh;
 margin-bottom:2.5vh;
+    overflow-y: auto;
+    height: 40vh;
 }
 
 .pile-card-image {
@@ -2616,7 +2634,7 @@ transform: scale(1.5);
 z-index:999;
 }
 
-#played-cards-popup button, #victory-pile-popup button, #escaped-villains-popup button, #ko-pile-popup button, #discard-pile-popup button  {
+#played-cards-popup button, #victory-pile-popup button, #escaped-villains-popup button, #ko-pile-popup button, #discard-pile-popup button, #playerDeck-popup button, #heroDeck-popup button, #villainDeck-popup button, #woundDeck-popup button, #sidekickDeck-popup button, #shieldDeck-popup button, #bystanderDeck-popup button {
 width:50%;
 margin-left: auto;
     margin-right: auto;
@@ -2650,7 +2668,6 @@ height: clamp(150px, 30vh, 35vh);
 #card-choice-one-location-popup button {
 width: 70%;
     font-size: clamp(0.7em, 2vh, 1.5em);
-  
     margin-top: 1vh;
     text-transform: uppercase;
 
@@ -2667,7 +2684,6 @@ height: 3vh;
     font-size: 2vh;
     display: flex;
     align-items: center;
-    justify-content: center;
     font-family: "Roboto Condensed", sans-serif;
     font-optical-sizing: auto;
     font-weight: 500;
@@ -2919,6 +2935,8 @@ font-size: calc(0.7vh + 0.7vw);
     font-size: clamp(9pt, 2vh, 1.5em);
     margin-top: 0px;
     margin-bottom: 0px;
+	margin-left: 2px;
+    margin-right: 2px;
 }
 
 #fight-effect-card-ko-popup .card-list ul {
@@ -2939,7 +2957,6 @@ padding:0;
     font-size: 2vh;
     display: flex;
     align-items: center;
-    justify-content: center;
     font-family: "Roboto Condensed", sans-serif;
     font-weight: 500;
     font-style: normal;
@@ -2997,7 +3014,7 @@ aspect-ratio: 740 / 1025;
     border-width: calc(0.2vh + 0.2vw);
 }
 
-#hero-ability-may-card {
+#hero-ability-may-card, #mulligan-card {
 height:100%;
 width: auto;
 }
@@ -3126,7 +3143,6 @@ height: calc(1vh + 1vw);
     font-size: 2vh;
     display: flex;
     align-items: center;
-    justify-content: center;
     font-family: "Roboto Condensed", sans-serif;
     font-weight: 500;
     font-style: normal;
@@ -3194,8 +3210,15 @@ margin-left: 0.5vw;
 
 .console-card-icons {
 width: auto;
+height:2.5vh;
+vertical-align: text-bottom;
+margin-top:0.2vh;
+}
+
+.popup-card-icons {
+width: auto;
 height:2vh;
-vertical-align: baseline;
+vertical-align: text-top;
 margin-top:0.2vh;
 }
 
@@ -3447,7 +3470,7 @@ width: 100%;
     color: white;
     border: none;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 998;
 font-size: calc(0.6vh + 0.6vw);
 display: flex;
     align-items: center;
@@ -3477,7 +3500,7 @@ width: 100%;
     color: white;
     border: none;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 998;
 font-size: calc(0.6vh + 0.6vw);
 display: flex;
     align-items: center;
@@ -3894,7 +3917,7 @@ font-size: calc(0.6vh + 0.6vw);
     width: 8%;
     height: 8%;
     display: flex;
-    background-image: url('Visual Assets/Other/demonGoblin.webp');
+    background-image: url('Visual Assets/Other/Transform Citizens Into Demons/demonGoblin.webp');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -4164,4 +4187,46 @@ width: 30%;
     filter: drop-shadow(0vh 0vh 0.3vh black);
     font-size: calc(0.5vh + 0.5vw);
     margin-top: 0.5vh;
+}
+
+.console-log-hrs {
+	width: 5vw;
+}
+
+.title-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.centered-title {
+  grid-column: 2;
+  text-align: center;
+  justify-self: center;
+}
+
+.settings-icon {
+  grid-column: 3;
+  justify-self: end;
+  cursor: pointer;
+width: 3.5vh;
+}
+
+#settingsButton {
+width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#sound-attributions {
+margin-left: 10%;
+    margin-right: 10%;
+    color: #969a9c;
+}
+
+#mulligan-confirm, #mulligan-deny {
+width: 50%;
 }

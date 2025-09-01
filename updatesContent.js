@@ -1,6 +1,72 @@
 // updatesContent.js
 //18.08.2025 10.30
 const updatesHTML = `
+
+<h3>🌃 <i>Version 2.0.2</i> - Dark City Bug Squashing 🌃</h3>
+<p>Thanks again for all the feedback! Still squashing Dark City bugs but hopefully this resolves most issues and I'll move on to our next expansion. Let me know what else you find!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p>🔁 <span style="text-decoration:underline;"><strong>GAME SETUP:</strong></span></p>
+<ul>
+<li><strong>She's a little busy -</strong> If the <i>Transform Citizens Into Demons</i> Scheme is randomly chosen, it will automatically avoid selecting Jean Grey as a Hero since she will be used in the Villain deck. This can be manually overridden if you do wish to select her.
+<li><strong>Come back later -</strong> The starting game HQ Mulligan has been introduced - if you begin the game with two or more Heroes with a cost of 7 or more, then you will have the option to shuffle them back into the Hero deck and replace with Heroes that cost less than 7.
+</ul>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>Don't make me sing!</strong> The game now includes background music and sound effects. The volume for these can be controlled using the settings menu, accessed by the cog on the Game Setup screen or in the top right corner of the gameboard. 
+<li><strong>At a glance -</strong> Heroes listed in popups now include their team and class icons for reference.
+<li><strong>Let's get logical -</strong> In relevant places, the list of Heroes in popups will now be sorted by the same logic as your hand cards. 
+<li><strong>Lost the flavour -</strong> Last update's flavour text did not roll out to the Evil Wins popups. This has been corrected. 
+<li><strong>How many have I played -</strong> The Played Cards pile will now also be sorted automatically so it is easier to count how many cards you've played of particular colors.
+<li><strong>Are demons meant to be attractive?</strong> When playing the <i>Transform Citizens Into Demons</i> Scheme, your Jean Grey cards will now be replaced with Snatchcat's custom Goblin Queen tokens. 
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>When does it stop?</strong> A new Villain card will no longer be drawn when the game ends.
+<li><strong>What was coming?</strong> At end game, you can now minimise the final popup and open any deck to inspect what cards were remaining.
+<li><strong>Strike first, ask later!</strong> If you fight a Villain with Bribe, you will now choose the balance of Attack and Recruit points before any fight effects are carried out. Fight choices have also been aligned with the <i>What If..?</i> rules, allowing you to select the order in which you rescue any captured cards and when you trigger the Villain's fight effect.
+<li><strong>Who's next?</strong> The close button on Villain popups now works correctly, allowing any further actions or cards to carry out.
+</ul>
+<p>📋 <span style="text-decoration:underline;"><strong>SCHEMES:</strong></span></p>
+<ul>
+<li><strong>Capture Baby Hope -</strong> When Hope is rescued, she will now appear as Snatchcat's token in your Victory Pile. 
+<li><strong>Massive Earthquake Generator -</strong> When able to reveal a card for this Scheme, the image is no longer broken.
+<li><strong>Steal the Weaponized Plutonium -</strong> If a Scheme Twist triggers another Scheme Twists it will now correctly draw the required additional Villain card.
+<li><strong>X-Cutioner's Song -</strong> Errors with Attack calculation have been addressed.
+</ul>
+<p>🧛 <span style="text-decoration:underline;"><strong>MASTERMINDS:</strong></span></p>
+<ul>
+<li><strong>Apocalypse -</strong> An issue with games against Apocalypse not ending has been fixed.
+<li><strong>Mr. Sinister -</strong> Previous issue with Attack calculation has been corrected. When a Master Strike occurs, cards appeared as if remaining in the player's hand. They are now properly removed. 
+<li><strong>Red Skull -</strong> The <i>Ruthless Dictator</i> Tactic would previously quit if you had less that three cards available to reveal. It will now correctly do "as much as possible".
+</ul>
+<p>🥷 <span style="text-decoration:underline;"><strong>HENCHMEN:</strong></span>
+<ul>
+<li><strong>Maggia Goons –</strong> Game would break if you minimized the Maggia Goons popup and then maximized again. Now fixed.
+<li><strong>Phalanx –</strong> Issue fixed with Phalanx staying in the city after being defeated.
+</ul>
+<p>🦹 <span style="text-decoration:underline;"><strong>VILLAINS:</strong></span></p>
+<ul>
+<li><strong>Azazel -</strong> If there are no Heroes to gain Teleport upon Azazel's defeat, that will now trigger a console message explaining this. 
+<li><strong>Dracula -</strong> There was an issue with Dracula's attack not calculating correctly, especially during certain schemes. Now fixed.
+<li><strong>Scalphunter -</strong> No longer triggers the popup saying the Bystander will be captured by the Villain closest to the Villain deck.
+</ul>
+<p>👤 <span style="text-decoration:underline;"><strong>SIDEKICKS:</strong></span></p>
+<ul>
+<li><strong>Boom-Boom -</strong> Will now appear face-up when revealed after Time Bomb is played.
+<li><strong>No need for help -</strong> If you choose to include no Sidekicks in your game setup then the Sidekick Stack will no longer appear on the gameboard, this will also prevent it from being highlighted when you have enough Recruit points.
+</ul>
+<p>🦸 <span style="text-decoration:underline;"><strong>HEROES:</strong></span></p>
+<ul>
+<li><strong>Bishop - Absorb Energies -</strong> Was still not stacking correctly - should be resolved now.
+<li><strong>Colossus -</strong> Now correctly labelled as an X-Force Hero in the Game Setup screen.
+<li><strong>Forge - B.F.G. -</strong> Will now correctly play even if it is the Mastermind's final Tactic or Final Blow.
+<li><strong>Ghost Rider - Infernal Chains -</strong> Can now target Demon Goblins if in play and can also defeat the top card of the Villain deck if Professor X's Telepathic Probe has revealed a Villain with 3 or less Attack.
+<li><strong>Jean Grey -</strong> Effects that trigger on Bystander rescues now correctly apply when a Killbot is defeated.
+<li><strong>Rogue - Copy Powers -</strong> When played, you must choose a Hero to copy if one is available.
+</ul>
+<p>I hope these changes improve your Marvel Legendary Solo Play experience. Look out for more updates soon!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3>🌃 <i>Version 2.0.1</i> - Dark City Fixes 🌃</h3>
 <p>Thanks again for all the feedback! Thanks to you I've found and fixed a lot of initial Dark City bugs. Keep the reports coming!</p>
 <p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
