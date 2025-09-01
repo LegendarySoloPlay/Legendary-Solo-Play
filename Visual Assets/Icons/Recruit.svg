@@ -1,22 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.54 10.47">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #c6a968;
-      }
-
-      .cls-2 {
-        fill: #787149;
-      }
-    </style>
-  </defs>
-  <g id="Layer_1-2" data-name="Layer 1">
-    <polyline class="cls-1" points="5.28 0 4.13 4.08 0 4.08 3.25 6.52 1.92 10.47 5.29 7.95 8.59 10.43 7.29 6.49 10.54 4.15 6.43 4.16"/>
-    <polyline class="cls-2" points="5.25 5.19 6.31 4.18 5.31 .45"/>
-    <polyline class="cls-2" points="5.3 5.27 6.97 6.33 10.24 4.27"/>
-    <polyline class="cls-2" points="5.3 7.88 8.3 10.06 5.26 5.31"/>
-    <polyline class="cls-2" points="3.33 6.52 2.13 10.13 5.22 5.31"/>
-    <polyline class="cls-2" points="5.19 5.22 4.16 4.19 .36 4.16"/>
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.7.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#C6A968;}
+	.st1{fill:#79724A;}
+</style>
+<g id="Layer_1-2">
+	<polyline class="st0" points="15,0.3 11.8,11.8 0.2,11.8 9.3,18.6 5.6,29.7 15.1,22.6 24.3,29.6 20.7,18.5 29.8,11.9 18.3,12 	"/>
+	<polyline class="st1" points="14.9,14.9 17.9,12 15.1,1.5 	"/>
+	<polyline class="st1" points="15.1,15.1 19.8,18.1 29,12.3 	"/>
+	<polyline class="st1" points="15.1,22.4 23.5,28.6 15,15.2 	"/>
+	<polyline class="st1" points="9.5,18.6 6.2,28.8 14.9,15.2 	"/>
+	<polyline class="st1" points="14.8,15 11.9,12.1 1.2,12 	"/>
+</g>
 </svg>
