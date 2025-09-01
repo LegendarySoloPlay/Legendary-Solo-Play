@@ -1,4 +1,4 @@
-//18.08.2025 10.30
+//01.09.2025 20.38
 
 const bystanders = [
 { id: 1, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" },
@@ -474,7 +474,7 @@ image: "Visual Assets/Masterminds/DarkCity_Apocalypse.webp",
         fightCondition: "None",
         victoryPoints: 6,
 masterStrike: "kingpinStrike",
-masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/MarvelKnights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or discards their hand and draws 5 cards.", 
+masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/Marvel Knights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or discards their hand and draws 5 cards.", 
 keyword1: "Bribe", 
 image: "Visual Assets/Masterminds/DarkCity_Kingpin.webp",
 
@@ -493,7 +493,7 @@ image: "Visual Assets/Masterminds/DarkCity_Kingpin.webp",
         fightCondition: "None",
         victoryPoints: 6,
 masterStrike: "mephistoStrike",
-masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/MarvelKnights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or gains a Wound.",
+masterStrikeConsoleLog: "Each player reveals a <img src='Visual Assets/Icons/Marvel Knights.svg' alt='Marvel Knights Icon' class='console-card-icons'> Hero or gains a Wound.",
 image: "Visual Assets/Masterminds/DarkCity_Mephisto.webp",
 
         tactics: [
@@ -750,6 +750,13 @@ const villains = [
         ]
     }
 ];
+
+const transformedGoblinQueenCards = [
+{name: "Goblin Queen (Jean Grey - Read Your Thoughts)", image: "Visual Assets/Other/Transform Citizens Into Demons/goblinQueen5.webp"},
+{name: "Goblin Queen (Jean Grey - Psychic Search)", image: "Visual Assets/Other/Transform Citizens Into Demons/goblinQueen3.webp"},
+{name: "Goblin Queen (Jean Grey - Mind Over Matter)", image: "Visual Assets/Other/Transform Citizens Into Demons/goblinQueen6.webp"},
+{name: "Goblin Queen (Jean Grey - Telekinetic Mastery)", image: "Visual Assets/Other/Transform Citizens Into Demons/goblinQueen7.webp"}
+]
 
 const sidekicks = [
     { id: 1, name: "Sidekick", expansion: "Secret Wars Volume 1", team: "None", class1: "None", keyword1: "None", type: "Hero", secondaryType: "Sidekick", attack: 0, recruit: 0, attackIcon: false, recruitIcon: false, color: "Grey", cost: 2, unconditionalAbility: "sidekickExtraDraw", sidekickToDestroy: false, image: "Visual Assets/Sidekicks/Sidekick.webp" },
