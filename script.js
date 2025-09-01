@@ -1,4 +1,4 @@
-//01.09.2025 20.38
+//02.09.2025 9.55
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -438,6 +438,8 @@ let popupMinimized = false;
 let deadpoolRare = false;
 let gameIsOver = false;
 let sfxGlobalVolume = 0.8;
+let audioContextInitialized = false;
+let sfxEnabled = false;
 
 window.victoryPile = [];
 
@@ -2200,18 +2202,21 @@ document.getElementById('modal-overlay').style.display = 'none';
 let hasFadedIn = false;
 
 document.getElementById('begin-game').addEventListener('click', function() {
+if (!audioContextInitialized) {
+        initAudio();
+        audioContextInitialized = true;
+    }
+    
     loadAudioSettings();
     const targetVolume = bgMusic.volume;
     
     bgMusic.currentTime = 0;
     
     if (targetVolume === 0) {
-        // If muted, just play silently without fade
         bgMusic.volume = 0;
         bgMusic.play();
         hasFadedIn = true;
     } else if (!hasFadedIn) {
-        // Fade in only if not muted and first time
         bgMusic.volume = 0;
         bgMusic.play();
         
@@ -2224,10 +2229,15 @@ document.getElementById('begin-game').addEventListener('click', function() {
             }
         }, 100);
     } else {
-        // Already faded in before, just set volume
         bgMusic.volume = targetVolume;
         bgMusic.play();
     }
+    
+    // Enable SFX after user interaction
+    sfxEnabled = true;
+    
+    // Load sounds after user interaction
+    loadAllSounds();
 
 
     if (!this.disabled) {
@@ -2254,6 +2264,15 @@ document.getElementById('begin-game').addEventListener('click', function() {
 
     }
 });
+
+function initAudio() {
+    // Create background music element if it doesn't exist
+    if (!bgMusic) {
+        bgMusic = new Audio();
+        bgMusic.loop = true;
+        bgMusic.src = 'Audio Assets/background-music.webm'; // Update with your actual file
+    }
+}
 
 document.getElementById('start-expansion').addEventListener('click', () => {
     const expansionPopup = document.getElementById('expansion-popup-container');
@@ -8673,6 +8692,7 @@ async function loadAllSounds() {
 }
 
 function playAttackSound() {
+if (!sfxEnabled) return;
     if (sounds.attack) {
         const sound = sounds.attack.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8684,6 +8704,7 @@ function playAttackSound() {
 }
 
 function playDrawSound() {
+if (!sfxEnabled) return;
     if (!sounds.draw) {
         console.warn('Recruit sound not loaded yet');
         return;
@@ -8704,6 +8725,7 @@ function playDrawSound() {
 }
 
 function playLoseSound() {
+if (!sfxEnabled) return;
     if (sounds.lose) {
         const sound = sounds.lose.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8715,6 +8737,7 @@ function playLoseSound() {
 }
 
 function playGameDrawSound() {
+if (!sfxEnabled) return;
     if (sounds.gameDraw) {
         const sound = sounds.gameDraw.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8726,6 +8749,7 @@ function playGameDrawSound() {
 }
 
 function playVictorySound() {
+if (!sfxEnabled) return;
     if (sounds.victory) {
         const sound = sounds.victory.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8737,6 +8761,7 @@ function playVictorySound() {
 }
 
 function playDealSound() {
+if (!sfxEnabled) return;
     if (sounds.deal) {
         const sound = sounds.deal.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8748,6 +8773,7 @@ function playDealSound() {
 }
 
 function playKOSound() {
+if (!sfxEnabled) return;
     if (!sounds.ko) {
         console.warn('KO sound not loaded yet');
         return;
@@ -8768,6 +8794,7 @@ function playKOSound() {
 }
 
 function playMasterStrikeSound() {
+if (!sfxEnabled) return;
     if (sounds.masterStrike) {
         const sound = sounds.masterStrike.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8779,6 +8806,7 @@ function playMasterStrikeSound() {
 }
 
 function playRecruitSound() {
+if (!sfxEnabled) return;
     if (sounds.recruit) {
         const sound = sounds.recruit.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8790,6 +8818,7 @@ function playRecruitSound() {
 }
 
 function playRescueSound() {
+if (!sfxEnabled) return;
     if (!sounds.rescue) {
         console.warn('Rescue sound not loaded yet');
         return;
@@ -8810,6 +8839,7 @@ function playRescueSound() {
 }
 
 function playSchemeTwistSound() {
+if (!sfxEnabled) return;
     if (sounds.schemeTwist) {
         const sound = sounds.schemeTwist.cloneNode();
         sound.volume = sfxGlobalVolume;
@@ -8821,6 +8851,7 @@ function playSchemeTwistSound() {
 }
 
 function playWoundSound() {
+if (!sfxEnabled) return;
     if (!sounds.wound) {
         console.warn('Wound sound not loaded yet');
         return;
