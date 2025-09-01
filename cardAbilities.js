@@ -1,7 +1,8 @@
 // cardAbilities.js
-//18.08.2025 10.30
+//01.09.2025 20.38
 
 function koBonuses() {
+playKOSound();
     if (twoRecruitFromKO > 0) {
 totalRecruitPoints += twoRecruitFromKO;
 cumulativeRecruitPoints += twoRecruitFromKO;
@@ -19,6 +20,7 @@ function defeatBonuses() {
 }
 
 function bystanderBonuses() {
+playRescueSound();
     if (jeanGreyBystanderRecruit > 0) {
   totalRecruitPoints += jeanGreyBystanderRecruit;
   cumulativeRecruitPoints += jeanGreyBystanderRecruit;
@@ -54,7 +56,8 @@ function extraDraw(hero) {
     }
 
     // Draw a card and add it to the player's hand
-    const card = playerDeck.pop();
+    playDrawSound();
+	const card = playerDeck.pop();
     playerHand.push(card);
     extraCardsDrawnThisTurn++;
     console.log("Card drawn. Total cards drawn this turn: ", extraCardsDrawnThisTurn);
@@ -164,7 +167,7 @@ async function SpiderManRevealTopCardToDrawAndBystander() {
 
     console.log("Bystander rescued:", rescuedBystander);
     console.log("Current Victory Pile:", victoryPile);
-    onscreenConsole.log(`<span class="console-highlight">${rescuedBystander.name}</span> rescued.`);
+    onscreenConsole.log(`<span class="console-highlights">${rescuedBystander.name}</span> rescued.`);
     await rescueBystanderAbility(rescuedBystander);
     updateGameBoard();
   } else {
@@ -182,6 +185,7 @@ async function SpiderManRevealTopCardToDrawAndBystander() {
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
 
   if (topCardPlayerDeck.cost <= 2) {
+	playDrawSound();
     playerDeck.pop(); // Removes the last card from the deck
     playerHand.push(topCardPlayerDeck); // Adds the card to the player's hand
     extraCardsDrawnThisTurn++;
@@ -204,6 +208,7 @@ function SpiderManRevealTopCardToDraw() {
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
 
   if (topCardPlayerDeck.cost <= 2) {
+playDrawSound();
     playerDeck.pop(); // Removes the last card from the deck
     playerHand.push(topCardPlayerDeck); // Adds the card to the player's hand
 extraCardsDrawnThisTurn++;
@@ -308,11 +313,34 @@ function showInvulnerabilityChoicePopup(invulnerableCards) {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(invulnerableCards);
         // Populate the list with invulnerable cards
         invulnerableCards.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = `${card.name} (${card.location})`;
+            
+	    const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} (${card.location})</span>`;
             li.dataset.cardId = card.id;
 
             li.onmouseover = () => {
@@ -477,7 +505,7 @@ async function BlackWidowRescueBystander() {
     victoryPile.push(rescuedBystander);
 bystanderBonuses();
 onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
-onscreenConsole.log(`<span class="console-highlight">${rescuedBystander.name}</span> rescued.`);
+onscreenConsole.log(`<span class="console-highlights">${rescuedBystander.name}</span> rescued.`);
 await rescueBystanderAbility(rescuedBystander);
     updateGameBoard();
   } else {
@@ -584,11 +612,33 @@ function BlackWidowRescueBystanderByKO() {
         updateConfirmButton();
         updateInstructions();
     }
-
+genericCardSort(playerDiscardPile);
     // Populate discard pile
     playerDiscardPile.forEach((card) => {
       const li = document.createElement("li");
-      li.textContent = card.name;
+          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
       li.setAttribute('data-card-id', card.id);
 
       li.onmouseover = () => {
@@ -610,11 +660,33 @@ function BlackWidowRescueBystanderByKO() {
       li.onclick = () => toggleCardSelection(card, 'discard', li);
       discardPileList.appendChild(li);
     });
-
+genericCardSort(playerHand);
     // Populate hand
     playerHand.forEach((card) => {
       const li = document.createElement("li");
-      li.textContent = card.name;
+          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
       li.setAttribute('data-card-id', card.id);
 
       li.onmouseover = () => {
@@ -653,7 +725,7 @@ function BlackWidowRescueBystanderByKO() {
             const bystanderCard = bystanderDeck.pop();
             victoryPile.push(bystanderCard);
           
-            onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd. <span class="console-highlight">${bystanderCard.name}</span> rescued.`);
+            onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd. <span class="console-highlights">${bystanderCard.name}</span> rescued.`);
             bystanderBonuses();
 koBonuses();
 
@@ -787,7 +859,7 @@ const previousCards = cardsPlayedThisTurn.slice(0, -1);
     SHIELDText = "Hero";  // Singular for one bystander
   }
 
-  onscreenConsole.log(`You have played ${SHELDCount} <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> ${SHIELDText}. +${SHELDCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
+  onscreenConsole.log(`You have played ${SHELDCount} <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> ${SHIELDText}. +${SHELDCount}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
   
   bonusAttack();
 }
@@ -988,6 +1060,7 @@ return;
 topCardPlayerDeck.revealed = true;
 
   if (topCardPlayerDeck.team === "X-Men") {
+playDrawSound();
     playerDeck.pop();
     playerHand.push(topCardPlayerDeck);
 extraCardsDrawnThisTurn++;
@@ -1910,6 +1983,7 @@ onscreenConsole.log('No cards available to draw and discard.');
     }
 
     // Draw the top card and immediately send it to the discard pile
+playDrawSound();
     const topCard = playerDeck.pop();
     playerDiscardPile.push(topCard);
 
@@ -2279,12 +2353,34 @@ function CyclopsOpticBlastDiscardToPlay() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(playerHand);
         // Populate the list with cards in the player's hand
         playerHand.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -2558,12 +2654,34 @@ function CyclopsDeterminationDiscardToPlay() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(playerHand);
         // Populate the list with cards in the player's hand
         playerHand.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -2779,7 +2897,7 @@ function DeadpoolAssignBystanderToVillain() {
                 const bystander = bystanderDeck.pop();
 
                 // Assign the bystander to the selected villain
-                deadpoolAttachBystanderToVillain(selectedVillain.originalIndex, bystander);
+                villainEffectAttachBystanderToVillain(selectedVillain.originalIndex, bystander);
 
                 console.log(`Bystander assigned to ${selectedVillain.name}.`);
                 onscreenConsole.log(`Bystander captured by <span class="console-highlights">${selectedVillain.name}</span>.`);
@@ -2907,12 +3025,34 @@ function GambitDrawTwoPutOneBack() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(playerHand);
         // Populate the list with cards in the player's hand
         playerHand.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -3137,11 +3277,33 @@ hasDiscardAvoidance = false;
                 updateConfirmButton();
                 updateInstructions();
             }
-
+genericCardSort(playerHand);
             // Populate the list with cards in hand
             playerHand.forEach((card, index) => {
                 const li = document.createElement('li');
-                li.textContent = card.name;
+                          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
                 li.setAttribute('data-card-id', card.id);
 
                 li.onmouseover = () => {
@@ -3258,10 +3420,32 @@ const context = document.getElementById('context');
 
 context.innerHTML = 'SELECT A CARD TO DISCARD.'
             cardsList.innerHTML = '';
-
+genericCardSort(playerHand);
             playerHand.forEach((card, index) => {
                 const li = document.createElement('li');
-                li.textContent = card.name;
+                          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
 const heroImage = document.getElementById('hero-one-location-image');
 const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 // On mouseover, change the hero image to the selected card's image
@@ -3329,7 +3513,7 @@ function NickFuryFindEligibleVillains() {
         });
 
         if (SHIELDInKO.length === 0) {
-            onscreenConsole.log('There are no <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> Heroes in the KO Pile.');
+            onscreenConsole.log('There are no <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> Heroes in the KO Pile.');
             resolve(false);
             return;
         }
@@ -3368,7 +3552,7 @@ function NickFuryFindEligibleVillains() {
 function showEligibleVillainsOptions(eligibleVillains) {
     return new Promise((resolve) => {
         if (eligibleVillains.length === 0) {
-            onscreenConsole.log('There are not enough <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> Heroes in the KO Pile for you to defeat any Villain or the Mastermind.');
+            onscreenConsole.log('There are not enough <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> Heroes in the KO Pile for you to defeat any Villain or the Mastermind.');
             resolve(false);
             return;
         }
@@ -3415,7 +3599,7 @@ function showEligibleVillainsOptions(eligibleVillains) {
             }
 
             if (selectedCard === null) {
-                instructionsDiv.innerHTML = `The following ${villainText} less <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> than the number of <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> Heroes in the KO pile. Select one to defeat.`;
+                instructionsDiv.innerHTML = `The following ${villainText} less <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> than the number of <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="card-icons"> Heroes in the KO pile. Select one to defeat.`;
             } else {
                 instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be defeated.`;
             }
@@ -3542,7 +3726,7 @@ function NickFuryRecruitShieldOfficerByKO() {
 
         // Check if there are any SHIELD cards to KO
         if (discardPile.length === 0 && hand.length === 0) {
-            onscreenConsole.log(`No <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Heroes available to KO.`);
+            onscreenConsole.log(`No <img src='Visual Assets/Icons/S.H.I.E.L.D..svg' alt='SHIELD Icon' class='console-card-icons'> Heroes available to KO.`);
             resolve(false);
             return;
         }
@@ -3566,7 +3750,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
         const context = document.getElementById("card-ko-popup-h2");
 
         // Initialize UI
-        context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+        context.innerHTML = `Select a <img src='Visual Assets/Icons/S.H.I.E.L.D..svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
         discardPileList.innerHTML = '';
         handList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
@@ -3590,7 +3774,7 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
         // Update instructions with styled card name
         function updateInstructions() {
             if (selectedCard === null) {
-                context.innerHTML = `Select a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
+                context.innerHTML = `Select a <img src='Visual Assets/Icons/S.H.I.E.L.D..svg' alt='SHIELD Icon' class='console-card-icons'> Hero to KO and if you wish to gain a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`;
             } else {
                 context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd from your ${selectedLocation}.`;
             }
@@ -3635,11 +3819,33 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(discardPile);
         // Populate discard pile list
         discardPile.forEach((card) => {
             const li = document.createElement("li");
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -3661,11 +3867,33 @@ const secondConfirmButton = document.getElementById("ko-third-option-button");
             li.onclick = () => toggleCardSelection(card, 'discard pile', li);
             discardPileList.appendChild(li);
         });
-
+genericCardSort(hand);
         // Populate hand list
         hand.forEach((card) => {
             const li = document.createElement("li");
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -3758,14 +3986,14 @@ koBonuses();
         // Add cancel button functionality
         const closeButton = document.getElementById('no-thanks-button');
         closeButton.onclick = () => {
-            onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
+            onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/S.H.I.E.L.D..svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
             closePopup();
             resolve(false);
         };
 
         const closeXButton = document.getElementById('card-ko-popup-close');
             closeButton.onclick = () => {
-            onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/SHIELD.svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
+            onscreenConsole.log(`You chose not to KO a <img src='Visual Assets/Icons/S.H.I.E.L.D..svg' alt='SHIELD Icon' class='console-card-icons'> Hero.`);
             closePopup();
             resolve(false);
         };
@@ -3878,11 +4106,33 @@ const xcloseButton = document.getElementById('card-ko-popup-close');
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(playerDiscardPile);
         // Populate discard pile
         playerDiscardPile.forEach((card) => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.dataset.cardId = card.id;
 
             li.onmouseover = () => {
@@ -3904,11 +4154,33 @@ const xcloseButton = document.getElementById('card-ko-popup-close');
             li.onclick = () => toggleCardSelection(card, 'discard pile', li);
             discardPileList.appendChild(li);
         });
-
+genericCardSort(playerHand);
         // Populate hand
         playerHand.forEach((card) => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.dataset.cardId = card.id;
 
             li.onmouseover = () => {
@@ -4080,11 +4352,33 @@ function RogueCopyPowers() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(heroesToCopy);
         // Populate hero list
         heroesToCopy.forEach(hero => {
             const li = document.createElement('li');
-            li.textContent = hero.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(hero.team);
+    const class1Icon = createClassIconHTML(hero.class1);
+    const class2Icon = createClassIconHTML(hero.class2);
+    const class3Icon = createClassIconHTML(hero.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             li.dataset.cardId = hero.id;
 
             li.onmouseover = () => {
@@ -4760,12 +5054,34 @@ koBonuses();
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
+genericCardSort(combinedCards);
         // Populate the list with the heroes from the player's hand and played cards
         combinedCards.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', index);
 
             li.onmouseover = () => {
@@ -4926,12 +5242,34 @@ koBonuses();
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-
+genericCardSort(combinedCards);
         // Populate the list with the heroes from the player's hand and played cards
         combinedCards.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', index);
 
             li.onmouseover = () => {
@@ -5103,7 +5441,29 @@ koBonuses();
     // Create list items for both cards
     [card1, card2].forEach(card => {
       const li = document.createElement('li');
-      li.textContent = card.name;
+                const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
       li.dataset.cardId = card.id;
 
       li.onmouseover = () => {
@@ -5289,11 +5649,33 @@ function handleNoTechRevealed(resolve) {
         updateButton();
         updateInstructions();
     }
-
+genericCardSort(playerHand);
     // Populate card list
     playerHand.forEach((card, index) => {
         const li = document.createElement('li');
-        li.textContent = card.name;
+                  const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
         li.setAttribute('data-card-id', index);
 
         li.onmouseover = () => {
@@ -5498,11 +5880,33 @@ function handleNoXMenRevealed(resolve) {
         }
         updateUI();
     }
-
+genericCardSort(playerHand);
     // Populate card list
     playerHand.forEach((card, index) => {
         const li = document.createElement('li');
-        li.textContent = card.name;
+                  const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
         li.setAttribute('data-card-id', index);
 
         li.onmouseover = () => {
@@ -5666,11 +6070,33 @@ function RedSkullKOHandHero() {
                     activeImage = null;
                 }
             }
-
+genericCardSort(combinedCards);
             // Populate card list
             combinedCards.forEach((card, index) => {
                 const li = document.createElement('li');
-                li.textContent = card.name;
+                          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
                 li.setAttribute('data-card-id', index);
 
                 li.onmouseover = () => {
@@ -6213,12 +6639,34 @@ function doomHeroRecruit() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(eligibleHeroesForDoomRecruit);
         // Populate the list with eligible heroes
         eligibleHeroesForDoomRecruit.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -6249,7 +6697,7 @@ function doomHeroRecruit() {
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
-
+		playRecruitSound();
                 closePopup();
                 updateGameBoard();
                 resolve(true);
@@ -6509,11 +6957,33 @@ function KO1To4FromDiscard() {
             updateKOButton();
             updateInstructions();
         }
-
+genericCardSort(playerDiscardPile);
         // Populate the list with discard pile cards
         playerDiscardPile.forEach((card, index) => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', `discard-${index}`);
 
             li.onmouseover = () => {
@@ -6998,12 +7468,34 @@ function recruitXMen() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(eligibleHeroesForXMenRecruit);
         // Populate the list with eligible heroes
         eligibleHeroesForXMenRecruit.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -7034,7 +7526,7 @@ function recruitXMen() {
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
-
+		playRecruitSound();
                 closePopup();
                 updateGameBoard();
                 resolve(true);
@@ -7325,13 +7817,36 @@ function XMen7thDraw() {
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(XMenCardsYouHave);
         // Populate the list with eligible heroes
         XMenCardsYouHave.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
             const location = playerHand.includes(card) ? '(Hand)' : '(Played Cards)';
-            li.textContent = `${card.name} ${location}`;
+		          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} (${location})</span>`;            
+
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -7434,14 +7949,14 @@ function revealTop3AndChooseActions() {
         // Calculate total available cards
         const totalAvailableCards = playerDeck.length + playerDiscardPile.length;
 
-        if (totalAvailableCards < 3) {
-            onscreenConsole.log('Not enough cards available to reveal and resolve.');
-            console.log('Not enough cards available to reveal and resolve.');
+        if (totalAvailableCards === 0) {
+            onscreenConsole.log('No cards available to reveal and resolve.');
+            console.log('No cards available to reveal and resolve.');
             resolve(false);
             return;
         }
 
-        // Draw up to 3 cards, shuffling if needed
+        // Draw available cards (up to 3), shuffling if needed
         function drawCards(num) {
             const drawnCards = [];
             for (let i = 0; i < num; i++) {
@@ -7458,13 +7973,9 @@ function revealTop3AndChooseActions() {
             return drawnCards;
         }
 
-        const top3Cards = drawCards(3);
-        if (top3Cards.length < 3) {
-	onscreenConsole.log(`Unable to reveal 3 cards.`);
-            resolve(false);
-            return;
-        }
-
+        const availableCards = drawCards(Math.min(3, totalAvailableCards));
+        const cardCount = availableCards.length;
+        
         // Get popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
@@ -7474,34 +7985,87 @@ function revealTop3AndChooseActions() {
         const instructionsDiv = document.getElementById('context');
         const heroImage = document.getElementById('hero-one-location-image');
         const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        
+        // Add action buttons
+        const actionButtonsContainer = document.createElement('div');
+        actionButtonsContainer.id = 'action-buttons-container';
+        actionButtonsContainer.style.marginTop = '10px';
+        actionButtonsContainer.style.display = 'flex';
+        actionButtonsContainer.style.justifyContent = 'center';
+        actionButtonsContainer.style.gap = '10px';
+        
+        const koButton = document.createElement('button');
+        koButton.textContent = 'KO';
+        koButton.className = 'action-button';
+        
+        const discardButton = document.createElement('button');
+        discardButton.textContent = 'Discard';
+        discardButton.className = 'action-button';
+        
+        const returnButton = document.createElement('button');
+        returnButton.textContent = 'Return to Deck';
+        returnButton.className = 'action-button';
+        
+        actionButtonsContainer.appendChild(koButton);
+        actionButtonsContainer.appendChild(discardButton);
+        actionButtonsContainer.appendChild(returnButton);
+        
+        // Insert action buttons after the cards list
+        cardsList.parentNode.insertBefore(actionButtonsContainer, cardsList.nextSibling);
 
         // Initialize UI
         popupTitle.textContent = 'MASTERMIND TACTIC!';
-        instructionsDiv.textContent = 'Select a card to KO.';
         cardsList.innerHTML = '';
-        confirmButton.style.display = 'inline-block';
-        confirmButton.disabled = true;
-        confirmButton.textContent = 'Confirm KO';
+        confirmButton.style.display = 'none';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
         let selectedCard = null;
-        let selectedIndex = null;
         let activeImage = null;
-        let currentAction = 'KO'; // KO -> Discard -> Return
-        let availableCards = [...top3Cards];
+        let remainingCards = [...availableCards];
+        let actionsCompleted = 0;
+        const totalActions = cardCount;
+        
+        // Track which actions are still available
+        let availableActions = ['KO', 'Discard', 'Return'];
 
         // Update UI based on current state
         function updateUI() {
             cardsList.innerHTML = '';
-            confirmButton.disabled = true;
             selectedCard = null;
-            selectedIndex = null;
             updateHeroImage(null);
-
-            availableCards.forEach((card, index) => {
+            genericCardSort(remainingCards);
+            
+            // Hide action buttons until a card is selected
+            actionButtonsContainer.style.display = 'none';
+            
+            // Update available action buttons
+            koButton.style.display = availableActions.includes('KO') ? 'block' : 'none';
+            discardButton.style.display = availableActions.includes('Discard') ? 'block' : 'none';
+            returnButton.style.display = availableActions.includes('Return') ? 'block' : 'none';
+            
+            remainingCards.forEach((card, index) => {
                 const li = document.createElement('li');
-                li.textContent = card.name;
+                const createTeamIconHTML = (value) => {
+                    if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                        return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+                    }
+                    return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+                };
+
+                const createClassIconHTML = (value) => {
+                    if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                        return '';
+                    }
+                    return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+                };
+                
+                const teamIcon = createTeamIconHTML(card.team);
+                const class1Icon = createClassIconHTML(card.class1);
+                const class2Icon = createClassIconHTML(card.class2);
+                const class3Icon = createClassIconHTML(card.class3);
+                
+                li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
                 li.setAttribute('data-card-id', card.id);
 
                 li.onmouseover = () => {
@@ -7526,29 +8090,17 @@ function revealTop3AndChooseActions() {
                     // Set new selection
                     li.classList.add('selected');
                     selectedCard = card;
-                    selectedIndex = index;
                     activeImage = card.image;
                     updateHeroImage(card);
-                    confirmButton.disabled = false;
+                    
+                    // Show action buttons when a card is selected
+                    actionButtonsContainer.style.display = 'flex';
                 };
 
                 cardsList.appendChild(li);
             });
 
-            switch (currentAction) {
-                case 'KO':
-                    instructionsDiv.textContent = 'Select a card to KO.';
-                    confirmButton.textContent = 'Confirm KO';
-                    break;
-                case 'Discard':
-                    instructionsDiv.textContent = 'Select a card to discard.';
-                    confirmButton.textContent = 'Confirm Discard';
-                    break;
-                case 'Return':
-                    instructionsDiv.textContent = 'Select a card to return to deck.';
-                    confirmButton.textContent = 'Confirm Return';
-                    break;
-            }
+            instructionsDiv.textContent = `Select a card and choose an action (${actionsCompleted + 1}/${totalActions}).`;
         }
 
         // Show/hide hero image
@@ -7566,61 +8118,60 @@ function revealTop3AndChooseActions() {
             }
         }
 
-        // Process the current action
-        async function processAction() {
+        // Process the selected action
+        async function processAction(action) {
             if (!selectedCard) return;
 
             const card = selectedCard;
 
-            switch (currentAction) {
+            switch (action) {
                 case 'KO':
                     koPile.push(card);
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-koBonuses();
+                    koBonuses();
                     break;
                 case 'Discard':
-		await discardAvoidance();
-		if (hasDiscardAvoidance) {
-		onscreenConsole.log(`You have revealed <span class="console-highlights">Iceman - Impenetrable Ice Wall</span> and avoided discarding.`);
-		hasDiscardAvoidance = false;
-		}
-                    
-        const { returned } = await checkDiscardForInvulnerability(card);
-                        if (returned.length) {
+                    await discardAvoidance();
+                   
+                    const { returned } = await checkDiscardForInvulnerability(card);
+                    if (returned.length) {
                         playerHand.push(...returned);
-                        }
-
+                    }
                     break;
                 case 'Return':
                     playerDeck.push(card);
-			card.revealed = true;
+                    card.revealed = true;
                     onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been returned to your deck.`);
                     break;
             }
 
+            // Remove the used action from available options
+            availableActions = availableActions.filter(a => a !== action);
+            
             // Remove processed card from available selections
-            availableCards = availableCards.filter(c => c !== card);
+            remainingCards = remainingCards.filter(c => c !== card);
+            actionsCompleted++;
 
-            // Move to next action or complete
-            if (currentAction === 'KO') {
-                currentAction = 'Discard';
-            } else if (currentAction === 'Discard') {
-                currentAction = 'Return';
-            } else {
+            // Check if all actions are completed
+            if (actionsCompleted >= totalActions) {
                 closePopup();
                 updateGameBoard();
                 resolve(true);
                 return;
             }
 
+            // Reset selection and update UI for next action
+            selectedCard = null;
             updateUI();
         }
 
-        // Initialize the first selection UI
-        updateUI();
+        // Set up action button handlers
+        koButton.onclick = () => processAction('KO');
+        discardButton.onclick = () => processAction('Discard');
+        returnButton.onclick = () => processAction('Return');
 
-        // Handle confirmation
-        confirmButton.onclick = processAction;
+        // Initialize the UI
+        updateUI();
 
         function closePopup() {
             popupTitle.textContent = 'HERO ABILITY';
@@ -7629,6 +8180,11 @@ koBonuses();
             heroImage.src = '';
             heroImage.style.display = 'none';
             oneChoiceHoverText.style.display = 'block';
+
+            // Remove action buttons
+            if (actionButtonsContainer.parentNode) {
+                actionButtonsContainer.parentNode.removeChild(actionButtonsContainer);
+            }
 
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
@@ -7752,11 +8308,33 @@ koBonuses();
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(availableHeroes);
         // Populate the list with available heroes
         availableHeroes.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.uniqueId);
 
             li.onmouseover = () => {
@@ -7937,11 +8515,33 @@ koBonuses();
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(availableHeroes);
         // Populate the list with available heroes
         availableHeroes.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.uniqueId);
 
             li.onmouseover = () => {
@@ -8173,11 +8773,33 @@ koBonuses();
             updateConfirmButton();
             updateInstructions();
         }
-
+genericCardSort(availableHeroes);
         // Populate hero list
         availableHeroes.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
@@ -8422,11 +9044,33 @@ function showHeroSelectionPopup(heroes, onHeroSelected) {
             updateInstructions();
             console.log('Selected Hero for capture:', selectedHero ? selectedHero.name : 'None');
         }
-
+genericCardSort(heroes);
         // Populate hero list
         heroes.forEach(hero => {
             const li = document.createElement('li');
-            li.textContent = hero.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(hero.team);
+    const class1Icon = createClassIconHTML(hero.class1);
+    const class2Icon = createClassIconHTML(hero.class2);
+    const class3Icon = createClassIconHTML(hero.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             li.setAttribute('data-card-id', hero.id);
 
             li.onmouseover = () => {
@@ -8664,12 +9308,34 @@ function freeHeroGain() {
             updateInstructions();
             console.log('Selected Hero for recruit:', selectedHero ? selectedHero.name : 'None');
         }
-
+genericCardSort(eligibleHeroesForRecruit);
         // Populate the list with eligible heroes
         eligibleHeroesForRecruit.forEach(card => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-            li.textContent = card.name;
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.index);
 
             li.onmouseover = () => {
@@ -8803,7 +9469,7 @@ onscreenConsole.log(`Fight! You fought <span class="console-highlights">Abominat
 }
 
 function KOAllSHIELD() {
-onscreenConsole.log(`Fight! KO all your <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> Heroes.`);
+onscreenConsole.log(`Fight! KO all your <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> Heroes.`);
 
     let shieldKOCounter = 0; // Counter to track how many S.H.I.E.L.D. cards are KO'd
 
@@ -8839,9 +9505,9 @@ koBonuses();
 
     if (shieldKOCounter > 0) {
         const cardText = shieldKOCounter === 1 ? 'card' : 'cards'; // Determine singular or plural
-        onscreenConsole.log(`KO'd ${shieldKOCounter} <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> ${cardText}.`);
+        onscreenConsole.log(`KO'd ${shieldKOCounter} <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> ${cardText}.`);
     } else {
-        onscreenConsole.log('No <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="console-card-icons"> cards available to KO.');
+        onscreenConsole.log('No <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="console-card-icons"> cards available to KO.');
     }
 
     updateGameBoard();
@@ -9015,11 +9681,33 @@ koBonuses();
             updateInstructions();
             console.log('Selected Heroes for KO:', selectedHeroes.map(hero => hero.name));
         }
-
+genericCardSort(availableHeroes);
         // Populate the list with available heroes
         availableHeroes.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                   const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', card.uniqueId);
 
             li.onmouseover = () => {
@@ -9110,10 +9798,32 @@ function koAnyNumberOfWounds() {
         function updateKoButton() {
             koButton.disabled = selectedWounds.length === 0;
         }
-
+genericCardSort(discardPile);
         discardPile.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                     const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             // On mouseover, change the hero image to the selected card's image
             li.onmouseover = () => {
                 KOImage.src = card.image;
@@ -9134,10 +9844,32 @@ function koAnyNumberOfWounds() {
             };
             discardPileList.appendChild(li);
         });
-
+genericCardSort(hand);
         hand.forEach(card => {
             const li = document.createElement('li');
-            li.textContent = card.name;
+                     const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             // On mouseover, change the hero image to the selected card's image
             li.onmouseover = () => {
                 KOImage.src = card.image;
@@ -9190,7 +9922,7 @@ function koAnyNumberOfWounds() {
                 }
 
                 koPile.push(card);
-                onscreenConsole.log(`<span class="console-highlight">${card.name}</span> has been KO'd.`);
+                onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
 koBonuses();
             });
             closePopup();
@@ -9488,11 +10220,33 @@ function showHeroSelectionSkrullPopup(heroes) {
             updateInstructions();
             console.log('Selected Hero for Skrull:', selectedHero ? selectedHero.name : 'None');
         }
-
+genericCardSort(heroes);
         // Populate hero list
         heroes.forEach(hero => {
             const li = document.createElement('li');
-            li.textContent = hero.name;
+                     const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(hero.team);
+    const class1Icon = createClassIconHTML(hero.class1);
+    const class2Icon = createClassIconHTML(hero.class2);
+    const class3Icon = createClassIconHTML(hero.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             li.setAttribute('data-card-id', hero.id);
 
             li.onmouseover = () => {
@@ -9737,11 +10491,33 @@ hasDiscardAvoidance = false;
                 updateConfirmButton();
                 updateInstructions();
             }
-
+genericCardSort(playerHand);
             // Populate the list with cards in hand
             playerHand.forEach((card, index) => {
                 const li = document.createElement('li');
-                li.textContent = card.name;
+                          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
                 li.setAttribute('data-card-id', card.id);
 
                 li.onmouseover = () => {
