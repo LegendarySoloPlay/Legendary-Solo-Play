@@ -10574,4 +10574,3 @@ genericCardSort(playerHand);
                 modalOverlay.style.display = 'none';
             }
         }
-    

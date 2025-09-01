@@ -11574,4 +11574,3 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
-
