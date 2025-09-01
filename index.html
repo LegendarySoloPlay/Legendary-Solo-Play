@@ -15,7 +15,8 @@
 </head>
 
 <body>
-  <div style="display:none;">18.08.2025 10.30</div>
+
+  <div style="display:none;">01.09.2025 20.38</div>
   <div id="background-for-expansion-popup"></div>
 <div id="expansion-popup-container">
   <div id="expansion-banner">
@@ -27,10 +28,11 @@
         <p>Will you rise to the challenge—or be swallowed by the darkness?</p>
       </div>
       <button id="start-expansion">DIVE IN</button>
+<p style="text-align: center; color: #ffab0f;">Version 2.0.2. UPDATE</p>
     </div>
   </div>
 </div>
-<div id="intro-popup-container">
+<div id="intro-popup-container" style="display: none;">
     <div id="intro-popup">
       <div id="intro-popup-header">
         <h2>Welcome to Marvel Legendary</h2>
@@ -87,7 +89,12 @@
     </div>
   </div>
   <div class="content" id="home-screen">
-    <div class="banner"><span id="title-banner-text">MARVEL LEGENDARY<br>SOLO PLAY</span></div>
+    <div class="banner">
+  <span id="title-banner-text">MARVEL LEGENDARY<br>SOLO PLAY</span>
+  <div class="banner-settings-icon" aria-label="Settings" onclick="openSettings()">
+    <img src="Visual Assets/Icons/settings-cog.svg" alt="Settings Icon" class="settingsCog">
+  </div>
+</div>
 <div class="overall-filter">
 <div id="overallsetlist" class="dropdown-check-list" tabindex="100">
   <span class="anchor">OVERALL SET</span>
@@ -343,9 +350,9 @@
   <span class="anchor2">Teams</span>
   <ul class="items">
     <li><label><input type="checkbox" data-team="Avengers"/> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Avengers</label></li>
-    <li><label><input type="checkbox" data-team="Marvel Knights"/> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Marvel Knights</label></li>
-    <li><label><input type="checkbox" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
-    <li><label><input type="checkbox" data-team="Spider Friends"/> <img src="Visual Assets/Icons/SpiderFriends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
+    <li><label><input type="checkbox" data-team="Marvel Knights"/> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Marvel Knights</label></li>
+    <li><label><input type="checkbox" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
+    <li><label><input type="checkbox" data-team="Spider Friends"/> <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
     <li><label><input type="checkbox" data-team="X-Force"/> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> X-Force</label></li>
     <li><label><input type="checkbox" data-team="X-Men"/> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> X-Men</label></li>
   </ul>
@@ -365,29 +372,29 @@
             <label><input type="checkbox" name="hero" value="Hawkeye" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Hawkeye</label>
             <label><input type="checkbox" name="hero" value="Hulk" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Hulk</label>
             <label><input type="checkbox" name="hero" value="Iron Man" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Iron Man</label>
-            <label><input type="checkbox" name="hero" value="Nick Fury" data-set="Core" data-team="S.H.I.E.L.D."> <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> Nick Fury</label>
+            <label><input type="checkbox" name="hero" value="Nick Fury" data-set="Core" data-team="S.H.I.E.L.D."> <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="card-icons"> Nick Fury</label>
             <label><input type="checkbox" name="hero" value="Rogue" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Rogue</label>
-            <label><input type="checkbox" name="hero" value="Spider-Man" data-set="Core" data-team="Spider Friends"> <img src="Visual Assets/Icons/SpiderFriends.svg" alt="Spider Friends Icon" class="card-icons"> Spider-Man</label>
+            <label><input type="checkbox" name="hero" value="Spider-Man" data-set="Core" data-team="Spider Friends"> <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="card-icons"> Spider-Man</label>
             <label><input type="checkbox" name="hero" value="Storm" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Storm</label>
             <label><input type="checkbox" name="hero" value="Thor" data-set="Core" data-team="Avengers"> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Thor</label>
             <label><input type="checkbox" name="hero" value="Wolverine" data-set="Core" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Wolverine</label>  
             <hr>
             <label><input type="checkbox" name="hero" value="Angel" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Angel</label>
             <label><input type="checkbox" name="hero" value="Bishop" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Bishop</label>
-            <label><input type="checkbox" name="hero" value="Blade" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Blade</label>
+            <label><input type="checkbox" name="hero" value="Blade" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Blade</label>
             <label><input type="checkbox" name="hero" value="Cable" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> Cable</label>
             <label><input type="checkbox" name="hero" value="Colossus" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> Colossus</label>
-            <label><input type="checkbox" name="hero" value="Daredevil" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Daredevil</label>
+            <label><input type="checkbox" name="hero" value="Daredevil" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Daredevil</label>
             <label><input type="checkbox" name="hero" value="Domino" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> Domino</label>
-            <label><input type="checkbox" name="hero" value="Elektra" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Elektra</label>
+            <label><input type="checkbox" name="hero" value="Elektra" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Elektra</label>
             <label><input type="checkbox" name="hero" value="Forge" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> Forge</label>
-            <label><input type="checkbox" name="hero" value="Ghost Rider" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Ghost Rider</label>
+            <label><input type="checkbox" name="hero" value="Ghost Rider" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Ghost Rider</label>
             <label><input type="checkbox" name="hero" value="Iceman" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Iceman</label>
-            <label><input type="checkbox" name="hero" value="Iron Fist" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Iron Fist</label>
+            <label><input type="checkbox" name="hero" value="Iron Fist" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Iron Fist</label>
             <label><input type="checkbox" name="hero" value="Jean Grey" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Jean Grey</label>
             <label><input type="checkbox" name="hero" value="Nightcrawler" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Nightcrawler</label>
             <label><input type="checkbox" name="hero" value="Professor X" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Professor X</label>  
-            <label><input type="checkbox" name="hero" value="Punisher" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Punisher</label>
+            <label><input type="checkbox" name="hero" value="Punisher" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Punisher</label>
             <label><input type="checkbox" name="hero" value="X-Force Wolverine" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> X-Force Wolverine</label>  
             </form>
         </div>
@@ -450,10 +457,16 @@
 
   <div class="container" id="game-board" style="display: none;">
     <div class="grid">
-      <!-- Title Banner -->
-      <div class="row">
-        <div id="game-board-title-banner" class="cell title-banner" style="grid-column: span 8;">LEGENDARY</div>
+<div class="row">
+  <div id="game-board-title-banner" class="cell title-banner" style="grid-column: span 8;">
+    <div class="title-container">
+      <span class="centered-title">LEGENDARY</span>
+      <div class="settings-icon" aria-label="Settings" onclick="openSettings()">
+        <img src="Visual Assets/Icons/settings-cog.svg" alt="Settings Icon" class="settingsCog">
       </div>
+    </div>
+  </div>
+</div>
       <!-- Row of 7 Cells -->
       <div class="row">
 <div class="top-row-cell-label"><span class="labeltext">TWISTS:</span><span id="drawnTwistCount" class="labeltext"></span></div>
@@ -464,8 +477,8 @@
 
 
         <button id="victory-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">VICTORY PILE:</span><span id="currentVictoryPointsTally" class="game-board-bottom-row"></span></button>
-<div class="top-row-cell-label"><span class="labeltext">WOUNDS:</span><span id="woundDeckCount" class="labeltext"></span></div>
-<div class="top-row-cell-label"><span class="labeltext">BYSTANDERS:</span><span id="bystanderDeckCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext" id="wound-label">WOUNDS:</span><span id="woundDeckCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext" id="bystander-label">BYSTANDERS:</span><span id="bystanderDeckCount" class="labeltext"></span></div>
 </div>
       <div class="row">
 <div class="cell scheme" id="scheme-place"><div id="scheme-token" style="display:none;">Baby<br>Hope</div><div id="demon-goblin-deck" style="display:none;"><span id="demon-goblin-count"></span></div></div>
@@ -779,7 +792,7 @@
 </div>
     <div class="popup-content">
       <h1>DRAW!</h1>
-      <p style="margin-bottom: 10px;" id="defeat-context">You've run out of Villains to battle. The Mastermind has not succeeded, but neither have you.</p>
+      <p style="margin-bottom: 10px;" id="draw-context">You've run out of Villains to battle. The Mastermind has not succeeded, but neither have you.</p>
       <h3>Victory Points:</h3>
       <p id="villainDRAWvictoryPointsTotal"></p>
       <h3>Total Turns Taken:</h3>
@@ -814,6 +827,7 @@
       <h3>Number of Escapes:</h3>
       <p id="LOSSnumberOfEscapes"></p>      
       <button id="defeat-return-home-button">Return Home</button>
+<button id="try-again-btn">Try Again</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive.</p>
@@ -929,9 +943,20 @@
     </div>
   </div>
 
-
-      
-
+  <div id="mulligan-popup" class="popup" style="display: none;">
+      <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+    <div class="popup-content">
+      <h2 id="hero-ability-may-h2">MULLIGAN</h2>
+      <p>You have begun the game with a least two Heroes in the HQ with a cost of 7 or more. Would you like to shuffle these back into the Hero Deck?</p>
+      <div class="card-display">
+        <div class="card-image-frame"><img src="Visual Assets/CardBack.webp" alt="Card Image" id="mulligan-card"></div>
+      </div>
+      <button id="mulligan-confirm">Yes</button>
+      <button id="mulligan-deny">No</button>
+    </div>
+  </div>
 
 <div id="bribe-popup" class="popup" style="display:none;">
     <div class="minimize-triangle-btn" aria-label="Minimize">
@@ -1115,6 +1140,124 @@
       <button class="pile-button" onclick="closeDiscardPilePopup()">CLOSE</button>
     </div>
   </div>
+
+  <div class="popup" id="playerDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closePlayerDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>PLAYER DECK</h2>
+      <div id="PlayerDeckTable" class="pile-table"></div>
+      <button class="player-deck-button" onclick="closePlayerDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="heroDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeHeroDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>HERO DECK</h2>
+      <div id="HeroDeckTable" class="pile-table"></div>
+      <button class="hero-deck-button" onclick="closeHeroDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="villainDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeVillainDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>VILLAIN DECK</h2>
+      <div id="VillainDeckTable" class="pile-table"></div>
+      <button class="villain-deck-button" onclick="closeVillainDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="woundDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeWoundDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>WOUND DECK</h2>
+      <div id="WoundDeckTable" class="pile-table"></div>
+      <button class="wound-deck-button" onclick="closeWoundDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="sidekickDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeSidekickDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>SIDEKICK STACK</h2>
+      <div id="SidekickDeckTable" class="pile-table"></div>
+      <button class="sidekick-deck-button" onclick="closeSidekickDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="shieldDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeShieldDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>S.H.I.E.L.D. DECK</h2>
+      <div id="ShieldDeckTable" class="pile-table"></div>
+      <button class="shield-deck-button" onclick="closeShieldDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+  <div class="popup" id="bystanderDeck-popup" style="display: none;">
+    <div class="minimize-triangle-btn" aria-label="Minimize">
+  <span class="inner-triangle"></span>
+</div>
+<div class="close-triangle-btn" aria-label="Close" onclick="closeBystanderDeckPopup()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+  <div class="popup-content">
+<h2>BYSTANDER DECK</h2>
+      <div id="BystanderDeckTable" class="pile-table"></div>
+      <button class="bystander-deck-button" onclick="closeBystanderDeckPopup()">CLOSE</button>
+  </div>
+</div>
+
+<div id="settings-popup" class="popup" style="display:none;">
+<div class="close-triangle-btn" aria-label="Close" onclick="saveSettings()">
+  <span class="close-x"><b>✕</b></span>
+</div>
+    <h3>SETTINGS</h3>
+    <label>
+        Music Volume:
+        <input type="range" id="musicVolume" min="0" max="1" step="0.1" value="0.7">
+    </label>
+<br>
+    <label>
+        SFX Volume:
+        <input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.8">
+    </label>
+<br>
+    <button id="settingsButton" onclick="saveSettings()">CLOSE</button>
+<br>
+<div id="sound-attributions"><span>Music and SFX sourced from https://freesound.org under their Attribution 3.0 license. Special thanks to the following creators: Artninja, Cigaro30, D4XX, HarDuKK, Hope_sounds_3, humanoide9000, mlteenie, original_sound, ponycillo, RealSquink, Robinhood76 and thecheeseman.</span></div>
+</div>
   
  <div id="investigate-popup" class="popup" style="display: none;">
   <div class="minimize-triangle-btn" aria-label="Minimize">
@@ -1130,9 +1273,9 @@
       <span class="anchor2">Teams</span>
       <ul class="items">
          <li><label><input type="radio" name="investigate-team" data-team="Avengers"/> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Avengers</label></li>
-<li><label><input type="radio" name="investigate-team" data-team="Marvel Knights"/> <img src="Visual Assets/Icons/MarvelKnights.svg" alt="Marvel Knights Icon" class="card-icons"> Marvel Knights</label></li>
-        <li><label><input type="radio" name="investigate-team" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/SHIELD.svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
-<li><label><input type="radio" name="investigate-team" data-team="Spider Friends"/> <img src="Visual Assets/Icons/SpiderFriends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
+<li><label><input type="radio" name="investigate-team" data-team="Marvel Knights"/> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Marvel Knights</label></li>
+        <li><label><input type="radio" name="investigate-team" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
+<li><label><input type="radio" name="investigate-team" data-team="Spider Friends"/> <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
 <li><label><input type="radio" name="investigate-team" data-team="X-Force"/> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> X-Force</label></li>
 <li><label><input type="radio" name="investigate-team" data-team="X-Men"/> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> X-Men</label></li>      </ul>
     </div>
@@ -1179,6 +1322,9 @@
     }
   }
 </script>
+<audio id="bgMusic" preload="auto" loop>
+    <source src="Audio Assets/background-music.ogg" type="audio/ogg">
+</audio>
 </body>
 
 </html>
