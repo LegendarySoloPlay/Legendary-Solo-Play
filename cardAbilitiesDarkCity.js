@@ -5218,7 +5218,7 @@ function bystanderRadiationScientist() {
         // Get only Hero cards from each location
         const handHeroes = playerHand.filter(card => card.type === 'Hero');
         const discardHeroes = playerDiscardPile.filter(card => card.type === 'Hero');
-        const playedHeroes = cardsPlayedThisTurn.filter(card => card.type === 'Hero');
+        const playedHeroes = cardsPlayedThisTurn.filter(card => card.type === 'Hero' && !card.isCopied && !card.sidekickToDestroy);
 
         if (handHeroes.length === 0 && discardHeroes.length === 0 && playedHeroes.length === 0) {
             onscreenConsole.log(`No Heroes available to be KO'd.`);
@@ -11574,4 +11574,5 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
 
