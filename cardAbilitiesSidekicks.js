@@ -408,7 +408,7 @@ genericCardSort(playerDiscardPile);
         return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
     };
     
-    const teamIcon = createTeamIconHTML(hero.team);
+    const teamIcon = createTeamIconHTML(card.team);
     const class1Icon = createClassIconHTML(card.class1);
     const class2Icon = createClassIconHTML(card.class2);
     const class3Icon = createClassIconHTML(card.class3);
@@ -1782,4 +1782,5 @@ async function handleCardPlacement(card, options = {}) {
     onscreenConsole.log(`You returned <span class="console-highlights">${card.name}</span> to the bottom of your deck.`);
   }
   updateGameBoard();
+
 }
