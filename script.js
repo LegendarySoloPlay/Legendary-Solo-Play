@@ -8787,22 +8787,33 @@ function loadSoundOnDemand(name, urls) {
     audio.load();
 }
 
-// Prime audio elements for mobile
+// Replace your primeAudioElements function with this improved version:
 function primeAudioElements() {
     if (isLocalFile) return; // Skip priming for local files
     
     for (const name in sounds) {
         if (sounds[name]) {
             try {
+                // Set volume to 0 before priming
+                sounds[name].volume = 0;
+                
                 // Play and immediately pause to "prime" the audio element
                 sounds[name].play().then(() => {
                     sounds[name].pause();
                     sounds[name].currentTime = 0;
+                    // Restore volume after priming
+                    sounds[name].volume = sfxGlobalVolume;
                 }).catch(e => {
                     console.log(`Could not prime ${name} sound:`, e);
+                    // Restore volume if priming failed
+                    sounds[name].volume = sfxGlobalVolume;
                 });
             } catch (e) {
                 console.log(`Error priming ${name} sound:`, e);
+                // Restore volume if priming failed
+                if (sounds[name]) {
+                    sounds[name].volume = sfxGlobalVolume;
+                }
             }
         }
     }
@@ -9334,3 +9345,4 @@ function saveSettings() {
 }
 
 loadAudioSettings();
+
