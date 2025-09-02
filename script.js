@@ -8781,7 +8781,7 @@ function primeAudioElements() {
 
 // SFX functions with mobile handling
 function playAttackSound() {
-    if (!sfxEnabled) return;
+if (!sfxEnabled) return;
     
     // For local files, load on demand
     if (isLocalFile && !sounds.attack) {
@@ -8791,18 +8791,14 @@ function playAttackSound() {
     
     if (sounds.attack) {
         try {
-            // Clone and play with mobile-friendly approach
             const sound = sounds.attack.cloneNode();
             sound.volume = sfxGlobalVolume;
             sound.currentTime = 0;
             
-            // For iOS, we need to play and catch any errors
             const playPromise = sound.play();
-            
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.log("Attack sound play failed, trying fallback:", error);
-                    // Fallback: try to play the original sound
+                    console.log("Recruit sound play failed:", error);
                     try {
                         sounds.attack.volume = sfxGlobalVolume;
                         sounds.attack.currentTime = 0;
@@ -8819,6 +8815,7 @@ function playAttackSound() {
         console.warn('Attack sound not loaded yet');
     }
 }
+
 
 function playDrawSound() {
     if (!sfxEnabled) return;
