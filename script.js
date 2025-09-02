@@ -1,4 +1,4 @@
-//02.09.2025 9.55
+//02.09.2025 10.34
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -61,7 +61,6 @@ document.querySelectorAll('.dropdown-check-list').forEach(function(checkList) {
 window.addEventListener('load', loadAllSounds);
 
 const bgMusic = document.getElementById('bgMusic');
-
 
 // Function to close the dropdown if clicking outside
 document.addEventListener('click', function(evt) {
@@ -437,9 +436,9 @@ let stackedTwistNextToMastermind = 0;
 let popupMinimized = false;
 let deadpoolRare = false;
 let gameIsOver = false;
-let sfxGlobalVolume = 0.8;
 let audioContextInitialized = false;
 let sfxEnabled = false;
+let isLocalFile = window.location.protocol === 'file:';
 
 window.victoryPile = [];
 
@@ -2199,9 +2198,9 @@ document.getElementById('confirm-startup-close-x').addEventListener('click', fun
 document.getElementById('modal-overlay').style.display = 'none';
 });
 
-let hasFadedIn = false;
+document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
-document.getElementById('begin-game').addEventListener('click', function() {
+async function onBeginGame() {
 if (!audioContextInitialized) {
         initAudio();
         audioContextInitialized = true;
@@ -2214,11 +2213,11 @@ if (!audioContextInitialized) {
     
     if (targetVolume === 0) {
         bgMusic.volume = 0;
-        bgMusic.play();
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
         hasFadedIn = true;
     } else if (!hasFadedIn) {
         bgMusic.volume = 0;
-        bgMusic.play();
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
         
         const fadeIn = setInterval(() => {
             if (bgMusic.volume < targetVolume) {
@@ -2230,15 +2229,12 @@ if (!audioContextInitialized) {
         }, 100);
     } else {
         bgMusic.volume = targetVolume;
-        bgMusic.play();
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
     }
     
-    // Enable SFX after user interaction
+    // Enable SFX after user interaction AND load sounds
     sfxEnabled = true;
-    
-    // Load sounds after user interaction
-    loadAllSounds();
-
+    loadAllSounds();  
 
     if (!this.disabled) {
         const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
@@ -2263,14 +2259,14 @@ if (!audioContextInitialized) {
         document.getElementById('confirm-start-up-choices').style.display = 'none';
 
     }
-});
+}
 
 function initAudio() {
     // Create background music element if it doesn't exist
     if (!bgMusic) {
         bgMusic = new Audio();
         bgMusic.loop = true;
-        bgMusic.src = 'Audio Assets/background-music.webm'; // Update with your actual file
+        bgMusic.src = 'Audio Assets/background-music.ogg'; // Update with your actual file
     }
 }
 
@@ -8661,52 +8657,180 @@ function addHRToTopWithInnerHTML() {
 updateGameBoard();
 }
 
- const sounds = {};
+function openSettings() {
+    document.getElementById('settings-popup').style.display = 'block';
+document.getElementById('modal-overlay').style.display = 'block';
+}
 
+// Add this function to initialize audio
+function initAudio() {
+    // Set up background music
+    bgMusic.loop = true;
+    bgMusic.src = 'Audio Assets/background-music.ogg';
+}
+
+// Load all sounds with user interaction context
+async function loadAllSounds() {
+    // If running from local file system, skip preloading
+    if (isLocalFile) {
+        console.warn("Running from local file system - sounds will be loaded on demand");
+        return;
+    }
+    
+    // Mobile browsers require this to happen in response to user interaction
+    const soundPromises = [];
+    
+    soundPromises.push(loadSound('attack', 'Audio Assets/attack-sound.webm'));
+    soundPromises.push(loadSound('draw', 'Audio Assets/card-draw-sound.webm'));
+    soundPromises.push(loadSound('lose', 'Audio Assets/evil-wins-sound.webm'));
+    soundPromises.push(loadSound('gameDraw', 'Audio Assets/game-draw-sound.webm'));
+    soundPromises.push(loadSound('victory', 'Audio Assets/good-wins-sound.webm'));
+    soundPromises.push(loadSound('deal', 'Audio Assets/hand-dealt-sound.webm'));
+    soundPromises.push(loadSound('ko', 'Audio Assets/ko-sound.webm'));
+    soundPromises.push(loadSound('masterStrike', 'Audio Assets/master-strike-sound.webm'));
+    soundPromises.push(loadSound('recruit', 'Audio Assets/recruit-sound.webm'));
+    soundPromises.push(loadSound('rescue', 'Audio Assets/rescue-bystander-sound.webm'));
+    soundPromises.push(loadSound('schemeTwist', 'Audio Assets/scheme-twist-sound.webm'));
+    soundPromises.push(loadSound('wound', 'Audio Assets/wound-sound.webm'));
+    
+    try {
+        await Promise.all(soundPromises);
+        console.log('All sounds loaded!');
+        
+        // On mobile, we need to "prime" the audio elements by playing them silently
+        // and immediately pausing, all within the user interaction context
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            primeAudioElements();
+        }
+    } catch (error) {
+        console.error('Error loading sounds:', error);
+    }
+}
+
+// Enhanced loadSound function for mobile
 function loadSound(name, url) {
     return new Promise((resolve) => {
         const audio = new Audio();
+        
+        // Mobile-specific handling
+        audio.setAttribute('preload', 'auto');
+        audio.setAttribute('webkit-playsinline', '');
+        audio.setAttribute('playsinline', '');
+        
         audio.addEventListener('canplaythrough', () => {
             sounds[name] = audio;
             resolve();
+        }, { once: true });
+        
+        audio.addEventListener('error', (e) => {
+            console.error(`Error loading sound ${name}:`, e);
+            sounds[name] = null; // Mark as failed to load
+            resolve(); // Still resolve to prevent blocking other sounds
         });
+        
         audio.src = url;
         audio.load();
     });
 }
 
-async function loadAllSounds() {
-    await loadSound('attack', 'Audio Assets/attack-sound.webm');
-    await loadSound('draw', 'Audio Assets/card-draw-sound.webm');
-    await loadSound('lose', 'Audio Assets/evil-wins-sound.webm');
-    await loadSound('gameDraw', 'Audio Assets/game-draw-sound.webm');
-    await loadSound('victory', 'Audio Assets/good-wins-sound.webm');
-    await loadSound('deal', 'Audio Assets/hand-dealt-sound.webm');
-    await loadSound('ko', 'Audio Assets/ko-sound.webm');
-    await loadSound('masterStrike', 'Audio Assets/master-strike-sound.webm');
-    await loadSound('recruit', 'Audio Assets/recruit-sound.webm');
-    await loadSound('rescue', 'Audio Assets/rescue-bystander-sound.webm');
-    await loadSound('schemeTwist', 'Audio Assets/scheme-twist-sound.webm');
-    await loadSound('wound', 'Audio Assets/wound-sound.webm');
-    console.log('All sounds loaded!');
+// Function for on-demand loading
+function loadSoundOnDemand(name, url) {
+    const audio = new Audio();
+    
+    audio.addEventListener('canplaythrough', () => {
+        sounds[name] = audio;
+        // Now play the sound since it's loaded
+        try {
+            audio.volume = sfxGlobalVolume;
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log(`Could not play ${name} sound:`, e));
+        } catch (e) {
+            console.log(`Error playing ${name} sound:`, e);
+        }
+    }, { once: true });
+    
+    audio.addEventListener('error', (e) => {
+        console.error(`Error loading sound ${name}:`, e);
+        sounds[name] = null;
+    });
+    
+    audio.src = url;
+    audio.load();
 }
 
+// Prime audio elements for mobile
+function primeAudioElements() {
+    if (isLocalFile) return; // Skip priming for local files
+    
+    for (const name in sounds) {
+        if (sounds[name]) {
+            try {
+                // Play and immediately pause to "prime" the audio element
+                sounds[name].play().then(() => {
+                    sounds[name].pause();
+                    sounds[name].currentTime = 0;
+                }).catch(e => {
+                    console.log(`Could not prime ${name} sound:`, e);
+                });
+            } catch (e) {
+                console.log(`Error priming ${name} sound:`, e);
+            }
+        }
+    }
+}
+
+// SFX functions with mobile handling
 function playAttackSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.attack) {
+        loadSoundOnDemand('attack', 'Audio Assets/attack-sound.webm');
+        return;
+    }
+    
     if (sounds.attack) {
-        const sound = sounds.attack.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            // Clone and play with mobile-friendly approach
+            const sound = sounds.attack.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            // For iOS, we need to play and catch any errors
+            const playPromise = sound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Attack sound play failed, trying fallback:", error);
+                    // Fallback: try to play the original sound
+                    try {
+                        sounds.attack.volume = sfxGlobalVolume;
+                        sounds.attack.currentTime = 0;
+                        sounds.attack.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing attack sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Attack sound not loaded yet');
     }
 }
 
 function playDrawSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.draw) {
+        loadSoundOnDemand('draw', 'Audio Assets/card-draw-sound.webm');
+        return;
+    }
+    
     if (!sounds.draw) {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Draw sound not loaded yet');
         return;
     }
     
@@ -8715,65 +8839,186 @@ if (!sfxEnabled) return;
     const delay = timeSinceLast < 300 ? 300 - timeSinceLast : 0;
     
     setTimeout(() => {
-        const sound = sounds.draw.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.draw.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Draw sound play failed:", error);
+                    // Try to play the original as fallback
+                    try {
+                        sounds.draw.volume = sfxGlobalVolume;
+                        sounds.draw.currentTime = 0;
+                        sounds.draw.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing draw sound:", e);
+        }
     }, delay);
     
     playDrawSound.lastPlayTime = now + delay;
 }
 
 function playLoseSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.lose) {
+        loadSoundOnDemand('lose', 'Audio Assets/evil-wins-sound.webm');
+        return;
+    }
+    
     if (sounds.lose) {
-        const sound = sounds.lose.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.lose.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Lose sound play failed:", error);
+                    try {
+                        sounds.lose.volume = sfxGlobalVolume;
+                        sounds.lose.currentTime = 0;
+                        sounds.lose.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing lose sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Lose sound not loaded yet');
     }
 }
 
 function playGameDrawSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.gameDraw) {
+        loadSoundOnDemand('gameDraw', 'Audio Assets/game-draw-sound.webm');
+        return;
+    }
+    
     if (sounds.gameDraw) {
-        const sound = sounds.gameDraw.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.gameDraw.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Game draw sound play failed:", error);
+                    try {
+                        sounds.gameDraw.volume = sfxGlobalVolume;
+                        sounds.gameDraw.currentTime = 0;
+                        sounds.gameDraw.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing game draw sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Game draw sound not loaded yet');
     }
 }
 
 function playVictorySound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.victory) {
+        loadSoundOnDemand('victory', 'Audio Assets/good-wins-sound.webm');
+        return;
+    }
+    
     if (sounds.victory) {
-        const sound = sounds.victory.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.victory.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Victory sound play failed:", error);
+                    try {
+                        sounds.victory.volume = sfxGlobalVolume;
+                        sounds.victory.currentTime = 0;
+                        sounds.victory.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing victory sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Victory sound not loaded yet');
     }
 }
 
 function playDealSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.deal) {
+        loadSoundOnDemand('deal', 'Audio Assets/hand-dealt-sound.webm');
+        return;
+    }
+    
     if (sounds.deal) {
-        const sound = sounds.deal.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.deal.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Deal sound play failed:", error);
+                    try {
+                        sounds.deal.volume = sfxGlobalVolume;
+                        sounds.deal.currentTime = 0;
+                        sounds.deal.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing deal sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Deal sound not loaded yet');
     }
 }
 
 function playKOSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.ko) {
+        loadSoundOnDemand('ko', 'Audio Assets/ko-sound.webm');
+        return;
+    }
+    
     if (!sounds.ko) {
         console.warn('KO sound not loaded yet');
         return;
@@ -8784,41 +9029,113 @@ if (!sfxEnabled) return;
     const delay = timeSinceLast < 300 ? 300 - timeSinceLast : 0;
     
     setTimeout(() => {
-        const sound = sounds.ko.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.ko.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("KO sound play failed:", error);
+                    try {
+                        sounds.ko.volume = sfxGlobalVolume;
+                        sounds.ko.currentTime = 0;
+                        sounds.ko.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing KO sound:", e);
+        }
     }, delay);
     
     playKOSound.lastPlayTime = now + delay;
 }
 
 function playMasterStrikeSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.masterStrike) {
+        loadSoundOnDemand('masterStrike', 'Audio Assets/master-strike-sound.webm');
+        return;
+    }
+    
     if (sounds.masterStrike) {
-        const sound = sounds.masterStrike.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.masterStrike.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Master strike sound play failed:", error);
+                    try {
+                        sounds.masterStrike.volume = sfxGlobalVolume;
+                        sounds.masterStrike.currentTime = 0;
+                        sounds.masterStrike.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing master strike sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Master strike sound not loaded yet');
     }
 }
 
 function playRecruitSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.recruit) {
+        loadSoundOnDemand('recruit', 'Audio Assets/recruit-sound.webm');
+        return;
+    }
+    
     if (sounds.recruit) {
-        const sound = sounds.recruit.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.recruit.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Recruit sound play failed:", error);
+                    try {
+                        sounds.recruit.volume = sfxGlobalVolume;
+                        sounds.recruit.currentTime = 0;
+                        sounds.recruit.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing recruit sound:", e);
+        }
     } else {
         console.warn('Recruit sound not loaded yet');
     }
 }
 
 function playRescueSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.rescue) {
+        loadSoundOnDemand('rescue', 'Audio Assets/rescue-bystander-sound.webm');
+        return;
+    }
+    
     if (!sounds.rescue) {
         console.warn('Rescue sound not loaded yet');
         return;
@@ -8829,29 +9146,77 @@ if (!sfxEnabled) return;
     const delay = timeSinceLast < 300 ? 300 - timeSinceLast : 0;
     
     setTimeout(() => {
-        const sound = sounds.rescue.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.rescue.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Rescue sound play failed:", error);
+                    try {
+                        sounds.rescue.volume = sfxGlobalVolume;
+                        sounds.rescue.currentTime = 0;
+                        sounds.rescue.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing rescue sound:", e);
+        }
     }, delay);
     
     playRescueSound.lastPlayTime = now + delay;
 }
 
 function playSchemeTwistSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.schemeTwist) {
+        loadSoundOnDemand('schemeTwist', 'Audio Assets/scheme-twist-sound.webm');
+        return;
+    }
+    
     if (sounds.schemeTwist) {
-        const sound = sounds.schemeTwist.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.schemeTwist.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Scheme twist sound play failed:", error);
+                    try {
+                        sounds.schemeTwist.volume = sfxGlobalVolume;
+                        sounds.schemeTwist.currentTime = 0;
+                        sounds.schemeTwist.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing scheme twist sound:", e);
+        }
     } else {
-        console.warn('Recruit sound not loaded yet');
+        console.warn('Scheme twist sound not loaded yet');
     }
 }
 
 function playWoundSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
+    
+    // For local files, load on demand
+    if (isLocalFile && !sounds.wound) {
+        loadSoundOnDemand('wound', 'Audio Assets/wound-sound.webm');
+        return;
+    }
+    
     if (!sounds.wound) {
         console.warn('Wound sound not loaded yet');
         return;
@@ -8862,50 +9227,69 @@ if (!sfxEnabled) return;
     const delay = timeSinceLast < 300 ? 300 - timeSinceLast : 0;
     
     setTimeout(() => {
-        const sound = sounds.wound.cloneNode();
-        sound.volume = sfxGlobalVolume;
-        sound.currentTime = 0;
-        sound.play();
+        try {
+            const sound = sounds.wound.cloneNode();
+            sound.volume = sfxGlobalVolume;
+            sound.currentTime = 0;
+            
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Wound sound play failed:", error);
+                    try {
+                        sounds.wound.volume = sfxGlobalVolume;
+                        sounds.wound.currentTime = 0;
+                        sounds.wound.play();
+                    } catch (e) {
+                        console.log("Fallback also failed:", e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Error playing wound sound:", e);
+        }
     }, delay);
     
     playWoundSound.lastPlayTime = now + delay;
 }
 
+// The rest of your code remains the same...
+let sfxGlobalVolume = 0.8;
+let hasFadedIn = false;
+
+const sounds = {};
+
 function updateMusicVolume(volume) {
-    bgMusic.volume = volume;
-    // Save to localStorage for persistence
+    if (bgMusic) {
+        bgMusic.volume = volume;
+    }
     localStorage.setItem('musicVolume', volume);
 }
 
 function updateSFXVolume(volume) {
-    // Apply to all SFX sounds
     sfxGlobalVolume = volume;
     localStorage.setItem('sfxVolume', volume);
 }
 
-// Initialize volumes from saved settings
 function loadAudioSettings() {
     const savedMusicVol = localStorage.getItem('musicVolume');
     const savedSFXVol = localStorage.getItem('sfxVolume');
     
-    // Set defaults if no saved values exist
     const musicVolume = savedMusicVol !== null ? parseFloat(savedMusicVol) : 0.7;
     const sfxVolume = savedSFXVol !== null ? parseFloat(savedSFXVol) : 0.8;
     
-    // Apply the volumes
-    bgMusic.volume = musicVolume;
+    if (bgMusic) {
+        bgMusic.volume = musicVolume;
+    }
     sfxGlobalVolume = sfxVolume;
     
-    // Update the sliders
     document.getElementById('musicVolume').value = musicVolume;
     document.getElementById('sfxVolume').value = sfxVolume;
     
-    // Save the defaults to localStorage (optional but consistent)
     if (savedMusicVol === null) localStorage.setItem('musicVolume', musicVolume);
     if (savedSFXVol === null) localStorage.setItem('sfxVolume', sfxVolume);
 }
 
-// Update volume in real-time as slider moves
 document.getElementById('musicVolume').addEventListener('input', (e) => {
     updateMusicVolume(parseFloat(e.target.value));
 });
@@ -8918,20 +9302,13 @@ function saveSettings() {
     const musicVolume = parseFloat(document.getElementById('musicVolume').value);
     const sfxVolume = parseFloat(document.getElementById('sfxVolume').value);
     
-    // Update volumes immediately
     updateMusicVolume(musicVolume);
     updateSFXVolume(sfxVolume);
     
-    // Hide the settings popup
     document.getElementById('settings-popup').style.display = 'none';
-document.getElementById('modal-overlay').style.display = 'none';
-    
+    document.getElementById('modal-overlay').style.display = 'none';
 }
 
 loadAudioSettings();
 
-function openSettings() {
-    document.getElementById('settings-popup').style.display = 'block';
-document.getElementById('modal-overlay').style.display = 'block';
-}
 
