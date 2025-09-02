@@ -2201,7 +2201,7 @@ document.getElementById('modal-overlay').style.display = 'none';
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 async function onBeginGame() {
-if (!audioContextInitialized) {
+    if (!audioContextInitialized) {
         initAudio();
         audioContextInitialized = true;
     }
@@ -2232,9 +2232,14 @@ if (!audioContextInitialized) {
         bgMusic.play().catch(e => console.log("Audio play failed:", e));
     }
     
-    // Enable SFX after user interaction AND load sounds
+    // Enable SFX after user interaction
     sfxEnabled = true;
-    loadAllSounds();  
+    
+    // Don't load sounds on mobile - they're already loaded during setup
+    // Only load sounds if not on mobile or if they haven't been loaded yet
+    if (!isMobileDevice() || Object.keys(sounds).length === 0) {
+        loadAllSounds();
+    }
 
     if (!this.disabled) {
         const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
@@ -2250,14 +2255,13 @@ if (!audioContextInitialized) {
         // Start the game
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('game-board').style.display = 'block';
-	document.getElementById('expand-side-panel').style.display = 'block';
+        document.getElementById('expand-side-panel').style.display = 'block';
         document.getElementById('side-panel').style.display = 'flex';
 
         initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
 
         // Close the popup
         document.getElementById('confirm-start-up-choices').style.display = 'none';
-
     }
 }
 
@@ -9345,4 +9349,5 @@ function saveSettings() {
 }
 
 loadAudioSettings();
+
 
