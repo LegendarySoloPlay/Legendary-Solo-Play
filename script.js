@@ -2201,7 +2201,7 @@ document.getElementById('modal-overlay').style.display = 'none';
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 async function onBeginGame() {
-    if (!audioContextInitialized) {
+if (!audioContextInitialized) {
         initAudio();
         audioContextInitialized = true;
     }
@@ -2232,14 +2232,9 @@ async function onBeginGame() {
         bgMusic.play().catch(e => console.log("Audio play failed:", e));
     }
     
-    // Enable SFX after user interaction
+    // Enable SFX after user interaction AND load sounds
     sfxEnabled = true;
-    
-    // Don't load sounds on mobile - they're already loaded during setup
-    // Only load sounds if not on mobile or if they haven't been loaded yet
-    if (!isMobileDevice() || Object.keys(sounds).length === 0) {
-        loadAllSounds();
-    }
+    loadAllSounds();  
 
     if (!this.disabled) {
         const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
@@ -2255,13 +2250,14 @@ async function onBeginGame() {
         // Start the game
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('game-board').style.display = 'block';
-        document.getElementById('expand-side-panel').style.display = 'block';
+	document.getElementById('expand-side-panel').style.display = 'block';
         document.getElementById('side-panel').style.display = 'flex';
 
         initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
 
         // Close the popup
         document.getElementById('confirm-start-up-choices').style.display = 'none';
+
     }
 }
 
@@ -8791,33 +8787,22 @@ function loadSoundOnDemand(name, urls) {
     audio.load();
 }
 
-// Replace your primeAudioElements function with this improved version:
+// Prime audio elements for mobile
 function primeAudioElements() {
     if (isLocalFile) return; // Skip priming for local files
     
     for (const name in sounds) {
         if (sounds[name]) {
             try {
-                // Set volume to 0 before priming
-                sounds[name].volume = 0;
-                
                 // Play and immediately pause to "prime" the audio element
                 sounds[name].play().then(() => {
                     sounds[name].pause();
                     sounds[name].currentTime = 0;
-                    // Restore volume after priming
-                    sounds[name].volume = sfxGlobalVolume;
                 }).catch(e => {
                     console.log(`Could not prime ${name} sound:`, e);
-                    // Restore volume if priming failed
-                    sounds[name].volume = sfxGlobalVolume;
                 });
             } catch (e) {
                 console.log(`Error priming ${name} sound:`, e);
-                // Restore volume if priming failed
-                if (sounds[name]) {
-                    sounds[name].volume = sfxGlobalVolume;
-                }
             }
         }
     }
@@ -9349,4 +9334,3 @@ function saveSettings() {
 }
 
 loadAudioSettings();
-
