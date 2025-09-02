@@ -1,4 +1,4 @@
-//02.09.2025 10.34
+//02.09.2025 15.13
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -8662,11 +8662,26 @@ function openSettings() {
 document.getElementById('modal-overlay').style.display = 'block';
 }
 
-// Add this function to initialize audio
 function initAudio() {
-    // Set up background music
+    // Set up background music with multiple formats
     bgMusic.loop = true;
-    bgMusic.src = 'Audio Assets/background-music.ogg';
+    // For background music, use multiple source elements or use a similar approach
+    // Since bgMusic is a single audio element, we'll handle it differently
+    const bgMusicSources = [
+        'Audio Assets/background-music.m4a',
+        'Audio Assets/background-music.mp3',
+        'Audio Assets/background-music.ogg'  // Keep original as fallback
+    ];
+    
+    // Find the first supported format
+    const audio = new Audio();
+    for (const src of bgMusicSources) {
+        const canPlay = audio.canPlayType('audio/' + src.split('.').pop());
+        if (canPlay === 'probably' || canPlay === 'maybe') {
+            bgMusic.src = src;
+            break;
+        }
+    }
 }
 
 // Load all sounds with user interaction context
@@ -8680,18 +8695,19 @@ async function loadAllSounds() {
     // Mobile browsers require this to happen in response to user interaction
     const soundPromises = [];
     
-    soundPromises.push(loadSound('attack', 'Audio Assets/attack-sound.webm'));
-    soundPromises.push(loadSound('draw', 'Audio Assets/card-draw-sound.webm'));
-    soundPromises.push(loadSound('lose', 'Audio Assets/evil-wins-sound.webm'));
-    soundPromises.push(loadSound('gameDraw', 'Audio Assets/game-draw-sound.webm'));
-    soundPromises.push(loadSound('victory', 'Audio Assets/good-wins-sound.webm'));
-    soundPromises.push(loadSound('deal', 'Audio Assets/hand-dealt-sound.webm'));
-    soundPromises.push(loadSound('ko', 'Audio Assets/ko-sound.webm'));
-    soundPromises.push(loadSound('masterStrike', 'Audio Assets/master-strike-sound.webm'));
-    soundPromises.push(loadSound('recruit', 'Audio Assets/recruit-sound.webm'));
-    soundPromises.push(loadSound('rescue', 'Audio Assets/rescue-bystander-sound.webm'));
-    soundPromises.push(loadSound('schemeTwist', 'Audio Assets/scheme-twist-sound.webm'));
-    soundPromises.push(loadSound('wound', 'Audio Assets/wound-sound.webm'));
+    // Each sound now loads multiple formats
+    soundPromises.push(loadSound('attack', ['Audio Assets/attack-sound.m4a', 'Audio Assets/attack-sound.mp3', 'Audio Assets/attack-sound.webm']));
+    soundPromises.push(loadSound('draw', ['Audio Assets/card-draw-sound.m4a', 'Audio Assets/card-draw-sound.mp3', 'Audio Assets/card-draw-sound.webm']));
+    soundPromises.push(loadSound('lose', ['Audio Assets/evil-wins-sound.m4a', 'Audio Assets/evil-wins-sound.mp3', 'Audio Assets/evil-wins-sound.webm']));
+    soundPromises.push(loadSound('gameDraw', ['Audio Assets/game-draw-sound.m4a', 'Audio Assets/game-draw-sound.mp3', 'Audio Assets/game-draw-sound.webm']));
+    soundPromises.push(loadSound('victory', ['Audio Assets/good-wins-sound.m4a', 'Audio Assets/good-wins-sound.mp3', 'Audio Assets/good-wins-sound.webm']));
+    soundPromises.push(loadSound('deal', ['Audio Assets/hand-dealt-sound.m4a', 'Audio Assets/hand-dealt-sound.mp3', 'Audio Assets/hand-dealt-sound.webm']));
+    soundPromises.push(loadSound('ko', ['Audio Assets/ko-sound.m4a', 'Audio Assets/ko-sound.mp3', 'Audio Assets/ko-sound.webm']));
+    soundPromises.push(loadSound('masterStrike', ['Audio Assets/master-strike-sound.m4a', 'Audio Assets/master-strike-sound.mp3', 'Audio Assets/master-strike-sound.webm']));
+    soundPromises.push(loadSound('recruit', ['Audio Assets/recruit-sound.m4a', 'Audio Assets/recruit-sound.mp3', 'Audio Assets/recruit-sound.webm']));
+    soundPromises.push(loadSound('rescue', ['Audio Assets/rescue-bystander-sound.m4a', 'Audio Assets/rescue-bystander-sound.mp3', 'Audio Assets/rescue-bystander-sound.webm']));
+    soundPromises.push(loadSound('schemeTwist', ['Audio Assets/scheme-twist-sound.m4a', 'Audio Assets/scheme-twist-sound.mp3', 'Audio Assets/scheme-twist-sound.webm']));
+    soundPromises.push(loadSound('wound', ['Audio Assets/wound-sound.m4a', 'Audio Assets/wound-sound.mp3', 'Audio Assets/wound-sound.webm']));
     
     try {
         await Promise.all(soundPromises);
@@ -8707,8 +8723,8 @@ async function loadAllSounds() {
     }
 }
 
-// Enhanced loadSound function for mobile
-function loadSound(name, url) {
+// Enhanced loadSound function for multiple formats
+function loadSound(name, urls) {
     return new Promise((resolve) => {
         const audio = new Audio();
         
@@ -8724,17 +8740,24 @@ function loadSound(name, url) {
         
         audio.addEventListener('error', (e) => {
             console.error(`Error loading sound ${name}:`, e);
-            sounds[name] = null; // Mark as failed to load
-            resolve(); // Still resolve to prevent blocking other sounds
+            // Try the next format if available
+            if (urls.length > 1) {
+                console.log(`Trying next format for ${name}`);
+                loadSound(name, urls.slice(1)).then(resolve);
+            } else {
+                sounds[name] = null; // Mark as failed to load
+                resolve(); // Still resolve to prevent blocking other sounds
+            }
         });
         
-        audio.src = url;
+        // Set the source to the first URL
+        audio.src = urls[0];
         audio.load();
     });
 }
 
-// Function for on-demand loading
-function loadSoundOnDemand(name, url) {
+// Function for on-demand loading with multiple formats
+function loadSoundOnDemand(name, urls) {
     const audio = new Audio();
     
     audio.addEventListener('canplaythrough', () => {
@@ -8751,10 +8774,16 @@ function loadSoundOnDemand(name, url) {
     
     audio.addEventListener('error', (e) => {
         console.error(`Error loading sound ${name}:`, e);
-        sounds[name] = null;
+        // Try the next format if available
+        if (urls.length > 1) {
+            console.log(`Trying next format for ${name}`);
+            loadSoundOnDemand(name, urls.slice(1));
+        } else {
+            sounds[name] = null;
+        }
     });
     
-    audio.src = url;
+    audio.src = urls[0];
     audio.load();
 }
 
@@ -8781,11 +8810,11 @@ function primeAudioElements() {
 
 // SFX functions with mobile handling
 function playAttackSound() {
-if (!sfxEnabled) return;
+    if (!sfxEnabled) return;
     
     // For local files, load on demand
     if (isLocalFile && !sounds.attack) {
-        loadSoundOnDemand('attack', 'Audio Assets/attack-sound.webm');
+        loadSoundOnDemand('attack', ['Audio Assets/attack-sound.m4a', 'Audio Assets/attack-sound.mp3', 'Audio Assets/attack-sound.webm']);
         return;
     }
     
@@ -8798,7 +8827,7 @@ if (!sfxEnabled) return;
             const playPromise = sound.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.log("Recruit sound play failed:", error);
+                    console.log("Attack sound play failed:", error);
                     try {
                         sounds.attack.volume = sfxGlobalVolume;
                         sounds.attack.currentTime = 0;
@@ -8816,13 +8845,12 @@ if (!sfxEnabled) return;
     }
 }
 
-
 function playDrawSound() {
     if (!sfxEnabled) return;
     
     // For local files, load on demand
     if (isLocalFile && !sounds.draw) {
-        loadSoundOnDemand('draw', 'Audio Assets/card-draw-sound.webm');
+        loadSoundOnDemand('draw', ['Audio Assets/card-draw-sound.m4a', 'Audio Assets/card-draw-sound.mp3', 'Audio Assets/card-draw-sound.webm']);
         return;
     }
     
@@ -8868,7 +8896,7 @@ function playLoseSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.lose) {
-        loadSoundOnDemand('lose', 'Audio Assets/evil-wins-sound.webm');
+        loadSoundOnDemand('lose', ['Audio Assets/evil-wins-sound.m4a', 'Audio Assets/evil-wins-sound.mp3', 'Audio Assets/evil-wins-sound.webm']);
         return;
     }
     
@@ -8904,7 +8932,7 @@ function playGameDrawSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.gameDraw) {
-        loadSoundOnDemand('gameDraw', 'Audio Assets/game-draw-sound.webm');
+        loadSoundOnDemand('gameDraw', ['Audio Assets/game-draw-sound.m4a', 'Audio Assets/game-draw-sound.mp3', 'Audio Assets/game-draw-sound.webm']);
         return;
     }
     
@@ -8940,7 +8968,7 @@ function playVictorySound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.victory) {
-        loadSoundOnDemand('victory', 'Audio Assets/good-wins-sound.webm');
+        loadSoundOnDemand('victory', ['Audio Assets/good-wins-sound.m4a', 'Audio Assets/good-wins-sound.mp3', 'Audio Assets/good-wins-sound.webm']);
         return;
     }
     
@@ -8976,7 +9004,7 @@ function playDealSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.deal) {
-        loadSoundOnDemand('deal', 'Audio Assets/hand-dealt-sound.webm');
+        loadSoundOnDemand('deal', ['Audio Assets/hand-dealt-sound.m4a', 'Audio Assets/hand-dealt-sound.mp3', 'Audio Assets/hand-dealt-sound.webm']);
         return;
     }
     
@@ -9012,7 +9040,7 @@ function playKOSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.ko) {
-        loadSoundOnDemand('ko', 'Audio Assets/ko-sound.webm');
+        loadSoundOnDemand('ko', ['Audio Assets/ko-sound.m4a', 'Audio Assets/ko-sound.mp3', 'Audio Assets/ko-sound.webm']);
         return;
     }
     
@@ -9057,7 +9085,7 @@ function playMasterStrikeSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.masterStrike) {
-        loadSoundOnDemand('masterStrike', 'Audio Assets/master-strike-sound.webm');
+        loadSoundOnDemand('masterStrike', ['Audio Assets/master-strike-sound.m4a', 'Audio Assets/master-strike-sound.mp3', 'Audio Assets/master-strike-sound.webm']);
         return;
     }
     
@@ -9093,7 +9121,7 @@ function playRecruitSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.recruit) {
-        loadSoundOnDemand('recruit', 'Audio Assets/recruit-sound.webm');
+        loadSoundOnDemand('recruit', ['Audio Assets/recruit-sound.m4a', 'Audio Assets/recruit-sound.mp3', 'Audio Assets/recruit-sound.webm']);
         return;
     }
     
@@ -9129,7 +9157,7 @@ function playRescueSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.rescue) {
-        loadSoundOnDemand('rescue', 'Audio Assets/rescue-bystander-sound.webm');
+        loadSoundOnDemand('rescue', ['Audio Assets/rescue-bystander-sound.m4a', 'Audio Assets/rescue-bystander-sound.mp3', 'Audio Assets/rescue-bystander-sound.webm']);
         return;
     }
     
@@ -9174,7 +9202,7 @@ function playSchemeTwistSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.schemeTwist) {
-        loadSoundOnDemand('schemeTwist', 'Audio Assets/scheme-twist-sound.webm');
+        loadSoundOnDemand('schemeTwist', ['Audio Assets/scheme-twist-sound.m4a', 'Audio Assets/scheme-twist-sound.mp3', 'Audio Assets/scheme-twist-sound.webm']);
         return;
     }
     
@@ -9210,7 +9238,7 @@ function playWoundSound() {
     
     // For local files, load on demand
     if (isLocalFile && !sounds.wound) {
-        loadSoundOnDemand('wound', 'Audio Assets/wound-sound.webm');
+        loadSoundOnDemand('wound', ['Audio Assets/wound-sound.m4a', 'Audio Assets/wound-sound.mp3', 'Audio Assets/wound-sound.webm']);
         return;
     }
     
@@ -9250,7 +9278,6 @@ function playWoundSound() {
     playWoundSound.lastPlayTime = now + delay;
 }
 
-// The rest of your code remains the same...
 let sfxGlobalVolume = 0.8;
 let hasFadedIn = false;
 
@@ -9307,5 +9334,3 @@ function saveSettings() {
 }
 
 loadAudioSettings();
-
-
