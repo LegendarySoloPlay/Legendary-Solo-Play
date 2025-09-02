@@ -437,6 +437,7 @@ let popupMinimized = false;
 let deadpoolRare = false;
 let gameIsOver = false;
 let audioContextInitialized = false;
+let soundsLoaded = false;
 let sfxEnabled = false;
 let isLocalFile = window.location.protocol === 'file:';
 
@@ -2201,6 +2202,7 @@ document.getElementById('modal-overlay').style.display = 'none';
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 async function onBeginGame() {
+    // Initialize audio context if not already done
     if (!audioContextInitialized) {
         initAudio();
         audioContextInitialized = true;
@@ -2235,10 +2237,10 @@ async function onBeginGame() {
     // Enable SFX after user interaction
     sfxEnabled = true;
     
-    // Don't load sounds on mobile - they're already loaded during setup
-    // Only load sounds if not on mobile or if they haven't been loaded yet
-    if (!isMobileDevice() || Object.keys(sounds).length === 0) {
-        loadAllSounds();
+    // Load sounds only if they haven't been loaded yet
+    if (!soundsLoaded) {
+        await loadAllSounds();
+        soundsLoaded = true;
     }
 
     if (!this.disabled) {
@@ -8699,7 +8701,7 @@ async function loadAllSounds() {
     // Mobile browsers require this to happen in response to user interaction
     const soundPromises = [];
     
-    // Each sound now loads multiple formats
+    // Each sound loads multiple formats
     soundPromises.push(loadSound('attack', ['Audio Assets/attack-sound.m4a', 'Audio Assets/attack-sound.mp3', 'Audio Assets/attack-sound.webm']));
     soundPromises.push(loadSound('draw', ['Audio Assets/card-draw-sound.m4a', 'Audio Assets/card-draw-sound.mp3', 'Audio Assets/card-draw-sound.webm']));
     soundPromises.push(loadSound('lose', ['Audio Assets/evil-wins-sound.m4a', 'Audio Assets/evil-wins-sound.mp3', 'Audio Assets/evil-wins-sound.webm']));
@@ -8717,15 +8719,16 @@ async function loadAllSounds() {
         await Promise.all(soundPromises);
         console.log('All sounds loaded!');
         
-        // On mobile, we need to "prime" the audio elements by playing them silently
-        // and immediately pausing, all within the user interaction context
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Don't prime on mobile - it causes all sounds to play
+        // We'll rely on the user interaction from button clicks to enable audio
+        if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
             primeAudioElements();
         }
     } catch (error) {
         console.error('Error loading sounds:', error);
     }
 }
+
 
 // Enhanced loadSound function for multiple formats
 function loadSound(name, urls) {
@@ -9349,5 +9352,6 @@ function saveSettings() {
 }
 
 loadAudioSettings();
+
 
 
