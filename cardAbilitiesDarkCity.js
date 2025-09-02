@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//01.09.2025 20.38
+//02.09.2025 14.45
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -9446,7 +9446,7 @@ genericCardSort(revealedCards);
                 const cardsToDiscard = revealedCards.filter(card => card !== selectedCard);
                 for (const card of cardsToDiscard) {
                     
-                    const { returned } = await checkDiscardForInvulnerability(selectedCard);
+                    const { returned } = await checkDiscardForInvulnerability(card);
                         if (returned.length) {
                         playerHand.push(...returned);
                         }
@@ -11574,3 +11574,4 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+

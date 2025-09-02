@@ -38,6 +38,7 @@ const updatesHTML = `
 <li><strong>Apocalypse -</strong> An issue with games against Apocalypse not ending has been fixed.
 <li><strong>Mr. Sinister -</strong> Previous issue with Attack calculation has been corrected. When a Master Strike occurs, cards appeared as if remaining in the player's hand. They are now properly removed. 
 <li><strong>Red Skull -</strong> The <i>Ruthless Dictator</i> Tactic would previously quit if you had less that three cards available to reveal. It will now correctly do "as much as possible".
+<li><strong>Stryfe -</strong> The <i>Psychic Torment</i> Tactic was accidentally duplicating whichever card was added to the player's hand. It will now correctly discard the other four revealed cards.
 </ul>
 <p>🥷 <span style="text-decoration:underline;"><strong>HENCHMEN:</strong></span>
 <ul>
