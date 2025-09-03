@@ -2548,6 +2548,13 @@ if (jeanGreyHero) {
                     type: 'Villain',
                     goblinQueen: true,
                     victoryPoints: 4,
+			unconditionalAbility: 'None',
+			conditionalAbility: 'None',
+			multiplier: 'None',
+			multiplierAttribute: 'None',
+			multiplierLocation: 'None',
+			conditionType: 'None',
+			condition: 'None',
 		image: transformedImage,
                 };
                 deck.push(modifiedCard);
