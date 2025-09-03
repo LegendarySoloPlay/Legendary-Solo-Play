@@ -1,4 +1,4 @@
-//04.09.2025 08.05
+//04.09.2025 08.51
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -3510,13 +3510,11 @@ function showHeroSelectPopup() {
         const heroOptions = document.getElementById('hero-options');
         const heroImage = document.getElementById('hero-select-image');
         const hoverText = document.getElementById('selectHoverText');
-        
-        // Check if confirm button already exists and remove it first
+
+        // Remove any existing confirm button
         const existingConfirm = document.getElementById('hero-select-confirm');
-        if (existingConfirm) {
-            heroSelectPopup.removeChild(existingConfirm);
-        }
-        
+        if (existingConfirm) heroSelectPopup.removeChild(existingConfirm);
+
         const confirmButton = document.createElement('button');
         confirmButton.id = 'hero-select-confirm';
         confirmButton.textContent = 'CONFIRM';
@@ -3526,56 +3524,50 @@ function showHeroSelectPopup() {
         heroImage.style.display = 'none';
         hoverText.style.display = 'block';
 
-        heroOptions.innerHTML = ''; // Clear previous options
-        let selectedHero = null;
+        heroOptions.innerHTML = '';
+        let selectedHQIndex = null;  // <-- store HQ index, not eligible index
         let activeImage = null;
 
-        // Add confirm button to popup
         heroSelectPopup.appendChild(confirmButton);
 
-        // Filter eligible heroes - now checks for null/undefined first
-        const eligibleHeroes = hq.filter(hero => 
-            hero && hero.type === 'Hero' && hero.cost <= 6
-        );
+        // Build a list of { hero, hqIndex } so indices don't shift
+        const eligible = hq
+            .map((hero, hqIndex) => ({ hero, hqIndex }))
+            .filter(x => x.hero && x.hero.type === 'Hero' && x.hero.cost <= 6);
 
-        if (eligibleHeroes.length === 0) {
+        if (eligible.length === 0) {
             onscreenConsole.log('No Heroes available with a cost of 6 or less.');
             resolve();
             return;
         }
 
-        // Populate hero options
-        eligibleHeroes.forEach((hero, index) => {
+        // Helpers for icons
+        const createTeamIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+            }
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+        const createClassIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') return '';
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+
+        // Populate options
+        eligible.forEach(({ hero, hqIndex }) => {
             const heroButton = document.createElement('button');
-    const hqPosition = hq.indexOf(hero) + 1;
-    
-    // Helper function to create icon HTML only if the value exists and is not 'none'
-    const createTeamIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-
-    const createClassIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(hero.team);
-    const class1Icon = createClassIconHTML(hero.class1);
-    const class2Icon = createClassIconHTML(hero.class2);
-    const class3Icon = createClassIconHTML(hero.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    heroButton.innerHTML = `<span style="white-space: nowrap;">HQ-${hqPosition} | ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             heroButton.classList.add('hero-option');
+            heroButton.setAttribute('data-hq-index', String(hqIndex)); // <-- bind HQ index
 
-            // Hover functionality
+            const teamIcon = createTeamIconHTML(hero.team);
+            const class1Icon = createClassIconHTML(hero.class1);
+            const class2Icon = createClassIconHTML(hero.class2);
+            const class3Icon = createClassIconHTML(hero.class3);
+
+            heroButton.innerHTML =
+                `<span style="white-space: nowrap;">HQ-${hqIndex + 1} | ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
+
+            // Hover preview
             heroButton.onmouseover = () => {
                 if (!activeImage) {
                     heroImage.src = hero.image;
@@ -3583,7 +3575,6 @@ function showHeroSelectPopup() {
                     hoverText.style.display = 'none';
                 }
             };
-
             heroButton.onmouseout = () => {
                 if (!activeImage) {
                     heroImage.src = '';
@@ -3592,11 +3583,12 @@ function showHeroSelectPopup() {
                 }
             };
 
-            // Selection functionality
+            // Selection
             heroButton.onclick = () => {
-                if (selectedHero === index) {
+                const thisHQIndex = Number(heroButton.getAttribute('data-hq-index'));
+                if (selectedHQIndex === thisHQIndex) {
                     // Deselect
-                    selectedHero = null;
+                    selectedHQIndex = null;
                     heroButton.classList.remove('selected');
                     activeImage = null;
                     heroImage.src = '';
@@ -3604,13 +3596,13 @@ function showHeroSelectPopup() {
                     hoverText.style.display = 'block';
                     confirmButton.disabled = true;
                 } else {
-                    // Deselect previous
-                    if (selectedHero !== null) {
-                        const prevButton = heroOptions.querySelector(`button[data-hero-id="${selectedHero}"]`);
+                    // Deselect previous (by HQ index)
+                    if (selectedHQIndex !== null) {
+                        const prevButton = heroOptions.querySelector(`button[data-hq-index="${selectedHQIndex}"]`);
                         if (prevButton) prevButton.classList.remove('selected');
                     }
                     // Select new
-                    selectedHero = index;
+                    selectedHQIndex = thisHQIndex;
                     heroButton.classList.add('selected');
                     activeImage = hero.image;
                     heroImage.src = hero.image;
@@ -3620,30 +3612,31 @@ function showHeroSelectPopup() {
                 }
             };
 
-            heroButton.setAttribute('data-hero-id', index);
             heroOptions.appendChild(heroButton);
         });
 
-        // Confirm button handler
+        // Confirm
         confirmButton.onclick = (e) => {
-            e.stopPropagation(); // Stop event bubbling
-            e.preventDefault();  // Prevent default behavior
-            
-            if (selectedHero === null) return;
+            e.stopPropagation();
+            e.preventDefault();
+            if (selectedHQIndex === null) return;
 
-            // Add a small delay before closing to block ghost clicks
             setTimeout(() => {
-                const hero = eligibleHeroes[selectedHero];
-                onscreenConsole.log(`A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`);
-                returnHeroToDeck(selectedHero);
+                const hero = hq[selectedHQIndex]; // <-- resolve by HQ index
+                if (hero) {
+                    onscreenConsole.log(
+                        `A Scheme Twist has forced you to return <span class="console-highlights">${hero.name}</span> to the bottom of the Hero Deck.`
+                    );
+                }
+                returnHeroToDeck(selectedHQIndex); // <-- pass HQ index
                 updateGameBoard();
-                
+
                 // Clean up
                 heroSelectPopup.removeChild(confirmButton);
                 heroSelectPopup.style.display = 'none';
                 modalOverlay.style.display = 'none';
                 resolve();
-            }, 100); // 100ms delay blocks ghost clicks
+            }, 100);
         };
 
         // Show popup
@@ -3652,23 +3645,23 @@ function showHeroSelectPopup() {
     });
 }
 
-function returnHeroToDeck(index) {
-    const hero = hq[index];
+function returnHeroToDeck(hqIndex) {
+    const hero = hq[hqIndex];
     if (hero) {
-        heroDeck.unshift(hero); // Add the Hero to the bottom of the Hero deck
-        
-        // Get the new card before placing it in HQ
+        // Bottom = front; drawing uses pop() from end (top)
+        heroDeck.unshift(hero);
+
+        // Draw new top card (end of array)
         const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
-        hq[index] = newCard; // Fill the HQ slot with the top card of the Hero deck
-        
+        hq[hqIndex] = newCard;
+
         if (newCard) {
             onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
         } else {
             onscreenConsole.log(`HQ Update: No new card available.`);
         }
 
-addHRToTopWithInnerHTML();
-       
+        addHRToTopWithInnerHTML();
         updateGameBoard();
     }
 }
@@ -6411,63 +6404,67 @@ function showHeroKOPopup() {
         const heroOptions = document.getElementById('hero-KO-options');
         const heroImage = document.getElementById('hero-ko-image');
         const hoverText = document.getElementById('KOHoverText');
-        const confirmButton = document.createElement('button'); // Create confirm button dynamically
+
+        // Remove existing confirm button if present
+        const existingConfirm = document.getElementById('hero-KO-confirm');
+        if (existingConfirm) heroKOPopup.removeChild(existingConfirm);
+
+        const confirmButton = document.createElement('button');
         confirmButton.id = 'hero-KO-confirm';
         confirmButton.textContent = 'CONFIRM';
-        confirmButton.style.display = 'inline-block'; // Show button immediately
+        confirmButton.style.display = 'inline-block';
         confirmButton.style.width = '50%';
-        confirmButton.style.marginTop = '2vh';  // Fixed: margin-top becomes marginTop
-        confirmButton.disabled = true; // Disabled by default
+        confirmButton.style.marginTop = '2vh';
+        confirmButton.disabled = true;
+
         heroImage.style.display = 'none';
         hoverText.style.display = 'block';
 
-        heroOptions.innerHTML = ''; // Clear previous options
-        let selectedHero = null;
+        heroOptions.innerHTML = '';
+        let selectedHQIndex = null;
         let activeImage = null;
 
-        // Add confirm button to popup
         heroKOPopup.appendChild(confirmButton);
 
-        // Filter eligible heroes
-        const eligibleHeroes = hq.filter(hero => hero && hero.cost <= 6);
+        // Build list retaining original HQ indices
+        const eligible = hq
+            .map((hero, hqIndex) => ({ hero, hqIndex }))
+            .filter(x => x.hero && x.hero.cost <= 6);
 
-        if (eligibleHeroes.length === 0) {
+        if (eligible.length === 0) {
             onscreenConsole.log('No Heroes available with a cost of 6 or less.');
+            // Ensure UI is closed if it was open
+            heroKOPopup.style.display = 'none';
+            modalOverlay.style.display = 'none';
             resolve();
             return;
         }
 
+        const createTeamIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+            }
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+        const createClassIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') return '';
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+
         // Populate hero options
-        eligibleHeroes.forEach((hero, index) => {
+        eligible.forEach(({ hero, hqIndex }) => {
             const heroButton = document.createElement('button');
-	const hqPosition = hq.indexOf(hero) + 1;
-    
-                const createTeamIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-
-    const createClassIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(hero.team);
-    const class1Icon = createClassIconHTML(hero.class1);
-    const class2Icon = createClassIconHTML(hero.class2);
-    const class3Icon = createClassIconHTML(hero.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    heroButton.innerHTML = `<span style="white-space: nowrap;">HQ-${hqPosition} | ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             heroButton.classList.add('hero-option');
+            heroButton.setAttribute('data-hq-index', String(hqIndex));
 
-            // Hover functionality
+            const teamIcon = createTeamIconHTML(hero.team);
+            const class1Icon = createClassIconHTML(hero.class1);
+            const class2Icon = createClassIconHTML(hero.class2);
+            const class3Icon = createClassIconHTML(hero.class3);
+
+            heroButton.innerHTML = `<span style="white-space: nowrap;">HQ-${hqIndex + 1} | ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
+
+            // Hover
             heroButton.onmouseover = () => {
                 if (!activeImage) {
                     heroImage.src = hero.image;
@@ -6475,7 +6472,6 @@ function showHeroKOPopup() {
                     hoverText.style.display = 'none';
                 }
             };
-
             heroButton.onmouseout = () => {
                 if (!activeImage) {
                     heroImage.src = '';
@@ -6484,11 +6480,12 @@ function showHeroKOPopup() {
                 }
             };
 
-            // Selection functionality
+            // Select
             heroButton.onclick = () => {
-                if (selectedHero === index) {
+                const thisHQIndex = Number(heroButton.getAttribute('data-hq-index'));
+                if (selectedHQIndex === thisHQIndex) {
                     // Deselect
-                    selectedHero = null;
+                    selectedHQIndex = null;
                     heroButton.classList.remove('selected');
                     activeImage = null;
                     heroImage.src = '';
@@ -6496,13 +6493,12 @@ function showHeroKOPopup() {
                     hoverText.style.display = 'block';
                     confirmButton.disabled = true;
                 } else {
-                    // Deselect previous
-                    if (selectedHero !== null) {
-                        const prevButton = heroOptions.querySelector(`button[data-hero-id="${selectedHero}"]`);
+                    // Deselect previous by HQ index
+                    if (selectedHQIndex !== null) {
+                        const prevButton = heroOptions.querySelector(`button[data-hq-index="${selectedHQIndex}"]`);
                         if (prevButton) prevButton.classList.remove('selected');
                     }
-                    // Select new
-                    selectedHero = index;
+                    selectedHQIndex = thisHQIndex;
                     heroButton.classList.add('selected');
                     activeImage = hero.image;
                     heroImage.src = hero.image;
@@ -6512,21 +6508,22 @@ function showHeroKOPopup() {
                 }
             };
 
-            heroButton.setAttribute('data-hero-id', index);
             heroOptions.appendChild(heroButton);
         });
 
-        // Confirm button handler
+        // Confirm
         confirmButton.onclick = () => {
-            if (selectedHero === null) return;
-            const hero = eligibleHeroes[selectedHero];
-            koHeroInHQ(selectedHero);
-            
-            // Cleanup
+            if (selectedHQIndex === null) return;
+
+            // Optional: log the actual hero being KO’d
+            const hero = hq[selectedHQIndex];
+            koHeroInHQ(selectedHQIndex); // <-- pass true HQ index
+
+            // Cleanup & close
             heroKOPopup.removeChild(confirmButton);
             heroKOPopup.style.display = 'none';
             modalOverlay.style.display = 'none';
-            
+
             requestAnimationFrame(() => {
                 updateGameBoard();
                 resolve();
@@ -6538,6 +6535,7 @@ function showHeroKOPopup() {
         heroKOPopup.style.display = 'block';
     });
 }
+
 
 
 function koHeroInHQ(index) {
@@ -9040,3 +9038,4 @@ function openSettingsPopup() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) overlay.style.display = 'block';
 }
+
