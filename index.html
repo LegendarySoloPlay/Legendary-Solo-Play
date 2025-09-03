@@ -16,7 +16,7 @@
 
 <body>
 
-  <div style="display:none;">01.09.2025 20.38</div>
+  <div style="display:none;">04.09.2025 08.05</div>
   <div id="background-for-expansion-popup"></div>
 <div id="expansion-popup-container">
   <div id="expansion-banner">
@@ -1239,24 +1239,45 @@
   </div>
 </div>
 
+<!-- SETTINGS POPUP (HTML) -->
 <div id="settings-popup" class="popup" style="display:none;">
-<div class="close-triangle-btn" aria-label="Close" onclick="saveSettings()">
-  <span class="close-x"><b>✕</b></span>
+  <div class="close-triangle-btn" aria-label="Close" onclick="saveSettings()">
+    <span class="close-x"><b>✕</b></span>
+  </div>
+  <h3>SETTINGS</h3>
+
+ <div class="volume-control">
+  <h3>Volume</h3>
+
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; justify-content: center;">
+    <label for="music-volume">Music:</label>
+    <input
+      type="range" id="music-volume" min="0" max="1" step="0.05" value="0.7"
+      oninput="applySettingsFromUI()" onchange="applySettingsFromUI()"
+    >
+    <label style="display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="music-mute" onchange="applySettingsFromUI()"> Mute Music
+    </label>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+    <label for="sfx-volume">SFX:</label>
+    <input
+      type="range" id="sfx-volume" min="0" max="1" step="0.05" value="0.7"
+      oninput="applySettingsFromUI()" onchange="applySettingsFromUI()"
+    >      
+    <label style="display: flex; align-items: center; gap: 6px;">
+      <input type="checkbox" id="sfx-mute" onchange="applySettingsFromUI()"> Mute SFX
+    </label>
+  </div>
 </div>
-    <h3>SETTINGS</h3>
-    <label>
-        Music Volume:
-        <input type="range" id="musicVolume" min="0" max="1" step="0.1" value="0.7">
-    </label>
-<br>
-    <label>
-        SFX Volume:
-        <input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.8">
-    </label>
-<br>
-    <button id="settingsButton" onclick="saveSettings()">CLOSE</button>
-<br>
-<div id="sound-attributions"><span>Music and SFX sourced from https://freesound.org under their Attribution 3.0 license. Special thanks to the following creators: Artninja, Cigaro30, D4XX, HarDuKK, Hope_sounds_3, humanoide9000, mlteenie, original_sound, ponycillo, RealSquink, Robinhood76 and thecheeseman.</span></div>
+
+  <br>
+  <button id="settingsButton" onclick="saveSettings()">CLOSE</button>
+  <br>
+  <div id="sound-attributions">
+    <span>SFX are sourced from https://freesound.org under their Attribution 3.0 license. Special thanks to the following creators: Artninja, Cigaro30, D4XX, HarDuKK, Hope_sounds_3, humanoide9000, mlteenie, original_sound, ponycillo, RealSquink, Robinhood76 and thecheeseman. Music: www.purple-planet.com</span>
+  </div>
 </div>
   
  <div id="investigate-popup" class="popup" style="display: none;">
