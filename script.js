@@ -4447,6 +4447,15 @@ if (city[i]) {
                 cardContainer.appendChild(permBuffOverlay);
             }
 
+if (
+    city[i] &&
+    typeof city[i].attack !== 'undefined' &&
+    typeof city[i].originalAttack !== 'undefined' &&
+    city[i].attack !== city[i].originalAttack
+) {
+    city[i].overlayTextAttack = `${city[i].attack}`;
+}
+
 
     // If the city[i].name is 'Killbot', set the overlayTextAttack
     if (city[i].killbot === true) {
