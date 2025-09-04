@@ -2200,7 +2200,7 @@ async function onBeginGame() {
   loader.classList.add('show');
   blackout.classList.add('show');
   
-  const minDisplay = 1000; // 1s minimum
+  const minDisplay = 2000; // 2s minimum
   const startTime = Date.now();
 
   if (window.audioEngine) {
