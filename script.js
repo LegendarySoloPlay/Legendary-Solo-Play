@@ -1,4 +1,4 @@
-//04.09.2025 08.51
+//04.09.2025 10.16
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -5959,6 +5959,10 @@ function recalculateVillainAttack(villainCard) {
         finalAttack += killbotAttack;
     }
 
+    if (villainCard.goblinQueen === true) {
+        finalAttack = villainCard.cost + demonGoblinDeck.length;
+    }
+
     return Math.max(0, finalAttack);
 }
 
@@ -6303,14 +6307,14 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
         onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
     }
 
-    // Handle XCutioner Heroes
-    if (villainCard.XCutionerHeroes && villainCard.XCutionerHeroes.length > 0) {
-        for (const hero of villainCard.XCutionerHeroes) {
-            playerDiscardPile.push(hero);
-        }
-        villainCard.XCutionerHeroes = [];
+// Handle X-Cutioner Heroes
+if (Array.isArray(villainCard.XCutionerHeroes) && villainCard.XCutionerHeroes.length > 0) {
+    for (const hero of villainCard.XCutionerHeroes) {
+        playerDiscardPile.push(hero);
         onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
     }
+    villainCard.XCutionerHeroes.length = 0; // clear in-place
+}
 
     // Handle extra bystanders
     if (rescueExtraBystanders > 0) {
@@ -6318,6 +6322,11 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
             rescueBystander();
         }
     }
+
+if (villainCard.name === 'Dracula') {
+villainCard.attack = 3;
+villainCard.cost = 0;
+}
 
     // Add villain to victory pile
     victoryPile.push(villainCard);
