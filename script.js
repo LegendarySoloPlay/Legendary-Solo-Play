@@ -2194,13 +2194,20 @@ document.getElementById('modal-overlay').style.display = 'none';
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 async function onBeginGame() {
-document.querySelector('.loading-container').classList.add('show');
-document.querySelector('.blackout-overlay').classList.add('show');
+  const loader = document.querySelector('.loading-container');
+  const blackout = document.querySelector('.blackout-overlay');
+  
+  loader.classList.add('show');
+  blackout.classList.add('show');
+  
+  const minDisplay = 1000; // 1s minimum
+  const startTime = Date.now();
 
-if (window.audioEngine) await window.audioEngine.begin({ musicFadeSeconds: 2.0 });
+  if (window.audioEngine) {
+    await window.audioEngine.begin({ musicFadeSeconds: 2.0 });
+  }
 
   if (!this.disabled) {
-
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
     const selectedMastermind = document.querySelector('#mastermind-section input[type=radio]:checked').value;
     const selectedVillains = Array.from(document.querySelectorAll('#villain-selection input[type=checkbox]:checked')).map(cb => cb.value);
@@ -2219,10 +2226,19 @@ if (window.audioEngine) await window.audioEngine.begin({ musicFadeSeconds: 2.0 }
     initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
 
     document.getElementById('confirm-start-up-choices').style.display = 'none';
-document.querySelector('.loading-container').classList.remove('show');
-document.querySelector('.blackout-overlay').classList.remove('show');
+
+    // enforce min display duration
+    const elapsed = Date.now() - startTime;
+    const remaining = Math.max(0, minDisplay - elapsed);
+
+    setTimeout(() => {
+      loader.classList.remove('show');
+      blackout.classList.remove('show');
+    }, remaining);
   }
 }
+
+
 
 document.getElementById('start-expansion').addEventListener('click', () => {
     const expansionPopup = document.getElementById('expansion-popup-container');

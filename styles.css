@@ -4242,17 +4242,7 @@ width: 50%;
   gap: 2vw;
   height: 100px;
   z-index: 9999;
-
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
 }
-
-.loading-container.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 
 .blackout-overlay {
     position: fixed;
@@ -4262,16 +4252,20 @@ width: 50%;
     height: 100%;
     background-color: #282828;
     z-index: 1000; /* Make sure it's above other elements */
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
 }
 
+.loading-container,
+.blackout-overlay {
+  opacity: 0;
+  transition: opacity 0.5s ease; /* fade in/out */
+  pointer-events: none; /* not clickable when hidden */
+}
+
+.loading-container.show,
 .blackout-overlay.show {
   opacity: 1;
   pointer-events: auto;
 }
-
 
 .loading-card-icons {
   width: 50px; /* adjust size */
