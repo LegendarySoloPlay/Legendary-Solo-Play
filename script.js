@@ -5,6 +5,25 @@ console.log(window.henchmen);
 console.log(window.villains);
 console.log(window.heroes);
 
+window.addEventListener("load", async () => {
+  const loader   = document.querySelector('.loading-container');
+  const blackout = document.querySelector('.blackout-overlay');
+
+  const minDisplayMs = 2000; // how long to show at least
+  const start = performance.now();
+
+  await allowPaint(); // let the loader actually render
+
+  // Calculate if we need to wait longer
+  const elapsed   = performance.now() - start;
+  const remaining = Math.max(0, minDisplayMs - elapsed);
+
+  setTimeout(() => {
+    loader.classList.remove('show');
+    blackout.classList.remove('show');
+  }, remaining);
+});
+
 // Custom on-screen log function
 const onscreenConsole = {
   log: function (...args) {

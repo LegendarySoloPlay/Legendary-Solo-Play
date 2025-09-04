@@ -4251,7 +4251,7 @@ width: 50%;
     width: 100%;
     height: 100%;
     background-color: #282828;
-    z-index: 1000; /* Make sure it's above other elements */
+    z-index: 1002; /* Make sure it's above other elements */
 }
 
 .loading-container,
