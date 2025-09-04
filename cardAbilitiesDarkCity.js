@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//02.09.2025 14.45
+//04.09.2025 10.16
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -4809,7 +4809,7 @@ async function professorXHandleBystanderCard(bystanderCard) {
 }
 
 async function initiateTelepathicVillainFight(villainCard, telepathicProbeCard) {
-playAttackSound();
+playSFX('attack');
 
     if (telepathicProbeCard) {
         telepathicProbeCard.villain = null; // Clear the reference after fighting
@@ -9438,7 +9438,7 @@ genericCardSort(revealedCards);
         confirmButton.onclick = async function() {
             if (selectedCard) {
                 // Add selected card to hand
-		playDrawSound();
+		playSFX('card-draw');
                 playerHand.push(selectedCard);
                 onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> added to hand.`);
 
@@ -11333,7 +11333,7 @@ function isCityEmpty() {
 }
 
 async function instantDefeatAttack(cityIndex) {
-playAttackSound();
+playSFX('attack');
     // Get fresh references
     const villainCard = city[cityIndex];
     if (!villainCard) {
@@ -11374,44 +11374,51 @@ if (Array.isArray(villainCard.bystander)) {
     }
 }
 
-if (villainCard.babyHope === true) {
-    delete villainCard.babyHope;
+ if (villainCard.babyHope === true) {
+        delete villainCard.babyHope;
         villainCard.attack = villainCard.originalAttack;
-         const BabyHopeCard = { 
-                    name: "Baby Hope", 
-                    type: "Baby", 
-                    victoryPoints: 6, 
-                    image: 'Visual Assets/Schemes/DarkCity_captureBabyHope.webp'
-                };
-                victoryPile.push(BabyHopeCard);
-                updateGameBoard();
-}
+        const BabyHopeCard = { 
+            name: "Baby Hope", 
+            type: "Baby", 
+            victoryPoints: 6, 
+            image: 'Visual Assets/Other/babyHope.webp'
+        };
+        victoryPile.push(BabyHopeCard);
+        updateGameBoard();
+    }
 
+    // Rest of the post-defeat handling remains the same
     if (villainCard.plutoniumCaptured && villainCard.plutoniumCaptured.length > 0) {
         for (const plutonium of villainCard.plutoniumCaptured) {
             villainDeck.push(plutonium);
-            onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
         }
-        // Clear the plutonium from the defeated villain
         villainCard.plutoniumCaptured = [];
-        shuffle(villainDeck); // Shuffle the villain deck
+        shuffle(villainDeck);
+        onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
     }
 
-     if (villainCard.XCutionerHeroes && villainCard.XCutionerHeroes.length > 0) {
-        for (const hero of villainCard.XCutionerHeroes) {
-            playerDiscardPile.push(hero);
-            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
-        }
-        // Clear the plutonium from the defeated villain
-        villainCard.XCutionerHeroes = [];
-    }
 
-    // Handle extra bystander rescues
+// Handle X-Cutioner Heroes
+if (Array.isArray(villainCard.XCutionerHeroes) && villainCard.XCutionerHeroes.length > 0) {
+    for (const hero of villainCard.XCutionerHeroes) {
+        playerDiscardPile.push(hero);
+        onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+    }
+    villainCard.XCutionerHeroes.length = 0; // clear in-place
+}
+
+
+    // Handle extra bystanders
     if (rescueExtraBystanders > 0) {
         for (let i = 0; i < rescueExtraBystanders; i++) {
             rescueBystander();
         }
     }
+
+if (villainCard.name === 'Dracula') {
+villainCard.attack = 3;
+villainCard.cost = 0;
+}
 
     victoryPile.push(villainCard);
 
@@ -11503,7 +11510,7 @@ defeatBonuses();
 }
 
 async function confirmInstantMastermindAttack() {
-playAttackSound();
+playSFX('attack');
     try {
         const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
         let mastermind = getSelectedMastermind();
@@ -11574,5 +11581,4 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
-
 
