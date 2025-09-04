@@ -1,4 +1,4 @@
-//04.09.2025 10.16
+//04.09.2025 11.12
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -2194,6 +2194,8 @@ document.getElementById('modal-overlay').style.display = 'none';
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 async function onBeginGame() {
+document.querySelector('.loading-container').classList.add('show');
+document.querySelector('.blackout-overlay').classList.add('show');
 
 if (window.audioEngine) await window.audioEngine.begin({ musicFadeSeconds: 2.0 });
 
@@ -2217,6 +2219,8 @@ if (window.audioEngine) await window.audioEngine.begin({ musicFadeSeconds: 2.0 }
     initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
 
     document.getElementById('confirm-start-up-choices').style.display = 'none';
+document.querySelector('.loading-container').classList.remove('show');
+document.querySelector('.blackout-overlay').classList.remove('show');
   }
 }
 
