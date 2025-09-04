@@ -2193,52 +2193,72 @@ document.getElementById('modal-overlay').style.display = 'none';
 
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
-async function onBeginGame() {
-  const loader = document.querySelector('.loading-container');
+// Utility: wait for two animation frames so the browser can paint the loader
+function allowPaint() {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+}
+
+async function onBeginGame(e) {
+  const loader   = document.querySelector('.loading-container');
   const blackout = document.querySelector('.blackout-overlay');
-  
+
+  // Show overlays immediately
   loader.classList.add('show');
   blackout.classList.add('show');
-  
-  const minDisplay = 2000; // 2s minimum
-  const startTime = Date.now();
+
+  const minDisplayMs = 2000; // set your minimum visible time here
+  const start = performance.now();
+
+  // Give the browser a chance to actually render the loader before heavy work
+  await allowPaint();
+
+  // (Optional) prevent double-clicks on the button that triggered this
+  if (e?.currentTarget) e.currentTarget.disabled = true;
 
   if (window.audioEngine) {
     await window.audioEngine.begin({ musicFadeSeconds: 2.0 });
   }
 
-  if (!this.disabled) {
+  if (!this || !this.disabled) {
+    // Gather selections
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
     const selectedMastermind = document.querySelector('#mastermind-section input[type=radio]:checked').value;
-    const selectedVillains = Array.from(document.querySelectorAll('#villain-selection input[type=checkbox]:checked')).map(cb => cb.value);
-    const selectedHenchmen = Array.from(document.querySelectorAll('#henchmen-selection input[type=checkbox]:checked')).map(cb => cb.value);
-    const selectedHeroes = Array.from(document.querySelectorAll('#hero-selection input[type=checkbox]:checked')).map(cb => cb.value);
+    const selectedVillains   = Array.from(document.querySelectorAll('#villain-selection input[type=checkbox]:checked')).map(cb => cb.value);
+    const selectedHenchmen   = Array.from(document.querySelectorAll('#henchmen-selection input[type=checkbox]:checked')).map(cb => cb.value);
+    const selectedHeroes     = Array.from(document.querySelectorAll('#hero-selection  input[type=checkbox]:checked')).map(cb => cb.value);
 
     finalBlowEnabled = document.getElementById('final-blow-checkbox').checked;
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
-    // Start the game (your existing UI flow)
+    // Swap UI
     document.getElementById('home-screen').style.display = 'none';
     document.getElementById('game-board').style.display = 'block';
     document.getElementById('expand-side-panel').style.display = 'block';
     document.getElementById('side-panel').style.display = 'flex';
 
-    initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
+    // If initGame is synchronous, this will run immediately; if it returns a Promise, we await it.
+    await Promise.resolve(
+      initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme)
+    );
 
     document.getElementById('confirm-start-up-choices').style.display = 'none';
-
-    // enforce min display duration
-    const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, minDisplay - elapsed);
-
-    setTimeout(() => {
-      loader.classList.remove('show');
-      blackout.classList.remove('show');
-    }, remaining);
   }
+
+  // Enforce minimum visible duration
+  const elapsed   = performance.now() - start;
+  const remaining = Math.max(0, minDisplayMs - elapsed);
+  if (remaining > 0) {
+    await new Promise(r => setTimeout(r, remaining));
+  }
+
+  // Fade out (CSS transition handles the smoothness)
+  loader.classList.remove('show');
+  blackout.classList.remove('show');
+
+  if (e?.currentTarget) e.currentTarget.disabled = false;
 }
-
-
 
 document.getElementById('start-expansion').addEventListener('click', () => {
     const expansionPopup = document.getElementById('expansion-popup-container');
