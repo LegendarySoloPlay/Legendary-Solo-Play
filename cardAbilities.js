@@ -1,8 +1,8 @@
 // cardAbilities.js
-//01.09.2025 20.38
+//04.09.2025 17.14
 
 function koBonuses() {
-playKOSound();
+playSFX('ko');
     if (twoRecruitFromKO > 0) {
 totalRecruitPoints += twoRecruitFromKO;
 cumulativeRecruitPoints += twoRecruitFromKO;
@@ -20,7 +20,7 @@ function defeatBonuses() {
 }
 
 function bystanderBonuses() {
-playRescueSound();
+playSFX('rescue');
     if (jeanGreyBystanderRecruit > 0) {
   totalRecruitPoints += jeanGreyBystanderRecruit;
   cumulativeRecruitPoints += jeanGreyBystanderRecruit;
@@ -56,7 +56,7 @@ function extraDraw(hero) {
     }
 
     // Draw a card and add it to the player's hand
-    playDrawSound();
+    playSFX('card-draw');
 	const card = playerDeck.pop();
     playerHand.push(card);
     extraCardsDrawnThisTurn++;
@@ -185,7 +185,7 @@ async function SpiderManRevealTopCardToDrawAndBystander() {
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
 
   if (topCardPlayerDeck.cost <= 2) {
-	playDrawSound();
+	playSFX('card-draw');
     playerDeck.pop(); // Removes the last card from the deck
     playerHand.push(topCardPlayerDeck); // Adds the card to the player's hand
     extraCardsDrawnThisTurn++;
@@ -208,7 +208,7 @@ function SpiderManRevealTopCardToDraw() {
   const topCardPlayerDeck = playerDeck[playerDeck.length - 1];
 
   if (topCardPlayerDeck.cost <= 2) {
-playDrawSound();
+playSFX('card-draw');
     playerDeck.pop(); // Removes the last card from the deck
     playerHand.push(topCardPlayerDeck); // Adds the card to the player's hand
 extraCardsDrawnThisTurn++;
@@ -1060,7 +1060,7 @@ return;
 topCardPlayerDeck.revealed = true;
 
   if (topCardPlayerDeck.team === "X-Men") {
-playDrawSound();
+playSFX('card-draw');
     playerDeck.pop();
     playerHand.push(topCardPlayerDeck);
 extraCardsDrawnThisTurn++;
@@ -1983,7 +1983,7 @@ onscreenConsole.log('No cards available to draw and discard.');
     }
 
     // Draw the top card and immediately send it to the discard pile
-playDrawSound();
+playSFX('card-draw');
     const topCard = playerDeck.pop();
     playerDiscardPile.push(topCard);
 
@@ -6697,7 +6697,7 @@ genericCardSort(eligibleHeroesForDoomRecruit);
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
-		playRecruitSound();
+		playSFX('recruit');
                 closePopup();
                 updateGameBoard();
                 resolve(true);
@@ -7526,7 +7526,7 @@ genericCardSort(eligibleHeroesForXMenRecruit);
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
-		playRecruitSound();
+		playSFX('recruit');
                 closePopup();
                 updateGameBoard();
                 resolve(true);
@@ -10574,3 +10574,4 @@ genericCardSort(playerHand);
                 modalOverlay.style.display = 'none';
             }
         }
+    

@@ -1,4 +1,4 @@
-//01.09.2025 20.38
+//04.09.2025 17.14
 
 function returnToSidekickDeck(card) {
     if (!card) {
@@ -202,7 +202,7 @@ function lockjawPhasing() {
             try {
                 if (playerDeck.length > 0) {
                     // Swap Lockjaw with the top card of the playerDeck
-			playDrawSound();
+			playSFX('card-draw');
                     const topCard = playerDeck.pop(); // Remove the top card from the deck
                     playerHand.push(topCard); // Add the top card to the player's hand
                     playerDeck.push(playedSidekick); // Move Lockjaw to the top of the deck
@@ -227,7 +227,7 @@ function lockjawPhasing() {
                     onscreenConsole.log("Discard pile shuffled into the player deck.");
 
                     if (playerDeck.length > 0) {
-			playDrawSound();
+			playSFX('card-draw');
                         const topCard = playerDeck.pop(); // Remove the top card from the deck
                         playerHand.push(topCard); // Add the top card to the player's hand
                         playerDeck.push(playedSidekick); // Move Lockjaw to the top of the deck
@@ -581,7 +581,7 @@ async function redwingDrawAndReturn() {
     })),
     confirmText: 'DRAW SELECTED CARD'
   });
-playDrawSound();
+playSFX('card-draw');
   playerHand.push(chosenCard.card);
   onscreenConsole.log(`<span class="console-highlights">${chosenCard.card.name}</span> added to hand.`);
 
@@ -1580,7 +1580,7 @@ function laylaMillerInvestigate() {
         else if (card1.team === selectedTeam || card2.team === selectedTeam) {
           const matchingCard = card1.team === selectedTeam ? card1 : card2;
           const otherCard = card1.team === selectedTeam ? card2 : card1;
-          playDrawSound();
+          playSFX('card-draw');
           playerHand.push(matchingCard);
           onscreenConsole.log(`You added <span class="console-highlights">${matchingCard.name}</span> to your hand.`);
           updateGameBoard();
@@ -1647,29 +1647,7 @@ async function showCardSelectionPopup(options) {
 
     options.items.forEach((item, index) => {
       const li = document.createElement('li');
-          const createTeamIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-
-    const createClassIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(item.team);
-    const class1Icon = createClassIconHTML(item.class1);
-    const class2Icon = createClassIconHTML(item.class2);
-    const class3Icon = createClassIconHTML(item.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${item.name}</span>`;
+      li.textContent = item.name || item.text;
       li.setAttribute('data-item-id', index);
 
       // Only add hover effects if enabled
@@ -1782,5 +1760,4 @@ async function handleCardPlacement(card, options = {}) {
     onscreenConsole.log(`You returned <span class="console-highlights">${card.name}</span> to the bottom of your deck.`);
   }
   updateGameBoard();
-
 }
