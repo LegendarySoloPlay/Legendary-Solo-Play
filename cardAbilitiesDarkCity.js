@@ -11205,7 +11205,7 @@ addHRToTopWithInnerHTML();
 async function KOCapturedHeroes() {
     const mastermind = getSelectedMastermind();
 
-    // 1. Handle XCutioner's captured heroes (original logic)
+    // 1. Handle XCutioner's captured heroes (original logic - already has null check)
     if (mastermind.XCutionerHeroes && mastermind.XCutionerHeroes.length > 0) {
         for (const hero of mastermind.XCutionerHeroes) {
             koPile.push(hero);
@@ -11214,9 +11214,9 @@ async function KOCapturedHeroes() {
         mastermind.XCutionerHeroes = [];
     }
 
-    // 2. Handle city spaces' XCutionerHeroes (original logic)
+    // 2. Handle city spaces' XCutionerHeroes (FIXED VERSION)
     for (let i = city.length - 1; i >= 0; i--) {
-        if (city[i].XCutionerHeroes && city[i].XCutionerHeroes.length > 0) {
+        if (city[i] && city[i].XCutionerHeroes && city[i].XCutionerHeroes.length > 0) {
             for (const hero of city[i].XCutionerHeroes) {
                 koPile.push(hero);
                 onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
@@ -11225,16 +11225,16 @@ async function KOCapturedHeroes() {
         }
     }
 
-    // 3. KO ALL captured heroes (Skrull/other captures)
+    // 3. KO ALL captured heroes (Skrull/other captures) - unchanged
     for (const hero of capturedCardsDeck) {
         koPile.push(hero);
         onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> has been KO'd.`);
     }
     capturedCardsDeck = []; // Clear the captured deck
 
-    // 4. Reset any villains that had captured heroes (Skrull Shapeshifters/Queen)
+    // 4. Reset any villains that had captured heroes (FIXED VERSION)
     for (const villain of city) {
-        if (villain && villain.captureCode) {
+        if (villain && villain.captureCode) { // Added null check here too
             // Remove capture-related properties
             delete villain.captureCode;
             delete villain.overlayText;
@@ -11245,7 +11245,7 @@ async function KOCapturedHeroes() {
         }
     }
 
-    // 5. Also reset mastermind if it had capture abilities
+    // 5. Also reset mastermind if it had capture abilities - unchanged
     if (mastermind.captureCode) {
         delete mastermind.captureCode;
         // Remove any overlays, reset attack, etc.
@@ -11581,4 +11581,5 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
 
