@@ -514,27 +514,25 @@ onscreenConsole.log('No Bystanders left to rescue.');
   }
 }
 
- 
-
 function BlackWidowRescueBystanderByKO() {
   return new Promise((resolve) => {
     onscreenConsole.log(`<img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
 
     // Check if there are any bystanders available
-    if (bystanderDeck.length === 0) {
+    const hasBystanders = bystanderDeck.length > 0;
+    
+    if (!hasBystanders) {
         console.log('There are no Bystanders available to be rescued.');
         onscreenConsole.log('There are no Bystanders available to be rescued.');
-        resolve();
-        return;
     }
 
-            if (playerHand.length === 0 && playerDiscardPile.length === 0) {
-                console.log("No cards in hand to discard.");
-                onscreenConsole.log(`No cards available to be KO'd.`);
-                updateGameBoard();
-                resolve(false);
-                return;
-            }
+    if (playerHand.length === 0 && playerDiscardPile.length === 0) {
+        console.log("No cards in hand to discard.");
+        onscreenConsole.log(`No cards available to be KO'd.`);
+        updateGameBoard();
+        resolve(false);
+        return;
+    }
 
     const popup = document.getElementById("card-ko-popup");
     const modalOverlay = document.getElementById("modal-overlay");
@@ -545,8 +543,13 @@ function BlackWidowRescueBystanderByKO() {
     const KOImage = document.getElementById("card-ko-popup-image");
     const context = document.getElementById("card-ko-popup-h2");
 
-    // Initialize UI
-    context.innerHTML = `Select a card to KO and rescue a <span class="bold-spans">Bystander</span>`;
+    // Initialize UI with appropriate message based on bystander availability
+    if (hasBystanders) {
+        context.innerHTML = `Select a card to KO and rescue a <span class="bold-spans">Bystander</span>`;
+    } else {
+        context.innerHTML = `There are no Bystanders available, but would you like to KO a card?`;
+    }
+    
     discardPileList.innerHTML = "";
     handList.innerHTML = "";
     confirmButton.style.display = 'inline-block';
@@ -567,9 +570,17 @@ function BlackWidowRescueBystanderByKO() {
     // Update instructions
     function updateInstructions() {
         if (selectedCard === null) {
-            context.innerHTML = `Select a card to KO and rescue a <span class="bold-spans">Bystander</span>`;
+            if (hasBystanders) {
+                context.innerHTML = `Select a card to KO and rescue a <span class="bold-spans">Bystander</span>`;
+            } else {
+                context.innerHTML = `There are no Bystanders available, but would you like to KO a card?`;
+            }
         } else {
-            context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd to rescue a Bystander.`;
+            if (hasBystanders) {
+                context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd to rescue a Bystander.`;
+            } else {
+                context.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd.`;
+            }
         }
     }
 
@@ -612,7 +623,8 @@ function BlackWidowRescueBystanderByKO() {
         updateConfirmButton();
         updateInstructions();
     }
-genericCardSort(playerDiscardPile);
+
+    genericCardSort(playerDiscardPile);
     // Populate discard pile
     playerDiscardPile.forEach((card) => {
       const li = document.createElement("li");
@@ -660,7 +672,8 @@ genericCardSort(playerDiscardPile);
       li.onclick = () => toggleCardSelection(card, 'discard', li);
       discardPileList.appendChild(li);
     });
-genericCardSort(playerHand);
+    
+    genericCardSort(playerHand);
     // Populate hand
     playerHand.forEach((card) => {
       const li = document.createElement("li");
@@ -712,7 +725,7 @@ genericCardSort(playerHand);
     // Handle confirmation
     confirmButton.onclick = async () => {
         if (selectedCard && selectedLocation) {
-            // Perform the KO and rescue
+            // Perform the KO
             if (selectedLocation === 'discard') {
                 const index = playerDiscardPile.indexOf(selectedCard);
                 if (index !== -1) playerDiscardPile.splice(index, 1);
@@ -722,42 +735,53 @@ genericCardSort(playerHand);
             }
             
             koPile.push(selectedCard);
-            const bystanderCard = bystanderDeck.pop();
-            victoryPile.push(bystanderCard);
-          
-            onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd. <span class="console-highlights">${bystanderCard.name}</span> rescued.`);
-            bystanderBonuses();
-koBonuses();
-
-await rescueBystanderAbility(bystanderCard);
-
+            
+            // Only rescue bystander if available
+            if (hasBystanders) {
+                const bystanderCard = bystanderDeck.pop();
+                victoryPile.push(bystanderCard);
+                onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd. <span class="console-highlights">${bystanderCard.name}</span> rescued.`);
+                bystanderBonuses();
+                await rescueBystanderAbility(bystanderCard);
+            } else {
+                onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
+            }
+            
+            koBonuses();
             closePopup();
             updateGameBoard();
             resolve();
         }
     };
 
-
-  // Handle cancellation
-        const closeButton = document.getElementById('no-thanks-button');
-        closeButton.style.display = 'inline-block';
-        closeButton.onclick = () => {
-            console.log(`No wound was KO'd.`);
+    // Handle cancellation
+    const closeButton = document.getElementById('no-thanks-button');
+    closeButton.style.display = 'inline-block';
+    closeButton.onclick = () => {
+        console.log(`No card was KO'd.`);
+        if (hasBystanders) {
+            onscreenConsole.log(`You chose not to KO any cards to rescue a Bystander.`);
+        } else {
             onscreenConsole.log(`You chose not to KO any cards.`);
-            closePopup();
-            resolve(false);
-        };
+        }
+        closePopup();
+        resolve(false);
+    };
 
-        const closeXButton = document.getElementById('card-ko-popup-close');
-            closeXButton.onclick = () => {
-            console.log(`No wound was KO'd.`);
+    const closeXButton = document.getElementById('card-ko-popup-close');
+    closeXButton.onclick = () => {
+        console.log(`No card was KO'd.`);
+        if (hasBystanders) {
+            onscreenConsole.log(`You chose not to KO any cards to rescue a Bystander.`);
+        } else {
             onscreenConsole.log(`You chose not to KO any cards.`);
-            closePopup();
-            resolve(false);
-        };
-
+        }
+        closePopup();
+        resolve(false);
+    };
 
     function closePopup() {
+        // Reset to default message
         context.innerHTML = `Do you wish to KO a card from your Discard Pile or Hand to rescue a <span class="bold-spans">S.H.I.E.L.D. Officer</span>?`;
         confirmButton.style.display = 'none';
         confirmButton.disabled = true;
@@ -770,7 +794,6 @@ await rescueBystanderAbility(bystanderCard);
     }
   });
 }
-
 
 function bonusAttack() {
   const previousCards = cardsPlayedThisTurn.slice(0, -1);
