@@ -2439,7 +2439,7 @@ let henchmenToPlaceOnTop = [];
             // Add 2 copies to the deck
             if (scheme.name === 'Organized Crime Wave') {
                 for (let i = 0; i < 8; i++) {
-                deck.push({ ...henchman, subtype: 'Henchman', ambushEffect: 'organizedCrimeAmbush' });
+                deck.push({ ...henchman, subtype: 'Henchman', ambushEffect: 'organizedCrimeAmbush', image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp' });
             }
             } else {
             for (let i = 0; i < 2; i++) {
@@ -9122,4 +9122,5 @@ function openSettingsPopup() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) overlay.style.display = 'block';
 }
+
 
