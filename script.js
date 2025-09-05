@@ -2435,30 +2435,24 @@ selectedHenchmen.forEach(henchmanName => {
     if (henchman) {
         if (henchmanName === selectedSpecialHenchman) {
             // For the selected special henchman:
-            
-            // Check if we need to use the Organized Crime Wave version
-            const isOrganizedCrime = scheme.name === 'Organized Crime Wave';
-            
-            // Determine the card details based on the scheme
-            const cardDetails = isOrganizedCrime ? {
-                ...henchman,
-                subtype: 'Henchman',
-                ambushEffect: 'organizedCrimeAmbush',
-                image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp'
-            } : {
-                ...henchman,
-                subtype: 'Henchman'
-            };
-            
-            // Add copies to the deck (8 for Organized Crime, 2 otherwise)
-            const deckCopies = isOrganizedCrime ? 8 : 2;
-            for (let i = 0; i < deckCopies; i++) {
-                deck.push(cardDetails);
-            }
-            
-            // Add 2 copies to the "to place on top" array USING THE SAME CARD DETAILS
-            for (let i = 0; i < 2; i++) {
-                henchmenToPlaceOnTop.push(cardDetails);
+            if (scheme.name === 'Organized Crime Wave') {
+                // Add 8 copies with ambush effect and new image to the deck
+                for (let i = 0; i < 8; i++) {
+                    deck.push({ ...henchman, subtype: 'Henchman', ambushEffect: 'organizedCrimeAmbush', image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp' });
+                }
+                // Add 2 copies with JUST the new image (no ambush) to the "on top" array
+                for (let i = 0; i < 2; i++) {
+                    henchmenToPlaceOnTop.push({ ...henchman, subtype: 'Henchman', image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp' });
+                }
+            } else {
+                // Normal rules: add 2 normal copies to the deck
+                for (let i = 0; i < 2; i++) {
+                    deck.push({ ...henchman, subtype: 'Henchman' });
+                }
+                // Add 2 normal copies to the "on top" array
+                for (let i = 0; i < 2; i++) {
+                    henchmenToPlaceOnTop.push({ ...henchman, subtype: 'Henchman' });
+                }
             }
         } else {
             // For the other henchmen:
