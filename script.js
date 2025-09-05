@@ -2430,25 +2430,35 @@ let modifiedCard = { ...card };
 const selectedSpecialHenchman = selectedHenchmen[Math.floor(Math.random() * selectedHenchmen.length)];
 let henchmenToPlaceOnTop = [];
 
-
-  selectedHenchmen.forEach(henchmanName => {
+selectedHenchmen.forEach(henchmanName => {
     const henchman = window.henchmen.find(h => h.name === henchmanName);
     if (henchman) {
         if (henchmanName === selectedSpecialHenchman) {
             // For the selected special henchman:
-            // Add 2 copies to the deck
-            if (scheme.name === 'Organized Crime Wave') {
-                for (let i = 0; i < 8; i++) {
-                deck.push({ ...henchman, subtype: 'Henchman', ambushEffect: 'organizedCrimeAmbush', image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp' });
+            
+            // Check if we need to use the Organized Crime Wave version
+            const isOrganizedCrime = scheme.name === 'Organized Crime Wave';
+            
+            // Determine the card details based on the scheme
+            const cardDetails = isOrganizedCrime ? {
+                ...henchman,
+                subtype: 'Henchman',
+                ambushEffect: 'organizedCrimeAmbush',
+                image: 'Visual Assets/Other/organizedCrimeMaggiaGoons.webp'
+            } : {
+                ...henchman,
+                subtype: 'Henchman'
+            };
+            
+            // Add copies to the deck (8 for Organized Crime, 2 otherwise)
+            const deckCopies = isOrganizedCrime ? 8 : 2;
+            for (let i = 0; i < deckCopies; i++) {
+                deck.push(cardDetails);
             }
-            } else {
+            
+            // Add 2 copies to the "to place on top" array USING THE SAME CARD DETAILS
             for (let i = 0; i < 2; i++) {
-                deck.push({ ...henchman, subtype: 'Henchman' });
-            }
-        }
-            // Add 2 copies to the "to place on top" array
-            for (let i = 0; i < 2; i++) {
-                henchmenToPlaceOnTop.push({ ...henchman, subtype: 'Henchman' });
+                henchmenToPlaceOnTop.push(cardDetails);
             }
         } else {
             // For the other henchmen:
