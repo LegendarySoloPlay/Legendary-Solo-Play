@@ -878,7 +878,7 @@ bonusAttack();
 }
 
 function BlackWidowBonusAttack() {
-  const bystanderVPCount = victoryPile.filter(item => item.name === "Bystander").length;
+  const bystanderVPCount = victoryPile.filter(item => item.type === "Bystander").length;
   let bystanderText = "Bystanders";  // Use let to allow reassignment
 
   if (bystanderVPCount === 1) {
