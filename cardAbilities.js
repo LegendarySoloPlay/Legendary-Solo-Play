@@ -8283,7 +8283,7 @@ koBonuses();
 
         function updateInstructions() {
             if (selectedHeroes.length < 2) {
-                instructionsDiv.textContent = `Select ${2 - selectedHeroes.length} more Hero${selectedHeroes.length === 0 ? 's' : ''} to KO.`;
+                instructionsDiv.textContent = `Select ${2 - selectedHeroes.length} more Hero${selectedHeroes.length === 0 ? 'es' : ''} to KO.`;
             } else {
                 const namesList = selectedHeroes.length === 2 ? 
                     `<span class="console-highlights">${selectedHeroes[0].name}</span> and <span class="console-highlights">${selectedHeroes[1].name}</span>` :
@@ -8757,7 +8757,7 @@ koBonuses();
                 ).join(', ');
                 
                 instructionsDiv.innerHTML = `Selected: ${names}. ${selectedHeroes.length < 2 ? 
-                    `Select ${2 - selectedHeroes.length} more Hero${selectedHeroes.length === 1 ? '' : 's'}` : 
+                    `Select ${2 - selectedHeroes.length} more Hero${selectedHeroes.length === 1 ? '' : 'es'}` : 
                     'Ready to confirm KO.'}`;
             }
         }
