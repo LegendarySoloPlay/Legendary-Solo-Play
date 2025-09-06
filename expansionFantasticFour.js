@@ -4,12 +4,11 @@
 
 //Villains
 
-function gigantoFight(villain) {
+function gigantoFight() {
 onscreenConsole.log(`Fight! When you draw a new hand of cards at the end of this turn, draw two extra cards.`);
 nextTurnsDraw++;
 nextTurnsDraw++;
 updateGameBoard();
-burrow(villain);
 }
 
 async function megataurAmbush(megataur) {
@@ -20,7 +19,7 @@ return;
 
 if (bystanderDeck.length === 1) {
 onscreenConsole.log(`Ambush! There is one Bystander left for <span class="console-highlights">Megatuar</span> to capture.`);
-const bystander = bystanderDeck.pop;
+const bystander = bystanderDeck.pop();
 const megataurIndex = city.findIndex(c => c === megataur);
 await villainEffectAttachBystanderToVillain(megataurIndex, bystander);        
 return;
@@ -28,20 +27,17 @@ return;
 
 if (bystanderDeck.length > 1) {
 onscreenConsole.log(`Ambush! <span class="console-highlights">Megatuar</span> captures two Bystanders.`);
-const bystander = bystanderDeck.pop;
+const bystander = bystanderDeck.pop();
 const megataurIndex = city.findIndex(c => c === megataur);
 await villainEffectAttachBystanderToVillain(megataurIndex, bystander);
-const bystander2 = bystanderDeck.pop;        
+const bystander2 = bystanderDeck.pop();        
 await villainEffectAttachBystanderToVillain(megataurIndex, bystander2);
 return;
 }
 }
 
-function megataurFight(villain) {
-burrow(villain);
-}
-
-function moloidsFight(villain) {
+function moloidsFight() {
+onscreenConsole.log(`Fight! KO one of your Heroes.`);
 return new Promise((resolve, reject) => {
         // Combine heroes from the player's hand and cards played this turn
         const combinedCards = [
@@ -228,15 +224,11 @@ genericCardSort(combinedCards);
             li.onclick = () => toggleCardSelection(card, index, li);
             cardsList.appendChild(li);
         });
-    });
-burrow(villain);        
-}
-
-function raktarFight(villain) {
-burrow(villain);
+    });      
 }
 
 async function raktarAmbush(villain) {
+      onscreenConsole.log(`Ambush! Any Villain in the Streets moves to the Bridge, pushing any Villain already there to escape.`);   
     // Check if there's a card in city[1]
     if (city[1] !== null) {
         const cardToMove = city[1];
@@ -265,6 +257,295 @@ async function raktarAmbush(villain) {
         
     } else {
         onscreenConsole.log(`There is no Villain in the Streets to be moved.`);
+    }
+}
+
+async function firelordFight() {
+await FightRevealRangeOrWound();
+}
+
+async function firelordEscape() {
+await EscapeRevealRangeOrWound();
+}
+
+function morgAmbush() {
+onscreenConsole.log(`Ambush! Put each non-<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero from the HQ on the bottom of the Hero Deck.`);
+    let heroesMovedCounter = 0;
+    const nonInstinctHeroes = [];
+
+    // First pass: identify and remove non-Instinct heroes from HQ
+    for (let i = hq.length - 1; i >= 0; i--) {
+        if (hq[i] && hq[i].type === "Hero") {
+            const hero = hq[i];
+            const hasInstinct = hero.class1 === "Instinct" || 
+                               hero.class2 === "Instinct" || 
+                               hero.class3 === "Instinct";
+            
+            if (!hasInstinct) {
+                nonInstinctHeroes.push(hq.splice(i, 1)[0]);
+                heroesMovedCounter++;
+            }
+        }
+    }
+
+    // Put non-Instinct heroes at the bottom of heroDeck (index 0)
+    if (nonInstinctHeroes.length > 0) {
+        heroDeck.unshift(...nonInstinctHeroes);
+    }
+
+    // Fill empty HQ spaces with new heroes from top of deck
+    for (let i = 0; i < 5; i++) {
+        if (!hq[i] && heroDeck.length > 0) {
+            hq[i] = heroDeck.pop();
+        }
+    }
+
+    if (heroesMovedCounter > 0) {
+        const cardText = heroesMovedCounter === 1 ? 'Hero' : 'Heroes';
+        onscreenConsole.log(`Moved ${heroesMovedCounter} non-<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> ${cardText} to the bottom of hero deck.`);
+    } else {
+        onscreenConsole.log('No non-<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Heroes found in the HQ.');
+    }
+
+    updateGameBoard(); // Update game board after changes
+}
+
+
+function stardustFight() {
+onscreenConsole.log(`Fight! Choose one of your <img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Heroes to add to next turn's draw as a seventh card.`);
+return new Promise((resolve) => {
+        const cardsYouHave = [
+            ...playerHand,
+            ...cardsPlayedThisTurn.filter(card => 
+                !card.isCopied && 
+                !card.sidekickToDestroy
+            )
+        ];
+        
+        const CovertCardsYouHave = cardsYouHave.filter(item => 
+    item.type === "Hero" && (
+        item.class1 === "Covert" || 
+        item.class2 === "Covert" || 
+        item.class3 === "Covert"
+    )
+);
+
+        if (CovertCardsYouHave.length === 0) {
+            console.log('No available Covert Heroes.');
+            onscreenConsole.log(`You do not have any <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='console-card-icons'> Heroes to add to next turn's draw.`);
+            resolve(false);
+            return;
+        }
+
+        // Get popup elements
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'FIGHT!';
+        instructionsDiv.innerHTML = `Choose one of your <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='card-icons'> Heroes to add to next turn's draw.`;
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Select Hero';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        // Update confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        // Update instructions with styled card name
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = `Choose one of your <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='card-icons'> Heroes to add to next turn's draw.`;
+            } else {
+                const location = playerHand.includes(selectedCard) ? '(from Hand)' : '(from Played Cards)';
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> ${location} will be added to next turn's draw.`;
+            }
+        }
+
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
+        function toggleCardSelection(card, index, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                selectedIndex = index;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+
+            updateConfirmButton();
+            updateInstructions();
+        }
+genericCardSort(CovertCardsYouHave);
+        // Populate the list with eligible heroes
+        CovertCardsYouHave.forEach((card, index) => {
+            console.log('Adding card to selection list:', card);
+            const li = document.createElement('li');
+            const location = playerHand.includes(card) ? '(Hand)' : '(Played Cards)';
+		          const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} (${location})</span>`;            
+
+            li.setAttribute('data-card-id', card.id);
+
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, index, li);
+            cardsList.appendChild(li);
+        });
+
+        // Handle confirmation
+        confirmButton.onclick = () => {
+            if (selectedCard) {
+                const cardCopy = { ...selectedCard };
+                cardsToBeDrawnNextTurn.push(cardCopy);
+                nextTurnsDraw++;
+                
+                // Mark the original card to be destroyed later
+                selectedCard.markedToDrawNextTurn = true;
+                
+                console.log(`${selectedCard.name} has been reserved for next turn.`);
+                onscreenConsole.log(`You have selected <span class="console-highlights">${selectedCard.name}</span> to be added to your next draw as a seventh card.`);
+
+                closePopup();
+                CovertCardsYouHave = [];
+                updateGameBoard();
+                resolve(true);
+            }
+        };
+
+        function closePopup() {
+            // Reset UI
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+
+            // Hide popup
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+    });
+}
+
+async function terraxTheTamerAmbush(terrax) {
+    onscreenConsole.log(`Ambush! For each <img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero in the HQ, <span class="console-highlight">Terrax the Tamer</span> captures a Bystander.`);
+    
+    const strengthCardsInHQCount = hq.filter(card => 
+        card && (
+            card.class1 === "Strength" || 
+            card.class2 === "Strength" || 
+            card.class3 === "Strength"
+        )
+    ).length;
+    
+    let strengthHQText = "Heroes";
+    if (strengthCardsInHQCount === 1) {
+        strengthHQText = "Hero";
+    }
+    
+    onscreenConsole.log(`The HQ contains ${strengthCardsInHQCount} <img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> ${strengthHQText}. <span class="console-highlight">Terrax the Tamer</span> will capture that many Bystanders.`);
+
+    const terraxIndex = city.findIndex(c => c === terrax);
+    let bystandersCaptured = 0;
+
+    // Loop for each Strength hero found, but don't exceed bystander deck size
+    for (let i = 0; i < strengthCardsInHQCount; i++) {
+        if (bystanderDeck.length === 0) {
+            onscreenConsole.log(`No more Bystanders left to capture!`);
+            break;
+        }
+        
+        const bystander = bystanderDeck.pop(); // Added parentheses to call pop()
+        await villainEffectAttachBystanderToVillain(terraxIndex, bystander);
+        bystandersCaptured++;
+        
+        // Optional: add a small delay between captures for visual effect
+        await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
+    if (bystandersCaptured > 0) {
+        const bystanderText = bystandersCaptured === 1 ? 'Bystander' : 'Bystanders';
+        onscreenConsole.log(`<span class="console-highlight">Terrax the Tamer</span> captured ${bystandersCaptured} ${bystanderText}!`);
+    } else {
+        onscreenConsole.log(`No Bystanders were captured.`);
     }
 }
 
