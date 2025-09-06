@@ -506,7 +506,6 @@ async function invisibleWomanUnseenRescue() {
                 }
 
 onscreenConsole.log(`Focus! You have spent 2 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, allowing you to rescue a Bystander.`);
-
 totalRecruitPoints -= 2;
 await rescueBystander();
 unseenRescueBystanders++;
@@ -524,6 +523,7 @@ function invisibleWomanInvisibleBarrier() {
 
 function mrFantasticTwistingEquations() {
 onscreenConsole.log(`Focus! You have spent 2 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, allowing you to draw an extra card next turn.`);
+totalRecruitPoints -= 2;
 nextTurnsDraw++;
 updateGameBoard();
 }
@@ -546,6 +546,7 @@ updateGameBoard();
 //NEEDED - an if condition check that looks for this card and negates fight effects
 function mrFantasticUltimateNullifier() {
 onscreenConsole.log(`Focus! You have spent 1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, giving you +1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> usable only against the Mastermind.`);
+totalRecruitPoints -= 1;
 mastermindTempBuff--;
 updateGameBoard();
 }
@@ -560,7 +561,8 @@ updateGameBoard();
 
 function thingKnuckleSandwich() {
         onscreenConsole.log(`Focus! You have spent 3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to gain 2 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
-       totalAttackPoints += 2;
+       totalRecruitPoints -= 3;
+totalAttackPoints += 2;
 cumulativeAttackPoints += 2;
 updateGameBoard();
 }
@@ -574,7 +576,7 @@ updateGameBoard();
 
 function thingCrimeStopperFocus() {
 onscreenConsole.log(`Focus! You have spent 1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to move a Villain to an adjacent city space.`);
-
+totalRecruitPoints -= 1;
 if (isCityEmpty()) {
     onscreenConsole.log(`No Villains in the city to move.`);
     return;
@@ -823,24 +825,367 @@ document.getElementById('villain-movement-context').innerHTML = 'You may move a 
 }
 
 function thingItsClobberinTime() {
-        onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
-const previousCards = cardsPlayedThisTurn.slice(0, -1);
+    onscreenConsole.log(`<img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Hero played. Superpower Ability activated.`);
+    const previousCards = cardsPlayedThisTurn.slice(0, -1);
 
-  const StrengthCount = previousCards.filter(item => item.class1 === "Strength").length;
-  let StrengthText = "Heroes";  // Use let to allow reassignment
+    // Filter for cards that have "Strength" in any class attribute
+    const StrengthCount = previousCards.filter(item => 
+        item.class1 === "Strength" || 
+        item.class2 === "Strength" || 
+        item.class3 === "Strength"
+    ).length;
+    
+    let StrengthText = "Heroes";  // Use let to allow reassignment
 
-  if (StrengthCount === 1) {
-    StrengthText = "Hero";  // Singular for one
-  }
+    if (StrengthCount === 1) {
+        StrengthText = "Hero";  // Singular for one
+    }
 
-  onscreenConsole.log(`You have played ${StrengthCount} <img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> ${StrengthText}. +${StrengthCount * 3}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
-  
-  bonusAttack();
+    onscreenConsole.log(`You have played ${StrengthCount} <img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> ${StrengthText}. +${StrengthCount * 3}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`);
+    
+    bonusAttack();
+    updateGameBoard();
+}
+
+function silverSurferWarpSpeed() {
+onscreenConsole.log(`Focus! You have spent 2 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, allowing you to draw a card.`);
+totalRecruitPoints -= 2;
+extraDraw();
+updateGameBoard();        
+}
+
+function silverSurferEpicDestiny() {
+onscreenConsole.log(`Focus! You have spent 6 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, allowing you to defeat a Villain with 5 or 6 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+totalRecruitPoints -= 6;
+return new Promise((resolve, reject) => {
+    const eligibleVillains = [];
+    
+    // Check city for eligible villains
+    city.forEach((card, index) => {
+        if (card && card.type === 'Villain') {  // Explicitly check for villain type
+            const villainAttack = recalculateVillainAttack(card);
+            if (villainAttack === 5 || villainAttack === 6) {  // Changed to target attack 5 or 6
+                if (card.name) {
+                    console.log(`${card.name} added to the eligible villain list.`);
+                    eligibleVillains.push({ ...card, index });
+                }
+            }
+        }
+    });
+
+    // Check for Professor X - Telepathic Probe revealed villain
+    const telepathicProbeCard = cardsPlayedThisTurn.find(card => 
+        card.name === "Professor X - Telepathic Probe" && 
+        card.villain && 
+        villainDeck.length > 0 &&
+        villainDeck[villainDeck.length - 1]?.name === card.villain.name &&
+        villainDeck.length === card.villain.deckLength
+    );
+
+    if (telepathicProbeCard && villainDeck.length > 0) {
+        const topVillainCard = villainDeck[villainDeck.length - 1];
+        const villainAttack = recalculateVillainAttack(topVillainCard);
+        
+        if (villainAttack === 5 || villainAttack === 6) {  // Changed to target attack 5 or 6
+            console.log(`${topVillainCard.name} (from Telepathic Probe) added to the eligible villain list.`);
+            eligibleVillains.push({ 
+                ...topVillainCard, 
+                index: 'telepathic-probe', // Special identifier for telepathic probe villains
+                telepathicProbe: true,
+                telepathicProbeCard: telepathicProbeCard
+            });
+        }
+    }
+
+    if (eligibleVillains.length === 0) {
+        onscreenConsole.log('There are no Villains available to defeat.');
+        resolve();
+        return;
+    }
+
+    // Get popup elements - add null checks
+    const popup = document.getElementById('card-choice-one-location-popup');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const cardsList = document.getElementById('cards-to-choose-from');
+    const defeatButton = document.getElementById('card-choice-confirm-button');
+    const noThanksButton = document.getElementById('close-choice-button');
+    const popupTitle = popup.querySelector('h2');
+    const instructionsDiv = document.getElementById('context');
+    const heroImage = document.getElementById('hero-one-location-image');
+    const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+    // Initialize UI
+    popupTitle.textContent = 'Defeat Villain';
+    instructionsDiv.innerHTML = 'Select a Villain to defeat for free.';
+    cardsList.innerHTML = '';
+    defeatButton.style.display = 'inline-block';
+    defeatButton.disabled = true;
+    defeatButton.textContent = 'DEFEAT SELECTED VILLAIN';
+    noThanksButton.style.display = 'none';
+    modalOverlay.style.display = 'block';
+    popup.style.display = 'block';
+
+    let selectedVillain = null;
+    let selectedIndex = null;
+    let activeImage = null;
+
+    // Update defeat button state
+    function updateDefeatButton() {
+        defeatButton.disabled = selectedVillain === null;
+    }
+
+    // Update instructions with styled card name
+    function updateInstructions() {
+        if (selectedVillain === null) {
+            instructionsDiv.textContent = 'Select a Villain to defeat for free.';
+        } else {
+            instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedVillain.name}</span> will be defeated.`;
+        }
+    }
+
+    // Show/hide villain image
+    function updateVillainImage(card) {
+        if (card) {
+            heroImage.src = card.image;
+            heroImage.style.display = 'block';
+            oneChoiceHoverText.style.display = 'none';
+            activeImage = card.image;
+        } else {
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+        }
+    }
+
+    // Toggle villain selection
+    function toggleVillainSelection(card, listItem) {
+        if (selectedVillain === card) {
+            // Deselect if same villain clicked
+            selectedVillain = null;
+            selectedIndex = null;
+            listItem.classList.remove('selected');
+            updateVillainImage(null);
+        } else {
+            // Clear previous selection if any
+            if (selectedVillain) {
+                const prevListItem = document.querySelector('li.selected');
+                if (prevListItem) prevListItem.classList.remove('selected');
+            }
+            // Select new villain
+            selectedVillain = card;
+            selectedIndex = card.index;
+            listItem.classList.add('selected');
+            updateVillainImage(card);
+        }
+
+        updateDefeatButton();
+        updateInstructions();
+    }
+
+    eligibleVillains.forEach(card => {
+        const li = document.createElement('li');
+        
+        // Add special indicators for different villain types
+        if (card.telepathicProbe) {
+            li.textContent = `${card.name} (Telepathic Probe)`;
+            li.style.fontStyle = 'italic';
+        } else {
+            li.textContent = card.name;
+        }
+        
+        li.setAttribute('data-card-id', card.id || 'telepathic-probe');
+
+        li.onmouseover = () => {
+            if (!activeImage) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+            }
+        };
+
+        li.onmouseout = () => {
+            if (!activeImage) {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+            }
+        };
+
+        li.onclick = () => toggleVillainSelection(card, li);
+        cardsList.appendChild(li);
+    });
+
+    // Handle defeat confirmation
+    defeatButton.onclick = async () => {
+        if (selectedVillain) {
+            if (selectedVillain.telepathicProbe) {
+                // Handle telepathic probe villain defeat (FREE version)
+                await freeTelepathicVillainDefeat(selectedVillain, selectedVillain.telepathicProbeCard);
+                console.log(`${selectedVillain.name} has been defeated via Telepathic Probe for free.`);
+                onscreenConsole.log(`You have defeated <span class="console-highlights">${selectedVillain.name}</span> for free using Telepathic Probe.`);
+            } else {
+                // Handle regular city villain defeat
+                await instantDefeatAttack(selectedVillain.index);
+                console.log(`${selectedVillain.name} has been defeated.`);
+                onscreenConsole.log(`You have defeated <span class="console-highlights">${selectedVillain.name}</span> for free.`);
+            }
+            
+            closePopup();
+            updateGameBoard();
+            resolve();
+        } else {
+            alert("You must select a valid Villain to defeat.");
+            reject("No villain selected");
+        }
+    };
+
+    function closePopup() {
+        // Reset UI
+        popupTitle.textContent = 'Hero Ability!';
+        instructionsDiv.textContent = 'Context';
+        defeatButton.style.display = 'none';
+        defeatButton.disabled = true;
+        heroImage.src = '';
+        heroImage.style.display = 'none';
+        oneChoiceHoverText.style.display = 'block';
+        activeImage = null;
+
+        // Hide popup
+        popup.style.display = 'none';
+        modalOverlay.style.display = 'none';
+    }
+
+    // Helper function for free telepathic probe villain defeat
+    async function freeTelepathicVillainDefeat(villainCard, telepathicProbeCard) {
+        if (telepathicProbeCard) {
+            telepathicProbeCard.villain = null; // Clear the reference after fighting
+        }
+
+        onscreenConsole.log(`Defeating <span class="console-highlights">${villainCard.name}</span> for free using <span class="console-highlights">Professor X - Telepathic Probe</span>.`);
+        
+        // Remove villain from deck and add to victory pile (NO point deduction)
+        villainDeck.pop();
+        victoryPile.push(villainCard);
+
+        onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated for free.`);
+        
+        // Handle rescue of extra bystanders
+        if (rescueExtraBystanders > 0) {
+            for (let i = 0; i < rescueExtraBystanders; i++) {
+                rescueBystander();
+            }
+        }
+
+        defeatBonuses();
+
+        // Handle fight effect if the villain has one
+        let fightEffectPromise = Promise.resolve();
+        if (villainCard.fightEffect && villainCard.fightEffect !== "None") {
+            const fightEffectFunction = window[villainCard.fightEffect];
+            console.log("Fight effect function found:", fightEffectFunction);
+            if (typeof fightEffectFunction === 'function') {
+                fightEffectPromise = new Promise((resolve, reject) => {
+                    try {
+                        const result = fightEffectFunction(villainCard);
+                        console.log("Fight effect executed:", result);
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            } else {
+                console.error(`Fight effect function ${villainCard.fightEffect} not found`);
+            }
+        } else {
+            console.log("No fight effect found for this villain.");
+        }
+
+        // Handle fight effect promise
+        await fightEffectPromise
+            .then(() => {
+                updateGameBoard(); // Update the game board after fight effect is handled
+            })
+            .catch(error => {
+                console.error(`Error in fight effect: ${error}`);
+                updateGameBoard(); // Ensure the game board is updated even if the fight effect fails
+            });
+
+        if (hasProfessorXMindControl) {
+            // Show popup for gaining villain as hero
+            const gainVillainResult = await new Promise((resolve) => {
+                const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                    "DO YOU WISH TO GAIN THIS VILLAIN?",
+                    "GAIN AS A HERO",
+                    "NO THANKS!"
+                );
+
+                document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+                // Show the villain card image in the popup
+                const cardImage = document.getElementById('hero-ability-may-card');
+                cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
+                cardImage.style.display = 'block';
+
+                confirmButton.onclick = () => {
+                    // Create and modify the copy
+                    const cardCopy = JSON.parse(JSON.stringify(villainCard));
+                    cardCopy.type = "Hero";
+                    cardCopy.color = "Grey";
+                    cardCopy.cost = villainCard.attack;
+                    cardCopy.keyword1 = "None";
+                    cardCopy.keyword2 = "None";
+                    cardCopy.keyword3 = "None";
+                    
+                    playerDiscardPile.push(cardCopy);
+                    
+                    onscreenConsole.log(`You have chosen to add <span class="console-highlights">${villainCard.name}</span> to your discard pile as a grey Hero.`);
+                    updateGameBoard();
+                    
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(true); // Resolve with true indicating the player chose to copy
+                };
+
+                denyButton.onclick = () => {
+                    onscreenConsole.log(`You declined to copy ${villainCard.name}.`);
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(false); // Resolve with false indicating the player declined
+                };
+            });
+        }
+
+        // Reset the currentVillainLocation after the attack is resolved
+        currentVillainLocation = null;
+        updateGameBoard();
+    }
+});
+
+function silverSurferThePowerCosmic(){
+onscreenConsole.log(`Focus! You have spent 9 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to gain +9 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+
+totalRecruitPoints -= 9;
+totalAttackPoints += 9;
+cumulativeAttackPoints += 9;
+
 updateGameBoard();
-}      
 
+}
 
-
+function silverSurferEnergySurge() {
+    // Store the original values for the log message
+    const originalRecruit = totalRecruitPoints;
+    const originalCumulative = cumulativeRecruitPoints;
+    
+    // Actually update the values by assigning the results
+    totalRecruitPoints = totalRecruitPoints * 2;
+    cumulativeRecruitPoints = cumulativeRecruitPoints * 2;
+    
+    onscreenConsole.log(`You had ${originalRecruit} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">. It has been doubled and you now have ${totalRecruitPoints} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`);
+    
+    updateGameBoard();
+}
 
 //Villains
 
