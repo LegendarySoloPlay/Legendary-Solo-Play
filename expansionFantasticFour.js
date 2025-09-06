@@ -2,6 +2,272 @@
 // Pre-release
 // 05/09/2025 17.45
 
+//Villains
+
+function gigantoFight(villain) {
+onscreenConsole.log(`Fight! When you draw a new hand of cards at the end of this turn, draw two extra cards.`);
+nextTurnsDraw++;
+nextTurnsDraw++;
+updateGameBoard();
+burrow(villain);
+}
+
+async function megataurAmbush(megataur) {
+if (bystanderDeck.length === 0) {
+onscreenConsole.log(`Ambush! There are no Bystanders left for <span class="console-highlights">Megatuar</span> to capture.`);
+return;
+}
+
+if (bystanderDeck.length === 1) {
+onscreenConsole.log(`Ambush! There is one Bystander left for <span class="console-highlights">Megatuar</span> to capture.`);
+const bystander = bystanderDeck.pop;
+const megataurIndex = city.findIndex(c => c === megataur);
+await villainEffectAttachBystanderToVillain(megataurIndex, bystander);        
+return;
+}
+
+if (bystanderDeck.length > 1) {
+onscreenConsole.log(`Ambush! <span class="console-highlights">Megatuar</span> captures two Bystanders.`);
+const bystander = bystanderDeck.pop;
+const megataurIndex = city.findIndex(c => c === megataur);
+await villainEffectAttachBystanderToVillain(megataurIndex, bystander);
+const bystander2 = bystanderDeck.pop;        
+await villainEffectAttachBystanderToVillain(megataurIndex, bystander2);
+return;
+}
+}
+
+function megataurFight(villain) {
+burrow(villain);
+}
+
+function moloidsFight(villain) {
+return new Promise((resolve, reject) => {
+        // Combine heroes from the player's hand and cards played this turn
+        const combinedCards = [
+            ...playerHand.filter(card => card.type === 'Hero'), // Heroes in hand (always included)
+            ...cardsPlayedThisTurn.filter(card => 
+                card.type === 'Hero' && 
+                !card.isCopied && 
+                !card.sidekickToDestroy
+            )
+        ];
+        
+        // Check if there are any heroes in the combined list
+        if (combinedCards.length === 0) {
+            console.log('No heroes in hand or played to KO.');
+            onscreenConsole.log(`<span class="console-highlights">Sentinel's</span> Fight effect negated. No Heroes available to KO.`);
+            resolve(); // Resolve immediately if there are no heroes to KO
+            return;
+        }
+
+        // Get the popup elements
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'FIGHT EFFECT!';
+        instructionsDiv.textContent = 'Select a hero to KO.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block'; // Always visible
+        confirmButton.disabled = true; // Disabled by default
+        confirmButton.innerHTML = "Confirm";
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let activeImage = null; // Track the currently locked image
+
+        // Update the confirm button state
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+            // No need to show/hide the button anymore since it's always visible
+        }
+
+        // Update instructions based on selection
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.textContent = 'Select a hero to KO.';
+            } else {
+                instructionsDiv.innerHTML= `Selected: <span class="console-highlights">${selectedCard.card.name}</span> will be KO'd.`;
+            }
+        }
+
+        // Show/hide hero image
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        // Toggle card selection
+        function toggleCardSelection(card, cardIndex, listItem) {
+            if (selectedCard && selectedCard.index === cardIndex && selectedCard.isFromHand === (cardIndex < playerHand.length)) {
+                // Deselect if clicking the same card
+                selectedCard = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Deselect previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector(`[data-card-id="${selectedCard.index}"]`);
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = {
+                    card: card,
+                    index: cardIndex,
+                    isFromHand: cardIndex < playerHand.length
+                };
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+
+            updateConfirmButton();
+            updateInstructions();
+        }
+
+        // Handle the confirm action
+        confirmButton.onclick = () => {
+            if (!selectedCard) return;
+
+            const { card, index, isFromHand } = selectedCard;
+            console.log(`${card.name} has been KO'd.`);
+            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
+koBonuses();
+            
+            // Remove the card from the correct array (hand or played)
+            if (isFromHand) {
+                playerHand.splice(index, 1);
+            } else {
+                cardsPlayedThisTurn.splice(index - playerHand.length, 1);
+            }
+            
+            // Add the card to the KO pile
+            koPile.push(card);
+            
+            closePopup();
+            updateGameBoard();
+            resolve();
+        };
+
+        function closePopup() {
+            // Reset popup elements to default state
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+            
+            // Hide the popup
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+genericCardSort(combinedCards);
+        // Populate the list with the heroes from the player's hand and played cards
+        combinedCards.forEach((card, index) => {
+            console.log('Adding card to selection list:', card);
+            const li = document.createElement('li');
+                      const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+            li.setAttribute('data-card-id', index);
+
+            li.onmouseover = () => {
+                if (!activeImage) { // Only change if no selection is locked
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) { // Only hide if no selection is locked
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, index, li);
+            cardsList.appendChild(li);
+        });
+    });
+burrow(villain);        
+}
+
+function raktarFight(villain) {
+burrow(villain);
+}
+
+async function raktarAmbush(villain) {
+    // Check if there's a card in city[1]
+    if (city[1] !== null) {
+        const cardToMove = city[1];
+        const cardAtCity0 = city[0];
+        
+        // Move card from city[1] to city[0]
+        city[0] = cardToMove;
+        city[1] = null;
+        
+        onscreenConsole.log(`<span class="console-highlights">${cardToMove.name}</span> moves from the Streets to the Bridge.`);
+        
+        // If there was a card at city[0], push it to escape
+        if (cardAtCity0 !== null) {
+            await new Promise(resolve => {
+                showPopup('Villain Escape', cardAtCity0, resolve);
+            });
+            await handleVillainEscape(cardAtCity0);
+            addHRToTopWithInnerHTML();
+        }
+        
+        // Show popup for the moved card
+        await new Promise(resolve => {
+            showPopup('Villain Moved', cardToMove, resolve);
+        });
+        addHRToTopWithInnerHTML();
+        
+    } else {
+        onscreenConsole.log(`There is no Villain in the Streets to be moved.`);
+    }
+}
+
 //Heroes
 
 function humanTorchCallForBackup() {
@@ -1186,9 +1452,6 @@ function silverSurferEnergySurge() {
     
     updateGameBoard();
 }
-
-//Villains
-
 
 //Masterminds
 
