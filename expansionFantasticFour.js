@@ -2,11 +2,74 @@
 // Pre-release
 // 05/09/2025 17.45
 
-// Need to code Burrow, Cosmic Threat and Villain movement for Galactus (Deep Seek - Villain Movement)
+// Need to code Burrow, Cosmic Threat and Villain movement for Galactus (Deep Seek - Villain Movement), changes to attack and recruit usable in particular places
 
 //Schemes
 
+// Need to add evil wins and flavour texts
+function risingWatersTwist() {
+  // Create a copy of the current HQ to avoid issues with changing array
+  const currentHQ = [...hq];
+  let heroesKOd = 0;
+ 
+  // Check each hero in the current HQ
+  for (let i = 0; i < currentHQ.length; i++) {
+    const hero = currentHQ[i];
+    
+    // Skip empty slots
+    if (!hero) continue;
+    
+    // Check if hero cost is equal to or less than schemeTwistCount
+    if (hero.cost <= schemeTwistCount) {
+      // KO the hero
+      koPile.push(hero);
+      heroesKOd++;
+      
+      // Remove from HQ
+      const hqIndex = hq.indexOf(hero);
+      if (hqIndex !== -1) {
+        hq[hqIndex] = null;
+      }
+      
+      // Log the KO
+      onscreenConsole.log(`KO'd <span class="console-highlights">${hero.name}</span> (Cost: ${hero.cost}) from HQ.`);
+      
+    }
+  }
+  
+  // Log results
+  if (heroesKOd === 0) {
+    onscreenConsole.log(`No Heroes in HQ cost less than or equal to the Rising Waters stack (${schemeTwistCount}).`);
+  } else {
+    onscreenConsole.log(`Rising Waters KO'd ${heroesKOd} Hero${heroesKOd !== 1 ? 'es' : ''} from the HQ.`);
+  }
+  
+  updateGameBoard();
+}
 
+// Need to establish variable, how it impacts attacking and recruiting, plus evil wins coding and flavour text
+function pullRealityIntoTheNegativeZoneTwist() {
+    if (schemeTwistCount === 2 || schemeTwistCount === 4 ||schemeTwistCount === 6) {
+        negativeZoneAttackAndRecruit = true;
+        } else {
+            negativeZoneAttackAndRecruit = false;
+            }
+        updateGameBoard();
+        }
+        
+// Need to establish variable and then add attack condition - dont make madtermind affordable unless the player has enough attack and recruit to successfully counter the forcefield and conplete the attack, then use a version of the bribe popup with stricter control of attack and receuit so that enough attack is reserved for the actual mastermind attack. Also need evil wins and flavour text.
+function invincibleForceField() {
+    const mastermind = getSelectedMastermind();
+    invincibleForceField++;
+    onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> now has ${invincibleForceField} Force Field${invincibleForceField === 1 ? '' : 's'}.`);
+    updateGameBoard();
+}
+
+// need to fix this with the actual popups and logic, plus evil wins and flavour text
+function batheEarthInCosmicRaysTwist() {
+KO non-grey hero - if none avaialble then console log and quit
+new popup - select a hero in HQ with cost same or lower than the KOd card. it is gained straight to the hand.
+}
 
 //Masterminds
 
@@ -362,7 +425,18 @@ async function moleManMastersOfMonsters() {
         onscreenConsole.log(`This is the final Tactic. No effect.`);
     }
 }  
-        
+
+function moleManSecretTunnel() {
+    onscreenConsole.log(`You gain +6 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> usable only against Villains in the Streets.`);
+    streetsReserveAttack += 6;
+    updateGameBoard();
+}
+
+function moleManUndergroundRiches() {
+    onscreenConsole.log(`You gain +6 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> usable only to recruit Heroes in the HQ space under the Streets.`);
+    streetsReserveRecruit += 6;
+    updateGameBoard();
+}
         
 //Villains
 
