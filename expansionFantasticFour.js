@@ -2,6 +2,368 @@
 // Pre-release
 // 05/09/2025 17.45
 
+// Need to code Burrow, Cosmic Threat and Villain movement for Galactus (Deep Seek - Villain Movement)
+
+//Schemes
+
+
+
+//Masterminds
+
+function galactusMasterStrike() {
+    // Find the first non-destroyed space starting from the front
+    for (let i = 0; i < destroyedSpaces.length; i++) {
+        if (!destroyedSpaces[i]) {
+            // Destroy this space
+            destroyedSpaces[i] = true;
+            onscreenConsole.log(`<span class="console-destruction">${citySpaceLabels[i]} is destroyed!</span>`);
+            
+            // Any villain at this space immediately escapes
+            if (city[i] !== null) {
+                const escapedVillain = city[i];
+                onscreenConsole.log(`<span class="console-highlights">${escapedVillain.name}</span> escapes from the destroyed ${citySpaceLabels[i]}!`);
+                city[i] = null;
+                
+                // Show escape popup
+                setTimeout(async () => {
+                    await new Promise(resolve => {
+                        showPopup('Villain Escape', escapedVillain, resolve);
+                    });
+                    await handleVillainEscape(escapedVillain);
+                    addHRToTopWithInnerHTML();
+                }, 500);
+            }
+            
+            return; // Exit after destroying one space
+        }
+    }
+    
+    // If we get here, all spaces are already destroyed
+    onscreenConsole.log("<span class='console-destruction'>The entire city has been destroyed!</span>");
+}
+
+// Function to get the effective front index (first non-destroyed space)
+function getEffectiveFrontIndex() {
+    for (let i = 0; i < destroyedSpaces.length; i++) {
+        if (!destroyedSpaces[i]) {
+            return i;
+        }
+    }
+    return -1; // All spaces destroyed
+}
+
+function galactusCosmicEntity() {
+ // Need a class pick popup - dynamic enough to be used in different ways       
+}
+
+// Need to establish following variable and then code how it works in end turn
+function galactusForceOfEternity() {
+        galactusForceOfEternityDraw = true;
+}
+
+function galactusPanickedMobs() {
+        //See Cosmic Entity
+}
+
+function galactusSunderTheEarth() {
+  return new Promise((resolve) => {
+    // Find all cards in discard pile that match names in HQ
+    const cardsToKO = playerDiscardPile.filter(card => 
+      hq.some(hqCard => hqCard.name === card.name)
+    );
+    
+    // If no matches found, log and exit
+    if (cardsToKO.length === 0) {
+      console.log('No matching cards found between discard pile and HQ.');
+      onscreenConsole.log('Mastermind Tactic! No cards in your discard pile have the same name as a Hero in the HQ!');
+      resolve();
+      return;
+    }
+    
+    // Group cards by name for logging
+    const cardCounts = {};
+    cardsToKO.forEach(card => {
+      cardCounts[card.name] = (cardCounts[card.name] || 0) + 1;
+    });
+    
+    const cardNames = Object.keys(cardCounts);
+    const totalCount = cardsToKO.length;
+    
+    // Format card names with highlights
+    const highlightedCardNames = cardNames.map(name => 
+      `<span class="console-highlights">${name}</span>`
+    ).join(', ');
+    
+    // Log matches found
+    onscreenConsole.log(`Mastermind Tactic! ${totalCount} card${totalCount === 1 ? '' : 's'} in your discard pile have the same name as a Hero in the HQ: ${highlightedCardNames}.`);
+    
+    // Remove matching cards from discard pile and add to KO pile
+    for (const card of cardsToKO) {
+      const index = playerDiscardPile.indexOf(card);
+      if (index !== -1) {
+        playerDiscardPile.splice(index, 1);
+        koPile.push(card);
+        // Trigger KO bonuses for each individual card
+        koBonuses();
+      }
+    }
+    
+    // Format KO message with highlights
+    const countMessages = Object.entries(cardCounts)
+      .map(([name, count]) => `${count} <span class="console-highlights">${name}</span>${count > 1 ? 's' : ''}`)
+      .join(', ');
+    
+    onscreenConsole.log(`KO'd ${countMessages} from discard pile.`);
+    
+    updateGameBoard();
+    resolve();
+  });
+}
+
+async function moleManMasterStrike() {
+  let subterraneaVillainsEscaped = false;
+  
+  for (let i = 0; i < city.length; i++) {
+    if (city[i] && city[i].team === "Subterranea") {
+      await handleVillainEscape(city[i]);
+      city[i] = null;
+      updateGameBoard();
+      subterraneaVillainsEscaped = true;
+    }
+  }
+  
+  // Trigger drawWound() only once if any Subterranea villains escaped
+  if (subterraneaVillainsEscaped) {
+    await drawWound();
+  }
+}
+
+function moleManDigToFreedom() {
+        const subterraneaInVP = victoryPile.filter(card => card.alwaysLeads === "true");
+    
+    if (subterraneaInVP.length === 0) {
+        onscreenConsole.log(`Mastermind Tactic! <span class="console-highlights">Mole Man</span> always leads your chosen Adversary group; however, there are no suitable Villain cards available in your Victory Pile.`);
+        return false;
+    }
+
+    if (subterraneaInVP.length === 1) {
+        // Only one Subterranean - automatically escape it
+        const subterranean = subterraneaInVP[0];
+        const index = victoryPile.findIndex(card => card.id === subterranean.id);
+        if (index !== -1) {
+onscreenConsole.log(`<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: <span class="console-highlights">${subterranean.name}</span> was the only suitable Villain in your Victory Pile. Placing in the Escape Pile now.`);
+            victoryPile.splice(index, 1);
+            escapedVillainsDeck.push(subterranean);
+            return true;
+        }
+        return false;
+    }
+
+    // Multiple Subterraneans - show selection popup
+    return new Promise((resolve) => {
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = document.getElementById('cardChoiceh2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Initialize UI
+        popupTitle.textContent = 'TACTIC';
+        instructionsDiv.innerHTML = '<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to move to the Escaped Villians pile.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Confirm';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let selectedIndex = null;
+        let activeImage = null;
+
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = '<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to move to the Escaped Villains pile.';
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be moved to the Escaped Villains pile.`;
+            }
+        }
+
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        function toggleCardSelection(card, index, listItem) {
+            if (selectedCard === card) {
+                // Deselect if same card clicked
+                selectedCard = null;
+                selectedIndex = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                // Clear previous selection if any
+                if (selectedCard) {
+                    const prevListItem = document.querySelector('li.selected');
+                    if (prevListItem) prevListItem.classList.remove('selected');
+                }
+                // Select new card
+                selectedCard = card;
+                selectedIndex = index;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+            updateConfirmButton();
+            updateInstructions();
+        }
+
+subterraneaInVP.forEach((card, index) => {
+    const li = document.createElement('li');
+    li.textContent = card.name;
+    li.setAttribute('data-card-id', card.id);
+
+    li.onmouseover = () => {
+        if (!activeImage) {
+            heroImage.src = card.image;
+            heroImage.style.display = 'block';
+            oneChoiceHoverText.style.display = 'none';
+        }
+    };
+
+    li.onmouseout = () => {
+        if (!activeImage) {
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+        }
+    };
+
+    li.onclick = () => toggleCardSelection(card, index, li);
+    cardsList.appendChild(li);
+});
+
+        // Handle confirmation
+        confirmButton.onclick = async function() {
+            if (selectedCard) {
+                // Remove from victory pile and add to villain deck
+                const indexInVP = victoryPile.findIndex(card => card.id === selectedCard.id);
+            if (selectedCard.bystander) {
+                delete selectedCard.bystander; // Or set to empty array: selectedCard.bystander = [];
+            }
+                if (indexInVP !== -1) {
+onscreenConsole.log(`Moving <span class="console-highlights">${selectedCard.name}</span> to the Escaped Villains pile.`);
+
+                    victoryPile.splice(indexInVP, 1);
+                    escapedVillainsDeck.push(selectedCard);
+		closePopup();
+                updateGameBoard();
+resolve(true);
+                }
+            }
+        };
+
+        function closePopup() {
+            // Reset UI
+            popupTitle.textContent = 'HERO ABILITY!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+
+            // Hide popup
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+    });
+}
+
+async function moleManMastersOfMonsters() {
+    const mastermind = getSelectedMastermind();
+
+    if (mastermind.tactics.length !== 0) {
+        onscreenConsole.log(`This is not the final Tactic.`);
+        
+        // Get top 6 cards from villain deck
+        const revealedCards = [];
+        for (let i = 0; i < 6 && villainDeck.length > 0; i++) {
+            revealedCards.push(villainDeck.pop());
+        }
+
+        // Log revealed cards
+        if (revealedCards.length > 0) {
+            const cardNames = revealedCards.map(card => 
+                `<span class="console-highlights">${card.name}</span>`
+            ).join(', ');
+            onscreenConsole.log(`You revealed the top ${revealedCards.length} card${revealedCards.length !== 1 ? 's' : ''} of the Villain deck: ${cardNames}.`);
+        } else {
+            onscreenConsole.log("No cards left in the Villain deck to reveal!");
+            return;
+        }
+
+        // Separate Subterranea villains from other cards
+        const subterraneaVillains = revealedCards.filter(card => card.team === "Subterranea");
+        const otherCards = revealedCards.filter(card => card.team !== "Subterranea");
+
+        // Play all Subterranea villains
+        if (subterraneaVillains.length > 0) {
+            const villainNames = subterraneaVillains.map(card => 
+                `<span class="console-highlights">${card.name}</span>`
+            ).join(', ');
+            
+            onscreenConsole.log(`Playing Subterranea Villain${subterraneaVillains.length !== 1 ? 's' : ''}: ${villainNames}.`);
+            
+            // Add Subterranea villains to the bottom of the villain deck to be played
+            villainDeck.unshift(...subterraneaVillains);
+            
+            // Play all Subterranea villains
+            for (let i = 0; i < subterraneaVillains.length; i++) {
+                await drawVillainCard();
+            }
+        }
+
+        // Handle remaining cards - shuffle and add to bottom of deck
+        if (otherCards.length > 0) {
+            shuffleArray(otherCards);
+            
+            const otherCardNames = otherCards.map(card => 
+                `<span class="console-highlights">${card.name}</span>`
+            ).join(', ');
+            
+            onscreenConsole.log(`Shuffling the other cards and placing them on the bottom of the Villain deck.`);
+            
+            // Add remaining cards to the bottom of the villain deck
+            villainDeck.unshift(...otherCards);
+        } else if (subterraneaVillains.length === 0) {
+            onscreenConsole.log("No Subterranea Villains were revealed. All revealed cards have been shuffled and placed at the bottom of the Villain deck.");
+        }
+        
+        updateGameBoard();
+    } else {
+        // This is the final tactic
+        onscreenConsole.log(`This is the final Tactic. No effect.`);
+    }
+}  
+        
+        
 //Villains
 
 function gigantoFight() {
@@ -1733,9 +2095,4 @@ function silverSurferEnergySurge() {
     
     updateGameBoard();
 }
-
-//Masterminds
-
-
-//Schemes
 
