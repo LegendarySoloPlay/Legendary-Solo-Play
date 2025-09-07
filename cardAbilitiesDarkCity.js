@@ -8840,7 +8840,7 @@ async function kingpinCriminalEmpire() {
             // Now handle the non-villain
             if (nonVillains.length > 0) {
                 villainDeck.push(nonVillains[0]);
-		nonVillains[0].revealed = true;
+                nonVillains[0].revealed = true;
             }
         } else if (villains.length === 1) {
             // One villain - play it first, then handle non-villains after
@@ -8857,6 +8857,9 @@ async function kingpinCriminalEmpire() {
             onscreenConsole.log(`No Villains were revealed. The revealed cards have been shuffled and returned to the top of the Villain deck.`);
         }
         updateGameBoard();
+    } else {
+        // This is the final tactic
+        onscreenConsole.log(`This is the final Tactic. No effect.`);
     }
 }
 
