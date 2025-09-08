@@ -2506,25 +2506,39 @@ async function checkDiscardForInvulnerability(cards) {
 
             if (card.invulnerability === "Discard") {
                 switch (card.name) {
-                    case "Cyclops - Unending Energy":
+                    case "Cyclops - Unending Energy": {
                         console.log(`→ Triggering Cyclops effect`);
                         const shouldReturn = await cyclopsDiscardInvulnerability(card);
                         if (shouldReturn) {
-                            returnedCards.push(card); // Just track the decision here
+                            returnedCards.push(card);
                             console.log(`→ ${card.name} will be returned to hand`);
                         } else {
                             playerDiscardPile.push(card);
                             actuallyDiscarded.push(card);
                             console.log(`→ ${card.name} discarded after effect`);
+                            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
                         }
                         break;
+                    }
+
+                    case "Angel - Diving Catch": {
+                        console.log(`→ Triggering Angel Diving Catch`);
+                        // Discard Angel, then trigger the effect
+                        playerDiscardPile.push(card);
+                        actuallyDiscarded.push(card);
+                        onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded (Diving Catch).`);
+                        await angelDivingCatch(card);
+                        break;
+                    }
 
                     // Other cases...
-                    default:
+                    default: {
                         playerDiscardPile.push(card);
                         actuallyDiscarded.push(card);
                         console.log(`→ ${card.name} discarded (no special effect)`);
+                        onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been discarded.`);
                         break;
+                    }
                 }
             }
             
@@ -10597,4 +10611,5 @@ genericCardSort(playerHand);
                 modalOverlay.style.display = 'none';
             }
         }
+
     
