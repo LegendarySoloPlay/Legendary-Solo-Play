@@ -8463,6 +8463,8 @@ document.getElementById('shield-deck-card-back').addEventListener('click', showS
 function showHeroRecruitButton(hqIndex, hero) {
     const recruitButtonContainer = document.querySelector(`#hq${hqIndex}-recruit-button-container`);
     const recruitButton = document.querySelector(`#hq${hqIndex}-deck-recruit-button`);
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
+    const scheme = schemes.find(scheme => scheme.name === selectedSchemeName); 	
 
     if (!recruitButtonContainer || !recruitButton) {
         console.error(`Recruit button container or button not found for HQ index ${hqIndex}`);
@@ -8511,7 +8513,7 @@ function showHeroRecruitButton(hqIndex, hero) {
             }, 500); // Adjust the delay as needed
         };
     } else {
-        onscreenConsole.log(`You need ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit <span class="console-highlights">${hero.name}</span>.`);
+        onscreenConsole.log(`You need ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to ${scheme.name === 'Save Humanity' && hero.type === 'Bystander' ? 'rescue' : 'recruit'} <span class="console-highlights">${hero.name}</span>.`);
     }
 }
 
@@ -8520,6 +8522,8 @@ playSFX('recruit');
 
 if (hero.saveHumanityBystander === true) {
 victoryPile.push(hero);
+onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> rescued!`);
+bystanderBonuses();
 await rescueBystanderAbility(hero);
 } else if (silentMeditationRecruit === true) {
  	playerHand.push(hero);
@@ -9126,5 +9130,6 @@ function openSettingsPopup() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) overlay.style.display = 'block';
 }
+
 
 
