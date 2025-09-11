@@ -2090,127 +2090,129 @@ function punisherHailOfBullets() {
 }
 
 function punisherHailOfBulletsDefeat() {
-onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"><img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Heroes played. Superpower Ability activated.`);
+    onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"><img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Heroes played. Superpower Ability activated.`);
 
-if (villainDeck.length === 0) {
+    if (villainDeck.length === 0) {
         onscreenConsole.log(`No cards in the Villain deck to reveal.`);
         return;
-}
+    }
 
- const topCardVillainDeck = villainDeck[villainDeck.length - 1];
+    const topCardVillainDeck = villainDeck[villainDeck.length - 1];
 
-if (topCardVillainDeck.type !== 'Villain') {
-onscreenConsole.log(`You revealed <span class="console-highlights">${topCardVillainDeck.name}</span>. This card is not a Villain.`);
-return;
-}
+    if (topCardVillainDeck.type !== 'Villain') {
+        onscreenConsole.log(`You revealed <span class="console-highlights">${topCardVillainDeck.name}</span>. This card is not a Villain.`);
+        return;
+    }
 
-const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+    const { confirmButton, denyButton } = showHeroAbilityMayPopup(
         "DO YOU WISH TO DEFEAT THIS VILLAIN FOR FREE?",
         "Yes",
         "No"
     );
 
-document.getElementById('heroAbilityHoverText').style.display = 'none';
+    document.getElementById('heroAbilityHoverText').style.display = 'none';
 
     const cardImage = document.getElementById('hero-ability-may-card');
     cardImage.src = topCardVillainDeck.image;
     cardImage.style.display = 'block';
 
+    // Moved denyButton event handler outside of confirmButton handler
+    denyButton.onclick = () => {
+        onscreenConsole.log(`You have chosen not to defeat <span class="console-highlights">${topCardVillainDeck.name}</span>.`);
+        hideHeroAbilityMayPopup();
+        document.getElementById('heroAbilityHoverText').style.display = 'block';
+        updateGameBoard();
+    };
+
     confirmButton.onclick = () => {
         onscreenConsole.log(`You have chosen to defeat <span class="console-highlights">${topCardVillainDeck.name}</span> for free.`);
 
         hideHeroAbilityMayPopup();
-document.getElementById('heroAbilityHoverText').style.display = 'block';
-villainDeck.pop(topCardVillainDeck);
-victoryPile.push(topCardVillainDeck);
-updateGameBoard();
-if (hasProfessorXMindControl) {
-return new Promise((resolve) => {
-        const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-            "DO YOU WISH TO GAIN THIS VILLAIN?",
-            "GAIN AS A HERO",
-            "NO THANKS!"
-        );
+        document.getElementById('heroAbilityHoverText').style.display = 'block';
+        villainDeck.pop(topCardVillainDeck);
+        victoryPile.push(topCardVillainDeck);
+        updateGameBoard();
+        
+        if (hasProfessorXMindControl) {
+            return new Promise((resolve) => {
+                const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                    "DO YOU WISH TO GAIN THIS VILLAIN?",
+                    "GAIN AS A HERO",
+                    "NO THANKS!"
+                );
 
-        document.getElementById('heroAbilityHoverText').style.display = 'none';
+                document.getElementById('heroAbilityHoverText').style.display = 'none';
 
-        // Show the villain card image in the popup
-        const cardImage = document.getElementById('hero-ability-may-card');
-        cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
-        cardImage.style.display = 'block';
+                // Show the villain card image in the popup
+                const cardImage = document.getElementById('hero-ability-may-card');
+                cardImage.src = 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_MindControl.webp';
+                cardImage.style.display = 'block';
 
-        confirmButton.onclick = () => {
-            // Create and modify the copy
-            const cardCopy = JSON.parse(JSON.stringify(topCardVillainDeck));
-            cardCopy.type = "Hero";
-            cardCopy.color = "Grey";
-            cardCopy.cost = topCardVillainDeck.attack;
-            cardCopy.keyword1 = "None";
-            cardCopy.keyword2 = "None";
-            cardCopy.keyword3 = "None";
-            
-            playerDiscardPile.push(cardCopy);
-            
-            onscreenConsole.log(`You have chosen to add <span class="console-highlights">${topCardVillainDeck.name}</span> to your discard pile as a grey Hero.`);
-            updateGameBoard();
-            
-            hideHeroAbilityMayPopup();
-            document.getElementById('heroAbilityHoverText').style.display = 'block';
-            resolve(true); // Resolve with true indicating the player chose to copy
-        };
+                confirmButton.onclick = () => {
+                    // Create and modify the copy
+                    const cardCopy = JSON.parse(JSON.stringify(topCardVillainDeck));
+                    cardCopy.type = "Hero";
+                    cardCopy.color = "Grey";
+                    cardCopy.cost = topCardVillainDeck.attack;
+                    cardCopy.keyword1 = "None";
+                    cardCopy.keyword2 = "None";
+                    cardCopy.keyword3 = "None";
+                    
+                    playerDiscardPile.push(cardCopy);
+                    
+                    onscreenConsole.log(`You have chosen to add <span class="console-highlights">${topCardVillainDeck.name}</span> to your discard pile as a grey Hero.`);
+                    updateGameBoard();
+                    
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(true); // Resolve with true indicating the player chose to copy
+                };
 
-        denyButton.onclick = () => {
-            onscreenConsole.log(`You declined to copy ${topCardVillainDeck.name}.`);
-            hideHeroAbilityMayPopup();
-            document.getElementById('heroAbilityHoverText').style.display = 'block';
-            resolve(false); // Resolve with false indicating the player declined
-        };
-    });
-}
+                denyButton.onclick = () => {
+                    onscreenConsole.log(`You declined to copy ${topCardVillainDeck.name}.`);
+                    hideHeroAbilityMayPopup();
+                    document.getElementById('heroAbilityHoverText').style.display = 'block';
+                    resolve(false); // Resolve with false indicating the player declined
+                };
+            });
+        }
 
-if (rescueExtraBystanders > 0) {
-  for (let i = 0; i < rescueExtraBystanders; i++) {
-    rescueBystander();
-  }
-}
-defeatBonuses();
-
-// Handle fight effect if the villain has one
-let fightEffectPromise = Promise.resolve();
-if (topCardVillainDeck.fightEffect && topCardVillainDeck.fightEffect !== "None") {
-    const fightEffectFunction = window[topCardVillainDeck.fightEffect];
-    console.log("Fight effect function found:", fightEffectFunction);
-    if (typeof fightEffectFunction === 'function') {
-        fightEffectPromise = new Promise((resolve, reject) => {
-            try {
-                const result = fightEffectFunction(topCardVillainDeck); // Pass villainCard as an argument here
-                console.log("Fight effect executed:", result);
-                resolve(result);
-            } catch (error) {
-                reject(error);
+        if (rescueExtraBystanders > 0) {
+            for (let i = 0; i < rescueExtraBystanders; i++) {
+                rescueBystander();
             }
+        }
+        defeatBonuses();
+
+        // Handle fight effect if the villain has one
+        let fightEffectPromise = Promise.resolve();
+        if (topCardVillainDeck.fightEffect && topCardVillainDeck.fightEffect !== "None") {
+            const fightEffectFunction = window[topCardVillainDeck.fightEffect];
+            console.log("Fight effect function found:", fightEffectFunction);
+            if (typeof fightEffectFunction === 'function') {
+                fightEffectPromise = new Promise((resolve, reject) => {
+                    try {
+                        const result = fightEffectFunction(topCardVillainDeck); // Pass villainCard as an argument here
+                        console.log("Fight effect executed:", result);
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            } else {
+                console.error(`Fight effect function ${topCardVillainDeck.fightEffect} not found`);
+            }
+        } else {
+            console.log("No fight effect found for this villain.");
+        }
+
+        fightEffectPromise.then(() => {
+            updateGameBoard(); // Update the game board after fight effect is handled
+        }).catch(error => {
+            console.error(`Error in fight effect: ${error}`);
+            updateGameBoard(); // Ensure the game board is updated even if the fight effect fails
         });
-    } else {
-        console.error(`Fight effect function ${topCardVillainDeck.fightEffect} not found`);
-    }
-} else {
-    console.log("No fight effect found for this villain.");
-}
-
-    fightEffectPromise.then(() => {
-        updateGameBoard(); // Update the game board after fight effect is handled
-    }).catch(error => {
-        console.error(`Error in fight effect: ${error}`);
-        updateGameBoard(); // Ensure the game board is updated even if the fight effect fails
-});
-
-    denyButton.onclick = () => {
-        onscreenConsole.log(`You have chosen not to defeat <span class="console-highlights">${topCardVillainDeck.name}</span>.`);
-        hideHeroAbilityMayPopup();
-document.getElementById('heroAbilityHoverText').style.display = 'block';
-updateGameBoard();
     };
-}
 }
 
 
