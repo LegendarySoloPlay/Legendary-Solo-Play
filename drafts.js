@@ -37,15 +37,25 @@
                 focusButton.style.display = 'none'; // Hide button immediately
                 
                 //Change this section for focus functions
-                try {
-                    await initiateTelepathicVillainFight(topCard, card);
-                    closePlayedCardsPopup();
-                } catch (error) {
-                    console.error('Error handling Telepathic Probe:', error);
-                    onscreenConsole.log(`Error fighting ${card.villain}`);
+                let abilityPromise = Promise.resolve();
+            if (card.unconditionalAbility && card.unconditionalAbility !== "None") {
+                const abilityFunction = window[card.unconditionalAbility];
+                if (typeof abilityFunction === 'function') {
+                    // Wrap the result in a Promise if it isn't one
+                    abilityPromise = new Promise((resolve, reject) => {
+                        try {
+                            const result = abilityFunction(card);
+                            resolve(result);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
+                } else {
+                    console.error(`Unconditional ability function ${card.unconditionalAbility} not found`);
                 }
+            }
             });
 
-            cardContainer.appendChild(indicator);
+            cardContainer.appendChild(focusIndicator);
         }
         
