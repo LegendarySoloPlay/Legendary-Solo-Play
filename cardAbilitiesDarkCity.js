@@ -4976,7 +4976,8 @@ return new Promise((resolve) => {
         if (AttackCardsYouHave.length === 0) {
             console.log('No available Heroes.');
             onscreenConsole.log(`You do not have any Heroes with a <img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'> icon.`);
-            resolve(false);
+            document.getElementById('modal-overlay').style.display = 'none';
+			resolve(false);
             return;
         }
 
@@ -11584,5 +11585,6 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
 
 
