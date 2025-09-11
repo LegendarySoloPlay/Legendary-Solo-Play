@@ -1,3 +1,84 @@
+// Add to Card Database:
+{
+    id: 17,
+        name: "Bathe the Earth in Cosmic Rays",
+        bystanderCount: 1,
+        twistCount: 6,
+        endGame: "SixNonGreyHeroesKOd???",
+        twistEffect: "batheEarthInCosmicRaysTwist",
+requiredVillains: 1,
+requiredHenchmen: 1,
+requiredHeroes: 3,  
+variableTwist: false,
+twistText: "Reveal your hand. KO one of your non-grey Heroes. Choose a Hero from the HQ with the same or lower cost and put it into your hand.",
+image: "Visual Assets/Schemes/FantasticFour_batheEarthInCosmicRays.webp"
+    },
+    {
+        id: 18,
+        name: "Flood the Planet with Melted Glaciers",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "TwentyNonGreyHeroesKOd???",
+        twistEffect: "risingWatersTwist",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: false,
+        twistText: `Stack this Twist next to the Scheme as “Rising Waters.“ Then KO each Hero from the HQ whose cost is less than or equal to the number of Rising Waters in that stack.`,
+        image: "Visual Assets/Schemes/FantasticFour_floodThePlanetWithMeltedGlaciers.webp"
+    },
+    {
+        id: 19,
+        name: "Invincible Force Field",
+        bystanderCount: 1,
+        twistCount: 7,
+        endGame: "7TwistsForceField???",
+        twistEffect: "invincibleForceField",
+requiredVillains: 1,
+requiredHenchmen: 1,
+requiredHeroes: 3,  
+variableTwist: false,
+twistText: `Stack this Twist next to the Mastermind as a “Force Field.“`,
+image: "Visual Assets/Schemes/FantasticFour_invincibleForceField.webp"
+    },
+    {
+        id: 20,
+        name: "Pull Reality Into the Negative Zone",
+        bystanderCount: 1,
+        twistCount: 8,
+        endGame: "7TwistsNegativeZone???",
+        twistEffect: "pullRealityIntoTheNegativeZoneTwist",
+        requiredVillains: 1,
+        requiredHenchmen: 1,
+        requiredHeroes: 3,
+        variableTwist: true,
+twistText1: "Nothing happens yet...",
+twistText2: `Until the next Twist, Enemies cost <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to fight and Heroes cost <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to recruit.`,
+twistText3: `Reality is temporarily stabilised! Enemies once again cost <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to fight and Heroes cost <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit.`,
+twistText4: `Until the next Twist, Enemies cost <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to fight and Heroes cost <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to recruit.`,
+twistText5: `Reality is temporarily stabilised! Enemies once again cost <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to fight and Heroes cost <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit.`,
+twistText6: `Until the next Twist, Enemies cost <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to fight and Heroes cost <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to recruit.`,
+twistText7: "Evil Wins!",
+twistText8: "Extra Twist. No effect.",
+twistText9: "Extra Twist. No effect.",
+twistText10: "Extra Twist. No effect.",
+ image: "Visual Assets/Schemes/FantasticFour_pullRealityIntoTheNegativeZone.webp"
+    }
+    
+// Schemes for Index
+
+<li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
+
+ <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
+
+  
+    <hr>
+            <label><input type="radio" name="scheme" value="Bathe the Earth in Cosmic Rays" data-set="Fantastic Four"> Bathe the Earth in Cosmic Rays</label>
+            <label><input type="radio" name="scheme" value="Flood the Planet with Melted Glaciers" data-set="Fantastic Four"> Flood the Planet with Melted Glaciers</label>
+            <label><input type="radio" name="scheme" value="Invincible Force Field" data-set="Fantastic Four"> Invincible Force Field</label>
+            <label><input type="radio" name="scheme" value="Pull Reality into the Negative Zone" data-set="Fantastic Four"> Pull Reality into the Negative Zone</label>
+
+
 // Add to USB DarkCity file:
 function punisherHailOfBulletsDefeat() {
     onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"><img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Heroes played. Superpower Ability activated.`);
