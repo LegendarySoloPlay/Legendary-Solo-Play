@@ -78,7 +78,7 @@ twistText10: "Extra Twist. No effect.",
             <label><input type="radio" name="scheme" value="Invincible Force Field" data-set="Fantastic Four"> Invincible Force Field</label>
             <label><input type="radio" name="scheme" value="Pull Reality into the Negative Zone" data-set="Fantastic Four"> Pull Reality into the Negative Zone</label>
 
-
+// Need to code Galsctus endGame and Mole Man bonus attack
 {
         id: 10,
         name: "Galactus",
@@ -86,8 +86,10 @@ twistText10: "Extra Twist. No effect.",
         bonusAttack: 0,
         fightCondition: "None",
         victoryPoints: 7,
+        endGame: "cityDestroyed",
 masterStrike: "galactusMasterStrike",
 masterStrikeConsoleLog: `Destroy the city space closest to Galactus. Any Villain there escapes. Put this Master Strike there.`,
+keyword1: "Cosmic Threat",
 image: "Visual Assets/Masterminds/FantasticFour_Galactus.webp",
 
         tactics: [
@@ -128,20 +130,20 @@ image: "Visual Assets/Masterminds/FantasticFour_MoleMan.webp",
         id: 14,
         name: "Heralds of Galactus",
         cards: [
-            { id: 53, villainId: 14, team: "Heralds of Galactus", name: "Firelord", type: "Villain", attack: 9, originalAttack: 9, victoryPoints: 4, ambushEffect: "None", fightEffect: "firelordFight", escapeEffect: "firelordEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Firelord.webp" },
-            { id: 54, villainId: 14, team: "Heralds of Galactus", name: "Morg", type: "Villain", attack: 12, originalAttack: 12, victoryPoints: 6, ambushEffect: "morgAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Morg.webp" },
-            { id: 55, villainId: 14, team: "Heralds of Galactus", name: "Stardust", type: "Villain", attack: 10, originalAttack: 10, victoryPoints: 5, ambushEffect: "None", fightEffect: "stardustFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Stardust.webp" },
-            { id: 56, villainId: 14, team: "Heralds of Galactus", name: "Terrax the Tamer", type: "Villain", attack: 11, originalAttack: 11, victoryPoints: 5, ambushEffect: "terraxTheTamerAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_TerraxTheTamer.webp" }
+            { id: 53, villainId: 14, team: "Heralds of Galactus", name: "Firelord", type: "Villain", attack: 9, originalAttack: 9, victoryPoints: 4, ambushEffect: "None", fightEffect: "firelordFight", escapeEffect: "firelordEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Cosmic Threat", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Firelord.webp" },
+            { id: 54, villainId: 14, team: "Heralds of Galactus", name: "Morg", type: "Villain", attack: 12, originalAttack: 12, victoryPoints: 6, ambushEffect: "morgAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Cosmic Threat", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Morg.webp" },
+            { id: 55, villainId: 14, team: "Heralds of Galactus", name: "Stardust", type: "Villain", attack: 10, originalAttack: 10, victoryPoints: 5, ambushEffect: "None", fightEffect: "stardustFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Cosmic Threat", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Stardust.webp" },
+            { id: 56, villainId: 14, team: "Heralds of Galactus", name: "Terrax the Tamer", type: "Villain", attack: 11, originalAttack: 11, victoryPoints: 5, ambushEffect: "terraxTheTamerAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Cosmic Threat", image: "Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_TerraxTheTamer.webp" }
         ]
     },
 {
         id: 15,
         name: "Subterranea",
         cards: [
-            { id: 57, villainId: 15, team: "Subterranea", name: "Giganto", type: "Villain", attack: 7, originalAttack: 7, victoryPoints: 4, ambushEffect: "None", fightEffect: "gigantoFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_Subterranea_Giganto.webp" },
-            { id: 58, villainId: 15, team: "Subterranea", name: "Megataur", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "megataurAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_Subterranea_Megataur.webp" },
-            { id: 59, villainId: 15, team: "Subterranea", name: "Moloids", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 2, ambushEffect: "None", fightEffect: "moloidsFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_Subterranea_Moloids.webp" },
-            { id: 60, villainId: 15, team: "Subterranea", name: "Ra'ktar the Molan King", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "raktarAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/FantasticFour_Subterranea_Raktar the Molan King.webp" }
+            { id: 57, villainId: 15, team: "Subterranea", name: "Giganto", type: "Villain", attack: 7, originalAttack: 7, victoryPoints: 4, ambushEffect: "None", fightEffect: "gigantoFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Burrow", image: "Visual Assets/Villains/FantasticFour_Subterranea_Giganto.webp" },
+            { id: 58, villainId: 15, team: "Subterranea", name: "Megataur", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "megataurAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Burrow", image: "Visual Assets/Villains/FantasticFour_Subterranea_Megataur.webp" },
+            { id: 59, villainId: 15, team: "Subterranea", name: "Moloids", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 2, ambushEffect: "None", fightEffect: "moloidsFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Burrow", image: "Visual Assets/Villains/FantasticFour_Subterranea_Moloids.webp" },
+            { id: 60, villainId: 15, team: "Subterranea", name: "Ra'ktar the Molan King", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "raktarAmbush", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", keyword1: "Burrow", image: "Visual Assets/Villains/FantasticFour_Subterranea_Raktar the Molan King.webp" }
         ]
     }
 
