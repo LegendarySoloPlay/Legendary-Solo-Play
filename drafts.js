@@ -79,6 +79,74 @@ twistText10: "Extra Twist. No effect.",
             <label><input type="radio" name="scheme" value="Pull Reality into the Negative Zone" data-set="Fantastic Four"> Pull Reality into the Negative Zone</label>
 
 
+{
+        id: 10,
+        name: "Galactus",
+        attack: 20,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 7,
+masterStrike: "galactusMasterStrike",
+masterStrikeConsoleLog: `Destroy the city space closest to Galactus. Any Villain there escapes. Put this Master Strike there.`,
+image: "Visual Assets/Masterminds/FantasticFour_Galactus.webp",
+
+        tactics: [
+            { id: 29, mastermindId: 9, fightEffect: "galactusCosmicEntity", victoryPoints: 7, name: "Cosmic Entity", type: "Mastermind", effect: `Choose <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='card-icons'>, <img src='Visual Assets/Icons/Instinct.svg' alt='Instinct Icon' class='card-icons'>, <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='card-icons'>, <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='card-icons'> or <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='card-icons'>. Each player reveals any number of cards of that class, then draws that many cards.`, image: "Visual Assets/Masterminds/FantasticFour_Galactus_CosmicEntity.webp" },
+            { id: 30, mastermindId: 9, fightEffect: "galactusForceOfEternity", victoryPoints: 7, name: "Force of Eternity", type: "Mastermind", effect: "When you draw a new hand of cards at the end of this turn, draw six extra cards, then discard six cards.", image: "Visual Assets/Masterminds/FantasticFour_Galactus_ForceOfEternity.webp" },
+            { id: 31, mastermindId: 9, fightEffect: "galactusPanickedMobs", victoryPoints: 7, name: "Panicked Mobs", type: "Mastermind", effect: `Choose <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='card-icons'>, <img src='Visual Assets/Icons/Instinct.svg' alt='Instinct Icon' class='card-icons'>, <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='card-icons'>, <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='card-icons'> or <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='card-icons'>. Each player reveals any number of cards of that class, then rescues that many Bystanders.`, image: "Visual Assets/Masterminds/FantasticFour_Galactus_PanickedMobs.webp" },
+            { id: 32, mastermindId: 9, fightEffect: "galactusSunderTheEarth", victoryPoints: 7, name: "Sunder the Earth", type: "Mastermind", effect: "Each other player KOs all Heroes from their discard pile with the same card name as a Hero in the HQ.", image: "Visual Assets/Masterminds/FantasticFour_Galactus_SunderTheEarth.webp" }
+        ]
+    },
+{
+        id: 11,
+        name: "Mole Man",
+        attack: 7,
+        bonusAttack: 0,
+        fightCondition: "None",
+        victoryPoints: 6,
+masterStrike: "moleManMasterStrike",
+masterStrikeConsoleLog: `All Subterranea Villains in the city escape. If any Villains escaped this way, each player gains a Wound.`,
+image: "Visual Assets/Masterminds/FantasticFour_MoleMan.webp",
+
+        tactics: [
+            { id: 29, mastermindId: 9, fightEffect: "moleManDigToFreedom", victoryPoints: 6, name: "Dig to Freedom", type: "Mastermind", effect: "Each other player chooses a Subterranea Villain in their Victory Pile and puts it into the Escaped Villains pile.", image: "Visual Assets/Masterminds/FantasticFour_MoleMan_DigToFreedom.webp" },
+            { id: 30, mastermindId: 9, fightEffect: "moleManMastersOfMonsters", victoryPoints: 6, name: "Master of Monsters", type: "Mastermind", effect: "If this is not the final Tactic, reveal the top six cards of the Villain Deck. Play all the Subterranea Villains you revealed. Put the rest on the bottom of the Villain Deck in random order.", image: "Visual Assets/Masterminds/FantasticFour_MoleMan_MasterOfMonsters.webp" },
+            { id: 31, mastermindId: 9, fightEffect: "moleManSecretTunnel", victoryPoints: 6, name: "Secret Tunnel", type: "Mastermind", effect: "You get +6<img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='card-icons'> usable only against Villains in the Streets.", image: "Visual Assets/Masterminds/FantasticFour_MoleMan_SecretTunnel.webp" },
+            { id: 32, mastermindId: 9, fightEffect: "moleManUndergroundRiches", victoryPoints: 6, name: "Underground Riches", type: "Mastermind", effect: "You get +6<img src='Visual Assets/Icons/Recruit.svg' alt='Recruit Icon' class='card-icons'> usable only to recruit Heroes in the HQ space under the Streets.", image: "Visual Assets/Masterminds/FantasticFour_MoleMan_UndergroundRiches.webp" }
+        ]
+    }
+
+<li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
+
+                <hr>
+            <label><input type="radio" name="mastermind" value="Galactus" data-set="Fantastic Four"> Galactus</label>
+            <label><input type="radio" name="mastermind" value="Mole Man" data-set="Fantastic Four"> Mole Man</label>
+
+
+
+{
+        id: 14,
+        name: "Heralds of Galactus",
+        cards: [
+            { id: 53, villainId: 14, team: "Heralds of Galactus", name: "Blackheart", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "blackheartAmbush", fightEffect: "blackheartFight", escapeEffect: "blackheartEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Blackheart.webp" },
+            { id: 54, villainId: 14, team: "Heralds of Galactus", name: "Dracula", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 4, ambushEffect: "draculaAmbush", fightEffect: "draculaFight", escapeEffect: "draculaEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Dracula.webp" },
+            { id: 55, villainId: 14, team: "Heralds of Galactus", name: "Azazel", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "azazelFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Azazel.webp" },
+            { id: 56, villainId: 14, team: "Heralds of Galactus", name: "Lilith, Daughter of Dracula", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "lilithEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_LilithDaughterOfDracula.webp" }
+        ]
+    },
+{
+        id: 15,
+        name: "Subterranea",
+        cards: [
+            { id: 57, villainId: 15, team: "Subterranea", name: "Blackheart", type: "Villain", attack: 6, originalAttack: 6, victoryPoints: 4, ambushEffect: "blackheartAmbush", fightEffect: "blackheartFight", escapeEffect: "blackheartEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Blackheart.webp" },
+            { id: 58, villainId: 15, team: "Subterranea", name: "Dracula", type: "Villain", attack: 3, originalAttack: 3, victoryPoints: 4, ambushEffect: "draculaAmbush", fightEffect: "draculaFight", escapeEffect: "draculaEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Dracula.webp" },
+            { id: 59, villainId: 15, team: "Subterranea", name: "Azazel", type: "Villain", attack: 4, originalAttack: 4, victoryPoints: 2, ambushEffect: "None", fightEffect: "azazelFight", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_Azazel.webp" },
+            { id: 60, villainId: 15, team: "Subterranea", name: "Lilith, Daughter of Dracula", type: "Villain", attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "lilithEscape", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "true", image: "Visual Assets/Villains/DarkCity_Underworld_LilithDaughterOfDracula.webp" }
+        ]
+    }
+
+
+
 // Add to USB DarkCity file:
 function punisherHailOfBulletsDefeat() {
     onscreenConsole.log(`<img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"><img src="Visual Assets/Icons/Tech.svg" alt="Tech Icon" class="console-card-icons"> Heroes played. Superpower Ability activated.`);
