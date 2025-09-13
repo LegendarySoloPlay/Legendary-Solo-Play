@@ -167,12 +167,26 @@ image: "Visual Assets/Masterminds/FantasticFour_MoleMan.webp",
 {id:132, heroName: "Human Torch", name: "Human Torch - Nova Flame", type: "Hero", rarity: "Rare", team: "Fantastic Four", class1: "Range", class2: "None", color: "Blue", cost: 8, attack: 6, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "humanTorchNovaFlame", conditionType: "playedCards", condition: "Fantastic Four", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_NovaFlame.webp"}
         ]
     },
+    {
+        id: 34,
+        name: "Invisible Woman",
+        cards: [
+{id:133, heroName: "Invisible Woman", name: "Invisible Woman - Disappearing Act", type: "Hero", rarity: "Common", team: "Fantastic Four", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", keyword1: "Focus", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_DisappearingAct.webp"},
+{id:134, heroName: "Invisible Woman", name: "Invisible Woman - Four of a Kind", type: "Hero", rarity: "Common 2", team: "Fantastic Four", class1: "Range", class2: "None", color: "Blue", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "invisibleWomanFourOfAKind", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_FourOfAKind.webp"},
+{id:135, heroName: "Invisible Woman", name: "Invisible Woman - Unseen Rescue", type: "Hero", rarity: "Uncommon", team: "Fantastic Four", class1: "Covert", class2: "None", color: "Red", cost: 4, attack: 2, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", keyword1: "Focus", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_UnseenRescue.webp"},
+{id:136, heroName: "Invisible Woman", name: "Invisible Woman - Invisible Barrier", type: "Hero", rarity: "Rare", team: "Fantastic Four", class1: "Covert", class2: "None", color: "Red", cost: 7, attack: 5, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_InvisibleBarrier.webp"}
+        ]
+    },
 
 
 <li><label><input type="checkbox" data-team="Fantastic Four"/> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Fantastic Four</label></li>
 
  <hr>
             <label><input type="checkbox" name="hero" value="Human Torch" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Human Torch</label>
+            <label><input type="checkbox" name="hero" value="Invisible Woman" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Invisible Woman</label>
+            <label><input type="checkbox" name="hero" value="Mr. Fantastic" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Mr. Fantastic</label>
+            <label><input type="checkbox" name="hero" value="Silver Surfer" data-set="Unaffiliated" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="card-icons"> Silver Surfer</label>
+            <label><input type="checkbox" name="hero" value="Thing" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Thing</label>
            
 
 "Focus": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
