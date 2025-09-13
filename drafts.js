@@ -155,6 +155,30 @@ image: "Visual Assets/Masterminds/FantasticFour_MoleMan.webp",
             <label><input type="checkbox" name="villain" value="Subterranea" data-set="Fantastic Four"> Subterranea</label>
 
 
+//Heroes Section:
+
+{
+        id: 33,
+        name: "Human Torch",
+        cards: [
+{id:129, heroName: "Human Torch", name: "Human Torch - Call for Backup", type: "Hero", rarity: "Common", team: "Fantastic Four", class1: "Instinct", class2: "None", color: "Yellow", cost: 3, attack: 0, recruit: 2, attackIcon: false, recruitIcon: true, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "humanTorchCallForBackup", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_CallForBackup.webp"},
+{id:130, heroName: "Human Torch", name: "Human Torch - Hothead", type: "Hero", rarity: "Common 2", team: "Fantastic Four", class1: "Range", class2: "None", color: "Blue", cost: 4, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "humanTorchHothead", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_Hothead.webp"},
+{id:131, heroName: "Human Torch", name: "Human Torch - Flame On!", type: "Hero", rarity: "Uncommon", team: "Fantastic Four", class1: "Range", class2: "None", color: "Blue", cost: 6, attack: 4, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "None", conditionType: "None", condition: "None", invulnerability: "None", keyword1: "Focus", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_FlameOn.webp"},
+{id:132, heroName: "Human Torch", name: "Human Torch - Nova Flame", type: "Hero", rarity: "Rare", team: "Fantastic Four", class1: "Range", class2: "None", color: "Blue", cost: 8, attack: 6, recruit: 0, attackIcon: true, recruitIcon: false, bonusAttack: 0, bonusRecruit: 0, multiplier: "None", multiplierAttribute: "None", multiplierLocation: "None", unconditionalAbility: "None", conditionalAbility: "humanTorchNovaFlame", conditionType: "playedCards", condition: "Fantastic Four", invulnerability: "None", image: "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_NovaFlame.webp"}
+        ]
+    },
+
+
+<li><label><input type="checkbox" data-team="Fantastic Four"/> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Fantastic Four</label></li>
+
+ <hr>
+            <label><input type="checkbox" name="hero" value="Human Torch" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Human Torch</label>
+           
+
+"Focus": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
+"Burrow": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
+"Cosmic Threat": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
+
 
 // Add to USB DarkCity file:
 function punisherHailOfBulletsDefeat() {
