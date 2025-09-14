@@ -2,12 +2,226 @@
 // Pre-release
 // 05/09/2025 17.45
 
-// Need to code Burrow, Cosmic Threat and Villain movement for Galactus (Deep Seek - Villain Movement), changes to attack and recruit usable in particular places
+// Need to code Focus and changes to attack and recruit usable in particular city spaces.
+// Need to add cards to database/index, images to Visual Assets and keywords to database.
+// Need to code expansion splash screen
+// Explore adding animations now
+
+//Keywords
+
+async function handleCosmicThreatChoice(card, index) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+               
+            const allRevealableCards = [
+                ...playerHand,
+                ...cardsPlayedThisTurn.filter(card => 
+                    !card.isCopied && 
+                    !card.sidekickToDestroy
+                )
+            ];
+
+ const hasClass = (card, wanted) =>
+  ['class1','class2','class3'].some(k =>
+    String(card?.[k] ?? '').trim().toLowerCase() === String(wanted).trim().toLowerCase()
+  );
+           
+            let className1, className2, imagePath, attackPerCard;
+            
+            switch(card.name) {
+                case 'Arishem, The Judge':
+                    className1 = 'Range';
+                    className2 = 'Strength';
+                    imagePath = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp';
+                    attackPerCard = 3;
+                    break;
+                
+                case 'Exitar, The Exterminator':
+                    className1 = 'Tech';
+                    className2 = 'Range';
+                    imagePath = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp';
+                    attackPerCard = 3;
+                    break;
+                    
+                case 'Gammenon, The Gatherer':
+                    className1 = 'Strength';
+                    className2 = 'Instinct';
+                    imagePath = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp';
+                    attackPerCard = 3;
+                    break;
+                    
+                case 'Nezarr, The Calculator':
+                    className1 = 'Covert';
+                    className2 = 'Tech';
+                    imagePath = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp';
+                    attackPerCard = 3;
+                    break;
+                    
+                case 'Tiamut, The Dreaming Celestial':
+                    className1 = 'Instinct';
+                    className2 = 'Covert';
+                    imagePath = 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_PsychicLink.webp';
+                    attackPerCard = 3;
+                    break;
+                
+                default:
+                    className1 = 'Class1';
+                    className2 = 'Class2';
+                    imagePath = 'Visual Assets/Other/cardback.webp';
+                    attackPerCard = 3;
+            }
+            
+
+            const countClass1 = allRevealableCards
+  .filter(c => hasClass(c, className1))
+  .length;
+
+           const countClass2 = allRevealableCards
+  .filter(c => hasClass(c, className2))
+  .length;
+            
+            // Calculate attack reduction values
+            const valueClass1 = countClass1 * attackPerCard;
+            const valueClass2 = countClass2 * attackPerCard;
+            
+            // Create button texts with icons
+            const confirmText = `<img src="Visual Assets/Icons/${className1}.svg" alt="${className1} Icon" class="console-card-icons"> - ${countClass1} card${countClass1 !== 1 ? 's' : ''}`;
+            const denyText = `<img src="Visual Assets/Icons/${className2}.svg" alt="${className2} Icon" class="console-card-icons"> - ${countClass2} card${countClass2 !== 1 ? 's' : ''}`;
+
+            const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                `CHOOSE A CLASS TO REVEAL:`,
+                confirmText,
+                denyText
+            );
+
+            document.getElementById('heroAbilityHoverText').style.display = 'none';
+            
+            const cardImage = document.getElementById('hero-ability-may-card');
+            cardImage.src = imagePath;
+            cardImage.style.display = 'block';
+
+            confirmButton.onclick = () => {
+                cosmicThreat(card, index, valueClass1, className1);
+                hideHeroAbilityMayPopup();
+                document.getElementById('heroAbilityHoverText').style.display = 'block';
+                cardImage.style.display = 'none';
+                resolve();
+            };
+
+            denyButton.onclick = () => {
+                cosmicThreat(card, index, valueClass2, className2);
+                hideHeroAbilityMayPopup();
+                document.getElementById('heroAbilityHoverText').style.display = 'block';
+                cardImage.style.display = 'none';
+                resolve();
+            };
+        }, 10);
+    });
+}
+
+function cosmicThreat(card, index, attackReduction, className) {
+  // temp buff
+  if (index === 0) city1TempBuff -= attackReduction;
+  else if (index === 1) city2TempBuff -= attackReduction;
+  else if (index === 2) city3TempBuff -= attackReduction;
+  else if (index === 3) city4TempBuff -= attackReduction;
+  else if (index === 4) city5TempBuff -= attackReduction;
+
+  // cosmic threat record
+  if (index === 0) city1CosmicThreat = attackReduction;
+  else if (index === 1) city2CosmicThreat = attackReduction;
+  else if (index === 2) city3CosmicThreat = attackReduction;
+  else if (index === 3) city4CosmicThreat = attackReduction;
+  else if (index === 4) city5CosmicThreat = attackReduction;
+
+  const cardCount = attackReduction / 3;
+  const cardText = cardCount === 1 ? 'card' : 'cards';
+  onscreenConsole.log(`Cosmic Threat! You have revealed ${cardCount} <img src="Visual Assets/Icons/${className}.svg" alt="${className} Icon" class="console-card-icons"> ${cardText}. <span class="console-highlights">${card.name}</span> gets -${attackReduction} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+  updateGameBoard();
+}
+
+
+// Call whenever an attack is completed
+function removeCosmicThreatBuff(cityIndex) {
+    if (cityIndex === 0 && city1CosmicThreat > 0) {
+        city1TempBuff += city1CosmicThreat;
+        city1CosmicThreat = 0;
+    } 
+    else if (cityIndex === 1 && city2CosmicThreat > 0) {
+        city2TempBuff += city2CosmicThreat;
+        city2CosmicThreat = 0;
+    } 
+    else if (cityIndex === 2 && city3CosmicThreat > 0) {
+        city3TempBuff += city3CosmicThreat;
+        city3CosmicThreat = 0;
+    } 
+    else if (cityIndex === 3 && city4CosmicThreat > 0) {
+        city4TempBuff += city4CosmicThreat;
+        city4CosmicThreat = 0;
+    } 
+    else if (cityIndex === 4 && city5CosmicThreat > 0) {
+        city5TempBuff += city5CosmicThreat;
+        city5CosmicThreat = 0;
+    }
+
+    updateGameBoard();
+}
+
+//To go near Telepathic Probe in cardsplayedthisturn popup in script - need to fix its onscreen console log for bolding and full stop. not finished here where it switches back to attack button, also need to add abck in part of the indicator code from original.
+if (card.keyword1 === "Focus" ||  card.keyword2 === "Focus" || card.keyword3 === "Focus") {
+            imgElement.classList.add('clickable-card', 'telepathic-probe-active');
+            imgElement.style.cursor = 'pointer';
+            imgElement.style.border = '3px solid rgb(235 43 58 / 100%)';
+            
+            // Create attack button (hidden by default)
+            const focusButton = document.createElement('div');
+            focusButton.className = 'played-cards-attack-button';
+            focusButton.innerHTML = `
+                <span style="filter: drop-shadow(0vh 0vh 0.3vh black);">
+                    <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-attack-icons">
+                </span>
+            `;
+            focusButton.style.display = 'none';
+            focusIndicator.appendChild(focusButton);
+
+            // Indicator click handler
+            focusIndicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let focusCost = recalculateVillainAttack(topCard);
+
+                // Calculate available attack points
+                let playerRecruitPoints = totalRecruitPoints;
+            
+                // Toggle attack button visibility
+                if (playerRecruitPoints >= focusCost) {
+                    focusButton.style.display = focusButton.style.display === 'none' ? 'block' : 'none';
+                } else {
+                    onscreenConsole.log(`You need ${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to activate <span class="console-highlights">${card.name}</span><span class="bold-span">'s</span> Focus ability.`);
+                }
+            });
+
+            // Attack button click handler
+            attackButton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                attackButton.style.display = 'none'; // Hide button immediately
+                
+                try {
+                    await initiateTelepathicVillainFight(topCard, card);
+                    closePlayedCardsPopup();
+                } catch (error) {
+                    console.error('Error handling Telepathic Probe:', error);
+                    onscreenConsole.log(`Error fighting ${card.villain}`);
+                }
+            });
+
+            cardContainer.appendChild(indicator);
+        }
+
 
 //Schemes
 
-// Need to add evil wins and flavour texts
 function risingWatersTwist() {
+    stackedTwistNextToMastermind++;
   // Create a copy of the current HQ to avoid issues with changing array
   const currentHQ = [...hq];
   let heroesKOd = 0;
@@ -47,7 +261,6 @@ function risingWatersTwist() {
   updateGameBoard();
 }
 
-// Need to establish variable, how it impacts attacking and recruiting, plus evil wins coding and flavour text
 function pullRealityIntoTheNegativeZoneTwist() {
     if (schemeTwistCount === 2 || schemeTwistCount === 4 ||schemeTwistCount === 6) {
         negativeZoneAttackAndRecruit = true;
@@ -57,19 +270,351 @@ function pullRealityIntoTheNegativeZoneTwist() {
         updateGameBoard();
         }
         
-// Need to establish variable and then add attack condition - dont make madtermind affordable unless the player has enough attack and recruit to successfully counter the forcefield and conplete the attack, then use a version of the bribe popup with stricter control of attack and receuit so that enough attack is reserved for the actual mastermind attack. Also need evil wins and flavour text.
 function invincibleForceField() {
+    stackedTwistNextToMastermind++;
     const mastermind = getSelectedMastermind();
     invincibleForceField++;
     onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> now has ${invincibleForceField} Force Field${invincibleForceField === 1 ? '' : 's'}.`);
     updateGameBoard();
 }
 
-// need to fix this with the actual popups and logic, plus evil wins and flavour text
-function batheEarthInCosmicRaysTwist() {
-KO non-grey hero - if none avaialble then console log and quit
-new popup - select a hero in HQ with cost same or lower than the KOd card. it is gained straight to the hand.
+async function batheEarthInCosmicRaysTwist() {
+    return new Promise((resolve) => {
+        // Build an array of eligible (non-grey) heroes you can access later
+        const COLOURS = new Set(['Green', 'Yellow', 'Black', 'Blue', 'Red']);
+        const eligibleCards = playerHand.filter(
+            c => c && COLOURS.has(String(c.color || '').trim())
+        );
+
+        if (eligibleCards.length === 0) {
+            console.log("No eligible coloured cards in hand (Green/Yellow/Black/Blue/Red).");
+            onscreenConsole.log("No non-grey Heroes available to KO.");
+            resolve();
+            return;
+        }
+
+        // Get the popup elements
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        document.getElementById('close-choice-button').style.display = 'none';
+
+        // Initialise UI
+        popupTitle.textContent = 'Scheme Twist';
+        instructionsDiv.innerHTML = 'Select a non-grey Hero to KO from your hand. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Return Card';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+        document.getElementById('close-choice-button').style.display = 'none';
+
+        let selectedCard = null;
+        let activeImage = null;
+
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        function updateInstructions() {
+            if (selectedCard === null) {
+                instructionsDiv.innerHTML = 'Select a non-grey Hero to KO from your hand. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.';
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd.`;
+            }
+        }
+
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        function toggleCardSelection(card, listItem) {
+            if (selectedCard === card) {
+                selectedCard = null;
+                listItem.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                const prevListItem = document.querySelector('li.selected');
+                if (prevListItem) prevListItem.classList.remove('selected');
+                selectedCard = card;
+                listItem.classList.add('selected');
+                updateHeroImage(card);
+            }
+            updateConfirmButton();
+            updateInstructions();
+        }
+
+        // Sort & render only the eligible (non-grey) cards
+        // If genericCardSort sorts in-place, pass the array directly.
+        genericCardSort(eligibleCards);
+
+        eligibleCards.forEach((card) => {
+            const li = document.createElement('li');
+
+            const createTeamIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
+
+            const createClassIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
+            
+            const teamIcon = createTeamIconHTML(card.team);
+            const class1Icon = createClassIconHTML(card.class1);
+            const class2Icon = createClassIconHTML(card.class2);
+            const class3Icon = createClassIconHTML(card.class3);
+
+            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+            li.setAttribute('data-card-id', card.id);
+
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, li);
+            cardsList.appendChild(li);
+        });
+
+        // Handle confirmation
+        confirmButton.onclick = async () => {
+            if (selectedCard) {
+                console.log('Card returned to the top of the deck:', selectedCard);
+
+                // Find the selected card's current index in the *actual* hand
+                const indexInHand = playerHand.findIndex(c => c && c.id === selectedCard.id);
+                if (indexInHand !== -1) {
+                    // Remove the card from the player's hand
+                    playerHand.splice(indexInHand, 1);
+                }
+
+                koPile.push(selectedCard);
+		onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
+		koBonuses();
+                closePopup();
+                updateGameBoard();
+		await cosmicRaysRecruit(selectedCard.cost);
+                resolve();
+            }
+        };
+
+        function closePopup() {
+            // Reset UI
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+
+            // Hide popup
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+    });
 }
+
+async function cosmicRaysRecruit(maxCost) {
+    return new Promise((resolve) => {
+        // Filter HQ for eligible recruits
+        const eligibleHQ = (hq || []).filter(c =>
+  c && c.type === 'Hero' && Number.isFinite(c.cost) && c.cost <= maxCost
+);
+
+        if (eligibleHQ.length === 0) {
+            console.log(`No HQ Heroes with cost ≤ ${maxCost}.`);
+            onscreenConsole.log(`No Heroes in the HQ with ${maxCost} or less cost.`);
+            updateGameBoard();
+            resolve();
+            return;
+        }
+
+        // --- Popup wiring (same scaffold as your twist function) ---
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        const closeBtn = document.getElementById('close-choice-button');
+
+        if (closeBtn) closeBtn.style.display = 'none';
+        popupTitle.textContent = 'Scheme Twist';
+        instructionsDiv.innerHTML = `Choose a Hero from the HQ with ${maxCost} or less cost to put into your hand.`;
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Recruit';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCard = null;
+        let activeImage = null;
+
+        const createTeamIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+            }
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+
+        const createClassIconHTML = (value) => {
+            if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                return '';
+            }
+            return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+        };
+
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCard === null;
+        }
+
+        function updateInstructions() {
+            if (!selectedCard) {
+                instructionsDiv.innerHTML = `Choose a Hero from the HQ with ${maxCost} or less cost to put into your hand.`;
+            } else {
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be gained and put in your hand.`;
+            }
+        }
+
+        function updateHeroImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        function toggleCardSelection(card, li) {
+            if (selectedCard === card) {
+                selectedCard = null;
+                li.classList.remove('selected');
+                updateHeroImage(null);
+            } else {
+                const prev = cardsList.querySelector('li.selected');
+                if (prev) prev.classList.remove('selected');
+                selectedCard = card;
+                li.classList.add('selected');
+                updateHeroImage(card);
+            }
+            updateConfirmButton();
+            updateInstructions();
+        }
+
+        // Render eligible HQ cards
+        eligibleHQ.forEach(card => {
+            const li = document.createElement('li');
+            const teamIcon = createTeamIconHTML(card.team);
+            const class1Icon = createClassIconHTML(card.class1);
+            const class2Icon = createClassIconHTML(card.class2);
+            const class3Icon = createClassIconHTML(card.class3);
+
+            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} (Cost ${card.cost})</span>`;
+            li.setAttribute('data-card-id', card.id ?? card.uniqueId ?? '');
+            li.onmouseover = () => { if (!activeImage) { heroImage.src = card.image; heroImage.style.display = 'block'; oneChoiceHoverText.style.display = 'none'; } };
+            li.onmouseout  = () => { if (!activeImage) { heroImage.src = ''; heroImage.style.display = 'none'; oneChoiceHoverText.style.display = 'block'; } };
+            li.onclick = () => toggleCardSelection(card, li);
+
+            cardsList.appendChild(li);
+        });
+
+        confirmButton.onclick = async () => {
+            if (!selectedCard) return;
+
+            // Remove from HQ
+            const idx = hq.findIndex(c =>
+                (c && (c.id ?? c.uniqueId)) === (selectedCard.id ?? selectedCard.uniqueId)
+            );
+            if (idx !== -1) {
+                hq.splice(idx, 1);
+            }
+
+    const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+    hq[hqIndex] = newCard;
+    
+    if (newCard) {
+        onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+    } 
+
+addHRToTopWithInnerHTML();
+    
+    if (!hq[hqIndex] && heroDeck.length === 0) {
+        heroDeckHasRunOut = true;
+    }
+
+            // Add to hand
+            playerHand.push(selectedCard);
+	playSFX('recruit');
+            onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> gained and put in your hand.`);
+
+
+
+            // Cleanup UI
+            closePopup();
+            updateGameBoard();
+            resolve();
+        };
+
+        function closePopup() {
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.style.display = 'none';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+            if (closeBtn) closeBtn.style.display = ''; // restore default for future modals
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+            cardsList.innerHTML = '';
+        }
+    });
+}
+
 
 //Masterminds
 
@@ -84,8 +629,8 @@ function galactusMasterStrike() {
             // Any villain at this space immediately escapes
             if (city[i] !== null) {
                 const escapedVillain = city[i];
-                onscreenConsole.log(`<span class="console-highlights">${escapedVillain.name}</span> escapes from the destroyed ${citySpaceLabels[i]}!`);
                 city[i] = null;
+                removeCosmicThreatBuff(i);
                 
                 // Show escape popup
                 setTimeout(async () => {
@@ -96,7 +641,7 @@ function galactusMasterStrike() {
                     addHRToTopWithInnerHTML();
                 }, 500);
             }
-            
+            updateGameBoard();
             return; // Exit after destroying one space
         }
     }
@@ -115,17 +660,558 @@ function getEffectiveFrontIndex() {
     return -1; // All spaces destroyed
 }
 
-function galactusCosmicEntity() {
- // Need a class pick popup - dynamic enough to be used in different ways       
+async function galactusCosmicEntity() {
+    return new Promise((resolve) => {
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const listContainer = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        const closeBtn = document.getElementById('close-choice-button');
+
+        // --- Constants & helpers
+        const CLASSES = ['Strength', 'Instinct', 'Covert', 'Tech', 'Range'];
+
+        const cardsPool = [
+            ...playerHand,
+            ...cardsPlayedThisTurn.filter(c => !c?.isCopied && !c?.sidekickToDestroy)
+        ];
+
+        const cardHasClass = (card, cls) =>
+            !!card && (card.class1 === cls || card.class2 === cls || card.class3 === cls);
+
+        const countsByClass = {};
+        for (const cls of CLASSES) {
+            countsByClass[cls] = cardsPool.reduce((acc, c) => acc + (cardHasClass(c, cls) ? 1 : 0), 0);
+        }
+
+        // --- Local UI state
+        let selectedClass = null;
+        let selectedQty = null;
+        let phase = 'chooseClass'; // or 'chooseQuantity'
+
+        // --- UI: initialise for this modal mode
+        if (closeBtn) closeBtn.style.display = 'none'; // hide cancel for this flow
+        if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Confirm';
+
+        popupTitle.textContent = 'Mastermind Tactic';
+        instructionsDiv.textContent = 'Select a class. You may reveal any number of cards of that class, then draw that many cards.';
+
+        listContainer.innerHTML = '';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        // --- Render helpers
+        const clearList = () => { listContainer.innerHTML = ''; };
+
+        function renderClassButtons() {
+            phase = 'chooseClass';
+            selectedClass = null;
+            selectedQty = null;
+            confirmButton.disabled = true;
+            popupTitle.textContent = 'Mastermind Tactic';
+            instructionsDiv.textContent = 'Select a class. You may reveal any number of cards of that class, then draw that many cards.';
+            clearList();
+
+            CLASSES.forEach(cls => {
+                const count = countsByClass[cls] || 0;
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
+                btn.onclick = () => {
+                    selectedClass = cls;
+                    selectedQty = null;
+                    // If you want to prevent moving forward when count is 0, keep confirm disabled.
+                    // Otherwise, allow continuing (and show no quantity options).
+                    confirmButton.disabled = false;
+                    instructionsDiv.textContent = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
+                };
+                li.appendChild(btn);
+                listContainer.appendChild(li);
+            });
+        }
+
+        function renderQuantityButtons(max) {
+            phase = 'chooseQuantity';
+            selectedQty = null;
+            confirmButton.disabled = true;
+            popupTitle.textContent = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
+            clearList();
+
+            if (max <= 0) {
+                instructionsDiv.textContent = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
+                confirmButton.disabled = false;
+                selectedQty = 0;
+                return;
+            }
+
+            instructionsDiv.textContent = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            for (let n = max; n >= 1; n--) {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `${n}`;
+                btn.onclick = () => {
+                    selectedQty = n;
+                    confirmButton.disabled = false;
+                    instructionsDiv.textContent = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
+                };
+                li.appendChild(btn);
+                listContainer.appendChild(li);
+            }
+
+            // Optional: include a "0" option explicitly
+            // const li0 = document.createElement('li');
+            // const btn0 = document.createElement('button');
+            // btn0.type = 'button';
+            // btn0.textContent = '0 (none)';
+            // btn0.onclick = () => { selectedQty = 0; confirmButton.disabled = false; instructionsDiv.textContent = `Reveal 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Press Confirm to proceed.`; };
+            // li0.appendChild(btn0);
+            // listContainer.appendChild(li0);
+        }
+
+        // --- Wire confirm behaviour for both phases
+        confirmButton.onclick = async () => {
+            if (phase === 'chooseClass') {
+                if (!selectedClass) return;
+                const max = countsByClass[selectedClass] || 0;
+                renderQuantityButtons(max);
+                return;
+            }
+
+            if (phase === 'chooseQuantity') {
+                if (selectedQty == null) return;
+
+                // Perform the extra draws
+                for (let i = 0; i < selectedQty; i++) {
+                    if (typeof extraDraw === 'function') extraDraw();
+                }
+
+                // Cleanup & restore popup to "normal" default state
+                if (typeof closePopup === 'function') closePopup();
+                // Make sure to reset any tweaks we made so future popups behave normally
+                try {
+                    // Reset content
+                    listContainer.innerHTML = '';
+                    instructionsDiv.textContent = '';
+                    popupTitle.textContent = '';
+
+                    // Restore visibility defaults
+                    if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+                    if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+                    if (closeBtn) closeBtn.style.display = ''; // show default close for future uses
+
+                    // Reset confirm button
+                    confirmButton.textContent = 'Confirm';
+                    confirmButton.disabled = true;
+
+                    // Hide overlay/popup in case closePopup didn't do it
+                    modalOverlay.style.display = 'none';
+                    popup.style.display = 'none';
+                } catch (e) {
+                    // swallow any minor UI reset errors
+                }
+
+                // Update board & resolve
+                updateGameBoard();
+                resolve();
+            }
+        };
+
+        // Initial render
+        renderClassButtons();
+    });
 }
 
-// Need to establish following variable and then code how it works in end turn
+
+async function galactusPanickedMobs() {
+    return new Promise((resolve) => {
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const listContainer = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+        const closeBtn = document.getElementById('close-choice-button');
+
+        // --- Constants & helpers
+        const CLASSES = ['Strength', 'Instinct', 'Covert', 'Tech', 'Range'];
+
+        const cardsPool = [
+            ...playerHand,
+            ...cardsPlayedThisTurn.filter(c => !c?.isCopied && !c?.sidekickToDestroy)
+        ];
+
+        const cardHasClass = (card, cls) =>
+            !!card && (card.class1 === cls || card.class2 === cls || card.class3 === cls);
+
+        const countsByClass = {};
+        for (const cls of CLASSES) {
+            countsByClass[cls] = cardsPool.reduce((acc, c) => acc + (cardHasClass(c, cls) ? 1 : 0), 0);
+        }
+
+        // --- Local UI state
+        let selectedClass = null;
+        let selectedQty = null;
+        let phase = 'chooseClass'; // or 'chooseQuantity'
+
+        // --- UI: initialise for this modal mode
+        if (closeBtn) closeBtn.style.display = 'none'; // hide cancel for this flow
+        if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Confirm';
+
+        popupTitle.textContent = 'Mastermind Tactic';
+        instructionsDiv.textContent = 'Select a class. You may reveal any number of cards of that class, then rescue that many Bystanders.';
+
+        listContainer.innerHTML = '';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        // --- Render helpers
+        const clearList = () => { listContainer.innerHTML = ''; };
+
+        function renderClassButtons() {
+            phase = 'chooseClass';
+            selectedClass = null;
+            selectedQty = null;
+            confirmButton.disabled = true;
+            popupTitle.textContent = 'Mastermind Tactic';
+            instructionsDiv.textContent = 'Select a class. You may reveal any number of cards of that class, then rescue that many Bystanders.';
+            clearList();
+
+            CLASSES.forEach(cls => {
+                const count = countsByClass[cls] || 0;
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
+                btn.onclick = () => {
+                    selectedClass = cls;
+                    selectedQty = null;
+                    // If you want to prevent moving forward when count is 0, keep confirm disabled.
+                    // Otherwise, allow continuing (and show no quantity options).
+                    confirmButton.disabled = false;
+                    instructionsDiv.textContent = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
+                };
+                li.appendChild(btn);
+                listContainer.appendChild(li);
+            });
+        }
+
+        function renderQuantityButtons(max) {
+            phase = 'chooseQuantity';
+            selectedQty = null;
+            confirmButton.disabled = true;
+            popupTitle.textContent = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
+            clearList();
+
+            if (max <= 0) {
+                instructionsDiv.textContent = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
+                confirmButton.disabled = false;
+                selectedQty = 0;
+                return;
+            }
+
+            instructionsDiv.textContent = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            for (let n = max; n >= 1; n--) {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `${n}`;
+                btn.onclick = () => {
+                    selectedQty = n;
+                    confirmButton.disabled = false;
+                    instructionsDiv.textContent = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
+                };
+                li.appendChild(btn);
+                listContainer.appendChild(li);
+            }
+
+            // Optional: include a "0" option explicitly
+            // const li0 = document.createElement('li');
+            // const btn0 = document.createElement('button');
+            // btn0.type = 'button';
+            // btn0.textContent = '0 (none)';
+            // btn0.onclick = () => { selectedQty = 0; confirmButton.disabled = false; instructionsDiv.textContent = `Reveal 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Press Confirm to proceed.`; };
+            // li0.appendChild(btn0);
+            // listContainer.appendChild(li0);
+        }
+
+        // --- Wire confirm behaviour for both phases
+        confirmButton.onclick = async () => {
+            if (phase === 'chooseClass') {
+                if (!selectedClass) return;
+                const max = countsByClass[selectedClass] || 0;
+                renderQuantityButtons(max);
+                return;
+            }
+
+            if (phase === 'chooseQuantity') {
+                if (selectedQty == null) return;
+
+                // Perform the extra draws
+                for (let i = 0; i < selectedQty; i++) {
+                    if (typeof rescueBystander === 'function') rescueBystander();
+                }
+
+                // Cleanup & restore popup to "normal" default state
+                if (typeof closePopup === 'function') closePopup();
+                // Make sure to reset any tweaks we made so future popups behave normally
+                try {
+                    // Reset content
+                    listContainer.innerHTML = '';
+                    instructionsDiv.textContent = '';
+                    popupTitle.textContent = '';
+
+                    // Restore visibility defaults
+                    if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+                    if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+                    if (closeBtn) closeBtn.style.display = ''; // show default close for future uses
+
+                    // Reset confirm button
+                    confirmButton.textContent = 'Confirm';
+                    confirmButton.disabled = true;
+
+                    // Hide overlay/popup in case closePopup didn't do it
+                    modalOverlay.style.display = 'none';
+                    popup.style.display = 'none';
+                } catch (e) {
+                    // swallow any minor UI reset errors
+                }
+
+                // Update board & resolve
+                updateGameBoard();
+                resolve();
+            }
+        };
+
+        // Initial render
+        renderClassButtons();
+    });
+}
+
 function galactusForceOfEternity() {
         galactusForceOfEternityDraw = true;
 }
 
-function galactusPanickedMobs() {
-        //See Cosmic Entity
+function galactusForceOfEternityDiscard() {
+onscreenConsole.log(`<span class="console-highlights">Galactus</span> has made you draw six additional cards. Now discard six cards.`);
+    
+    return new Promise(async (resolve) => {
+        // Get all cards in hand (not just zero-cost)
+        const availableCards = playerHand
+            .filter(card => card) // Filter out any undefined/null cards
+            .map((card, index) => ({ ...card, uniqueId: `${card.id}-${index}` }));
+
+        // Handle cases where there are 6 or fewer cards available
+        if (availableCards.length === 0) {
+            onscreenConsole.log("No cards in hand to discard.");
+            resolve();
+            return;
+        }
+
+        if (availableCards.length <= 6) {
+            // Discard all cards if 6 or fewer
+            const returnedCards = [];
+            for (const card of availableCards) {
+                const indexInHand = playerHand.findIndex(c => c.id === card.id);
+                if (indexInHand !== -1) {
+                    playerHand.splice(indexInHand, 1);
+                    const { returned } = await checkDiscardForInvulnerability(card);
+                    returnedCards.push(...returned);
+                }
+            }
+            
+            // Add back any invulnerable cards
+            if (returnedCards.length > 0) {
+                playerHand.push(...returnedCards);
+            }
+            
+            updateGameBoard();
+            onscreenConsole.log(`Discarded ${availableCards.length} card${availableCards.length !== 1 ? 's' : ''}.`);
+            resolve();
+            return;
+        }
+
+        // Setup UI for selection when more than 6 cards available
+        const popup = document.getElementById('card-choice-one-location-popup');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+        // Hide the "No Thanks" button
+        document.getElementById('close-choice-button').style.display = 'none';
+
+        // Initialize UI
+        popupTitle.textContent = 'Mastermind Tactic!';
+        instructionsDiv.textContent = 'Select six cards to discard.';
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Discard';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
+
+        let selectedCards = [];
+        let activeImage = null;
+
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCards.length !== 6;
+        }
+
+        function updateInstructions() {
+            if (selectedCards.length < 6) {
+                instructionsDiv.textContent = `Select ${6 - selectedCards.length} more card${selectedCards.length === 2 ? '' : 's'} to discard.`;
+            } else {
+                const namesList = selectedCards.map(card => 
+                    `<span class="console-highlights">${card.name}</span>`
+                ).join(', ');
+                instructionsDiv.innerHTML = `Selected: ${namesList} will be discarded.`;
+            }
+        }
+
+        function updateCardImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        function toggleCardSelection(card, listItem) {
+            const index = selectedCards.findIndex(c => c.uniqueId === card.uniqueId);
+            
+            if (index > -1) {
+                selectedCards.splice(index, 1);
+                listItem.classList.remove('selected');
+            } else {
+                if (selectedCards.length >= 6) {
+                    const firstSelected = document.querySelector(`[data-card-id="${selectedCards[0].uniqueId}"]`);
+                    if (firstSelected) firstSelected.classList.remove('selected');
+                    selectedCards.shift();
+                }
+                selectedCards.push(card);
+                listItem.classList.add('selected');
+            }
+
+            updateCardImage(selectedCards[selectedCards.length - 1] || null);
+            updateConfirmButton();
+            updateInstructions();
+        }
+genericCardSort(availableCards);
+        // Populate the list with available cards
+        availableCards.forEach(card => {
+            const li = document.createElement('li');
+            const createTeamIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    const createClassIconHTML = (value) => {
+        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+            return '';
+        }
+        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    
+    const teamIcon = createTeamIconHTML(card.team);
+    const class1Icon = createClassIconHTML(card.class1);
+    const class2Icon = createClassIconHTML(card.class2);
+    const class3Icon = createClassIconHTML(card.class3);
+    
+    // Combine all icons
+    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
+    
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+
+            li.setAttribute('data-card-id', card.uniqueId);
+
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
+                }
+            };
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, li);
+            cardsList.appendChild(li);
+        });
+
+        confirmButton.onclick = async () => {
+            if (selectedCards.length === 6) {
+                const returnedCards = [];
+                for (const card of selectedCards) {
+                    const indexInHand = playerHand.findIndex(c => c.id === card.id);
+                    if (indexInHand !== -1) {
+                        playerHand.splice(indexInHand, 1);
+                        const { returned } = await checkDiscardForInvulnerability(card);
+                        returnedCards.push(...returned);
+                    }
+                }
+                
+                // Add back any invulnerable cards
+                if (returnedCards.length > 0) {
+                    playerHand.push(...returnedCards);
+                }
+                
+                closePopup();
+                updateGameBoard();
+                extraDraw();
+                extraDraw();
+                resolve();
+            }
+        };
+
+        function closePopup() {
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.textContent = 'Confirm';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
+    });
 }
 
 function galactusSunderTheEarth() {
@@ -190,6 +1276,7 @@ async function moleManMasterStrike() {
     if (city[i] && city[i].team === "Subterranea") {
       await handleVillainEscape(city[i]);
       city[i] = null;
+      removeCosmicThreatBuff(i);
       updateGameBoard();
       subterraneaVillainsEscaped = true;
     }
@@ -663,11 +1750,23 @@ genericCardSort(combinedCards);
     });      
 }
 
-async function raktarAmbush(villain) {
-      onscreenConsole.log(`Ambush! Any Villain in the Streets moves to the Bridge, pushing any Villain already there to escape.`);   
+async function moveVillainFromCity1ToCity0() {
     // Check if there's a card in city[1]
     if (city[1] !== null) {
         const cardToMove = city[1];
+        
+        // If city[0] is destroyed (when fighting Galactus), card escapes immediately
+        if (mastermind.name === "Galactus" && destroyedSpaces[0]) {
+            onscreenConsole.log(`<span class="console-highlights">${cardToMove.name}</span> escapes from the Streets!`);
+            await new Promise(resolve => {
+                showPopup('Villain Escape', cardToMove, resolve);
+            });
+            await handleVillainEscape(cardToMove);
+            city[1] = null;
+            addHRToTopWithInnerHTML();
+            return;
+        }
+        
         const cardAtCity0 = city[0];
         
         // Move card from city[1] to city[0]
@@ -676,13 +1775,37 @@ async function raktarAmbush(villain) {
         
         onscreenConsole.log(`<span class="console-highlights">${cardToMove.name}</span> moves from the Streets to the Bridge.`);
         
-        // If there was a card at city[0], push it to escape
+        // If there was a card at city[0], handle it based on game state
         if (cardAtCity0 !== null) {
-            await new Promise(resolve => {
-                showPopup('Villain Escape', cardAtCity0, resolve);
-            });
-            await handleVillainEscape(cardAtCity0);
-            addHRToTopWithInnerHTML();
+            // When fighting Galactus, try to push to next available space
+            if (mastermind.name === "Galactus") {
+                // Try to find next available space
+                let moved = false;
+                for (let i = 1; i < city.length; i++) {
+                    if (city[i] === null && !destroyedSpaces[i]) {
+                        city[i] = cardAtCity0;
+                        onscreenConsole.log(`<span class="console-highlights">${cardAtCity0.name}</span> is pushed to ${citySpaceLabels[i]}.`);
+                        moved = true;
+                        break;
+                    }
+                }
+                
+                // If no space found, villain escapes
+                if (!moved) {
+                    await new Promise(resolve => {
+                        showPopup('Villain Escape', cardAtCity0, resolve);
+                    });
+                    await handleVillainEscape(cardAtCity0);
+                    addHRToTopWithInnerHTML();
+                }
+            } else {
+                // Standard behavior - push to escape
+                await new Promise(resolve => {
+                    showPopup('Villain Escape', cardAtCity0, resolve);
+                });
+                await handleVillainEscape(cardAtCity0);
+                addHRToTopWithInnerHTML();
+            }
         }
         
         // Show popup for the moved card
@@ -694,6 +1817,14 @@ async function raktarAmbush(villain) {
     } else {
         onscreenConsole.log(`There is no Villain in the Streets to be moved.`);
     }
+}
+
+// Your raktarAmbush function
+async function raktarAmbush(villain) {
+    onscreenConsole.log(`Ambush! Any Villain in the Streets moves to the Bridge, pushing any Villain already there to escape.`);   
+    
+    // Use the enhanced moveVillainFromCity1ToCity0 function
+    await moveVillainFromCity1ToCity0();
 }
 
 async function firelordFight() {
@@ -985,7 +2116,7 @@ async function terraxTheTamerAmbush(terrax) {
     }
 }
 
-//Heroes
+//Heroes - Variables Done
 
 function humanTorchCallForBackup() {
 return new Promise((resolve) => {
@@ -1481,7 +2612,6 @@ onscreenConsole.log(`Special Ability: You have not played any other Heroes that 
  updateGameBoard();
 }
 
-//NEEDED - establish variable in script for numbwr of rescues, reset at end turn
 async function invisibleWomanUnseenRescue() {
         if (unseenRescueBystanders >= 4) {
                 onscreenConsole.log(`Focus! You have already used this ability four times.`);
@@ -1496,12 +2626,66 @@ unseenRescueBystanders++;
 updateGameBoard();
 }
 
-//NEEDED - establish an if condition in handling villain draws that allows the player to reveal this card before an ambush occurs
 function invisibleWomanInvisibleBarrier() {
         onscreenConsole.log(`You revealed <span class="console-highlights">Invisible Woman - Invisible Barrier</span>, preventing an ambush and allowing you to draw two cards!`);
         extraDraw();
         extraDraw();
         updateGameBoard();
+}
+
+function canRevealInvisibleWomanInvisibleBarrier() {
+    const cardsYouHave = [
+        ...playerHand,
+        ...cardsPlayedThisTurn.filter(card => !card.isCopied && !card.sidekickToDestroy)
+    ];
+    return cardsYouHave.some(c => c && c.name === 'Invisible Woman - Invisible Barrier');
+}
+
+// --- Popup flow to optionally negate a villain's Ambush effect
+function promptNegateAmbushEffectWithInvisibleWoman() {
+    const INVISIBLE_WOMAN_IMAGE = 'Visual Assets/Heroes/Fantastic_Four_InvisibleWoman_InvisibleBarrier.webp';
+
+    return new Promise((resolve) => {
+        // If player cannot reveal, immediately resolve "no negate"
+        if (!canRevealInvisibleWomanInvisibleBarrier()) {
+            resolve(false);
+            return;
+        }
+
+        setTimeout(() => {
+            const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                "Would you like to use <span class='console-highlights'>Invisible Woman – Invisible Barrier</span> to cancel this Ambush effect and draw two cards instead?",
+                "Yes",
+                "No"
+            );
+
+            const hoverEl = document.getElementById('heroAbilityHoverText');
+            if (hoverEl) hoverEl.style.display = 'none';
+
+            const cardImage = document.getElementById('hero-ability-may-card');
+            if (cardImage) {
+                cardImage.src = INVISIBLE_WOMAN_IMAGE;
+                cardImage.style.display = 'block';
+            }
+
+            confirmButton.onclick = () => {
+                onscreenConsole.log("<span class='console-highlights'>Invisible Woman – Invisible Barrier</span> used to cancel an Ambush. Drawing two cards isntead.");
+                hideHeroAbilityMayPopup();
+                if (hoverEl) hoverEl.style.display = 'block';
+                if (cardImage) cardImage.style.display = 'none';
+		invisibleWomanInvisibleBarrier();
+                resolve(true); // negate
+            };
+
+            denyButton.onclick = () => {
+                onscreenConsole.log("You chose not to cancel an Ambush using <span class='console-highlights'>Invisible Woman – Invisible Barrier</span>.");
+                hideHeroAbilityMayPopup();
+                if (hoverEl) hoverEl.style.display = 'block';
+                if (cardImage) cardImage.style.display = 'none';
+                resolve(false); // do not negate
+            };
+        }, 10);
+    });
 }
 
 function mrFantasticTwistingEquations() {
@@ -1526,12 +2710,64 @@ cumulativeAttackPoints += playerHand.length;
 updateGameBoard();
 }
 
-//NEEDED - an if condition check that looks for this card and negates fight effects
 function mrFantasticUltimateNullifier() {
 onscreenConsole.log(`Focus! You have spent 1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, giving you +1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> usable only against the Mastermind.`);
 totalRecruitPoints -= 1;
 mastermindTempBuff--;
 updateGameBoard();
+}
+
+function canRevealMrFantasticUltimateNullifier() {
+    const cardsYouHave = [
+        ...playerHand,
+        ...cardsPlayedThisTurn.filter(card => !card.isCopied && !card.sidekickToDestroy)
+    ];
+    return cardsYouHave.some(c => c && c.name === 'Mr. Fantastic - Ultimate Nullifier');
+}
+
+function promptNegateFightEffectWithMrFantastic() {
+    const MR_FANTASTIC_IMAGE = 'Visual Assets/Heroes/Fantastic_Four_MrFantastic_UltimateNullifier.webp';
+
+    return new Promise((resolve) => {
+        // Safety: if player cannot reveal, immediately resolve "no negate"
+        if (!canRevealMrFantasticUltimateNullifier()) {
+            resolve(false);
+            return;
+        }
+
+        setTimeout(() => {
+            const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+                "<span class='console-highlights'>Mr. Fantastic – Ultimate Nullifier</span> allows you to cancel this fight effect. Would you like to?",
+                "Yes",
+                "No"
+            );
+
+            const hoverEl = document.getElementById('heroAbilityHoverText');
+            if (hoverEl) hoverEl.style.display = 'none';
+
+            const cardImage = document.getElementById('hero-ability-may-card');
+            if (cardImage) {
+                cardImage.src = MR_FANTASTIC_IMAGE;
+                cardImage.style.display = 'block';
+            }
+
+            confirmButton.onclick = () => {
+                onscreenConsole.log(`<span class="console-highlights">Mr. Fantastic – Ultimate Nullifier</span> used to cancel a fight effect.`);
+                hideHeroAbilityMayPopup();
+                if (hoverEl) hoverEl.style.display = 'block';
+                if (cardImage) cardImage.style.display = 'none';
+                resolve(true); // negate
+            };
+
+            denyButton.onclick = () => {
+                onscreenConsole.log(`You chose not to cancel a fight effect using <span class="console-highlights">Mr. Fantastic – Ultimate Nullifier</span>.`);
+                hideHeroAbilityMayPopup();
+                if (hoverEl) hoverEl.style.display = 'block';
+                if (cardImage) cardImage.style.display = 'none';
+                resolve(false); // do not negate
+            };
+        }, 10);
+    });
 }
 
 function thingItStartedOnYancyStreet() {
@@ -1550,10 +2786,9 @@ cumulativeAttackPoints += 2;
 updateGameBoard();
 }
 
-//NEEDED - Add to postdefeat and check for thing variable, establish variable when game starts and turn off in end turn
 function thingCrimeStopper() {
 onscreenConsole.log(`Whenever you defeat a Villain in the Bank this turn, rescue a Bystander.`);
- thingCrimeStopperRescue = true;
+thingCrimeStopperRescue = true;
 updateGameBoard();            
 }
 
@@ -2144,6 +3379,7 @@ return new Promise((resolve, reject) => {
         updateGameBoard();
     }
 });
+}
 
 function silverSurferThePowerCosmic(){
 onscreenConsole.log(`Focus! You have spent 9 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to gain +9 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
@@ -2169,4 +3405,3 @@ function silverSurferEnergySurge() {
     
     updateGameBoard();
 }
-
