@@ -219,9 +219,9 @@ image: "Visual Assets/Masterminds/FantasticFour_MoleMan.webp",
             <label><input type="checkbox" name="hero" value="Thing" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Thing</label>
            
 
-"Focus": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
-"Burrow": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
-"Cosmic Threat": `You can fight Villains and Masterminds with this keyword by spending any combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points.`,
+"Focus": `When you play a card with a Focus ability, you can pay the cost on the left side of the arrow to get the effect on the right side of the arrow. You can use that Focus ability as many times as you want for the rest of the turn. Access Focus abilities in the Played Cards popup.`,
+"Burrow": `Fight: If the Streets were empty, put this Villain back into the Streets.`,
+"Cosmic Threat": `Once per turn, you can reveal any number of cards that match the specified class (or one of the possible classes). For each revealed card, this Enemy gets -3<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> this turn. If you try to fight a Mastermind with Cosmic Threat a second time in the same turn, it will return to its full <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`,
 
 
 // Add to USB DarkCity file:
