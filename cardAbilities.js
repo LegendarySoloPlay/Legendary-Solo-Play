@@ -4973,6 +4973,9 @@ function HenchmenKOHeroYouHave() {
             return;
         }
 
+        // Sort the cards BEFORE creating the selection list
+        genericCardSort(combinedCards);
+
         // Get the popup elements
         const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
@@ -5028,7 +5031,7 @@ function HenchmenKOHeroYouHave() {
 
         // Toggle card selection
         function toggleCardSelection(card, cardIndex, listItem) {
-            if (selectedCard && selectedCard.index === cardIndex && selectedCard.isFromHand === (cardIndex < playerHand.length)) {
+            if (selectedCard && selectedCard.index === cardIndex) {
                 // Deselect if clicking the same card
                 selectedCard = null;
                 listItem.classList.remove('selected');
@@ -5043,7 +5046,7 @@ function HenchmenKOHeroYouHave() {
                 selectedCard = {
                     card: card,
                     index: cardIndex,
-                    isFromHand: cardIndex < playerHand.length
+                    isFromHand: cardIndex < playerHand.filter(c => c.type === 'Hero').length
                 };
                 listItem.classList.add('selected');
                 updateHeroImage(card);
@@ -5060,13 +5063,21 @@ function HenchmenKOHeroYouHave() {
             const { card, index, isFromHand } = selectedCard;
             console.log(`${card.name} has been KO'd.`);
             onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
-koBonuses();
+            koBonuses();
             
-            // Remove the card from the correct array (hand or played)
+            // Find the actual card in the original arrays using the card object reference
             if (isFromHand) {
-                playerHand.splice(index, 1);
+                // Find the index in the original playerHand array
+                const handIndex = playerHand.findIndex(c => c === card);
+                if (handIndex !== -1) {
+                    playerHand.splice(handIndex, 1);
+                }
             } else {
-                cardsPlayedThisTurn.splice(index - playerHand.length, 1);
+                // Find the index in the original cardsPlayedThisTurn array
+                const playedIndex = cardsPlayedThisTurn.findIndex(c => c === card);
+                if (playedIndex !== -1) {
+                    cardsPlayedThisTurn.splice(playedIndex, 1);
+                }
             }
             
             // Add the card to the KO pile
@@ -5091,34 +5102,31 @@ koBonuses();
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
         }
-genericCardSort(combinedCards);
-        // Populate the list with the heroes from the player's hand and played cards
+
+        // Populate the list with the sorted heroes from the player's hand and played cards
         combinedCards.forEach((card, index) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
-                      const createTeamIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
+            const createTeamIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
 
-    const createClassIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(card.team);
-    const class1Icon = createClassIconHTML(card.class1);
-    const class2Icon = createClassIconHTML(card.class2);
-    const class3Icon = createClassIconHTML(card.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+            const createClassIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
+            
+            const teamIcon = createTeamIconHTML(card.team);
+            const class1Icon = createClassIconHTML(card.class1);
+            const class2Icon = createClassIconHTML(card.class2);
+            const class3Icon = createClassIconHTML(card.class3);
+            
+            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
             li.setAttribute('data-card-id', index);
 
             li.onmouseover = () => {
@@ -10624,3 +10632,4 @@ genericCardSort(playerHand);
         }
 
     
+
