@@ -1,4 +1,4 @@
-//24.09.2025 10.19
+//24.09.2025 10.20
 
 function returnToSidekickDeck(card) {
     if (!card) {
