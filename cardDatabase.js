@@ -400,7 +400,7 @@ image: "Visual Assets/Schemes/FantasticFour_batheEarthInCosmicRays.webp"
         requiredHeroes: 3,
         variableTwist: false,
         twistText: `Stack this Twist next to the Scheme as "Rising Waters." Then KO each Hero from the HQ whose cost is less than or equal to the number of Rising Waters in that stack.`,
-        image: "Visual Assets/Schemes/FantasticFour_floodThePlanetWithMeltedGlaciers.webp"
+        image: "Visual Assets/Schemes/FantasticFour_floodthePlanetWithMeltedGlaciers.webp"
     },
     {
         id: 19,
