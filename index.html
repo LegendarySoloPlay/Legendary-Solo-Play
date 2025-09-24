@@ -15,23 +15,28 @@
 </head>
 
 <body>
+  <div class="fullscreen-background"></div>
 
-  <div style="display:none;">04.09.2025 11.09</div>
+  <div style="display:none;">24.09.2025 10.19</div>
+  
   <div id="background-for-expansion-popup"></div>
-<div id="expansion-popup-container">
-  <div id="expansion-banner">
-    <div id="expansion-banner-border">
-      <div id="expansion-intro">
-        <p>Shadows lengthen over the Marvel Universe...</p>
-        <p>A new wave of terror grips the streets as ruthless henchmen, deadly villains, and sinister masterminds emerge from the underworld. Heroes must rise and push themselves to their limits—because in the <strong>Dark City</strong> only the strongest will survive.</p>
-        <p><strong>New Heroes. Deadlier Villains. No Mercy.</strong></p>
-        <p>Will you rise to the challenge—or be swallowed by the darkness?</p>
-      </div>
-      <button id="start-expansion">DIVE IN</button>
-<p style="text-align: center; color: #ffab0f;">Version 2.0.2. UPDATE</p>
+  
+    <div id="expansion-popup-container">
+      <div id="skip-button">SKIP</div>
+        <div class="splash-container">
+            <div class="splash-content circular" id="splashContent">
+                <div class="splash-text" id="splashText">
+                    <h2 class="splash-title-legendary">LEGENDARY</h2>
+                    <h2 class="splash-title-expansion">FANTASTIC 4</h2>
+                    <p class="splash-description">Before the Avengers, there was a family.</p>
+                    <p class="splash-description">When a cosmic hunger awakens, a silver herald turns from destroyer to ally.</p>
+                    <p class="splash-description">To save the world from Galactus, you must guide the Fantastic Four—and their newfound companion—into the cosmos. Will they overcome Earth's own threats before saving the universe?</p>
+                    <p class="splash-description">Their first steps begin with you.</p>
+                    <button id="start-expansion">Flame On!</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 <div id="intro-popup-container" style="display: none;">
     <div id="intro-popup">
       <div id="intro-popup-header">
@@ -45,7 +50,7 @@
       <div id="intro-popup-content">
         <div id="intro" class="tab-content active">
 <h3 class="pulsing-glow-text">
-  <strong>DARK CITY BUG FIXES -</strong> Please see the <i>Updates</i> tab for patch notes.
+  <strong>FANTASTIC FOUR <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"> -</strong> Please see the <i>Updates</i> tab for Expansion patch notes.
 </h3>
   <p>Get ready to dive into the <strong>Marvel Legendary</strong> universe in this fan-made digital adaptation of the classic deck-building game! Assemble a team of heroes, take down powerful villains, and stop the mastermind’s nefarious schemes—all in <strong>solo mode</strong>, optimised with the latest <i>"What If...?"</i> variations to the Advanced Solo rules.</p>
 
@@ -54,7 +59,7 @@
 <p>This version of the game includes a console log and pop-ups that will guide you through card effects.</p>
 <p><strong>IMPORTANT:</strong> Select a card and tap it again to play. Multiple S.H.I.E.L.D. heroes can be played at the same time by using the <i>Play All Greys</i> button, but <strong>any heroes must be played individually, in the order you wish to play them or activate their abilities</strong>.</p>
 
-  <h3>🔥 What’s Different in <i>"What If...?"</i> Solo Mode?</h3>
+  <h3>🔥 What's Different in <i>"What If...?"</i> Solo Mode?</h3>
   <ul>
     <li>✅ A chain of Scheme Twists will only cycle ONE hero in the HQ, rather than one per twist.</li>
     <li>✅ Master Strikes no longer chain into playing another card.</li>
@@ -92,7 +97,7 @@
     <div class="banner">
   <span id="title-banner-text">MARVEL LEGENDARY<br>SOLO PLAY</span>
   <div class="banner-settings-icon" aria-label="Settings" onclick="openSettings()">
-    <img src="Visual Assets/Icons/settings-cog.svg" alt="Settings Icon" class="settingsCog">
+    <img id="settingsCogImage" src="Visual Assets/Icons/settingsCog_theme-core.svg" alt="Settings Icon" class="settingsCog">
   </div>
 </div>
 <div class="overall-filter">
@@ -101,11 +106,13 @@
   <ul class="items">
     <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
     <li><label><input type="checkbox" data-set="Dark City"/> Dark City</label></li>
+    <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
   </ul>
 </div>
 </div>
     <div class="startup-centered-buttons">
       <button id="randomize-all" style="width:70%; margin-left:auto; margin-right: auto;">RANDOMIZE ALL</button>
+      <button id="load-last-setup-1" style="width:70%; margin-left:auto; margin-right: auto;">LOAD LAST SETUP</button>
       <button id="start-game" style="width:70%; margin-left:auto; margin-right: auto;">START GAME</button>
     </div>
 <div id="all-selected-filters" class="selected-filters"></div>
@@ -118,6 +125,7 @@
   <ul class="items">
     <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
     <li><label><input type="checkbox" data-set="Dark City"/> Dark City</label></li>
+    <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
 
   </ul>
 </div>
@@ -143,6 +151,11 @@
             <label><input type="radio" name="scheme" value="Steal the Weaponized Plutonium" data-set="Dark City"> Steal the Weaponized Plutonium</label>
             <label><input type="radio" name="scheme" value="Transform Citizens Into Demons" data-set="Dark City"> Transform Citizens Into Demons</label>
             <label><input type="radio" name="scheme" value="X-Cutioner's Song" data-set="Dark City"> X-Cutioner's Song</label>
+          <hr>
+            <label><input type="radio" name="scheme" value="Bathe the Earth in Cosmic Rays" data-set="Fantastic Four"> Bathe the Earth in Cosmic Rays</label>
+            <label><input type="radio" name="scheme" value="Flood the Planet with Melted Glaciers" data-set="Fantastic Four"> Flood the Planet with Melted Glaciers</label>
+            <label><input type="radio" name="scheme" value="Invincible Force Field" data-set="Fantastic Four"> Invincible Force Field</label>
+            <label><input type="radio" name="scheme" value="Pull Reality Into the Negative Zone" data-set="Fantastic Four"> Pull Reality Into the Negative Zone</label>
           </form>
         </div>
         
@@ -170,6 +183,7 @@
   <ul class="items">
     <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
     <li><label><input type="checkbox" data-set="Dark City"/> Dark City</label></li>
+    <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
   </ul>
 </div>
 </div>
@@ -187,6 +201,9 @@
             <label><input type="radio" name="mastermind" value="Mephisto" data-set="Dark City"> Mephisto</label>
             <label><input type="radio" name="mastermind" value="Mr. Sinister" data-set="Dark City"> Mr. Sinister</label>
             <label><input type="radio" name="mastermind" value="Stryfe" data-set="Dark City"> Stryfe</label>
+            <hr>
+            <label><input type="radio" name="mastermind" value="Galactus" data-set="Fantastic Four"> Galactus</label>
+            <label><input type="radio" name="mastermind" value="Mole Man" data-set="Fantastic Four"> Mole Man</label>
           </form>
         </div>
               </div>
@@ -211,6 +228,7 @@
   <ul class="items">
     <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
     <li><label><input type="checkbox" data-set="Dark City"/> Dark City</label></li>
+    <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
   </ul>
 </div>
 </div>
@@ -231,7 +249,10 @@
             <label><input type="checkbox" name="villain" value="Marauders" data-set="Dark City"> Marauders</label>
             <label><input type="checkbox" name="villain" value="Mutant Liberation Front" data-set="Dark City"> Mutant Liberation Front</label>
             <label><input type="checkbox" name="villain" value="Streets of New York" data-set="Dark City"> Streets of New York</label>
-            <label><input type="checkbox" name="villain" value="Underworld" data-set="Dark City"> Underworld</label>       
+            <label><input type="checkbox" name="villain" value="Underworld" data-set="Dark City"> Underworld</label> 
+            <hr>
+            <label><input type="checkbox" name="villain" value="Heralds of Galactus" data-set="Fantastic Four"> Heralds of Galactus</label>
+            <label><input type="checkbox" name="villain" value="Subterranea" data-set="Fantastic Four"> Subterranea</label>      
           </form>
         </div>
         
@@ -272,7 +293,7 @@
             <label><input type="checkbox" name="henchmen" value="Sentinel" data-set="Core"> Sentinel</label>
             <hr>
             <label><input type="checkbox" name="henchmen" value="Maggia Goons" data-set="Dark City"> Maggia Goons</label>
-            <label><input type="checkbox" name="henchmen" value="Phalanx" data-set="Dark City"> Phalanx</label>
+            <label><input type="checkbox" name="henchmen" value="Phalanx" data-set="Dark City" data-set="Fantastic Four"> Phalanx</label>
    </form>
         </div>
         
@@ -344,12 +365,14 @@
   <ul class="items">
     <li><label><input type="checkbox" data-set="Core"/> Core</label></li>
     <li><label><input type="checkbox" data-set="Dark City"/> Dark City</label></li>
+    <li><label><input type="checkbox" data-set="Fantastic Four"/> Fantastic Four</label></li>
   </ul>
 </div>
 <div id="heroteamfilter" class="dropdown-check-list" tabindex="100">
   <span class="anchor2">Teams</span>
   <ul class="items">
     <li><label><input type="checkbox" data-team="Avengers"/> <img src="Visual Assets/Icons/Avengers.svg" alt="Avengers Icon" class="card-icons"> Avengers</label></li>
+    <li><label><input type="checkbox" data-team="Fantastic Four"/> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Fantastic Four</label></li>
     <li><label><input type="checkbox" data-team="Marvel Knights"/> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Marvel Knights</label></li>
     <li><label><input type="checkbox" data-team="S.H.I.E.L.D."/> <img src="Visual Assets/Icons/S.H.I.E.L.D..svg" alt="SHIELD Icon" class="card-icons"> S.H.I.E.L.D.</label></li>
     <li><label><input type="checkbox" data-team="Spider Friends"/> <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="card-icons"> Spider Friends</label></li>
@@ -396,7 +419,13 @@
             <label><input type="checkbox" name="hero" value="Professor X" data-set="Dark City" data-team="X-Men"> <img src="Visual Assets/Icons/X-Men.svg" alt="X-Men Icon" class="card-icons"> Professor X</label>  
             <label><input type="checkbox" name="hero" value="Punisher" data-set="Dark City" data-team="Marvel Knights"> <img src="Visual Assets/Icons/Marvel Knights.svg" alt="Marvel Knights Icon" class="card-icons"> Punisher</label>
             <label><input type="checkbox" name="hero" value="X-Force Wolverine" data-set="Dark City" data-team="X-Force"> <img src="Visual Assets/Icons/X-Force.svg" alt="X-Force Icon" class="card-icons"> X-Force Wolverine</label>  
-            </form>
+            <hr>
+            <label><input type="checkbox" name="hero" value="Human Torch" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Human Torch</label>
+            <label><input type="checkbox" name="hero" value="Invisible Woman" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Invisible Woman</label>
+            <label><input type="checkbox" name="hero" value="Mr. Fantastic" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Mr. Fantastic</label>
+            <label><input type="checkbox" name="hero" value="Silver Surfer" data-set="Fantastic Four" data-team=""> <img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="card-icons"> Silver Surfer</label>
+            <label><input type="checkbox" name="hero" value="Thing" data-set="Fantastic Four" data-team="Fantastic Four"> <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="card-icons"> Thing</label>
+          </form>
         </div>
         
       </div>
@@ -428,6 +457,7 @@
     </div>
     <div class="startup-centered-buttons">
       <button id="randomize-all2"  style="width:70%; margin-left:auto; margin-right: auto;">RANDOMIZE ALL</button>
+      <button id="load-last-setup-2" style="width:70%; margin-left:auto; margin-right: auto;">LOAD LAST SETUP</button>
       <button id="start-game2"  style="width:70%; margin-left:auto; margin-right: auto;">START GAME</button>
     </div>
   </div>
@@ -455,30 +485,30 @@
 </div>
 
 
-  <div class="container" id="game-board" style="display: none;">
+  <div class="container" id="game-board" class="game-board-image" style="display: none;">
     <div class="grid">
 <div class="row">
-  <div id="game-board-title-banner" class="cell title-banner" style="grid-column: span 8;">
+  <div id="game-board-title-banner" class="cell title-banner" style="grid-column: span 8; height: 4vh;">
     <div class="title-container">
       <span class="centered-title">LEGENDARY</span>
       <div class="settings-icon" aria-label="Settings" onclick="openSettings()">
-        <img src="Visual Assets/Icons/settings-cog.svg" alt="Settings Icon" class="settingsCog">
+        <img id="gameboardSettingsCog" src="Visual Assets/Icons/settingsCog_theme-core.svg" alt="Settings Icon" class="settingsCog">
       </div>
     </div>
   </div>
 </div>
       <!-- Row of 7 Cells -->
       <div class="row">
-<div class="top-row-cell-label"><span class="labeltext">TWISTS:</span><span id="drawnTwistCount" class="labeltext"></span></div>
-<div class="top-row-cell-label"><span class="labeltext">MASTER STRIKES:</span><span id="drawnMasterStrikeCount" class="labeltext"></span></div>
-               <button id="escape-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">ESCAPE PILE:</span><span id="escapePileCount" class="game-board-bottom-row"></span></button>
+<div class="top-row-cell-label"><span class="labeltext">Twists:</span><span id="drawnTwistCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext">Master Strikes:</span><span id="drawnMasterStrikeCount" class="labeltext"></span></div>
+               <div id="escape-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">Escape Pile:</span><span id="escapePileCount" class="game-board-bottom-row"></span></div>
 
-        <button id="ko-pile-button" class="cell top-row-buttons" style="grid-column: span 2;"><span class="game-board-bottom-row">KO PILE:</span><span id="koPileCount" class="game-board-bottom-row"></span></button>
+        <div id="ko-pile-button" class="cell top-row-buttons" style="grid-column: span 2;"><span class="game-board-bottom-row">KO Pile:</span><span id="koPileCount" class="game-board-bottom-row"></span></div>
 
 
-        <button id="victory-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">VICTORY PILE:</span><span id="currentVictoryPointsTally" class="game-board-bottom-row"></span></button>
-<div class="top-row-cell-label"><span class="labeltext" id="wound-label">WOUNDS:</span><span id="woundDeckCount" class="labeltext"></span></div>
-<div class="top-row-cell-label"><span class="labeltext" id="bystander-label">BYSTANDERS:</span><span id="bystanderDeckCount" class="labeltext"></span></div>
+        <div id="victory-pile-button" class="cell top-row-buttons"><span class="game-board-bottom-row">Victory Pile:</span><span id="currentVictoryPointsTally" class="game-board-bottom-row"></span></div>
+<div class="top-row-cell-label"><span class="labeltext" id="wound-label">Wounds:</span><span id="woundDeckCount" class="labeltext"></span></div>
+<div class="top-row-cell-label"><span class="labeltext" id="bystander-label">Bystanders:</span><span id="bystanderDeckCount" class="labeltext"></span></div>
 </div>
       <div class="row">
 <div class="cell scheme" id="scheme-place"><div id="scheme-token" style="display:none;">Baby<br>Hope</div><div id="demon-goblin-deck" style="display:none;"><span id="demon-goblin-count"></span></div></div>
@@ -489,7 +519,6 @@
           <div class="temp-buff-overlay" id="mastermind-temp-buff"><p></p></div>
 <div class="perm-buff-overlay" id="mastermind-perm-buff"><p></p></div>
         </div>
-
         <div class="cell city" id="city-1">City - Bridge<div class="temp-buff-overlay" id="city-1-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-1-perm-buff"><p></p></div></div>
         <div class="cell city" id="city-2">City - Streets<div class="temp-buff-overlay" id="city-2-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-2-perm-buff"><p></p></div></div>
         <div class="cell city" id="city-3">City - Rooftops<div class="temp-buff-overlay" id="city-3-temp-buff"><p></p></div><div class="perm-buff-overlay" id="city-3-perm-buff"><p></p></div></div>
@@ -499,14 +528,14 @@
     
 </div>
 <div class="row">
-<div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">EVIL WINS:</span><span id="evilWinsTracker"></span></div>
-        <div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">REMAINING TACTICS:</span><span id="mastermindTacticCountNumber" class="labeltext"></span></div>
-        <div class="cell-label"><p class="labeltext">BRIDGE</p></div>
-        <div class="cell-label"><p class="labeltext">STREETS</p></div>
-        <div class="cell-label"><p class="labeltext">ROOFTOPS</p></div>
-        <div class="cell-label"><p class="labeltext">BANK</p></div>
-        <div class="cell-label"><p class="labeltext">SEWERS</p></div>
-        <div class="cell-label"><span class="labeltext">VILLAIN DECK: </span><span id="villainDeckCountNumber" class="game-board-bottom-row"></span></div>
+<div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">Evil Wins:</span><span id="evilWinsTracker"></span></div>
+        <div class="cell-label"><span class="labeltext" style="font-size:calc(0.6vh + 0.6vw);">Remaining Tactics:</span><span id="mastermindTacticCountNumber" class="labeltext"></span></div>
+        <div class="cell-label"><p class="labeltext">Bridge</p></div>
+        <div class="cell-label"><p class="labeltext">Streets</p></div>
+        <div class="cell-label"><p class="labeltext">Rooftops</p></div>
+        <div class="cell-label"><p class="labeltext">Bank</p></div>
+        <div class="cell-label"><p class="labeltext">Sewers</p></div>
+        <div class="cell-label"><span class="labeltext">Villain Deck: </span><span id="villainDeckCountNumber" class="game-board-bottom-row"></span></div>
       </div>
       <!-- Row of 7 Cells for HQ and Decks -->
       <div class="row">
@@ -516,7 +545,7 @@
         <div class="cell shield-deck" id="shield-deck"><img src="Visual Assets/CardBack.webp" alt="Card Back" class="card-image-back" id="shield-deck-card-back" style="display:flex;"><div id="shield-recruit-button-container" style="display: none;">
         <div id="shield-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
-<div id="hq-wrapper">
+<div class="hq-wrapper">
         <div class="cell hq" id="hq-1"><img src="Visual Assets/Icons/Fire.svg" alt="Explosion" id="hq-1-explosion" class="hq-explosions"><span id="hq-1-explosion-count"></span><div id="hq1-recruit-button-container" style="display: none;">
         <div id="hq1-deck-recruit-button"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);"><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-recruit-icons"></span></div>
     </div></div>
@@ -538,12 +567,12 @@
 
 
 <div class="row">
-<div class="cell-label"><span class="labeltext">SIDEKICKS: </span><span id="sidekickCountNumber" class="game-board-bottom-row"></span></div>
+<div class="cell-label"><span class="labeltext">Sidekicks: </span><span id="sidekickCountNumber" class="game-board-bottom-row"></span></div>
         <div class="cell-label"><span class="labeltext">S.H.I.E.L.D.: </span><span id="shieldCountNumber" class="game-board-bottom-row"></span></div>
       
         <div class="cell-label" style="grid-column: span 5;"><p class="labeltext">HQ</p></div>
         
-        <div class="cell-label"><span class="labeltext">HERO DECK: </span><span id="heroDeckCountNumber" class="game-board-bottom-row"></span></div>
+        <div class="cell-label"><span class="labeltext">Hero Deck: </span><span id="heroDeckCountNumber" class="game-board-bottom-row"></span></div>
       </div>
 
       <div class="row">
@@ -556,35 +585,41 @@
 
 
  <div class="row">
-        <div class="cell-label"><span class="labeltext">DISCARD PILE: </span><span id="discardCountNumber" class="game-board-bottom-row"></span></div>
- <div class="cell-label"><span class="labeltext">PLAYED CARDS: </span><span id="playedCardsCountNumber" class="game-board-bottom-row"></span></div>
-        <div class="attack-recruit" style="grid-column: span 5;">
-            <div><img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"><span id="attack-point-label">ATTACK: </span><span id="attack-points">0</span></div>
-            <div><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"><span id="recruit-point-label">RECRUIT: </span><span id="recruit-points">0</span></div>
+        <div class="cell-label"><span class="labeltext">Discard Pile: </span><span id="discardCountNumber" class="game-board-bottom-row"></span></div>
+ <div class="cell-label"><span class="labeltext">Played Cards: </span><span id="playedCardsCountNumber" class="game-board-bottom-row"></span></div>
+         <div id="reserveAttackPointDisplay" class="attack-recruit" style="grid-column: span 2; visibility: hidden;">
+<div><span id="attack-point-label">Reserved Attack: </span><br><span id="reserved-attack-points">0</span></div>
           </div>
-        <div class="cell-label"><span class="labeltext">PLAYER DECK: </span><span id="playerDeckCountNumber" class="game-board-bottom-row"></span></div>
+        <div class="attack-recruit" style="grid-column: span 1;">
+            <div><img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"><span id="attack-point-label">Attack: </span><span id="attack-points">0</span></div>
+            <div><img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"><span id="recruit-point-label">Recruit: </span><span id="recruit-points">0</span></div>
+          </div>
+        <div id="reserveRecruitPointDisplay" class="attack-recruit" style="grid-column: span 2; visibility: hidden;">
+          <div><span id="recruit-point-label">Reserved Recruit: </span><br><span id="reserved-recruit-points">0</span></div>
+          </div>
+        <div class="cell-label"><span class="labeltext">Player Deck: </span><span id="playerDeckCountNumber" class="game-board-bottom-row"></span></div>
       </div>
       <div class="row">
-<button id="healing-button" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">HEAL WOUNDS?</span></button>
+<button id="healing-button" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">Heal Wounds</span></button>
 <div id="superpowersToggle" class="toggle-container" class="player-controls">
-    <span>SUPERPOWERS</span>
+    <span>Superpowers</span>
     <div class="toggle-button-container">
         <div id="autoButton" class="toggle-button">
-            <button id="superToggleAuto"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);margin-top: 0.6vh;">AUTO</span></button>
+            <button id="superToggleAuto"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);margin-top: 0.6vh;">Auto</span></button>
         </div>
         <div id="manualButton" class="toggle-button">
-            <button id="superToggleManual"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);margin-top: 0.6vh;">MANUAL</span></button>
+            <button id="superToggleManual"><span style="filter: drop-shadow(0vh 0vh 0.3vh black);margin-top: 0.6vh;">Manual</span></button>
         </div>
     </div>
 </div>
-<button id="sort-player-cards" class="player-controls"><span class="game-board-bottom-row">SORT HAND</span></button>
-<button id="confirm-actions" class="player-controls"><span class="game-board-bottom-row">PLAY SELECTED</span></button>
-<button id="play-all-button" style="margin-top:1vh;" class="player-controls"><span class="game-board-bottom-row">PLAY ALL GREYS</span></button>
-        <button id="end-turn" class="cell button-end-turn" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">HOLD TO END TURN</span></button>
+<button id="sort-player-cards" class="player-controls"><span class="game-board-bottom-row">Sort Hand</span></button>
+<button id="confirm-actions" class="player-controls"><span class="game-board-bottom-row">Play Selected</span></button>
+<button id="play-all-button" style="margin-top:1vh;" class="player-controls"><span class="game-board-bottom-row">Play All Greys</span></button>
+        <button id="end-turn" class="cell button-end-turn" style="grid-column: span 2;" class="player-controls"><span class="game-board-bottom-row">Hold to End Turn</span></button>
      
         <button class="reopen-popup-btn" aria-label="Reopen popup" style="grid-column: span 8; display:none;">
   <span class="reopen-icon">▲</span>
-  <span class="reopen-text">OPEN POPUP</span>
+  <span class="reopen-text">Open Popup</span>
   <span class="reopen-icon">▲</span>
         </button>
      
@@ -603,13 +638,14 @@
   </div>
 
   <div id="side-panel" class="side-panel" style="display: none;">
-    <div id="zoom-preview" class="zoom-preview">HOVER/TAP FOR CARD TEXT<img id="zoomed-image" src="" alt="Zoomed Preview" style="display:none;"></div>
-<div class="keywords"><h2>KEYWORDS</h2><div id="keyword-content">
+    <div id="zoom-preview-top" class="zoom-preview-top"><img id="zoomed-image-top" src="" alt="Zoomed Preview Top" style="display:none;"></div>
+    <div id="zoom-preview" class="zoom-preview">Hover/Tap for Card Text<img id="zoomed-image" src="" alt="Zoomed Preview" style="display:none;"></div>
+<div class="keywords"><h2>Keywords</h2><div id="keyword-content">
 <p><span id="keyword1" class="keywordTitles"></span><span id="keyword1Description" class="keywordDescriptions"></span></p>
 <p><span id="keyword2" class="keywordTitles"></span><span id="keyword2Description" class="keywordDescriptions"></span></p>
 <p><span id="keyword3" class="keywordTitles"></span></span><span id="keyword3Description" class="keywordDescriptions"></span></p>
 <p><span id="errata" class="keywordTitles"></span></span><span id="errataDescription" class="keywordDescriptions"></span></p></div></div>
-    <div class="console-log"><h2>CONSOLE</h2><div class="inner-console-log"><div class="scroll-gradient"></div></div></div>
+    <div class="console-log"><h2>Console</h2><div class="inner-console-log"><div class="scroll-gradient"></div></div></div>
   </div>
 
   <!-- Pop-up for recruiting S.H.I.E.L.D. Officer -->
@@ -667,12 +703,13 @@
     <div class="popup-content">
       <h2 id="popup-title"></h2>
       <span id="popup-context"></span>
-<div id="popup-single-image"></div>
+<div id="popup-single-image" style="display:block;"></div>
       <button id="popup-confirm">Confirm</button>
     </div>
   </div>
 
   <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+  <div id="played-cards-modal-overlay" class="modal-overlay" style="display: none;"></div>
   <div id="popup" class="popup" style="display: none;">
     <div class="popup-content">
 <span class="popup-visibility-btn" style="opacity:1;">_</span>
@@ -727,13 +764,15 @@
   <span class="inner-triangle"></span>
 </div>
     <div class="popup-content">
-      <h2>The villain escaped with a bystander! Discard 1 card.</h2>
+      <h2>ESCAPE</h2>
+      <p id="discard-instructions">The Villain escaped with a Bystander! Discard 1 card.</p>
       <div id="discard-options" class="discard-options-container">
         <div class="discard-buttons"></div>
         <div class="hero-image">
           <div class="hero-image-placeholder">
          <img src="" alt="Card Image" id="discard-card-image" style="display:none; height:100%;">
  <span id="discard-card-popupHoverText">HOVER/TAP FOR CARD DISPLAY</span>
+ <button id="discard-confirm-button">CONFIRM</button>
 </div>
 
         </div>
@@ -801,7 +840,7 @@
       <p id="villainDRAWaverageVPPerTurn"></p>
       <h3>Number of Escapes:</h3>
       <p id="villainDRAWnumberOfEscapes"></p> 
-      <button id="return-home-button">Return Home</button>
+      <button id="return-home-button">Restart</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive.</p>
@@ -826,8 +865,7 @@
       <p id="LOSSaverageVPPerTurn"></p>
       <h3>Number of Escapes:</h3>
       <p id="LOSSnumberOfEscapes"></p>      
-      <button id="defeat-return-home-button">Return Home</button>
-<button id="try-again-btn">Try Again</button>
+      <button id="defeat-return-home-button">Restart</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
   <p>If you enjoyed this game of Marvel Legendary, please consider donating to keep the project alive.</p>
@@ -964,7 +1002,7 @@
 </div>
       <div class="popup-content">
       <h2 id="bribe-popup-h2">Attack or Recruit?</h2>
-<p>What combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> and <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> points would you like to use?</p>
+<p id="bribe-instructions">What combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> and <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> points would you like to use?</p>
         <div class="countersAndDisplay">
         <div class="counters">
         <div class="counter">
@@ -1244,9 +1282,32 @@
   <div class="close-triangle-btn" aria-label="Close" onclick="saveSettings()">
     <span class="close-x"><b>✕</b></span>
   </div>
-  <h3>SETTINGS</h3>
+  <h2>SETTINGS</h2>
+  <h3>Theme</h3>
+  <div class="theme-grid">
+    <button class="theme-button" data-theme="theme-core">
+      <div class="theme-name">Core</div>
+    </button>
+    <button class="theme-button" data-theme="theme-dark-city">
+      <div class="theme-name">Dark City</div>
+    </button>
+    <button class="theme-button" data-theme="theme-fantastic-four">
+      <div class="theme-name">Fantastic Four</div>
+    </button>
+  </div>
+  <div class="font-and-volume">
+<div class="font-control">
+  <h3>Font</h3>
+  <div class="font-selector-container">
+    <select id="font-selector" class="font-selector">
+      <option value="Core" style="font-family:'Percolator'; font-size: 1em;">Core</option>
+      <option value="DarkCity" style="font-family:'DarkCity'; font-size: .8em;">Dark City</option>
+      <option value="FantasticFour" style="font-family:'FantasticFour'; font-size: 1em;">Fantastic Four</option>
+    </select>
+  </div>
+  </div>
 
- <div class="volume-control">
+  <div class="volume-control">
   <h3>Volume</h3>
 
   <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; justify-content: center;">
@@ -1271,12 +1332,11 @@
     </label>
   </div>
 </div>
-
-  <br>
+</div>
   <button id="settingsButton" onclick="saveSettings()">CLOSE</button>
   <br>
   <div id="sound-attributions">
-    <span>SFX are sourced from https://freesound.org under their Attribution 3.0 license. Special thanks to the following creators: Artninja, Cigaro30, D4XX, HarDuKK, Hope_sounds_3, humanoide9000, mlteenie, original_sound, ponycillo, RealSquink, Robinhood76 and thecheeseman. Music: www.purple-planet.com</span>
+    <span>SFX are sourced from https://freesound.org under their Attribution 3.0 license. Special thanks to the following creators: Artninja, Cigaro30, D4XX, HarDuKK, Hope_sounds_3, humanoide9000, mlteenie, original_sound, ponycillo, RealSquink, Robinhood76 and thecheeseman. Music: www.purple-planet.com Backgrounds by Arcs and Strokes, and Nest Sketch.</span>
   </div>
 </div>
 
@@ -1307,18 +1367,21 @@
 
 <script>
   // Main script loading chain
-  const cardDatabaseScript = document.createElement('script');
-  cardDatabaseScript.src = 'cardDatabase.js';
-  cardDatabaseScript.onload = () => {
-    const cardAbilitiesScript = document.createElement('script');
-    cardAbilitiesScript.src = 'cardAbilities.js';
-    cardAbilitiesScript.onload = () => {
-      const cardAbilitiesSidekicksScript = document.createElement('script');
-      cardAbilitiesSidekicksScript.src = 'cardAbilitiesSidekicks.js';
-      cardAbilitiesSidekicksScript.onload = () => {
-        const cardAbilitiesDarkCityScript = document.createElement('script');
-        cardAbilitiesDarkCityScript.src = 'cardAbilitiesDarkCity.js';
-        cardAbilitiesDarkCityScript.onload = () => {
+const cardDatabaseScript = document.createElement('script');
+cardDatabaseScript.src = 'cardDatabase.js';
+cardDatabaseScript.onload = () => {
+  const cardAbilitiesScript = document.createElement('script');
+  cardAbilitiesScript.src = 'cardAbilities.js';
+  cardAbilitiesScript.onload = () => {
+    const cardAbilitiesSidekicksScript = document.createElement('script');
+    cardAbilitiesSidekicksScript.src = 'cardAbilitiesSidekicks.js';
+    cardAbilitiesSidekicksScript.onload = () => {
+      const cardAbilitiesDarkCityScript = document.createElement('script');
+      cardAbilitiesDarkCityScript.src = 'cardAbilitiesDarkCity.js';
+      cardAbilitiesDarkCityScript.onload = () => {
+        const expansionFantasticFourScript = document.createElement('script');
+        expansionFantasticFourScript.src = 'expansionFantasticFour.js'; // Fixed variable name
+        expansionFantasticFourScript.onload = () => {
           const updatesContentScript = document.createElement('script');
           updatesContentScript.src = 'updatesContent.js';
           updatesContentScript.onload = () => {
@@ -1329,13 +1392,15 @@
           };
           document.body.appendChild(updatesContentScript);
         };
-        document.body.appendChild(cardAbilitiesDarkCityScript);
+        document.body.appendChild(expansionFantasticFourScript);
       };
-      document.body.appendChild(cardAbilitiesSidekicksScript);
+      document.body.appendChild(cardAbilitiesDarkCityScript);
     };
-    document.body.appendChild(cardAbilitiesScript);
+    document.body.appendChild(cardAbilitiesSidekicksScript);
   };
-  document.head.appendChild(cardDatabaseScript);
+  document.body.appendChild(cardAbilitiesScript);
+};
+document.head.appendChild(cardDatabaseScript);
 
   function setupUpdatesTab() {
     const updatesTab = document.getElementById('right-tab');

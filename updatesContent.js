@@ -1,7 +1,30 @@
 // updatesContent.js
-//01.09.2025 20.38
+//24.09.2025 10.19
 const updatesHTML = `
-
+<h3>✨ <i>Version 3.0.0</i> - Fantastic Four <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"></h3>
+<p>Welcome to our next expansion! This update brings you the <strong>Fantastic Four</strong> at their finest - all new cards and mechanics! There have also been some major patches and changes under the hood.</p>
+<p>Another massive thank you to this incredible community! Keep the feedback coming!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p><img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"> <span style="text-decoration:underline;"><strong>FANTASTIC FOUR:</strong></span></p>
+<ul>
+<li><strong>New Heroes -</strong> 5 new Superheroes to recruit and play from Marvel's First Family, plus the Silver Surfer.
+<li><strong>New Threats -</strong> 4 new Schemes, 2 Masterminds and 2 Villain groups to take down. 
+<li><strong>New Keywords -</strong> Be sure to have fun playing with <i>Focus</i>, <i>Burrow</i> and <i>Cosmic Threat</i>. The rules for each will show in the Keywords panel. Focus abilities can be accessed multiple times via the Played Cards popup.
+</ul>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>I think something just moved!</strong> Our game now features animations when attacking Villains or recruiting Heroes. 
+<li><strong>Night Vision! </strong> You can now customize your preferred color scheme and font via the Settings menu, accessed by the cog on the Game Setup screen or in the top right corner of the gameboard. 
+<li><strong>What's your name? </strong> The card preview panel now zooms on both the card's text as well as its name.
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>Location, location!</strong> Some previous card effects and new cards in Fantastic Four provide Attack or Recruit only applicable to certain City or HQ spaces. When relevant, these will now appear separately as 'Reserved' Attack or Recruit and tell you where it can be spent.
+<li><strong>Not quite a restart... </strong> At end game, you can now click <i>Restart</i> which will return you to the Game Setup screen, skipping the Expansion and Intro popups. There is also a <i>Load Last Setup</i> button that allows you to reselect your last set of selections.
+</ul>
+<p>I hope you enjoy this new foray into the cosmos!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3>🌃 <i>Version 2.0.2</i> - Dark City Bug Squashing 🌃</h3>
 <p>Thanks again for all the feedback! Still squashing Dark City bugs but hopefully this resolves most issues and I'll move on to our next expansion. Let me know what else you find!</p>
 <p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>

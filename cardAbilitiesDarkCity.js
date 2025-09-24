@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//04.09.2025 17.14
+//24.09.2025 10.19
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -5250,6 +5250,7 @@ function bystanderRadiationScientist() {
         confirmButton.textContent = 'Confirm KO';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
+        popup.style.zIndex = 1002;
 
         let selectedCard = null;
         let selectedLocation = null; // 'hand', 'played', or 'discard'
@@ -5516,6 +5517,7 @@ genericCardSort(playedHeroes);
             activeImage = null;
             popup.style.display = 'none';
             modalOverlay.style.display = 'none';
+            popup.style.zIndex = 1000;
         }
     });
 }
@@ -11587,6 +11589,5 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
-
 
 

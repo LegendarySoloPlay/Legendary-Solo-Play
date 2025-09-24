@@ -1,13 +1,60 @@
 // Fantastic Four Expansion
-// Pre-release
-// 05/09/2025 17.45
-
-// Need to code Focus and changes to attack and recruit usable in particular city spaces.
-// Need to add cards to database/index, images to Visual Assets and keywords to database.
-// Need to code expansion splash screen
-// Explore adding animations now
+// 24/09/2025 10.19
 
 //Keywords
+
+function getFocusDetails(card) {
+    let focusCost = 0;
+    let focusFunction = null;
+
+    switch (card.name) {
+        case "Silver Surfer - The Power Cosmic":
+            focusCost = 9;
+            focusFunction = silverSurferThePowerCosmic;
+            break;
+        case "Silver Surfer - Epic Destiny":
+            focusCost = 6;
+            focusFunction = silverSurferEpicDestiny;
+            break;
+        case "Silver Surfer - Warp Speed":
+            focusCost = 2;
+            focusFunction = silverSurferWarpSpeed;
+            break;
+        case "Invisible Woman - Unseen Rescue":
+            focusCost = 2;
+            focusFunction = invisibleWomanUnseenRescue;
+            break;
+            case "Invisible Woman - Disappearing Act":
+            focusCost = 2;
+            focusFunction = invisibleWomanDisappearingAct;
+            break;
+            case "Thing - Crime Stopper":
+            focusCost = 1;
+            focusFunction = thingCrimeStopperFocus;
+            break;
+            case "Thing - Knuckle Sandwich":
+            focusCost = 3;
+            focusFunction = thingKnuckleSandwich;
+            break;
+            case "Mr. Fantastic - Ultimate Nullifier":
+            focusCost = 1;
+            focusFunction = mrFantasticUltimateNullifier;
+            break;
+            case "Mr. Fantastic - Twisting Equations":
+            focusCost = 2;
+            focusFunction = mrFantasticTwistingEquations;
+            break;
+            case "Human Torch - Flame On!":
+            focusCost = 6;
+            focusFunction = humanTorchFlameOn;
+            break;
+        // Add more cases as needed
+        default:
+            break;
+    }
+
+    return { focusCost, focusFunction };
+}
 
 async function handleCosmicThreatChoice(card, index) {
     return new Promise((resolve) => {
@@ -167,99 +214,62 @@ function removeCosmicThreatBuff(cityIndex) {
     updateGameBoard();
 }
 
-//To go near Telepathic Probe in cardsplayedthisturn popup in script - need to fix its onscreen console log for bolding and full stop. not finished here where it switches back to attack button, also need to add abck in part of the indicator code from original.
-if (card.keyword1 === "Focus" ||  card.keyword2 === "Focus" || card.keyword3 === "Focus") {
-            imgElement.classList.add('clickable-card', 'telepathic-probe-active');
-            imgElement.style.cursor = 'pointer';
-            imgElement.style.border = '3px solid rgb(235 43 58 / 100%)';
-            
-            // Create attack button (hidden by default)
-            const focusButton = document.createElement('div');
-            focusButton.className = 'played-cards-attack-button';
-            focusButton.innerHTML = `
-                <span style="filter: drop-shadow(0vh 0vh 0.3vh black);">
-                    <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-attack-icons">
-                </span>
-            `;
-            focusButton.style.display = 'none';
-            focusIndicator.appendChild(focusButton);
-
-            // Indicator click handler
-            focusIndicator.addEventListener('click', (e) => {
-                e.stopPropagation();
-                let focusCost = recalculateVillainAttack(topCard);
-
-                // Calculate available attack points
-                let playerRecruitPoints = totalRecruitPoints;
-            
-                // Toggle attack button visibility
-                if (playerRecruitPoints >= focusCost) {
-                    focusButton.style.display = focusButton.style.display === 'none' ? 'block' : 'none';
-                } else {
-                    onscreenConsole.log(`You need ${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to activate <span class="console-highlights">${card.name}</span><span class="bold-span">'s</span> Focus ability.`);
-                }
-            });
-
-            // Attack button click handler
-            attackButton.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                attackButton.style.display = 'none'; // Hide button immediately
-                
-                try {
-                    await initiateTelepathicVillainFight(topCard, card);
-                    closePlayedCardsPopup();
-                } catch (error) {
-                    console.error('Error handling Telepathic Probe:', error);
-                    onscreenConsole.log(`Error fighting ${card.villain}`);
-                }
-            });
-
-            cardContainer.appendChild(indicator);
-        }
-
-
 //Schemes
 
 function risingWatersTwist() {
     stackedTwistNextToMastermind++;
-  // Create a copy of the current HQ to avoid issues with changing array
-  const currentHQ = [...hq];
-  let heroesKOd = 0;
- 
-  // Check each hero in the current HQ
-  for (let i = 0; i < currentHQ.length; i++) {
-    const hero = currentHQ[i];
+    // Create a copy of the current HQ to avoid issues with changing array
+    const currentHQ = [...hq];
+    let heroesKOd = 0;
     
-    // Skip empty slots
-    if (!hero) continue;
-    
-    // Check if hero cost is equal to or less than schemeTwistCount
-    if (hero.cost <= schemeTwistCount) {
-      // KO the hero
-      koPile.push(hero);
-      heroesKOd++;
-      
-      // Remove from HQ
-      const hqIndex = hq.indexOf(hero);
-      if (hqIndex !== -1) {
-        hq[hqIndex] = null;
-      }
-      
-      // Log the KO
-      onscreenConsole.log(`KO'd <span class="console-highlights">${hero.name}</span> (Cost: ${hero.cost}) from HQ.`);
-      
+    // Check each hero in the current HQ
+    for (let i = 0; i < currentHQ.length; i++) {
+        const hero = currentHQ[i];
+        
+        // Skip empty slots
+        if (!hero) continue;
+        
+        // Check if hero cost is equal to or less than schemeTwistCount
+        if (hero.cost <= schemeTwistCount) {
+            // KO the hero
+            koPile.push(hero);
+            heroesKOd++;
+            
+            // Remove from HQ and replace with new card
+            const hqIndex = hq.indexOf(hero);
+            if (hqIndex !== -1) {
+                hq[hqIndex] = null;
+                
+                const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
+                hq[hqIndex] = newCard; // Use hqIndex instead of index
+                
+                if (newCard) {
+                    // Log the KO
+                    onscreenConsole.log(`KO'd <span class="console-highlights">${hero.name}</span> (Cost: ${hero.cost}) from HQ.`);
+                    onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
+                } else {
+                    onscreenConsole.log(`KO'd <span class="console-highlights">${hero.name}</span> (Cost: ${hero.cost}) from HQ.`);
+                }
+            }
+            
+            updateGameBoard();
+            
+            if (!hq[hqIndex] && heroDeck.length === 0) { // Use hqIndex instead of index
+                showDrawPopup();
+            }
+        }
     }
-  }
-  
-  // Log results
-  if (heroesKOd === 0) {
-    onscreenConsole.log(`No Heroes in HQ cost less than or equal to the Rising Waters stack (${schemeTwistCount}).`);
-  } else {
-    onscreenConsole.log(`Rising Waters KO'd ${heroesKOd} Hero${heroesKOd !== 1 ? 'es' : ''} from the HQ.`);
-  }
-  
-  updateGameBoard();
+    
+    // Log results
+    if (heroesKOd === 0) {
+        onscreenConsole.log(`No Heroes in HQ cost less than or equal to the Rising Waters stack (${schemeTwistCount}).`);
+    } else {
+        onscreenConsole.log(`Rising Waters KO'd ${heroesKOd} Hero${heroesKOd !== 1 ? 'es' : ''} from the HQ.`);
+    }
+    
+    updateGameBoard();
 }
+
 
 function pullRealityIntoTheNegativeZoneTwist() {
     if (schemeTwistCount === 2 || schemeTwistCount === 4 ||schemeTwistCount === 6) {
@@ -270,7 +280,7 @@ function pullRealityIntoTheNegativeZoneTwist() {
         updateGameBoard();
         }
         
-function invincibleForceField() {
+function invincibleForceFieldTwist() {
     stackedTwistNextToMastermind++;
     const mastermind = getSelectedMastermind();
     invincibleForceField++;
@@ -481,7 +491,7 @@ async function cosmicRaysRecruit(maxCost) {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Recruit';
+        confirmButton.textContent = 'Gain';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
 
@@ -573,7 +583,7 @@ async function cosmicRaysRecruit(maxCost) {
             }
 
     const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
-    hq[hqIndex] = newCard;
+    hq[idx] = newCard;
     
     if (newCard) {
         onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
@@ -581,7 +591,7 @@ async function cosmicRaysRecruit(maxCost) {
 
 addHRToTopWithInnerHTML();
     
-    if (!hq[hqIndex] && heroDeck.length === 0) {
+    if (!hq[idx] && heroDeck.length === 0) {
         heroDeckHasRunOut = true;
     }
 
@@ -635,19 +645,24 @@ function galactusMasterStrike() {
                 // Show escape popup
                 setTimeout(async () => {
                     await new Promise(resolve => {
-                        showPopup('Villain Escape', escapedVillain, resolve);
+                        showPopup('Destroyed City Villain Escape', escapedVillain, resolve);
                     });
                     await handleVillainEscape(escapedVillain);
                     addHRToTopWithInnerHTML();
-                }, 500);
+                }, 200);
             }
             updateGameBoard();
+               const allSpacesDestroyed = destroyedSpaces.every(space => space === true);
+            
+            if (allSpacesDestroyed) {
+                onscreenConsole.log('The entire city has been destroyed!');
+            }
+    
             return; // Exit after destroying one space
         }
     }
-    
-    // If we get here, all spaces are already destroyed
-    onscreenConsole.log("<span class='console-destruction'>The entire city has been destroyed!</span>");
+
+ 
 }
 
 // Function to get the effective front index (first non-destroyed space)
@@ -695,8 +710,13 @@ async function galactusCosmicEntity() {
 
         // --- UI: initialise for this modal mode
         if (closeBtn) closeBtn.style.display = 'none'; // hide cancel for this flow
-        if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
-        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+        
+        // SET GALACTUS IMAGE FOR BOTH PHASES
+        if (heroImage) { 
+            heroImage.src = 'Visual Assets/Masterminds/FantasticFour_Galactus_PanickedMobs.webp';
+            heroImage.style.display = 'block'; 
+        }
+        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'none'; // Hide hover text since we're showing Galactus
 
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
@@ -724,18 +744,25 @@ async function galactusCosmicEntity() {
             CLASSES.forEach(cls => {
                 const count = countsByClass[cls] || 0;
                 const li = document.createElement('li');
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
-                btn.onclick = () => {
+                
+                // Use innerHTML directly on the list item instead of creating a button
+                li.innerHTML = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
+                
+                li.onclick = () => {
+                    // Remove selection from any previously selected item
+                    document.querySelectorAll('#cards-to-choose-from li').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Highlight selected item
+                    li.classList.add('selected');
+                    
                     selectedClass = cls;
                     selectedQty = null;
-                    // If you want to prevent moving forward when count is 0, keep confirm disabled.
-                    // Otherwise, allow continuing (and show no quantity options).
                     confirmButton.disabled = false;
-                    instructionsDiv.textContent = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
+                    instructionsDiv.innerHTML = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
                 };
-                li.appendChild(btn);
+                
                 listContainer.appendChild(li);
             });
         }
@@ -744,39 +771,38 @@ async function galactusCosmicEntity() {
             phase = 'chooseQuantity';
             selectedQty = null;
             confirmButton.disabled = true;
-            popupTitle.textContent = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
+            popupTitle.innerHTML = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
             clearList();
 
             if (max <= 0) {
-                instructionsDiv.textContent = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
+                instructionsDiv.innerHTML = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
                 confirmButton.disabled = false;
                 selectedQty = 0;
                 return;
             }
 
-            instructionsDiv.textContent = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            instructionsDiv.innerHTML = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            
             for (let n = max; n >= 1; n--) {
                 const li = document.createElement('li');
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = `${n}`;
-                btn.onclick = () => {
+                li.textContent = `${n}`;
+                      
+                li.onclick = () => {
+                    // Remove selection from any previously selected item
+                    document.querySelectorAll('#cards-to-choose-from li').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Highlight selected item
+                    li.classList.add('selected');
+                    
                     selectedQty = n;
                     confirmButton.disabled = false;
-                    instructionsDiv.textContent = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
+                    instructionsDiv.innerHTML = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
                 };
-                li.appendChild(btn);
+                
                 listContainer.appendChild(li);
             }
-
-            // Optional: include a "0" option explicitly
-            // const li0 = document.createElement('li');
-            // const btn0 = document.createElement('button');
-            // btn0.type = 'button';
-            // btn0.textContent = '0 (none)';
-            // btn0.onclick = () => { selectedQty = 0; confirmButton.disabled = false; instructionsDiv.textContent = `Reveal 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Press Confirm to proceed.`; };
-            // li0.appendChild(btn0);
-            // listContainer.appendChild(li0);
         }
 
         // --- Wire confirm behaviour for both phases
@@ -798,6 +824,7 @@ async function galactusCosmicEntity() {
 
                 // Cleanup & restore popup to "normal" default state
                 if (typeof closePopup === 'function') closePopup();
+                
                 // Make sure to reset any tweaks we made so future popups behave normally
                 try {
                     // Reset content
@@ -806,7 +833,10 @@ async function galactusCosmicEntity() {
                     popupTitle.textContent = '';
 
                     // Restore visibility defaults
-                    if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+                    if (heroImage) { 
+                        heroImage.src = '';
+                        heroImage.style.display = 'none'; 
+                    }
                     if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
                     if (closeBtn) closeBtn.style.display = ''; // show default close for future uses
 
@@ -868,8 +898,13 @@ async function galactusPanickedMobs() {
 
         // --- UI: initialise for this modal mode
         if (closeBtn) closeBtn.style.display = 'none'; // hide cancel for this flow
-        if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
-        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
+        
+        // SET GALACTUS IMAGE FOR BOTH PHASES
+        if (heroImage) { 
+            heroImage.src = 'Visual Assets/Masterminds/FantasticFour_Galactus_PanickedMobs.webp';
+            heroImage.style.display = 'block'; 
+        }
+        if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'none'; // Hide hover text since we're showing Galactus
 
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
@@ -897,18 +932,25 @@ async function galactusPanickedMobs() {
             CLASSES.forEach(cls => {
                 const count = countsByClass[cls] || 0;
                 const li = document.createElement('li');
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
-                btn.onclick = () => {
+                
+                // Use innerHTML directly on the list item instead of creating a button
+                li.innerHTML = `<img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons"> — Up to ${count} card${count === 1 ? '' : 's'} to reveal`;
+                
+                li.onclick = () => {
+                    // Remove selection from any previously selected item
+                    document.querySelectorAll('#cards-to-choose-from li').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Highlight selected item
+                    li.classList.add('selected');
+                    
                     selectedClass = cls;
                     selectedQty = null;
-                    // If you want to prevent moving forward when count is 0, keep confirm disabled.
-                    // Otherwise, allow continuing (and show no quantity options).
                     confirmButton.disabled = false;
-                    instructionsDiv.textContent = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
+                    instructionsDiv.innerHTML = `Selected: <img src="Visual Assets/Icons/${cls}.svg" alt="${cls} Icon" class="console-card-icons">. Press Confirm to choose how many cards to reveal (up to ${count}).`;
                 };
-                li.appendChild(btn);
+                
                 listContainer.appendChild(li);
             });
         }
@@ -917,39 +959,38 @@ async function galactusPanickedMobs() {
             phase = 'chooseQuantity';
             selectedQty = null;
             confirmButton.disabled = true;
-            popupTitle.textContent = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
+            popupTitle.innerHTML = `How many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards to reveal?`;
             clearList();
 
             if (max <= 0) {
-                instructionsDiv.textContent = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
+                instructionsDiv.innerHTML = `You have 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Confirm to reveal none (0).`;
                 confirmButton.disabled = false;
                 selectedQty = 0;
                 return;
             }
 
-            instructionsDiv.textContent = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            instructionsDiv.innerHTML = `Select how many <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards you wish to reveal.`;
+            
             for (let n = max; n >= 1; n--) {
                 const li = document.createElement('li');
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = `${n}`;
-                btn.onclick = () => {
+                li.textContent = `${n}`;
+                      
+                li.onclick = () => {
+                    // Remove selection from any previously selected item
+                    document.querySelectorAll('#cards-to-choose-from li').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Highlight selected item
+                    li.classList.add('selected');
+                    
                     selectedQty = n;
                     confirmButton.disabled = false;
-                    instructionsDiv.textContent = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
+                    instructionsDiv.innerHTML = `Reveal ${n} <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> card${n === 1 ? '' : 's'}. Press Confirm to proceed.`;
                 };
-                li.appendChild(btn);
+                
                 listContainer.appendChild(li);
             }
-
-            // Optional: include a "0" option explicitly
-            // const li0 = document.createElement('li');
-            // const btn0 = document.createElement('button');
-            // btn0.type = 'button';
-            // btn0.textContent = '0 (none)';
-            // btn0.onclick = () => { selectedQty = 0; confirmButton.disabled = false; instructionsDiv.textContent = `Reveal 0 <img src="Visual Assets/Icons/${selectedClass}.svg" alt="${selectedClass} Icon" class="console-card-icons"> cards. Press Confirm to proceed.`; };
-            // li0.appendChild(btn0);
-            // listContainer.appendChild(li0);
         }
 
         // --- Wire confirm behaviour for both phases
@@ -971,6 +1012,7 @@ async function galactusPanickedMobs() {
 
                 // Cleanup & restore popup to "normal" default state
                 if (typeof closePopup === 'function') closePopup();
+                
                 // Make sure to reset any tweaks we made so future popups behave normally
                 try {
                     // Reset content
@@ -978,8 +1020,11 @@ async function galactusPanickedMobs() {
                     instructionsDiv.textContent = '';
                     popupTitle.textContent = '';
 
-                    // Restore visibility defaults
-                    if (heroImage) { heroImage.src = ''; heroImage.style.display = 'none'; }
+                    // Restore visibility defaults - KEEP GALACTUS IMAGE VISIBLE
+                    if (heroImage) { 
+                        heroImage.src = '';
+                        heroImage.style.display = 'none'; 
+                    }
                     if (oneChoiceHoverText) oneChoiceHoverText.style.display = 'block';
                     if (closeBtn) closeBtn.style.display = ''; // show default close for future uses
 
@@ -1192,8 +1237,6 @@ genericCardSort(availableCards);
                 
                 closePopup();
                 updateGameBoard();
-                extraDraw();
-                extraDraw();
                 resolve();
             }
         };
@@ -1273,7 +1316,7 @@ async function moleManMasterStrike() {
   let subterraneaVillainsEscaped = false;
   
   for (let i = 0; i < city.length; i++) {
-    if (city[i] && city[i].team === "Subterranea") {
+    if (city[i] && city[i].alwaysLeads === "true") {
       await handleVillainEscape(city[i]);
       city[i] = null;
       removeCosmicThreatBuff(i);
@@ -1446,7 +1489,7 @@ resolve(true);
     });
 }
 
-async function moleManMastersOfMonsters() {
+async function moleManMasterOfMonsters() {
     const mastermind = getSelectedMastermind();
 
     if (mastermind.tactics.length !== 0) {
@@ -1458,22 +1501,26 @@ async function moleManMastersOfMonsters() {
             revealedCards.push(villainDeck.pop());
         }
 
-        // Log revealed cards
-        if (revealedCards.length > 0) {
-            const cardNames = revealedCards.map(card => 
-                `<span class="console-highlights">${card.name}</span>`
-            ).join(', ');
-            onscreenConsole.log(`You revealed the top ${revealedCards.length} card${revealedCards.length !== 1 ? 's' : ''} of the Villain deck: ${cardNames}.`);
-        } else {
+        if (revealedCards.length === 0) {
             onscreenConsole.log("No cards left in the Villain deck to reveal!");
             return;
         }
 
-        // Separate Subterranea villains from other cards
-        const subterraneaVillains = revealedCards.filter(card => card.team === "Subterranea");
-        const otherCards = revealedCards.filter(card => card.team !== "Subterranea");
+        // Log revealed cards
+        const cardNames = revealedCards.map(card => 
+            `<span class="console-highlights">${card.name}</span>`
+        ).join(', ');
+        onscreenConsole.log(`You revealed the top ${revealedCards.length} card${revealedCards.length !== 1 ? 's' : ''} of the Villain deck: ${cardNames}.`);
 
-        // Play all Subterranea villains
+        // Separate Subterranea villains from other cards
+                const subterraneaVillains = revealedCards.filter(card => {
+            // Try multiple conditions to see which one matches
+            return card.alwaysLeads === true || 
+                   card.alwaysLeads === "true"
+        });
+        const otherCards = revealedCards.filter(card => card.alwaysLeads !== true);
+
+        // Play Subterranea villains first
         if (subterraneaVillains.length > 0) {
             const villainNames = subterraneaVillains.map(card => 
                 `<span class="console-highlights">${card.name}</span>`
@@ -1481,26 +1528,22 @@ async function moleManMastersOfMonsters() {
             
             onscreenConsole.log(`Playing Subterranea Villain${subterraneaVillains.length !== 1 ? 's' : ''}: ${villainNames}.`);
             
-            // Add Subterranea villains to the bottom of the villain deck to be played
-            villainDeck.unshift(...subterraneaVillains);
-            
-            // Play all Subterranea villains
-            for (let i = 0; i < subterraneaVillains.length; i++) {
+            // Play each Subterranea villain
+            for (const villain of subterraneaVillains) {
+                // Add to top of deck first
+                villainDeck.push(villain);
+                // Then draw it properly
                 await drawVillainCard();
             }
         }
 
-        // Handle remaining cards - shuffle and add to bottom of deck
+        // Handle remaining cards
         if (otherCards.length > 0) {
             shuffleArray(otherCards);
             
-            const otherCardNames = otherCards.map(card => 
-                `<span class="console-highlights">${card.name}</span>`
-            ).join(', ');
-            
             onscreenConsole.log(`Shuffling the other cards and placing them on the bottom of the Villain deck.`);
             
-            // Add remaining cards to the bottom of the villain deck
+            // Add to bottom of deck
             villainDeck.unshift(...otherCards);
         } else if (subterraneaVillains.length === 0) {
             onscreenConsole.log("No Subterranea Villains were revealed. All revealed cards have been shuffled and placed at the bottom of the Villain deck.");
@@ -1508,10 +1551,9 @@ async function moleManMastersOfMonsters() {
         
         updateGameBoard();
     } else {
-        // This is the final tactic
         onscreenConsole.log(`This is the final Tactic. No effect.`);
     }
-}  
+}
 
 function moleManSecretTunnel() {
     onscreenConsole.log(`You gain +6 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> usable only against Villains in the Streets.`);
@@ -1521,7 +1563,7 @@ function moleManSecretTunnel() {
 
 function moleManUndergroundRiches() {
     onscreenConsole.log(`You gain +6 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> usable only to recruit Heroes in the HQ space under the Streets.`);
-    streetsReserveRecruit += 6;
+    hq2ReserveRecruit += 6;
     updateGameBoard();
 }
         
@@ -1756,16 +1798,22 @@ async function moveVillainFromCity1ToCity0() {
         const cardToMove = city[1];
         
         // If city[0] is destroyed (when fighting Galactus), card escapes immediately
-        if (mastermind.name === "Galactus" && destroyedSpaces[0]) {
+        if (destroyedSpaces[0] === true) {
             onscreenConsole.log(`<span class="console-highlights">${cardToMove.name}</span> escapes from the Streets!`);
             await new Promise(resolve => {
-                showPopup('Villain Escape', cardToMove, resolve);
+                showPopup('Raktar Villain Escape', cardToMove, resolve);
             });
             await handleVillainEscape(cardToMove);
             city[1] = null;
             addHRToTopWithInnerHTML();
             return;
         }
+
+            // Show popup for the moved card
+        await new Promise(resolve => {
+            showPopup('Villain Moved', cardToMove, resolve);
+        });
+        addHRToTopWithInnerHTML();
         
         const cardAtCity0 = city[0];
         
@@ -1793,7 +1841,7 @@ async function moveVillainFromCity1ToCity0() {
                 // If no space found, villain escapes
                 if (!moved) {
                     await new Promise(resolve => {
-                        showPopup('Villain Escape', cardAtCity0, resolve);
+                        showPopup('Raktar Villain Escape', cardAtCity0, resolve);
                     });
                     await handleVillainEscape(cardAtCity0);
                     addHRToTopWithInnerHTML();
@@ -1801,18 +1849,12 @@ async function moveVillainFromCity1ToCity0() {
             } else {
                 // Standard behavior - push to escape
                 await new Promise(resolve => {
-                    showPopup('Villain Escape', cardAtCity0, resolve);
+                    showPopup('Raktar Villain Escape', cardAtCity0, resolve);
                 });
                 await handleVillainEscape(cardAtCity0);
                 addHRToTopWithInnerHTML();
             }
         }
-        
-        // Show popup for the moved card
-        await new Promise(resolve => {
-            showPopup('Villain Moved', cardToMove, resolve);
-        });
-        addHRToTopWithInnerHTML();
         
     } else {
         onscreenConsole.log(`There is no Villain in the Streets to be moved.`);
@@ -1820,28 +1862,89 @@ async function moveVillainFromCity1ToCity0() {
 }
 
 // Your raktarAmbush function
-async function raktarAmbush(villain) {
-    onscreenConsole.log(`Ambush! Any Villain in the Streets moves to the Bridge, pushing any Villain already there to escape.`);   
+async function raktarAmbush() {
+    if (destroyedSpaces[1] === true) {
+        onscreenConsole.log(`Ambush! <span class="console-highlights">Ra'ktar the Molan King</span> would usually push a Villin in the Streets to the Bridge but these city spaces are already destroyed!`);
+        return;
+    } else {
+        onscreenConsole.log(`Ambush! Any Villain in the Streets moves to the Bridge, pushing any Villain already there to escape.`);
+    }   
     
     // Use the enhanced moveVillainFromCity1ToCity0 function
     await moveVillainFromCity1ToCity0();
 }
 
 async function firelordFight() {
-await FightRevealRangeOrWound();
+onscreenConsole.log('Fight! Reveal a <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero or gain a Wound.');
+		await woundAvoidance();
+		if (hasWoundAvoidance) {
+onscreenConsole.log(`You have revealed <span class="console-highlights">Iceman - Impenetrable Ice Wall</span> and avoided gaining a Wound.`);
+hasWoundAvoidance = false;
+		return; 
+		}
+await FirelordRevealRangeOrWound();
 }
 
 async function firelordEscape() {
-await EscapeRevealRangeOrWound();
+onscreenConsole.log('Escape! Reveal a <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero or gain a Wound.');
+		await woundAvoidance();
+		if (hasWoundAvoidance) {
+onscreenConsole.log(`You have revealed <span class="console-highlights">Iceman - Impenetrable Ice Wall</span> and avoided gaining a Wound.`);
+hasWoundAvoidance = false;
+		return; 
+		}
+await FirelordRevealRangeOrWound();
+}
+
+function FirelordRevealRangeOrWound() {
+
+const cardsYouHave = [
+    ...playerHand,
+    ...cardsPlayedThisTurn.filter(card => 
+        card.isCopied !== true && 
+        card.sidekickToDestroy !== true
+    )
+];
+
+if (cardsYouHave.filter(item => item.class1 === 'Range').length === 0) {
+onscreenConsole.log('You are unable to reveal a <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero.')
+drawWound();
+} else {
+setTimeout(() => {  
+const { confirmButton, denyButton } = showHeroAbilityMayPopup(
+        "DO YOU WISH TO REVEAL A CARD?",
+        "Yes",
+        "No"
+    );
+
+document.getElementById('heroAbilityHoverText').style.display = 'none';
+
+    const cardImage = document.getElementById('hero-ability-may-card');
+    cardImage.src = 'Visual Assets/Villains/FantasticFour_HeraldsOfGalactus_Firelord.webp';
+    cardImage.style.display = 'block';
+
+    confirmButton.onclick = () => {
+        onscreenConsole.log(`You are able to reveal a <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero and have escaped gaining a wound!`);
+        hideHeroAbilityMayPopup();
+document.getElementById('heroAbilityHoverText').style.display = 'block';
+    };
+
+    denyButton.onclick = () => {
+        onscreenConsole.log(`You have chosen not to reveal a <img src="Visual Assets/Icons/Range.svg" alt="Range Icon" class="console-card-icons"> Hero.`);
+drawWound();
+        hideHeroAbilityMayPopup();
+document.getElementById('heroAbilityHoverText').style.display = 'block';
+    };
+ }, 10); // 10ms delay
+}
 }
 
 function morgAmbush() {
-onscreenConsole.log(`Ambush! Put each non-<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero from the HQ on the bottom of the Hero Deck.`);
+    onscreenConsole.log(`Ambush! Put each non-<img src="Visual Assets/Icons/Instinct.svg" alt="Instinct Icon" class="console-card-icons"> Hero from the HQ on the bottom of the Hero Deck.`);
     let heroesMovedCounter = 0;
-    const nonInstinctHeroes = [];
 
-    // First pass: identify and remove non-Instinct heroes from HQ
-    for (let i = hq.length - 1; i >= 0; i--) {
+    // Process each HQ slot one by one
+    for (let i = 0; i < 5; i++) {
         if (hq[i] && hq[i].type === "Hero") {
             const hero = hq[i];
             const hasInstinct = hero.class1 === "Instinct" || 
@@ -1849,20 +1952,17 @@ onscreenConsole.log(`Ambush! Put each non-<img src="Visual Assets/Icons/Instinct
                                hero.class3 === "Instinct";
             
             if (!hasInstinct) {
-                nonInstinctHeroes.push(hq.splice(i, 1)[0]);
+                // Move non-Instinct hero to bottom of deck
+                heroDeck.unshift(hq[i]);
+                hq[i] = null; // Clear the HQ slot
                 heroesMovedCounter++;
             }
         }
     }
 
-    // Put non-Instinct heroes at the bottom of heroDeck (index 0)
-    if (nonInstinctHeroes.length > 0) {
-        heroDeck.unshift(...nonInstinctHeroes);
-    }
-
-    // Fill empty HQ spaces with new heroes from top of deck
+    // Now fill any empty HQ slots with new heroes from top of deck
     for (let i = 0; i < 5; i++) {
-        if (!hq[i] && heroDeck.length > 0) {
+        if (hq[i] === null && heroDeck.length > 0) {
             hq[i] = heroDeck.pop();
         }
     }
@@ -2010,7 +2110,7 @@ genericCardSort(CovertCardsYouHave);
     // Combine all icons
     const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
     
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} (${location})</span>`;            
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} ${location}</span>`;            
 
             li.setAttribute('data-card-id', card.id);
 
@@ -2048,7 +2148,6 @@ genericCardSort(CovertCardsYouHave);
                 onscreenConsole.log(`You have selected <span class="console-highlights">${selectedCard.name}</span> to be added to your next draw as a seventh card.`);
 
                 closePopup();
-                CovertCardsYouHave = [];
                 updateGameBoard();
                 resolve(true);
             }
@@ -2152,7 +2251,7 @@ return new Promise((resolve) => {
         popup.style.display = 'block';
 
         // Set image
-        KOImage.src = "Visual Assets/Heroes/humanTorchCallForBackup.webp";
+        KOImage.src = "Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_CallForBackup.webp";
         KOImage.style.display = 'block';
         hoverText.style.display = 'none';
 
@@ -2643,7 +2742,7 @@ function canRevealInvisibleWomanInvisibleBarrier() {
 
 // --- Popup flow to optionally negate a villain's Ambush effect
 function promptNegateAmbushEffectWithInvisibleWoman() {
-    const INVISIBLE_WOMAN_IMAGE = 'Visual Assets/Heroes/Fantastic_Four_InvisibleWoman_InvisibleBarrier.webp';
+    const INVISIBLE_WOMAN_IMAGE = 'Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_InvisibleBarrier.webp';
 
     return new Promise((resolve) => {
         // If player cannot reveal, immediately resolve "no negate"
@@ -2669,7 +2768,6 @@ function promptNegateAmbushEffectWithInvisibleWoman() {
             }
 
             confirmButton.onclick = () => {
-                onscreenConsole.log("<span class='console-highlights'>Invisible Woman – Invisible Barrier</span> used to cancel an Ambush. Drawing two cards isntead.");
                 hideHeroAbilityMayPopup();
                 if (hoverEl) hoverEl.style.display = 'block';
                 if (cardImage) cardImage.style.display = 'none';
@@ -2713,7 +2811,7 @@ updateGameBoard();
 function mrFantasticUltimateNullifier() {
 onscreenConsole.log(`Focus! You have spent 1 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">, giving you +1 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> usable only against the Mastermind.`);
 totalRecruitPoints -= 1;
-mastermindTempBuff--;
+mastermindReserveAttack++;
 updateGameBoard();
 }
 
@@ -2726,7 +2824,7 @@ function canRevealMrFantasticUltimateNullifier() {
 }
 
 function promptNegateFightEffectWithMrFantastic() {
-    const MR_FANTASTIC_IMAGE = 'Visual Assets/Heroes/Fantastic_Four_MrFantastic_UltimateNullifier.webp';
+    const MR_FANTASTIC_IMAGE = 'Visual Assets/Heroes/Fantastic Four/Fantastic_Four_MrFantastic_UltimateNullifier.webp';
 
     return new Promise((resolve) => {
         // Safety: if player cannot reveal, immediately resolve "no negate"
@@ -2752,7 +2850,7 @@ function promptNegateFightEffectWithMrFantastic() {
             }
 
             confirmButton.onclick = () => {
-                onscreenConsole.log(`<span class="console-highlights">Mr. Fantastic – Ultimate Nullifier</span> used to cancel a fight effect.`);
+                onscreenConsole.log(`You used <span class="console-highlights">Mr. Fantastic – Ultimate Nullifier</span> to cancel a fight effect.`);
                 hideHeroAbilityMayPopup();
                 if (hoverEl) hoverEl.style.display = 'block';
                 if (cardImage) cardImage.style.display = 'none';
@@ -3117,6 +3215,8 @@ return new Promise((resolve, reject) => {
 
     if (eligibleVillains.length === 0) {
         onscreenConsole.log('There are no Villains available to defeat.');
+        totalRecruitPoints += 6;
+        updateGameBoard();
         resolve();
         return;
     }
@@ -3405,3 +3505,130 @@ function silverSurferEnergySurge() {
     
     updateGameBoard();
 }
+
+//Expansion Popup
+
+var number_of_stars = 300;
+        
+        var random_number = function(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+        
+        var createStars = function() {
+            for(var i = 0; i < number_of_stars; i++) {
+                var star_top = random_number(0, document.documentElement.clientHeight);
+                var star_left = random_number(0, document.documentElement.clientWidth);
+                var star_radius = random_number(1, 2);
+                var pulse_duration = random_number(6, 12);
+                var pulse_delay = random_number(0, 6);
+                
+                var star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = star_top + 'px';
+                star.style.left = star_left + 'px';
+                star.style.width = star_radius + 'px';
+                star.style.height = star_radius + 'px';
+                star.style.animationDuration = pulse_duration + 's';
+                star.style.animationDelay = pulse_delay + 's';
+                
+                // Add slight color variation for a few stars
+                if (Math.random() > 0.9) {
+                    star.style.backgroundColor = 'rgba(210, 225, 255, 0.8)';
+                }
+                
+                document.getElementById('background-for-expansion-popup').appendChild(star);
+            }
+        };
+        
+        // Create shooting stars (your preferred version)
+        function createShootingStars() {
+            for (var i = 0; i < 10; i++) {
+                var shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                
+                // Random starting position
+                var startTop = random_number(-100, document.documentElement.clientHeight);
+                var startLeft = random_number(-100, document.documentElement.clientWidth/2);
+                
+                // Random delay and duration
+                var delay = random_number(0, 15);
+                var duration = random_number(2, 4);
+                
+                shootingStar.style.top = startTop + 'px';
+                shootingStar.style.left = startLeft + 'px';
+                shootingStar.style.animation = `shooting ${duration}s linear infinite`;
+                shootingStar.style.animationDelay = delay + 's';
+                
+                document.getElementById('background-for-expansion-popup').appendChild(shootingStar);
+            }
+        }
+        
+ function initSplash() {
+            const splashContent = document.getElementById('splashContent');
+            const splashText = document.getElementById('splashText');
+            const backgroundElement = document.getElementById('background-for-expansion-popup');
+            const popupContainer = document.getElementById('expansion-popup-container');
+            
+            // Start as a circle
+            setTimeout(() => {
+                // Calculate size based on screen dimensions
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const size = Math.min(screenWidth, screenHeight) * 0.3;
+                
+                splashContent.style.width = size + 'px';
+                splashContent.style.height = size + 'px';
+                splashContent.classList.add('visible');
+                
+                // After 4 seconds, transform to rectangle
+                setTimeout(() => {
+                    splashContent.classList.remove('circular');
+                    splashContent.classList.add('rectangular');
+                    
+                    // Set rectangle dimensions based on screen size
+                    const isPortrait = window.innerHeight > window.innerWidth;
+                    if (isPortrait) {
+                        splashContent.style.width = '70%';
+                        splashContent.style.height = 'auto';
+                        splashContent.style.minHeight = '40%';
+                    } else {
+                        splashContent.style.width = '70%';
+                        splashContent.style.height = 'auto';
+                        splashContent.style.maxWidth = '600px';
+                    }
+                                       
+                    // Fade in content
+                    setTimeout(() => {
+                        splashText.classList.add('visible');
+                    }, 1000);
+                }, 4000);
+            }, 2000); // Initial delay
+        }
+              
+        // Initialize everything when the window loads
+        window.onload = function() {
+const urlParams = new URLSearchParams(window.location.search);
+    const restartParam = urlParams.get('restart');
+    
+    if (restartParam === 'true') {
+        skipSplashAndIntro();
+        return;
+    }
+
+            createStars();
+            createShootingStars();
+            initSplash();
+        };
+        
+        // Adjust on window resize
+        window.onresize = function() {
+            // Remove existing stars
+            var stars = document.querySelectorAll('.star, .shooting-star');
+            stars.forEach(function(star) {
+                star.remove();
+            });
+            
+            // Create new ones based on new dimensions
+            createStars();
+            createShootingStars();
+        };

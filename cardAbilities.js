@@ -1,5 +1,5 @@
 // cardAbilities.js
-//04.09.2025 17.14
+//24.09.2025 10.19
 
 function koBonuses() {
 playSFX('ko');
@@ -6730,7 +6730,12 @@ genericCardSort(eligibleHeroesForDoomRecruit);
         confirmButton.onclick = () => {
             if (selectedCard) {
                 recruitHeroConfirmed(selectedCard, selectedCard.index);
+                
+                if (!negativeZoneAttackAndRecruit) {
                 totalRecruitPoints += selectedCard.cost;
+                } else {
+                totalAttackPoints += selectedCard.cost;
+                }
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
@@ -7559,7 +7564,12 @@ genericCardSort(eligibleHeroesForXMenRecruit);
         confirmButton.onclick = () => {
             if (selectedCard) {
                 recruitHeroConfirmed(selectedCard, selectedCard.index);
+                
+                if (!negativeZoneAttackAndRecruit) {
                 totalRecruitPoints += selectedCard.cost;
+                } else {
+                totalAttackPoints += selectedCard.cost;
+                }
                 
                 console.log(`${selectedCard.name} has been recruited.`);
                 onscreenConsole.log(`You have recruited <span class="console-highlights">${selectedCard.name}</span> for free.`);
@@ -10127,6 +10137,7 @@ function KOAllHeroesInHQ() {
 
 
 function killbotAttackIncrease() {
+    stackedTwistNextToMastermind++;
     killbotAttack++;
     console.log(`Killbot attack increased to ${killbotAttack}`);
     updateGameBoard(); // Optional, if this should update the UI
@@ -10611,5 +10622,4 @@ genericCardSort(playerHand);
                 modalOverlay.style.display = 'none';
             }
         }
-
     

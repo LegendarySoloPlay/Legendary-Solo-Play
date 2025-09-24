@@ -1,4 +1,4 @@
-//04.09.2025 17.14
+//24.09.2025 10.19
 
 function returnToSidekickDeck(card) {
     if (!card) {
@@ -207,6 +207,8 @@ function lockjawPhasing() {
                     playerHand.push(topCard); // Add the top card to the player's hand
                     playerDeck.push(playedSidekick); // Move Lockjaw to the top of the deck
 
+                    playedSidekick.revealed = true;
+
                     // Remove Lockjaw from cardsPlayedThisTurn
                     const lockjawIndex = cardsPlayedThisTurn.findIndex(card => card.name === "Lockjaw");
                     if (lockjawIndex !== -1) {
@@ -219,7 +221,7 @@ function lockjawPhasing() {
 
                     onscreenConsole.log(`Phasing activated. ${topCard.name} added to hand, <span class="console-highlights">Lockjaw</span> moved to the top of the deck.`);
                     
-                } else if (discardPile.length > 0) {
+                } else if (playerDiscardPile.length > 0) {
                     // Shuffle the discard pile into the player deck if the deck is empty
                     shuffleArray(discardPile);
                     playerDeck = discardPile.slice(); // Copy the shuffled discard pile to the player deck
@@ -231,6 +233,8 @@ function lockjawPhasing() {
                         const topCard = playerDeck.pop(); // Remove the top card from the deck
                         playerHand.push(topCard); // Add the top card to the player's hand
                         playerDeck.push(playedSidekick); // Move Lockjaw to the top of the deck
+
+                        playedSidekick.revealed = true;
 
                         // Remove Lockjaw from cardsPlayedThisTurn
                         const lockjawIndex = cardsPlayedThisTurn.findIndex(card => card.name === "Lockjaw");
@@ -1099,7 +1103,7 @@ genericCardSort(heroesToCopy);
     // Combine all icons
     const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
     
-    li.innerHTML = `<span style="white-space: nowrap;">HQ-${hqPosition} | ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             li.dataset.cardId = hero.id;
 
             li.onmouseover = () => {
@@ -1760,4 +1764,5 @@ async function handleCardPlacement(card, options = {}) {
     onscreenConsole.log(`You returned <span class="console-highlights">${card.name}</span> to the bottom of your deck.`);
   }
   updateGameBoard();
+
 }

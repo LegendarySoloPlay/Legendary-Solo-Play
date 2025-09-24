@@ -1,4 +1,4 @@
-//04.09.2025 11.12
+//24.09.2025 10.19
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -11,6 +11,18 @@ window.addEventListener("load", async () => {
 
   const minDisplayMs = 2000; // how long to show at least
   const start = performance.now();
+
+  const load1 = document.getElementById('load-last-setup-1');
+  const load2 = document.getElementById('load-last-setup-2');
+  const saved = localStorage.getItem('legendaryGameSetup');
+
+  if (!saved) {
+    load1.disabled = true;
+    load2.disabled = true;
+  } else {
+    load1.disabled = false;
+    load2.disabled = false;
+  }
 
   await allowPaint(); // let the loader actually render
 
@@ -52,10 +64,6 @@ document.querySelector('.inner-console-log').addEventListener('scroll', function
   // If the user manually scrolls, nothing will change here. 
   // You can still track the user's scrolling if needed for any other logic.
 });
-
-// Usage examples:
-onscreenConsole.log('<span style="font-style:italic;">Initializing game...</span>');
-onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn 1:</span>`);
 
 // Function to toggle dropdowns when clicking either anchor or anchor2
 document.querySelectorAll('.dropdown-check-list').forEach(function(checkList) {
@@ -268,7 +276,7 @@ function updateSelectedTeamFiltersHeroes() {
     filterTag.className = 'filter-team-tag';
     
     // Add the text and close "X" to the filter pill
-    filterTag.innerHTML = `${checkbox.getAttribute('data-team')} <span class="close-x">×</span>`;
+    filterTag.innerHTML = `${checkbox.getAttribute('data-team')}`;
 
     // Add event listener to the entire tag to remove the filter
     filterTag.addEventListener('click', function() {
@@ -364,7 +372,15 @@ let currentVillainLocation = null;
 let heroDeck = [];
 let capturedCardsDeck = [];
 let hq = [];
-let city = ["", "", "", "", ""];
+let city = [null, null, null, null, null];
+let destroyedSpaces = [false, false, false, false, false];
+const citySpaceLabels = [
+    "The Bridge",
+    "The Streets", 
+    "The Rooftops",
+    "The Bank",
+    "The Sewers"
+];
 var city1TempBuff = 0;
 var city2TempBuff = 0;
 var city3TempBuff = 0;
@@ -377,6 +393,17 @@ var city3PermBuff = 0;
 var city4PermBuff = 0;
 var city5PermBuff = 0;
 var mastermindPermBuff = 0;
+var mastermindReserveAttack = 0;
+var bridgeReserveAttack = 0;
+var streetsReserveAttack = 0;
+var rooftopsReserveAttack = 0;
+var bankReserveAttack = 0;
+var sewersReserveAttack = 0;
+var hq1ReserveRecruit = 0;
+var hq2ReserveRecruit = 0;
+var hq3ReserveRecruit = 0;
+var hq4ReserveRecruit = 0;
+var hq5ReserveRecruit = 0;
 let playerHand = [];
 let playerDeck = [];
 let playerDiscardPile = [];
@@ -434,6 +461,18 @@ let hasWoundAvoidance = false;
 let silentMeditationRecruit = false;
 let backflipRecruit = false;
 let sewerRooftopDefeats = false;
+let thingCrimeStopperRescue = false;
+let galactusForceOfEternityDraw = false;
+let negativeZoneAttackAndRecruit = false;
+let invincibleForceField = 0;
+let city1CosmicThreat = 0;
+let city2CosmicThreat = 0;
+let city3CosmicThreat = 0;
+let city4CosmicThreat = 0;
+let city5CosmicThreat = 0;
+let mastermindCosmicThreat = 0;
+let mastermindCosmicThreatResolved = false;
+let unseenRescueBystanders = 0;
 let sewerRooftopBonusRecruit = 0;
 let twoRecruitFromKO = 0;
 let trueVersatility = false;
@@ -2208,8 +2247,185 @@ document.getElementById('confirm-startup-close-x').addEventListener('click', fun
 document.getElementById('modal-overlay').style.display = 'none';
 });
 
-   
+function loadLastGameSetup() {
+    const saved = localStorage.getItem('legendaryGameSetup');
+    
+    if (!saved) {
+        alert('No saved game setup found!');
+        return;
+    }
+    
+    try {
+        const gameSettings = JSON.parse(saved);
+        
+        // Restore radio buttons (single selection)
+        restoreRadioButton('#scheme-section', gameSettings.scheme);
+        restoreRadioButton('#mastermind-section', gameSettings.mastermind);
+        
+        // Restore checkbox groups (multiple selection)
+        restoreCheckboxes('#villain-selection', gameSettings.villains);
+        restoreCheckboxes('#henchmen-selection', gameSettings.henchmen);
+        restoreCheckboxes('#hero-selection', gameSettings.heroes);
+        restoreCheckboxes('#bystander-selection', gameSettings.bystanders);
+        restoreCheckboxes('#sidekick-selection', gameSettings.sidekicks);
+        
+        // Restore final blow checkbox
+        if (gameSettings.finalBlow !== undefined) {
+            document.getElementById('final-blow-checkbox').checked = gameSettings.finalBlow;
+        }
+        
+        // UPDATE IMAGES AND SCROLL - ADD THIS PART!
+        updateAllImagesAndScroll(gameSettings);
+        
+        console.log('Last game setup loaded successfully!');
+        
+    } catch (error) {
+        console.error('Error loading saved setup:', error);
+        alert('Error loading saved setup. Please make new selections.');
+    }
+}
 
+// NEW FUNCTION: Update images and scroll to selections
+function updateAllImagesAndScroll(gameSettings) {
+    // Update scheme image and scroll
+    updateSchemeImage(gameSettings.scheme);
+    scrollToRadioSelection('#scheme-section .scrollable-list', gameSettings.scheme, '#scheme-section');
+    
+    // Update mastermind image and scroll
+    updateMastermindImage(gameSettings.mastermind);
+    scrollToRadioSelection('#mastermind-section .scrollable-list', gameSettings.mastermind, '#mastermind-section');
+    
+    // Update villain images and scroll
+    if (gameSettings.villains && gameSettings.villains.length > 0) {
+        const firstVillainGroup = villains.find(v => v.name === gameSettings.villains[0]);
+        if (firstVillainGroup) {
+            selectedVillainGroups = gameSettings.villains.map(villainName => 
+                villains.find(v => v.name === villainName)
+            ).filter(Boolean);
+            
+            currentVillainGroupIndex = 0;
+            currentVillainIndex = 0;
+            displayCurrentVillainImage();
+            updateVillainFaceDownCards();
+            
+            scrollToSelection('#villain-section .scrollable-list', gameSettings.villains[0], '#villain-selection');
+        }
+    }
+    
+    // Update henchmen images and scroll
+    if (gameSettings.henchmen && gameSettings.henchmen.length > 0) {
+        const firstHenchmenGroup = henchmen.find(h => h.name === gameSettings.henchmen[0]);
+        if (firstHenchmenGroup) {
+            selectedHenchmenGroups = gameSettings.henchmen.map(henchmenName => 
+                henchmen.find(h => h.name === henchmenName)
+            ).filter(Boolean);
+            
+            currentHenchmenGroupIndex = 0;
+            displayCurrentHenchmenImage();
+            updateHenchmenFaceDownCards();
+            
+            scrollToSelection('#henchmen-section .scrollable-list', gameSettings.henchmen[0], '#henchmen-selection');
+        }
+    }
+    
+    // Update hero images and scroll
+    if (gameSettings.heroes && gameSettings.heroes.length > 0) {
+        const firstHeroGroup = heroes.find(h => h.name === gameSettings.heroes[0]);
+        if (firstHeroGroup) {
+            selectedHeroGroups = gameSettings.heroes.map(heroName => 
+                heroes.find(h => h.name === heroName)
+            ).filter(Boolean);
+            
+            currentHeroGroupIndex = 0;
+            currentHeroIndex = 0;
+            displayCurrentHeroImage();
+            updateHeroFaceDownCards();
+            
+            scrollToSelection('#hero-section .scrollable-list', gameSettings.heroes[0], '#hero-selection');
+        }
+    }
+    
+    // Handle Jean Grey special case (if needed)
+    const selectedScheme = schemes.find(scheme => scheme.name === gameSettings.scheme);
+    const jeanGreyCheckbox = document.querySelector('input[value="Jean Grey"]');
+    if (jeanGreyCheckbox && selectedScheme) {
+        jeanGreyCheckbox.disabled = selectedScheme.name === 'Transform Citizens Into Demons';
+    }
+}
+
+// NEW FUNCTION: Scroll to radio button selection
+function scrollToRadioSelection(containerSelector, value, sectionSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    // Find the radio button with this value
+    const radio = document.querySelector(`${sectionSelector} input[type="radio"][value="${value}"]`);
+    if (radio) {
+        // Wait a tiny bit for the DOM to update
+        setTimeout(() => {
+            const radioPosition = radio.offsetTop - container.offsetTop;
+            container.scrollTop = radioPosition - container.clientHeight / 2;
+        }, 50);
+    }
+}
+
+// Updated existing function for clarity (checkbox version)
+function scrollToSelection(containerSelector, value, sectionSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    // Find the checkbox with this value
+    const checkbox = document.querySelector(`${sectionSelector} input[type="checkbox"][value="${value}"]`);
+    if (checkbox) {
+        setTimeout(() => {
+            const checkboxPosition = checkbox.offsetTop - container.offsetTop;
+            container.scrollTop = checkboxPosition - container.clientHeight / 2;
+        }, 50);
+    }
+}
+
+// Helper function for radio buttons
+function restoreRadioButton(sectionSelector, value) {
+    if (!value) return;
+    
+    // Uncheck all radios in this section first
+    document.querySelectorAll(`${sectionSelector} input[type="radio"]`).forEach(radio => {
+        radio.checked = false;
+    });
+    
+    // Check the saved one
+    const radioToCheck = document.querySelector(`${sectionSelector} input[value="${value}"]`);
+    if (radioToCheck) {
+        radioToCheck.checked = true;
+    } else {
+        console.warn(`Could not find radio button with value: ${value} in ${sectionSelector}`);
+    }
+}
+
+// Helper function for checkboxes
+function restoreCheckboxes(sectionSelector, values) {
+    if (!values || !Array.isArray(values)) return;
+    
+    // Uncheck all checkboxes in this section first
+    document.querySelectorAll(`${sectionSelector} input[type="checkbox"]`).forEach(cb => {
+        cb.checked = false;
+    });
+    
+    // Check the saved ones
+    values.forEach(value => {
+        const checkboxToCheck = document.querySelector(`${sectionSelector} input[value="${value}"]`);
+        if (checkboxToCheck) {
+            checkboxToCheck.checked = true;
+        } else {
+            console.warn(`Could not find checkbox with value: ${value} in ${sectionSelector}`);
+        }
+    });
+}
+
+document.getElementById('load-last-setup-1').addEventListener('click', loadLastGameSetup);
+
+document.getElementById('load-last-setup-2').addEventListener('click', loadLastGameSetup);
+   
 document.getElementById('begin-game').addEventListener('pointerdown', onBeginGame);
 
 // Utility: wait for two animation frames so the browser can paint the loader
@@ -2247,9 +2463,26 @@ async function onBeginGame(e) {
     const selectedVillains   = Array.from(document.querySelectorAll('#villain-selection input[type=checkbox]:checked')).map(cb => cb.value);
     const selectedHenchmen   = Array.from(document.querySelectorAll('#henchmen-selection input[type=checkbox]:checked')).map(cb => cb.value);
     const selectedHeroes     = Array.from(document.querySelectorAll('#hero-selection  input[type=checkbox]:checked')).map(cb => cb.value);
+    const selectedBystanders = Array.from(document.querySelectorAll('#bystander-selection input[name="bystander"]:checked')).map(cb => cb.value);
+    const selectedSidekicks = Array.from(document.querySelectorAll('#sidekick-selection input[name="sidekick"]:checked')).map(cb => cb.value);
 
     finalBlowEnabled = document.getElementById('final-blow-checkbox').checked;
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+    const gameSettings = {
+    scheme: selectedSchemeName,
+    mastermind: selectedMastermind,
+    villains: selectedVillains,
+    henchmen: selectedHenchmen,
+    heroes: selectedHeroes,
+    bystanders: selectedBystanders,
+    sidekicks: selectedSidekicks,
+    finalBlow: finalBlowEnabled,
+    timestamp: new Date().toISOString() // Optional: when was this saved?
+};
+
+// Store the entire object
+localStorage.setItem('legendaryGameSetup', JSON.stringify(gameSettings));
 
     // Swap UI
     document.getElementById('home-screen').style.display = 'none';
@@ -2257,10 +2490,8 @@ async function onBeginGame(e) {
     document.getElementById('expand-side-panel').style.display = 'block';
     document.getElementById('side-panel').style.display = 'flex';
 
-    // If initGame is synchronous, this will run immediately; if it returns a Promise, we await it.
-    await Promise.resolve(
-      initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme)
-    );
+    // FIX: Use await directly instead of Promise.resolve()
+    await initGame(selectedHeroes, selectedVillains, selectedHenchmen, selectedMastermind, selectedScheme);
 
     document.getElementById('confirm-start-up-choices').style.display = 'none';
   }
@@ -2286,13 +2517,49 @@ const expansionBackground = document.getElementById('background-for-expansion-po
     expansionPopup.classList.add('hidden');
     expansionBackground.classList.add('hidden');
 document.getElementById('intro-popup-container').style.display = 'flex';
+expansionPopup.style.display = 'none';
     
     // Optional: Remove the element from DOM after fade completes
     setTimeout(() => {
         expansionPopup.style.display = 'none';
 	expansionBackground.style.display = 'none';
-    }, 1500); // Match this timeout with your transition duration
+    }, 1000); // Match this timeout with your transition duration
 });
+
+document.getElementById('skip-button').addEventListener('click', () => {
+    skipSplash();
+});
+ 
+function skipSplash() {
+   const expansionPopup = document.getElementById('expansion-popup-container');
+const expansionBackground = document.getElementById('background-for-expansion-popup');
+
+    expansionPopup.classList.add('hidden');
+    expansionBackground.classList.add('hidden');
+document.getElementById('intro-popup-container').style.display = 'flex';
+expansionPopup.style.display = 'none';
+    
+    // Optional: Remove the element from DOM after fade completes
+    setTimeout(() => {
+        expansionPopup.style.display = 'none';
+	expansionBackground.style.display = 'none';
+    }, 1000); // Match this timeout with your transition duration
+}
+
+function skipSplashAndIntro() {
+   const expansionPopup = document.getElementById('expansion-popup-container');
+const expansionBackground = document.getElementById('background-for-expansion-popup');
+
+    expansionPopup.classList.add('hidden');
+    expansionBackground.classList.add('hidden');
+expansionPopup.style.display = 'none';
+    
+    // Optional: Remove the element from DOM after fade completes
+    setTimeout(() => {
+        expansionPopup.style.display = 'none';
+	expansionBackground.style.display = 'none';
+    }, 1000); // Match this timeout with your transition duration
+}
 
 document.getElementById('start-game').addEventListener('click', () => {
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
@@ -2407,15 +2674,20 @@ selectedVillains.forEach(villainName => {
     const villain = window.villains.find(v => v.name === villainName);
     if (villain) {
         villain.cards.forEach(card => {
-let modifiedCard = { ...card };
-                
-                if (mastermind.name === 'Apocalypse' && card.alwaysLeads === 'true') {
-                    modifiedCard = {
-                        ...card,
-                        attack: card.attack + 2,
-                        overlayTextAttack: `${card.attack + 2}`
-                    };
-                }
+            let modifiedCard = { ...card };
+            
+            // Check if this villain group is the "always leads" group
+            if (villainName === window.alwaysLeadsVillain) {
+                modifiedCard.alwaysLeads = "true";
+            }
+            
+            if (mastermind.name === 'Apocalypse' && modifiedCard.alwaysLeads === 'true') {
+                modifiedCard = {
+                    ...modifiedCard,
+                    attack: card.attack + 2,
+                    overlayTextAttack: `${card.attack + 2}`
+                };
+            }
                 
                 // Add the card to the deck the specified number of times
                 for (let i = 0; i < (modifiedCard.quantity || 2); i++) {
@@ -2533,6 +2805,9 @@ const schemePlace = document.getElementById('scheme-place');
     schemePlace.appendChild(schemeImage);
 
   if (scheme.name === "Replace Earth's Leaders with Killbots") {
+    stackedTwistNextToMastermind++;
+    stackedTwistNextToMastermind++;
+    stackedTwistNextToMastermind++;
     killbotSchemeTwistCount += 3;
     for (let i = 0; i < 18; i++) {
         if (bystanderDeck.length > 0) {
@@ -2741,6 +3016,8 @@ async function initGame(heroes, villains, henchmen, mastermindName, scheme) {
     console.log('Mastermind:', mastermindName);
     console.log('Scheme:', scheme);
     console.log('Final Blow Enabled:', finalBlowEnabled);
+    
+    onscreenConsole.log('<span style="font-style:italic;">Initializing game...</span>');
 
      bystanderDeck = buildBystanderDeck();
 
@@ -2775,18 +3052,27 @@ const mastermindCell = document.getElementById('mastermind');
     console.log('Selected Mastermind:', mastermind);
     console.log('Mastermind Deck:', mastermindDeck);
 
-    const selectedVillains = Array.from(document.querySelectorAll('#villains-section input[type=checkbox]:checked')).map(cb => cb.value);
-
-    if (selectedVillains.length === 1) {
-        alwaysLeads = selectedVillains[0];
-        console.log(`The Mastermind always leads ${alwaysLeads}`);
-    } else if (selectedVillains.length > 1) {
-        const randomIndex = Math.floor(Math.random() * selectedVillains.length);
-        alwaysLeads = selectedVillains[randomIndex];
-        console.log(`The Mastermind always leads ${alwaysLeads}`);
-    } else {
-        console.log('No villains selected. The Mastermind has no specific group to lead.');
-    }
+if (villains.length === 1) {
+    const selectedVillainName = villains[0];
+    console.log(`The Mastermind always leads ${selectedVillainName} in this game.`);
+    onscreenConsole.log(`The Mastermind always leads ${selectedVillainName} in this game.`);
+    
+    // Store the alwaysLeads villain name for later use
+    window.alwaysLeadsVillain = selectedVillainName;
+    
+} else if (villains.length > 1) {
+    const randomIndex = Math.floor(Math.random() * villains.length);
+    const selectedVillainName = villains[randomIndex];
+    console.log(`The Mastermind always leads ${selectedVillainName} in this game.`);
+    onscreenConsole.log(`The Mastermind always leads ${selectedVillainName} in this game.`);
+    
+    // Store the alwaysLeads villain name for later use
+    window.alwaysLeadsVillain = selectedVillainName;
+    
+} else {
+    console.log('No villains selected. The Mastermind has no specific group to lead.');
+    window.alwaysLeadsVillain = null;
+}
 
     // Generate the hero deck first
     heroDeck = generateHeroDeck(heroes);
@@ -2812,12 +3098,6 @@ const mastermindCell = document.getElementById('mastermind');
 
 updateGameBoard();
 
-const highCostHeroCount = hq.filter(hero => hero.cost >= 7).length;
-
-if (highCostHeroCount >= 2) {
-await mulliganChoice();
-}
-
     // Draw the initial player hand
     playerHand = [];
     for (let i = 0; i < 6; i++) {
@@ -2825,6 +3105,7 @@ await mulliganChoice();
     }
 
     sortPlayerCards();
+    onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn 1:</span>`);
 
         // Update the game board and draw the first villain card
     updateGameBoard();
@@ -2910,59 +3191,135 @@ function shuffleDeck(deck) {
 let isFirstTurn = true;
 
 async function drawVillainCard() {
+
+    if (destroyedSpaces[4] === true) {
+        onscreenConsole.log(`The city is destroyed. No more Villains can be drawn. You have until the end of this turn before defeat...`)
+        return;
+    }
+
+const highCostHeroCount = hq.filter(hero => hero.cost >= 7).length;
+if (isFirstTurn && highCostHeroCount >= 2) {
+await mulliganChoice();
+}
+
     const drawCount = isFirstTurn ? 3 : 1;
     isFirstTurn = false;
 
+    
     for (let i = 0; i < drawCount; i++) {
         await processVillainCard();
     }
 }
 
 async function processRegularVillainCard(villainCard) {
-    let sewersIndex = city.length - 1;
-    let previousCard = city[sewersIndex];
+    const sewersIndex = city.length - 1;
+
+    // Save the previous occupant of the sewers BEFORE placing the new villain
+    const previousSewersCard = city[sewersIndex] || null;
+
+    // Place new villain
     city[sewersIndex] = villainCard;
     onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> enters the city.`);
 
-    // Move existing villains to the left
-    for (let j = sewersIndex - 1; j >= 0; j--) {
-        if (city[j] === null) {
-            city[j] = previousCard;
-            previousCard = null;
-            break;
-        } else if (previousCard !== null) {
-            let temp = city[j];
-            city[j] = previousCard;
-            previousCard = temp;
+    const destroyedCount = destroyedSpaces.filter(Boolean).length;
 
-            if (j === 0 && previousCard) {
-                await new Promise(resolve => {
-                    showPopup('Villain Escape', previousCard, resolve);
-                });
-                await handleVillainEscape(previousCard);
-	addHRToTopWithInnerHTML();
+    if (destroyedCount > 0) {
+        await processMovementWithDestroyedSpaces(previousSewersCard);
+    } else {
+        // Standard movement logic
+        let previousCard = previousSewersCard;
+        for (let j = sewersIndex - 1; j >= 0; j--) {
+            if (city[j] === null) {
+                city[j] = previousCard;
+                previousCard = null;
+                break;
+            } else if (previousCard !== null) {
+                let temp = city[j];
+                city[j] = previousCard;
+                previousCard = temp;
+
+                if (j === 0 && previousCard) {
+                    await new Promise(resolve => { showPopup('Villain Escape', previousCard, resolve); });
+                    await handleVillainEscape(previousCard);
+                    addHRToTopWithInnerHTML();
+                    previousCard = null;
+                }
             }
         }
     }
 
-    // Show arrival popup if no ambush
+    // Arrival popup if no ambush
     if (!villainCard.ambushEffect || villainCard.ambushEffect === "None") {
-        await new Promise(resolve => {
-            showPopup('Villain Arrival', villainCard, resolve);
-        });
-	addHRToTopWithInnerHTML();
+        await new Promise(resolve => { showPopup('Villain Arrival', villainCard, resolve); });
+        addHRToTopWithInnerHTML();
     }
 
-    // Handle Ambush effects
+    // Ambush
     if (villainCard.ambushEffect && villainCard.ambushEffect !== "None") {
-        await new Promise(resolve => {
-            showPopup('Villain Ambush', villainCard, resolve);
-        });
+        await new Promise(resolve => { showPopup('Villain Ambush', villainCard, resolve); });
         const ambushEffectFunction = window[villainCard.ambushEffect];
         if (typeof ambushEffectFunction === 'function') {
-            await ambushEffectFunction(villainCard);
+            let negate = false;
+            if (typeof promptNegateAmbushEffectWithInvisibleWoman === 'function') {
+                negate = await promptNegateAmbushEffectWithInvisibleWoman();
+            }
+            if (negate) {
+                onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span><span class="bold-spans">'s</span> Ambush effect was negated.`);
+            } else {
+                await ambushEffectFunction(villainCard);
+            }
         }
-	addHRToTopWithInnerHTML();
+        addHRToTopWithInnerHTML();
+    }
+}
+
+// Destroyed-space movement, same logic but over non-destroyed slots only
+async function processMovementWithDestroyedSpaces(previousCard) {
+    const sewersIndex = city.length - 1;
+
+    // Find first non-destroyed slot = new front
+    let newFrontIndex = -1;
+    for (let i = 0; i < city.length; i++) {
+        if (!destroyedSpaces[i]) { newFrontIndex = i; break; }
+    }
+    if (newFrontIndex === -1) return;
+
+    // Build the movement path: non-destroyed indices to the left of sewers (right->left)
+    const path = [];
+    for (let i = sewersIndex - 1; i >= newFrontIndex; i--) {
+        if (!destroyedSpaces[i]) path.push(i);
+    }
+
+    // Edge case: if no non-destroyed slot, the old sewers card escapes immediately
+    if (path.length === 0 && previousCard) {
+        await new Promise(resolve => { showPopup('Villain Escape', previousCard, resolve); });
+        await handleVillainEscape(previousCard);
+        addHRToTopWithInnerHTML();
+        previousCard = null;
+    }
+
+    // Bubble-left along non-destroyed slots
+    for (const j of path) {
+        if (previousCard == null) break;
+
+        if (city[j] === null) {
+            city[j] = previousCard;
+            previousCard = null;
+            break;
+        } else {
+            const temp = city[j];
+            city[j] = previousCard;
+            previousCard = temp;
+
+            // Escape check at the new front
+            if (j === newFrontIndex && previousCard) {
+                onscreenConsole.log(`<span class="console-highlights">${previousCard.name}</span> escapes from ${citySpaceLabels[newFrontIndex]}!`);
+                await new Promise(resolve => { showPopup('Villain Escape', previousCard, resolve); });
+                await handleVillainEscape(previousCard);
+                addHRToTopWithInnerHTML();
+                previousCard = null;
+            }
+        }
     }
 }
 
@@ -3009,6 +3366,7 @@ updateGameBoard();
 addHRToTopWithInnerHTML();
 
 }
+
 
 async function villainEffectAttachBystanderToVillain(villainIndex, bystanderCard) {
     if (city[villainIndex].bystander) {
@@ -3068,6 +3426,7 @@ function updateMastermindOverlay() {
     const overlay = mastermindCard.querySelector('.overlay');
     let mastermind = getSelectedMastermind();
     const bystanderCount = mastermind.bystanders ? mastermind.bystanders.length : 0;
+    const alwaysLeadsEscapeCount = escapedVillainsDeck ? escapedVillainsDeck.filter(card => card.alwaysLeads === "true").length : 0;
 
     // Clear any existing bystander overlays
     const existingBystanderOverlay = mastermindCard.querySelector('.bystander-overlay');
@@ -3084,6 +3443,11 @@ function updateMastermindOverlay() {
     // Update mastermindPermBuff for Mr. Sinister
     if (mastermind.name === 'Mr. Sinister') {
         mastermindPermBuff = bystanderCount;
+    }
+
+        // Update mastermindPermBuff for Mole Man
+    if (mastermind.name === 'Mole Man') {
+        mastermindPermBuff = alwaysLeadsEscapeCount;
     }
 
     // XCutioner Heroes section
@@ -3502,7 +3866,7 @@ function handleVillainEscapeActions(escapedVillain) {
         // 2. Then handle discard
         const handleDiscard = () => {
             if (escapedVillain.bystander?.length > 0) {
-                return showDiscardCardPopup();
+                return showDiscardCardPopup(escapedVillain);
             }
             return Promise.resolve();
         };
@@ -3808,6 +4172,21 @@ const closeButton = document.getElementById('close-x');
         popupImage.style.display = 'block';
         popupContext.innerHTML = `No Villains in the city. <span class="console-highlights">${drawnCard.name}</span> will be captured by <span class="console-highlights">${mastermind.name}</span>.`;
         popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    }   else if (type === 'Destroyed City Villain Escape') {
+        popupTitle.innerText = `Escape`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `As <span class="console-highlights">Galactus</span> destroys the city <span class="console-highlights">${drawnCard.name}</span> escapes!`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Raktar Villain Escape') {
+        popupTitle.innerText = `Escape`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `The actions of <span class="console-highlights">Ra'ktar the Molan King</span> help <span class="console-highlights">${drawnCard.name}</span> to escape!`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
+    } else if (type === 'Villain Moved') {
+        popupTitle.innerText = `Ambush`;
+        popupImage.style.display = 'block';
+        popupContext.innerHTML = `<span class="console-highlights">Ra'ktar the Molan King</span> forces <span class="console-highlights">${drawnCard.name}</span> further into the city!`;
+        popupImage.style.backgroundImage = `url("${drawnCard.image}")`;
     } else {
         popupImage.style.display = 'none'; // Hide image if the type is unknown
     }
@@ -3902,6 +4281,7 @@ function minimizePopup(popup) {
     // Hide the popup and its controls
     popup.style.display = 'none';
     document.getElementById('modal-overlay').style.display = 'none';
+    document.getElementById('played-cards-modal-overlay').style.display = 'none';
     state.associatedControls.forEach(control => {
         control.dataset.originalDisplay = control.style.display;
         control.style.display = 'none';
@@ -3995,7 +4375,18 @@ function maximizeAllPopups() {
         });
     });
 
-    document.getElementById('modal-overlay').style.display = 'block';
+    
+
+    const specificPopup = document.getElementById('played-cards-popup');
+    const wasSpecificPopupMinimized = Array.from(minimizedPopups).some(
+        state => state.popup === specificPopup
+    );
+    
+    if (wasSpecificPopupMinimized) {
+ document.getElementById('played-cards-modal-overlay').style.display = 'block';
+    } else {
+document.getElementById('modal-overlay').style.display = 'block';
+    }
     
     // Clear minimized state
     minimizedPopups.clear();
@@ -4084,18 +4475,28 @@ document.getElementById('currentVictoryPointsTally').innerHTML = `${currentVicto
 }
 
 function updateHighlights() {
-    for (let i = 0; i < hq.length; i++) {
-        const hqCell = document.querySelector(`#hq-${i + 1}`);
-        if (hq[i]) {
-            // Remove any existing highlight
-            hqCell.classList.remove('affordable');
-            
-            // Add highlight if player can afford this hero
-            if (totalRecruitPoints >= hq[i].cost) {
-                hqCell.classList.add('affordable');
-            }
+for (let i = 0; i < hq.length; i++) {
+    const hqCell = document.querySelector(`#hq-${i + 1}`);
+    if (hq[i]) {
+        // Remove any existing highlight
+        hqCell.classList.remove('affordable');
+        
+        // Get the reserved recruit points for this HQ
+        let reservedRecruit = 0;
+        switch(i + 1) {
+            case 1: reservedRecruit = hq1ReserveRecruit; break;
+            case 2: reservedRecruit = hq2ReserveRecruit; break;
+            case 3: reservedRecruit = hq3ReserveRecruit; break;
+            case 4: reservedRecruit = hq4ReserveRecruit; break;
+            case 5: reservedRecruit = hq5ReserveRecruit; break;
+        }
+        
+        // Add highlight if player can afford this hero (including reserved points)
+        if (totalRecruitPoints + reservedRecruit >= hq[i].cost) {
+            hqCell.classList.add('affordable');
         }
     }
+}
 
 const sidekickCheckboxes = document.querySelectorAll('#sidekick-selection input[type=checkbox]');
 const isAnySidekickChecked = Array.from(sidekickCheckboxes).some(checkbox => checkbox.checked);
@@ -4120,6 +4521,18 @@ const isAnySidekickChecked = Array.from(sidekickCheckboxes).some(checkbox => che
     const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
 
     // Highlight villains in city
+// Create an array of location names in the same order as the city array
+const cityLocations = ["Bridge", "Streets", "Rooftops", "Bank", "Sewers"];
+
+// Create an array of reserve attack values in the same order
+const cityReserveAttacks = [
+    bridgeReserveAttack,
+    streetsReserveAttack,
+    rooftopsReserveAttack,
+    bankReserveAttack,
+    sewersReserveAttack,
+];
+
 for (let i = 0; i < city.length; i++) {
     const cityCell = document.querySelector(`#city-${i + 1}`);
     cityCell.classList.remove('attackable');
@@ -4134,19 +4547,22 @@ for (let i = 0; i < city.length; i++) {
             // Calculate effective attack value
             const villainAttack = recalculateVillainAttack(city[i]);
             
-            // Check if attackable with current points
-            const canAttackWithAttackPoints = totalAttackPoints >= villainAttack;
+            // Get reserved attack points for this city slot
+            const reservedAttack = cityReserveAttacks[i] || 0;
+            
+            // Check if attackable with current points (including reserved points)
+            const canAttackWithAttackPoints = totalAttackPoints + reservedAttack >= villainAttack;
             const hasBribeKeyword = city[i].keyword1 === "Bribe" || 
                         city[i].keyword2 === "Bribe" || 
                         city[i].keyword3 === "Bribe";
             const canAttackWithRecruitPoints = (recruitUsedToAttack || hasBribeKeyword) && 
-                                  (totalAttackPoints + totalRecruitPoints >= villainAttack);
+                                  (totalAttackPoints + totalRecruitPoints + reservedAttack >= villainAttack);
             
             if (canAttackWithAttackPoints || canAttackWithRecruitPoints) {
                 cityCell.classList.add('attackable');
                
                 // Add special class if recruit points would be needed
-                if (canAttackWithRecruitPoints) {
+                if (canAttackWithRecruitPoints && !canAttackWithAttackPoints) {
                     cityCell.classList.add('needs-recruit');
                 }
             }
@@ -4184,9 +4600,7 @@ const hasMastermindBribe = mastermind.keyword1 === "Bribe" ||
                            mastermind.keyword2 === "Bribe" || 
                            mastermind.keyword3 === "Bribe";
 
-const canAttackWithRecruitPoints = (recruitUsedToAttack || hasMastermindBribe) && 
-                                 (totalAttackPoints + totalRecruitPoints >= mastermindAttack) &&
-                                 (totalAttackPoints < mastermindAttack);
+const canUseRecruitForAttack = recruitUsedToAttack || hasMastermindBribe;
 
 // Count defeated mastermind cards (tactics + final blow if applicable)
 const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
@@ -4194,12 +4608,149 @@ const maxDefeatsAllowed = finalBlowEnabled ? 5 : 4;
 
 // Determine if mastermind can still be attacked
 const canStillBeAttacked = defeatedMasterminds.length < maxDefeatsAllowed;
-const hasEnoughPoints = totalAttackPoints >= mastermindAttack || canAttackWithRecruitPoints;
 const hasTacticsRemaining = mastermind.tactics.length > 0;
 
+// Calculate total points available (any combination)
+const totalAvailablePoints = totalAttackPoints + totalRecruitPoints + mastermindReserveAttack;
+
+// Check if player can pay forcefield AND attack mastermind
+let canAttack = false;
+
+if (invincibleForceField > 0) {
+    // Must pay forcefield first from total points, then have enough appropriate points for mastermind
+    const pointsAfterForcefield = totalAvailablePoints - invincibleForceField;
+    
+    if (pointsAfterForcefield >= 0) {
+        // Now check if we have enough of the right type of points for the mastermind attack
+        if (canUseRecruitForAttack) {
+            // Can use any combination of points for mastermind attack
+            canAttack = pointsAfterForcefield >= mastermindAttack;
+        } else {
+            // Can only use attack points for mastermind attack
+            // Calculate how many attack points are left after paying forcefield
+            // (Forcefield can be paid with any points, but we prioritize using recruit points first)
+            const recruitUsedForForcefield = Math.min(invincibleForceField, totalRecruitPoints);
+            const attackUsedForForcefield = invincibleForceField - recruitUsedForForcefield;
+            const attackPointsLeft = totalAttackPoints - attackUsedForForcefield;
+            
+            canAttack = attackPointsLeft >= mastermindAttack;
+        }
+    } else {
+        canAttack = false;
+    }
+} else {
+    // No forcefield - normal rules
+    if (canUseRecruitForAttack) {
+        canAttack = totalAvailablePoints >= mastermindAttack;
+    } else {
+        canAttack = totalAttackPoints + mastermindReserveAttack >= mastermindAttack;
+    }
+}
+
 // Mastermind is attackable if:
-// 1. Player has enough points AND
+// 1. Player can attack AND
 // 2. Either: a) Has tactics remaining OR b) Final Blow is enabled and at exactly 4 defeats
+const canAttackMastermind = canAttack && 
+                          (hasTacticsRemaining || 
+                           (finalBlowEnabled && defeatedMasterminds.length === 4));
+
+// Update UI
+if (canAttackMastermind && canStillBeAttacked) {
+    document.getElementById("mastermind").classList.add('attackable');
+} else {
+    document.getElementById("mastermind").classList.remove('attackable');
+}
+}
+
+function updateHighlightsNegativeZone() {
+    for (let i = 0; i < hq.length; i++) {
+        const hqCell = document.querySelector(`#hq-${i + 1}`);
+        if (hq[i]) {
+            // Remove any existing highlight
+            hqCell.classList.remove('affordable');
+            
+            // Add highlight if player can afford this hero
+            if (totalAttackPoints >= hq[i].cost) {
+                hqCell.classList.add('affordable');
+            }
+        }
+    }
+
+const sidekickCheckboxes = document.querySelectorAll('#sidekick-selection input[type=checkbox]');
+const isAnySidekickChecked = Array.from(sidekickCheckboxes).some(checkbox => checkbox.checked);
+
+ if (totalAttackPoints >= 2 && !sidekickRecruited && isAnySidekickChecked) {
+    document.getElementById("sidekick-deck").classList.add('affordable');
+} else {
+    document.getElementById("sidekick-deck").classList.remove('affordable');
+}
+
+ if (sidekickRecruited) {
+    document.getElementById("sidekick-deck").classList.remove('affordable');
+}
+   
+    if (totalAttackPoints >= 3) {
+        document.getElementById("shield-deck").classList.add('affordable');
+    } else {
+        document.getElementById("shield-deck").classList.remove('affordable');
+    }
+
+    const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked')?.value;
+    const selectedScheme = schemes.find(scheme => scheme.name === selectedSchemeName);
+
+    // Highlight villains in city
+for (let i = 0; i < city.length; i++) {
+    const cityCell = document.querySelector(`#city-${i + 1}`);
+    cityCell.classList.remove('attackable');
+    cityCell.classList.remove('needs-recruit');
+    
+    if (city[i]) {
+        // First check if fight condition is met (if it exists)
+        const hasFightCondition = city[i].fightCondition && city[i].fightCondition !== "None";
+        const conditionMet = !hasFightCondition || isVillainConditionMet(city[i]);
+        
+        if (conditionMet) {
+            // Calculate effective attack value
+            const villainAttack = recalculateVillainAttack(city[i]);
+            
+            // Check if attackable with current points
+            const canAttackWithRecruitPoints = totalRecruitPoints >= villainAttack;
+            const hasBribeKeyword = city[i].keyword1 === "Bribe" || 
+                        city[i].keyword2 === "Bribe" || 
+                        city[i].keyword3 === "Bribe";
+            const canAttackWithCombo = (hasBribeKeyword || recruitUsedToAttack) && 
+                                  (totalAttackPoints + totalRecruitPoints >= villainAttack);
+         
+            if (canAttackWithRecruitPoints || canAttackWithCombo) {
+                cityCell.classList.add('attackable');
+               
+           
+            }
+        }
+    }
+}
+
+let mastermind = getSelectedMastermind();
+let mastermindAttack = recalculateMastermindAttack(mastermind);
+
+// Check if Mastermind has Bribe keyword
+const hasMastermindBribe = mastermind.keyword1 === "Bribe" || 
+                           mastermind.keyword2 === "Bribe" || 
+                           mastermind.keyword3 === "Bribe";
+
+const canAttackWithCombo = (hasMastermindBribe || recruitUsedToAttack) && 
+                                 (totalAttackPoints + totalRecruitPoints >= mastermindAttack) &&
+                                 (totalRecruitPoints < mastermindAttack);
+
+// Count defeated mastermind cards (tactics + final blow if applicable)
+const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
+const maxDefeatsAllowed = finalBlowEnabled ? 5 : 4;
+
+// Determine if mastermind can still be attacked
+const canStillBeAttacked = defeatedMasterminds.length < maxDefeatsAllowed;
+const hasEnoughPoints = totalRecruitPoints >= mastermindAttack || canAttackWithCombo;
+const hasTacticsRemaining = mastermind.tactics.length > 0;
+
 const canAttackMastermind = hasEnoughPoints && 
                           (hasTacticsRemaining || 
                            (finalBlowEnabled && defeatedMasterminds.length === 4));
@@ -4207,7 +4758,7 @@ const canAttackMastermind = hasEnoughPoints &&
 // Update UI
 if (canAttackMastermind && canStillBeAttacked) {
     document.getElementById("mastermind").classList.add('attackable');
-    if (totalAttackPoints < mastermindAttack) {
+    if (totalRecruitPoints < mastermindAttack) {
         document.getElementById("mastermind").classList.add('needs-recruit');
     }
 } else {
@@ -4220,7 +4771,65 @@ let isRecruiting = false; // Flag to track if a hero is being recruited
 const CARD_BACK_PATH = 'Visual Assets/CardBack.webp';
 
 function updateDeckImage(element, card) {
-    element.src = card?.revealed ? card.image : CARD_BACK_PATH;
+    if (card?.revealed) {
+        element.src = card.image;
+        element.classList.remove('card-image-back');
+        element.classList.add('revealed-deck-card-image');
+    } else {
+        element.src = CARD_BACK_PATH;
+        element.classList.remove('revealed-deck-card-image');
+        element.classList.add('card-image-back'); // Add exclusion when it's the card back
+    }
+}
+
+function updateReserveAttackAndRecruit() {
+    const reserveAttackText = document.getElementById('reserved-attack-points');
+    const reserveRecruitText = document.getElementById('reserved-recruit-points');
+
+    // Create arrays of location-value pairs for attack points
+    const attackLocations = [
+        {name: "Mastermind", value: mastermindReserveAttack},
+        {name: "Bridge", value: bridgeReserveAttack},
+        {name: "Streets", value: streetsReserveAttack},
+        {name: "Rooftops", value: rooftopsReserveAttack},
+        {name: "Bank", value: bankReserveAttack},
+        {name: "Sewers", value: sewersReserveAttack}
+    ];
+
+    // Create arrays of location-value pairs for recruit points
+    const recruitLocations = [
+        {name: "HQ 1", value: hq1ReserveRecruit},
+        {name: "HQ 2", value: hq2ReserveRecruit},
+        {name: "HQ 3", value: hq3ReserveRecruit},
+        {name: "HQ 4", value: hq4ReserveRecruit},
+        {name: "HQ 5", value: hq5ReserveRecruit}
+    ];
+
+const attackStrings = attackLocations
+    .filter(loc => loc.value > 0)
+    .map(loc => `${loc.name}: +${loc.value} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="reserved-card-icons">`);
+
+// Filter and format recruit locations with positive values - WITH SINGLE ICON
+const recruitStrings = recruitLocations
+    .filter(loc => loc.value > 0)
+    .map(loc => `${loc.name}: +${loc.value} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="reserved-card-icons">`);
+
+    // Update visibility and text content
+    if (attackStrings.length > 0) {
+        document.getElementById('reserveAttackPointDisplay').style.visibility = "visible";
+        reserveAttackText.innerHTML = attackStrings.join('<br>'); // Use <br> instead of comma separation
+    } else {
+        document.getElementById('reserveAttackPointDisplay').style.visibility = "hidden";
+        reserveAttackText.innerHTML = "0";
+    }
+
+    if (recruitStrings.length > 0) {
+        document.getElementById('reserveRecruitPointDisplay').style.visibility = "visible";
+        reserveRecruitText.innerHTML = recruitStrings.join('<br>'); // Use <br> instead of comma separation
+    } else {
+        document.getElementById('reserveRecruitPointDisplay').style.visibility = "hidden";
+        reserveRecruitText.innerHTML = "0";
+    }
 }
 
 function showRevealedCards() {
@@ -4253,9 +4862,14 @@ function updateGameBoard() {
         heroImage.src = hq[i].image;  // Use the image property from the hero object
         heroImage.alt = hq[i].name;   // Set alt text as the hero's name
         heroImage.classList.add('card-image'); // Add a class for styling if needed
+         heroImage.dataset.heroId = hq[i].id; // Add hero ID as data attribute
+    heroImage.dataset.hqIndex = i; // Add HQ index as data attribute
 
         // Append the image to the HQ cell
         hqCell.appendChild(heroImage);
+
+            hqCell.dataset.heroId = hq[i].id;
+    hqCell.dataset.hqIndex = i;
 
         // Create a named function for the click handler
         hqCell.clickHandler = () => {
@@ -4327,6 +4941,7 @@ for (let i = 1; i <= 5; i++) {
 }
 
 updateDeckCounts();
+updateReserveAttackAndRecruit();
 showRevealedCards();
 
         for (let i = 0; i < city.length; i++) {
@@ -4433,10 +5048,14 @@ if (discardPileImage) {
         // Show the discard pile and set the image to the last discarded card
         discardPileImage.style.display = 'flex';
         discardPileImage.src = playerDiscardPile[playerDiscardPile.length - 1].image;
+        discardPileImage.style.display = 'flex';
+        discardPileImage.classList.remove('card-image-back');
+        discardPileImage.classList.add('revealed-deck-card-image');
     } else {
         // Hide the discard pile when empty
         discardPileImage.style.display = 'none';
-        // Optional: Clear the image source when empty
+        discardPileImage.classList.remove('revealed-deck-card-image');
+        discardPileImage.classList.add('card-image-back');
         discardPileImage.src = '';
     }
 } else {
@@ -4448,8 +5067,12 @@ if (playedCardsPileImage) {
     if (cardsPlayedThisTurn.length >= 1) {
         playedCardsPileImage.style.display = 'flex';
         playedCardsPileImage.src = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1].image;
+        playedCardsPileImage.classList.remove('card-image-back');
+        playedCardsPileImage.classList.add('revealed-deck-card-image');
     } else {
         playedCardsPileImage.style.display = 'none';
+        playedCardsPileImage.classList.remove('revealed-deck-card-image');
+        playedCardsPileImage.classList.add('card-image-back');
     }
 } else {
     console.warn('played-cards-deck-pile element not found');
@@ -4487,10 +5110,26 @@ if (demonGoblinDeckImage) {
             permBuffOverlayMastermind.style.display = 'none'; // Hide the overlay if the buff is zero
         }
 
+if (destroyedSpaces[i]) {
+    // Create a container to hold the card image and overlays
+    const cardContainer = document.createElement('div');
+    cardContainer.classList.add('card-container'); // Add a class for styling the container
+    newCityCell.appendChild(cardContainer);
+
+    // Create an image element
+    const cardImage = document.createElement('img');
+
+        cardImage.src = "Visual Assets/Other/MasterStrike.webp";
+        cardImage.alt = "Destroyed City Space";
+        cardImage.classList.add('destroyed-space');
+        cardContainer.appendChild(cardImage);
+}
+
 if (city[i]) {
     // Create a container to hold the card image and overlays
     const cardContainer = document.createElement('div');
     cardContainer.classList.add('card-container'); // Add a class for styling the container
+    cardContainer.setAttribute('data-city-index', i);
     newCityCell.appendChild(cardContainer);
 
     // Create an image element
@@ -4524,6 +5163,114 @@ if (
     city[i].attack !== city[i].originalAttack
 ) {
     city[i].overlayTextAttack = `${city[i].attack}`;
+}
+
+if (
+  (city[i].keyword1 === "Cosmic Threat" ||
+   city[i].keyword2 === "Cosmic Threat" ||
+   city[i].keyword3 === "Cosmic Threat") &&
+  !city[i].cosmicThreatResolved
+) {
+  // Safety: if a previous render left a button in this card, remove it first
+  cardContainer.querySelectorAll('.keyword-overlay').forEach(el => el.remove());
+
+  const keywordButton = document.createElement('div');
+  const keywordButtonText = document.createElement('span');
+
+  // helper (lowercases the wanted class too)
+  const hasClass = (card, wanted) =>
+    ['class1','class2','class3'].some(k =>
+      String(card?.[k] ?? '').trim().toLowerCase() === String(wanted).trim().toLowerCase()
+    );
+
+  const allRevealableCosmicThreatCards = [
+    ...playerHand,
+    ...cardsPlayedThisTurn.filter(card => !card.isCopied && !card.sidekickToDestroy)
+  ];
+
+  keywordButton.className = 'keyword-overlay';
+  keywordButtonText.className = 'city-keyword-button-text';
+
+  // === Per-villain setups ===
+  if ((city[i].name === "Firelord" || city[i].name === "The Shaper of Worlds") && !city[i].cosmicThreatResolved) {
+    keywordButtonText.innerHTML = `Cosmic Threat: <img src='Visual Assets/Icons/Range.svg' alt='Range Icon' class='cosmic-threat-card-icons'>`;
+    const countRange = allRevealableCosmicThreatCards.filter(c => hasClass(c, 'range')).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      // 1) set flag BEFORE any redraw to prevent rebuild
+      city[i].cosmicThreatResolved = true;
+      // 2) remove the actual clicked element instantly
+      e.currentTarget.remove();
+      // 3) apply effect (this may call updateGameBoard)
+      cosmicThreat(city[i], i, countRange, 'Range');
+    });
+  } else if (city[i].name === "Morg" || city[i].name === "Kubik") {
+    keywordButtonText.innerHTML = `Cosmic Threat: <img src='Visual Assets/Icons/Instinct.svg' alt='Instinct Icon' class='cosmic-threat-card-icons'>`;
+    const countInstinct = allRevealableCosmicThreatCards.filter(c => hasClass(c, 'instinct')).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      city[i].cosmicThreatResolved = true;
+      e.currentTarget.remove();
+      cosmicThreat(city[i], i, countInstinct, 'Instinct');
+    });
+  } else if (city[i].name === "Stardust" || city[i].name === "Kosmos") {
+    keywordButtonText.innerHTML = `Cosmic Threat: <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='cosmic-threat-card-icons'>`;
+    const countCovert = allRevealableCosmicThreatCards.filter(c => hasClass(c, 'covert')).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      city[i].cosmicThreatResolved = true;
+      e.currentTarget.remove();
+      cosmicThreat(city[i], i, countCovert, 'Covert');
+    });
+  } else if (city[i].name === "Terrax the Tamer") {
+    keywordButtonText.innerHTML = `Cosmic Threat: <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='cosmic-threat-card-icons'>`;
+    const countStrength = allRevealableCosmicThreatCards.filter(c => hasClass(c, 'strength')).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      city[i].cosmicThreatResolved = true;
+      e.currentTarget.remove();
+      cosmicThreat(city[i], i, countStrength, 'Strength');
+    });
+  } else if (city[i].name === "The Mapmakers") {
+    keywordButtonText.innerHTML = `Cosmic Threat: <img src='Visual Assets/Icons/Tech.svg' alt='Tech Icon' class='cosmic-threat-card-icons'>`;
+    const countTech = allRevealableCosmicThreatCards.filter(c => hasClass(c, 'tech')).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      city[i].cosmicThreatResolved = true;
+      e.currentTarget.remove();
+      cosmicThreat(city[i], i, countTech, 'Tech');
+    });
+  } else if (
+    city[i].name === "Arishem, The Judge" ||
+    city[i].name === "Exitar, The Exterminator" ||
+    city[i].name === "Gammenon, The Gatherer" ||
+    city[i].name === "Nezarr, The Calculator" ||
+    city[i].name === "Tiamut, The Dreaming Celestial"
+  ) {
+    // Dual-choice villains – delegate to your chooser
+    // (Set the flag and remove instantly; the chooser will call cosmicThreat)
+    const dualMap = {
+      "Arishem, The Judge": ["Range", "Strength"],
+      "Exitar, The Exterminator": ["Tech", "Range"],
+      "Gammenon, The Gatherer": ["Strength", "Instinct"],
+      "Nezarr, The Calculator": ["Covert", "Tech"],
+      "Tiamut, The Dreaming Celestial": ["Instinct", "Covert"],
+    };
+    const [a, b] = dualMap[city[i].name] || ["Range", "Strength"];
+    keywordButtonText.innerHTML =
+      `Cosmic Threat: <img src='Visual Assets/Icons/${a}.svg' alt='${a} Icon' class='cosmic-threat-card-icons'> or <img src='Visual Assets/Icons/${b}.svg' alt='${b} Icon' class='cosmic-threat-card-icons'>`;
+
+    keywordButton.addEventListener('click', async (e) => {
+      city[i].cosmicThreatResolved = true; // guard first
+      e.currentTarget.remove();            // instant disappearance
+      await handleCosmicThreatChoice(city[i], i);
+    });
+  } else {
+    keywordButtonText.textContent = 'Undefined';
+  }
+
+  keywordButton.appendChild(keywordButtonText);
+  cardContainer.appendChild(keywordButton);
 }
 
 
@@ -4566,6 +5313,83 @@ if (city[i].babyHope === true) {
 updateMastermindOverlay();
 
 const mastermind = getSelectedMastermind();
+const mastermindContainer = document.getElementById('mastermind');
+const MM_BTN_ID = 'mm-cosmic-threat-btn'; // stable id to prevent duplicates
+
+// Guard: only act if we have a target mastermind and it's not resolved
+const isTargetMastermind = mastermind &&
+  (mastermind.name === 'Galactus' ||
+   mastermind.name === 'The Beyonder' ||
+   mastermind.name === 'Epic Beyonder');
+
+if (isTargetMastermind && !mastermindCosmicThreatResolved && mastermindContainer) {
+  // If a previous render left a button, remove it first (prevents duplicates)
+  const existingBtn = mastermindContainer.querySelector(`#${MM_BTN_ID}`);
+  if (existingBtn) existingBtn.remove();
+
+  const keywordButton = document.createElement('div');
+  const keywordButtonText = document.createElement('span');
+  keywordButton.id = MM_BTN_ID;                       // <- stable id
+  keywordButton.className = 'mastermind-keyword-overlay';        // same styling as city
+  keywordButtonText.className = 'city-keyword-button-text';
+
+  // shared pools/helpers
+  const allRevealable = [
+    ...playerHand,
+    ...cardsPlayedThisTurn.filter(card => !card.isCopied && !card.sidekickToDestroy)
+  ];
+  const hasClass = (card, wanted) =>
+    ['class1','class2','class3'].some(k =>
+      String(card?.[k] ?? '').trim().toLowerCase() === String(wanted).trim().toLowerCase()
+    );
+
+if (mastermind.name === 'Galactus') {
+  keywordButtonText.innerHTML = `
+    <div>Cosmic Threat:</div>
+    <div>
+      <img src='Visual Assets/Icons/Strength.svg' alt='Strength Icon' class='cosmic-threat-card-icons'>
+      <img src='Visual Assets/Icons/Instinct.svg' alt='Instinct Icon' class='cosmic-threat-card-icons'>
+      <img src='Visual Assets/Icons/Covert.svg'   alt='Covert Icon'   class='cosmic-threat-card-icons'>
+      <img src='Visual Assets/Icons/Tech.svg'     alt='Tech Icon'     class='cosmic-threat-card-icons'>
+      <img src='Visual Assets/Icons/Range.svg'    alt='Range Icon'    class='cosmic-threat-card-icons'>
+    </div>
+  `;
+
+    keywordButton.addEventListener('click', async (e) => {
+      // set guard BEFORE anything that might trigger a redraw
+      mastermindCosmicThreatResolved = true;
+      // remove the actual clicked element to avoid visual lag/dupes
+      e.currentTarget.remove();
+
+      const chosenClass = await showGalactusClassChoicePopup(); // returns 'Strength'|'Instinct'|'Covert'|'Tech'|'Range'
+      const count = allRevealable.filter(c => hasClass(c, chosenClass)).length * 3;
+      applyMastermindCosmicThreat(mastermind, count, chosenClass);
+    });
+
+  } else {
+    const threshold = mastermind.name === 'The Beyonder' ? 5 : 6;
+keywordButtonText.innerHTML = `
+  <div>Cosmic Threat:</div>
+  <div>${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards</div>
+`;
+
+    const count = allRevealable.filter(c => typeof c?.cost === 'number' && c.cost >= threshold).length * 3;
+
+    keywordButton.addEventListener('click', (e) => {
+      mastermindCosmicThreatResolved = true;
+      e.currentTarget.remove();
+      applyMastermindCosmicThreat(mastermind, count, `${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards`);
+    });
+  }
+
+  keywordButton.appendChild(keywordButtonText);
+  mastermindContainer.appendChild(keywordButton);
+} else if (mastermindContainer) {
+  // If not target or already resolved, ensure no leftover button remains
+  const leftover = mastermindContainer.querySelector(`#${MM_BTN_ID}`);
+  if (leftover) leftover.remove();
+}
+
 
 if (city[i].alwaysLeads === 'true' && mastermind.name === 'Apocalypse') {
     city[i].overlayTextAttack = `${city[i].attack}`;
@@ -4595,7 +5419,7 @@ if (city[i].alwaysLeads === 'true' && mastermind.name === 'Apocalypse') {
         cardContainer.appendChild(villainOverlayAttack);
     }
 
-if (city[i].bystander) {
+if (city[i].bystander && city[i].bystander.length > 0) {
                 const overlay = document.createElement('div');
                 overlay.className = 'overlay';
                 
@@ -4818,40 +5642,7 @@ if (lastTurn && !lastTurnMessageShown) {
     const KOdHeroes = koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
     const carriedOffHeroes = escapedVillainsDeck.filter(card => card.type === 'Hero' && card.color !== 'Grey').length;
 
-    // Check Mastermind end game conditions first (if any)
-    if (mastermindEndGame) {
-    switch (mastermindEndGame) {
-        case "fourHorsemen":
-            // Get all villainIds from escaped villains
-            const villainGroups = escapedVillainsDeck.reduce((acc, card) => {
-                if (card.villainId) {
-                    if (!acc[card.villainId]) {
-                        acc[card.villainId] = new Set(); // Using Set to track unique names
-                    }
-                    acc[card.villainId].add(card.name);
-                }
-                return acc;
-            }, {});
-
-            // Check if any villain group has at least 4 unique members
-            const hasFourUniqueFromSameGroup = Object.values(villainGroups).some(
-                uniqueNames => uniqueNames.size >= 4
-            );
-
-            if (hasFourUniqueFromSameGroup) {
-                document.getElementById('defeat-context').innerHTML = `<span class="console-highlights">Apocalypse</span><span class="bold-spans">'s</span> chosen Villain group have escaped!`;
-                showDefeatPopup();
-                break;
-            }
-    break;
-
-            default:
-                console.log(`Mastermind End Game "${mastermindEndGame}" is not yet defined.`);
-                break;
-        }
-    }
-
-    // Then check Scheme end game conditions (if Mastermind conditions weren't met)
+   // Then check Scheme end game conditions (if Mastermind conditions weren't met)
     if (selectedSchemeEndGame) {
         switch (selectedSchemeEndGame) {
             case "8BystandersCarriedAway":
@@ -4967,6 +5758,35 @@ if (lastTurn && !lastTurnMessageShown) {
                 }
                 break;
 
+            case "sixNonGreyHeroesKOd":
+                if (koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length >= 6) {
+                    document.getElementById('defeat-context').innerHTML = `The number of non-grey Heroes in the KO pile has reached critical levels. ${mastermind.name}'s cosmic rays have ravaged Earth's defenders, and the planet now lies defenseless.`;
+                    showDefeatPopup();
+                }
+                break;
+
+            case "twentyNonGreyHeroesKOd":
+                if (koPile.filter(card => card.type === 'Hero' && card.color !== 'Grey').length >= 20) {
+                    document.getElementById('defeat-context').innerHTML = `20 non-grey Heroes have been KO'd. ${mastermind.name}'s flood has drowned the world's defenders and civilization sinks beneath the waves.`;
+                    showDefeatPopup();
+                }
+                break;
+
+            case "ForceField7Twists":
+                if (twistCount >= 7) {
+                    document.getElementById('defeat-context').innerHTML = `The final force field is in place. ${mastermind.name} is untouchable and their reign will last forever.`;
+                    showDefeatPopup();
+                }
+                break;
+
+            case "NegativeZone7Twists":
+                if (twistCount >= 7) {
+                    document.getElementById('defeat-context').innerHTML = `Reality has been dragged into the Negative Zone. ${mastermind.name} rules over a warped antimatter universe and our world is lost forever.`;
+                    showDefeatPopup();
+                }
+                break;
+
+
             default:
                 console.log(`Scheme End Game "${selectedSchemeEndGame}" is not yet defined.`);
                 break;
@@ -5034,7 +5854,11 @@ updateSelectionOrder();
 
 updateCardSizing();
 resetOpacity();
-updateHighlights();
+if (negativeZoneAttackAndRecruit) {
+	updateHighlightsNegativeZone();
+} else {
+	updateHighlights();
+}
 
 }
 
@@ -5174,6 +5998,22 @@ function updateEvilWinsTracker() {
 
         case "X-Cutioner's Song":
       evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/9 Non Grey Heroes KO'd or Carried Off`;
+      break;
+
+        case "Bathe the Earth in Cosmic Rays":
+      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/6 Non Grey Heroes KO'd or Carried Off`;
+      break;
+
+        case "Flood the Planet with Melted Glaciers":
+      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/20 Non Grey Heroes KO'd or Carried Off`;
+      break;
+
+        case "Invincible Force Field":
+      evilWinsText.innerHTML = `${twistCount}/7 Twists`;
+      break;
+
+        case "Pull Reality Into the Negative Zone":
+      evilWinsText.innerHTML = `${twistCount}/7 Twists`;
       break;
 
         default:
@@ -5601,27 +6441,32 @@ function hideRevealedCards() {
 }
 
 async function endTurn() {
+    document.getElementById('end-turn').innerHTML = `<span class="game-board-bottom-row">End Turn</span>`;
 
-document.getElementById('end-turn').innerHTML = `<span class="game-board-bottom-row">END TURN</span>`;
+    // Check for defeat conditions first
+    const isDefeated = await checkDefeat();
+    if (isDefeated) {
+        showDefeatPopup();
+        return;
+    }
 
-updateDeckCounts();
+    updateDeckCounts();
+    hideRevealedCards();
 
-hideRevealedCards();
+    // Check for victory conditions
+    if (lastTurn === true) {
+        await showWinPopup();
+        if (gameIsOver) return;
+    } 
 
-if (lastTurn === true) {
-await showWinPopup()
-if (gameIsOver) return;
-} 
+    if (heroDeckHasRunOut === true && !delayEndGame) {
+        await showDrawPopup();
+        if (gameIsOver) return;
+    }
 
-if (heroDeckHasRunOut === true && !delayEndGame) {
-    await showDrawPopup();
-    if (gameIsOver) return;
-}
-
-onscreenConsole.log("Turn ended.");
-turnCount += 1;
-
-onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn&nbsp;</span><span class="console-highlights" style="text-decoration:underline;">${turnCount}</span><span class="console-highlights" style="text-decoration:underline;">:</span>`);
+    onscreenConsole.log("Turn ended.");
+    turnCount += 1;
+    onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn&nbsp;</span><span class="console-highlights" style="text-decoration:underline;">${turnCount}</span><span class="console-highlights" style="text-decoration:underline;">:</span>`);
 
     console.log('Ending turn...');
     
@@ -5718,6 +6563,17 @@ city3TempBuff = 0;
 city4TempBuff = 0;
 city5TempBuff = 0;
 mastermindTempBuff = 0;
+mastermindReserveAttack = 0;
+bridgeReserveAttack = 0;
+streetsReserveAttack = 0;
+rooftopsReserveAttack = 0;
+bankReserveAttack = 0;
+sewersReserveAttack = 0;
+hq1ReserveRecruit = 0;
+hq2ReserveRecruit = 0;
+hq3ReserveRecruit = 0;
+hq4ReserveRecruit = 0;
+hq5ReserveRecruit = 0;
 rescueExtraBystanders = 0;
 rescueExtraBystanders = 0;
 jeanGreyBystanderRecruit = 0;
@@ -5725,6 +6581,20 @@ jeanGreyBystanderDraw = 0;
 jeanGreyBystanderAttack = 0;
 sewerRooftopDefeats = false;
 sewerRooftopBonusRecruit = 0;
+thingCrimeStopperRescue = false;
+mastermindCosmicThreatResolved = false;
+city1CosmicThreat = 0;
+city2CosmicThreat = 0;
+city3CosmicThreat = 0;
+city4CosmicThreat = 0;
+city5CosmicThreat = 0;
+for (let i = 0; i < 5; i++) {
+    if (city[i] && 'cosmicThreatResolved' in city[i]) {
+        city[i].cosmicThreatResolved = false;
+    }
+}
+mastermindCosmicThreat = 0;
+unseenRescueBystanders = 0;
 twoRecruitFromKO = 0;
 hasProfessorXMindControl = false;
 trueVersatility = false;
@@ -5740,34 +6610,55 @@ playerHand.forEach(card => {
     }
 });
 
-   playerDiscardPile.push(...playerHand);
+    playerDiscardPile.push(...playerHand);
     playerHand = [];
-for (let i = 0; i < nextTurnsDraw; i++) {
-    if (cardsToBeDrawnNextTurn.length > 0) {
-        // Draw the next card from the cardsToBeDrawnNextTurn array
-        const card = cardsToBeDrawnNextTurn.shift(); // Remove the first card in the array
-        playerHand.push(card); // Add the card to the player's hand
-        console.log(`Drew ${card.name} from cardsToBeDrawnNextTurn.`);
-    } else {
-        // Proceed to draw from the deck
-        if (playerDeck.length === 0) {
-            if (playerDiscardPile.length > 0) {
-                console.log('Deck is empty, reshuffling discard pile into deck.');
-                playerDeck = shuffle(playerDiscardPile);
-                playerDiscardPile = [];
-            } else {
-                console.log('No cards left to draw.');
-                break; // Exit the loop if no more cards can be drawn
+
+    const drawOne = () => {
+        if (cardsToBeDrawnNextTurn.length > 0) {
+            const card = cardsToBeDrawnNextTurn.shift();
+            playerHand.push(card);
+            console.log(`Drew ${card.name} from cardsToBeDrawnNextTurn.`);
+            return true;
+        } else {
+            if (playerDeck.length === 0) {
+                if (playerDiscardPile.length > 0) {
+                    console.log('Deck is empty, reshuffling discard pile into deck.');
+                    playerDeck = shuffle(playerDiscardPile);
+                    playerDiscardPile = [];
+                } else {
+                    console.log('No cards left to draw.');
+                    return false;
+                }
             }
+            // Assumes drawCard() pulls from playerDeck and pushes into playerHand
+            drawCard();
+            return true;
+        }
+    };
+
+    // Normal draw
+    for (let i = 0; i < nextTurnsDraw; i++) {
+        if (!drawOne()) break;
+        if (i >= 6) {
+            // Keep your original tracking behaviour
+            extraCardsDrawnThisTurn++;
+        }
+    }
+
+    // Galactus: Force of Eternity — draw 6 more, then require a discard decision
+    if (galactusForceOfEternityDraw === true) {
+        let extra = 0;
+        while (extra < 6) {
+            if (!drawOne()) break;
+            // These are explicitly "extra" cards, so count all of them
+            extraCardsDrawnThisTurn++;
+            extra++;
         }
 
-        drawCard();
-    }
+            await galactusForceOfEternityDiscard();
 
-    if (i >= 6) {
-        extraCardsDrawnThisTurn++;
+    	galactusForceOfEternityDraw = false;
     }
-}
 
 sortPlayerCards();
 
@@ -5878,6 +6769,14 @@ function showAttackButton(cityIndex) {
     // Calculate attack synchronously first
     const selectedScheme = getSelectedScheme(); // Extract this to a function
     const villainAttack = recalculateVillainAttack(villainCard);
+    const cityReserveAttacks = [
+    bridgeReserveAttack,
+    streetsReserveAttack,
+    rooftopsReserveAttack,
+    bankReserveAttack,
+    sewersReserveAttack
+];
+const reservedAttack = cityReserveAttacks[cityIndex] || 0;
 
      if (villainAttack < 0) {
         villainAttack = 0;
@@ -5891,17 +6790,26 @@ function showAttackButton(cityIndex) {
         return;
     }
 
-       // Check if the player has enough attack points
-    let playerAttackPoints = totalAttackPoints;
-    if (recruitUsedToAttack === true) {
+let playerAttackPoints = 0;
+   if (!negativeZoneAttackAndRecruit) {
+    playerAttackPoints = totalAttackPoints;
+   } else {
+    playerAttackPoints = totalRecruitPoints;
+   }
+ 
+   if (!negativeZoneAttackAndRecruit && recruitUsedToAttack === true) {
         playerAttackPoints += totalRecruitPoints;
     }
 
     if (villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
-        playerAttackPoints += totalRecruitPoints;
+        if (!negativeZoneAttackAndRecruit) {
+            playerAttackPoints += totalRecruitPoints;
+        } else {
+            playerAttackPoints += totalAttackPoints;
+        }
     }
 
-    if (playerAttackPoints >= villainAttack) {
+    if (playerAttackPoints + reservedAttack >= villainAttack) {
         // Create or update the attack button
         let attackButton = cityCell.querySelector('.attack-button');
         if (!attackButton) {
@@ -5946,8 +6854,12 @@ function showAttackButton(cityIndex) {
         if (recruitUsedToAttack === "true" || villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
             onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and/or <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
     } else {
+        if (!negativeZoneAttackAndRecruit) {
         onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
+    } else {
+        onscreenConsole.log(`Negative Zone! You need ${villainAttack}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to defeat <span class="console-highlights">${villainCard.name}</span>.`);
     }
+}
 }
 }
 
@@ -6029,8 +6941,10 @@ function recalculateVillainAttack(villainCard) {
     return Math.max(0, finalAttack);
 }
 
-async function confirmAttack(cityIndex) {
-playSFX('attack');
+// Combined defeat function with flag for instant defeat
+async function defeatVillain(cityIndex, isInstantDefeat = false) {
+    playSFX('attack');
+    
     // Get fresh references
     const villainCard = city[cityIndex];
     if (!villainCard) {
@@ -6039,27 +6953,164 @@ playSFX('attack');
         return;
     }
 
+       // Find the card container - using a more specific selector
+    const cityCell = document.querySelector(`[data-city-index="${cityIndex}"]`);
+    if (!cityCell) {
+        console.error('City cell not found for index:', cityIndex);
+        return;
+    }
+    
+    const cardContainer = document.querySelector(`.card-container[data-city-index="${cityIndex}"]`);
+    if (!cardContainer) {
+        console.error('Card container not found in city cell:', cityIndex);
+        return;
+    }
+
+    // Store the card image source for the animation
+    const cardImage = cardContainer.querySelector('.card-image');
+    if (!cardImage) {
+        console.error('Card image not found');
+        return;
+    }
+
+    // Create the split animation
+    const rect = cardContainer.getBoundingClientRect();
+    const splitContainer = document.createElement('div');
+    splitContainer.className = 'split-container';
+    splitContainer.style.position = 'fixed';
+    splitContainer.style.left = `${rect.left}px`;
+    splitContainer.style.top = `${rect.top}px`;
+    splitContainer.style.width = `${rect.width}px`;
+    splitContainer.style.height = `${rect.height}px`;
+    splitContainer.style.zIndex = '1000';
+    
+    // Create halves
+    const leftHalf = document.createElement('div');
+    leftHalf.className = 'half-card left-half';
+    leftHalf.style.backgroundImage = `url(${cardImage.src})`;
+    leftHalf.style.backgroundSize = 'cover';
+    leftHalf.style.backgroundPosition = 'center';
+    
+    const rightHalf = document.createElement('div');
+    rightHalf.className = 'half-card right-half';
+    rightHalf.style.backgroundImage = `url(${cardImage.src})`;
+    rightHalf.style.backgroundSize = 'cover';
+    rightHalf.style.backgroundPosition = 'center';
+    
+    splitContainer.appendChild(leftHalf);
+    splitContainer.appendChild(rightHalf);
+    document.body.appendChild(splitContainer);
+    
+    // Add jolt animation to original card
+    cardContainer.classList.add('jolt');
+    
+    // After jolt animation, split the card
+    setTimeout(() => {
+        // Hide original card
+        cardImage.style.visibility = 'hidden';
+        
+        // Add split animation to halves
+        leftHalf.classList.add('split');
+        rightHalf.classList.add('split');
+        
+        // Remove the split container after animation completes
+        setTimeout(() => {
+            if (splitContainer.parentNode) {
+                document.body.removeChild(splitContainer);
+            }
+            
+            // Continue with the rest of your defeat logic
+            city[cityIndex] = null;
+            updateGameBoard();
+            
+        }, 900);
+    }, 100);
+
+
+
     // Store location and make copy
     currentVillainLocation = cityIndex;
     const villainCopy = createVillainCopy(villainCard);
-    const villainAttack = recalculateVillainAttack(villainCard);
+    const villainAttack = isInstantDefeat ? 0 : recalculateVillainAttack(villainCard);
 
-// Handle point deduction
-    try {
-        if (recruitUsedToAttack === true || villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
-            const result = await showCounterPopup(villainCopy, villainAttack);
-            totalAttackPoints -= result.attackUsed || 0;
-            totalRecruitPoints -= result.recruitUsed || 0;
-            onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points to attack <span class="console-highlights">${villainCopy.name}</span>.`);
-        } else {
-            totalAttackPoints -= villainAttack;
+    // Map city indices to reserve attack variables
+    const reserveAttackVars = [
+        bridgeReserveAttack,    // cityIndex 0 - Bridge
+        streetsReserveAttack,   // cityIndex 1 - Streets
+        rooftopsReserveAttack,  // cityIndex 2 - Rooftops
+        bankReserveAttack,      // cityIndex 3 - Bank
+        sewersReserveAttack,    // cityIndex 4 - Sewers
+        mastermindReserveAttack // cityIndex 5 - Mastermind
+    ];
+
+    // Handle point deduction (skip for instant defeat)
+    if (!isInstantDefeat) {
+        try {
+            if ((!negativeZoneAttackAndRecruit && recruitUsedToAttack === true) || 
+                villainCard.keyword1 === "Bribe" || villainCard.keyword2 === "Bribe" || villainCard.keyword3 === "Bribe") {
+                const result = await showCounterPopup(villainCopy, villainAttack);
+                
+                // Use reserved points first, then regular points
+                let attackNeeded = result.attackUsed || 0;
+                let recruitNeeded = result.recruitUsed || 0;
+                
+                // Use reserved attack points for this location first
+                const reservedAttackAvailable = reserveAttackVars[cityIndex] || 0;
+                const reservedAttackUsed = Math.min(attackNeeded, reservedAttackAvailable);
+                
+                // Deduct from reserved points
+                if (reservedAttackUsed > 0) {
+                    switch(cityIndex) {
+                        case 0: bridgeReserveAttack -= reservedAttackUsed; break;
+                        case 1: streetsReserveAttack -= reservedAttackUsed; break;
+                        case 2: rooftopsReserveAttack -= reservedAttackUsed; break;
+                        case 3: bankReserveAttack -= reservedAttackUsed; break;
+                        case 4: sewersReserveAttack -= reservedAttackUsed; break;
+                        case 5: mastermindReserveAttack -= reservedAttackUsed; break;
+                    }
+                    attackNeeded -= reservedAttackUsed;
+               }
+                
+                // Deduct remaining points from regular pools
+                totalAttackPoints -= attackNeeded;
+                totalRecruitPoints -= recruitNeeded;
+                
+                onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points to attack <span class="console-highlights">${villainCopy.name}</span>.`);
+            } else {
+                if (!negativeZoneAttackAndRecruit) {
+                    // Use reserved attack points for this location first
+                    const reservedAttackAvailable = reserveAttackVars[cityIndex] || 0;
+                    const reservedAttackUsed = Math.min(villainAttack, reservedAttackAvailable);
+                    
+                    // Deduct from reserved points
+                    if (reservedAttackUsed > 0) {
+                        switch(cityIndex) {
+                            case 0: bridgeReserveAttack -= reservedAttackUsed; break;
+                            case 1: streetsReserveAttack -= reservedAttackUsed; break;
+                            case 2: rooftopsReserveAttack -= reservedAttackUsed; break;
+                            case 3: bankReserveAttack -= reservedAttackUsed; break;
+                            case 4: sewersReserveAttack -= reservedAttackUsed; break;
+                            case 5: mastermindReserveAttack -= reservedAttackUsed; break;
+                        }
+                  }
+                    
+                    // Deduct remaining from regular attack points
+                    totalAttackPoints -= (villainAttack - reservedAttackUsed);
+                } else {
+                    totalRecruitPoints -= villainAttack;
+                }
+            }
+        } catch (error) {
+            console.error('Error handling point deduction:', error);
         }
-    } catch (error) {
-        console.error('Error handling point deduction:', error);
     }
 
-     const operations = await collectDefeatOperations(villainCopy);
-
+    // Update the reserve display
+    updateReserveAttackAndRecruit();
+    
+    // Collect and execute operations (bystander rescues and fight effects)
+    const operations = await collectDefeatOperations(villainCopy);
+    
     // Let player choose order if there are multiple operations
     if (operations.length > 1) {
         await executeOperationsInPlayerOrder(operations, villainCopy);
@@ -6068,45 +7119,43 @@ playSFX('attack');
     }
     
     // Continue with post-defeat logic
-    await handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex);
+    await handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex, isInstantDefeat);
 }
 
 // Helper function to create a deep copy of villain data
 function createVillainCopy(villainCard) {
     return {
         id: villainCard.id,
-            name: villainCard.name,
-            type: villainCard.type,
-            rarity: villainCard.rarity,
-            team: villainCard.team,
-            class1: villainCard.class1,
-            class2: villainCard.class2,
-            color: villainCard.color,
-            cost: villainCard.cost,
-            attack: villainCard.attack,
-            recruit: villainCard.recruit,
-            attackIcon: villainCard.attackIcon,
-            recruitIcon: villainCard.recruitIcon,
-            bonusAttack: villainCard.bonusAttack,
-            bonusRecruit: villainCard.bonusRecruit,
-            multiplier: villainCard.multiplier,
-            multiplierAttribute: villainCard.multiplierAttribute,
-            multiplierLocation: villainCard.multiplierLocation,
-            unconditionalAbility: villainCard.unconditionalAbility,
-            conditionalAbility: villainCard.conditionalAbility,
-            conditionType: villainCard.conditionType,
-            condition: villainCard.condition,
-            invulnerability: villainCard.invulnerability,
-            image: villainCard.image,
-
-        
+        name: villainCard.name,
+        type: villainCard.type,
+        rarity: villainCard.rarity,
+        team: villainCard.team,
+        class1: villainCard.class1,
+        class2: villainCard.class2,
+        color: villainCard.color,
+        cost: villainCard.cost,
+        attack: villainCard.attack,
+        recruit: villainCard.recruit,
+        attackIcon: villainCard.attackIcon,
+        recruitIcon: villainCard.recruitIcon,
+        bonusAttack: villainCard.bonusAttack,
+        bonusRecruit: villainCard.bonusRecruit,
+        multiplier: villainCard.multiplier,
+        multiplierAttribute: villainCard.multiplierAttribute,
+        multiplierLocation: villainCard.multiplierLocation,
+        unconditionalAbility: villainCard.unconditionalAbility,
+        conditionalAbility: villainCard.conditionalAbility,
+        conditionType: villainCard.conditionType,
+        condition: villainCard.condition,
+        invulnerability: villainCard.invulnerability,
+        image: villainCard.image,
         originalAttack: villainCard.originalAttack,
         bystander: [...(villainCard.bystander || [])],
         fightEffect: villainCard.fightEffect,
         shattered: villainCard.shattered,
         fightCondition: villainCard.fightCondition,
         captureCode: villainCard.captureCode,
-		alwaysLeads: villainCard.alwaysLeads
+        alwaysLeads: villainCard.alwaysLeads
     };
 }
 
@@ -6121,7 +7170,7 @@ async function collectDefeatOperations(villainCopy) {
                     name: `Rescue ${bystander.name}`,
                     image: bystander.image,
                     execute: async () => {
-			onscreenConsole.log(`<span class="console-highlights">${bystander.name}</span> rescued.`);
+                        onscreenConsole.log(`<span class="console-highlights">${bystander.name}</span> rescued.`);
                         victoryPile.push(bystander);
                         bystanderBonuses();
                         await rescueBystanderAbility(bystander);
@@ -6139,6 +7188,15 @@ async function collectDefeatOperations(villainCopy) {
                 name: `Trigger ${villainCopy.name}'s Fight Effect`,
                 image: villainCopy.image,
                 execute: async () => {
+                    // Ask to negate if player can reveal Mr. Fantastic
+                    let negate = false;
+                    if (typeof promptNegateFightEffectWithMrFantastic === 'function') {
+                        negate = await promptNegateFightEffectWithMrFantastic();
+                    }
+                    if (negate) {
+                        return;
+                    }
+                    // Not negated: run the fight effect as normal
                     await fightEffectFunction(villainCopy);
                 }
             });
@@ -6148,16 +7206,10 @@ async function collectDefeatOperations(villainCopy) {
     return operations;
 }
 
-
 async function executeOperationsInPlayerOrder(operations, villainCopy) {
     const remainingOperations = [...operations];
     
     while (remainingOperations.length > 0) {
-        // For single operation left, just execute it
-        if (remainingOperations.length === 1) {
-            await remainingOperations[0].execute();
-            break;
-        }
 
         // Show popup for player to choose next rescue
         const choice = await showOperationSelectionPopup({
@@ -6182,7 +7234,6 @@ async function executeOperationsInPlayerOrder(operations, villainCopy) {
         updateGameBoard();
     }
 }
-
 
 async function showOperationSelectionPopup(options) {
     return new Promise((resolve) => {
@@ -6345,8 +7396,10 @@ async function showOperationSelectionPopup(options) {
     });
 }
 
-async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex) {
-    // Handle Baby Hope first (moved back here from operations)
+// Updated handlePostDefeat to handle instant defeat flag
+async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityIndex, isInstantDefeat = false) {
+
+    // Handle Baby Hope first
     if (villainCard.babyHope === true) {
         delete villainCard.babyHope;
         villainCard.attack = villainCard.originalAttack;
@@ -6360,7 +7413,7 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
         updateGameBoard();
     }
 
-    // Rest of the post-defeat handling remains the same
+    // Rest of the post-defeat handling
     if (villainCard.plutoniumCaptured && villainCard.plutoniumCaptured.length > 0) {
         for (const plutonium of villainCard.plutoniumCaptured) {
             villainDeck.push(plutonium);
@@ -6370,14 +7423,14 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
         onscreenConsole.log(`Plutonium from <span class="console-highlights">${villainCard.name}</span> shuffled back into Villain Deck.`);
     }
 
-// Handle X-Cutioner Heroes
-if (Array.isArray(villainCard.XCutionerHeroes) && villainCard.XCutionerHeroes.length > 0) {
-    for (const hero of villainCard.XCutionerHeroes) {
-        playerDiscardPile.push(hero);
-        onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+    // Handle X-Cutioner Heroes
+    if (Array.isArray(villainCard.XCutionerHeroes) && villainCard.XCutionerHeroes.length > 0) {
+        for (const hero of villainCard.XCutionerHeroes) {
+            playerDiscardPile.push(hero);
+            onscreenConsole.log(`You have rescued <span class="console-highlights">${hero.name}</span>. They have been added to your Discard pile.`);
+        }
+        villainCard.XCutionerHeroes.length = 0;
     }
-    villainCard.XCutionerHeroes.length = 0; // clear in-place
-}
 
     // Handle extra bystanders
     if (rescueExtraBystanders > 0) {
@@ -6386,23 +7439,55 @@ if (Array.isArray(villainCard.XCutionerHeroes) && villainCard.XCutionerHeroes.le
         }
     }
 
-if (villainCard.name === 'Dracula') {
-villainCard.attack = 3;
-villainCard.cost = 0;
-}
+    if (villainCard.name === 'Dracula') {
+        villainCard.attack = 3;
+        villainCard.cost = 0;
+    }
 
-    // Add villain to victory pile
-    victoryPile.push(villainCard);
-   onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
-if (villainCard.killbot === true) {
-bystanderBonuses();
-}
-addHRToTopWithInnerHTML();
+    const burrowingVillain = (
+        villainCard.keyword1 === 'Burrow' || 
+        villainCard.keyword2 === 'Burrow' || 
+        villainCard.keyword3 === 'Burrow'
+    );
+
+    const inStreetsNow = cityIndex === 1;
+    const streetsFree = ((city[1] === '' || city[1] === null) && destroyedSpaces[1] === false);
+
+
+        // Handle burrowing (applies to both regular and instant defeats)
+    if (burrowingVillain) {
+        if (inStreetsNow) {
+            victoryPile.push(villainCard);
+            onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> is in the Streets and cannot burrow. They have been defeated!`);
+        } else if (streetsFree) {
+            city[1] = villainCard;
+            onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> was defeated but has burrowed to the Streets! You'll have to fight them again!`);
+        } else {
+            victoryPile.push(villainCard);
+            onscreenConsole.log(`The Streets are ${destroyedSpaces[1] === false ? 'occupied' : 'destroyed'} so <span class="console-highlights">${villainCard.name}</span> cannot burrow and has been defeated!`);
+        }
+    } else {
+        victoryPile.push(villainCard);
+        onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
+    }
+
+    if (villainCard.killbot === true) {
+        bystanderBonuses();
+    }
+    addHRToTopWithInnerHTML();
  
     city[cityIndex] = null;
+    if (villainCard.bystander) {
+        villainCard.bystander = [];
+    }
 
     // Handle location bonuses
     try {
+        if (thingCrimeStopperRescue && cityIndex == 3) {
+            onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> in the Bank. Rescuing a Bystander.`);
+            await rescueBystander();
+        }
+
         if (sewerRooftopDefeats && (cityIndex === 2 || cityIndex === 4)) {
             onscreenConsole.log(`You defeated <span class="console-highlights">${villainCard.name}</span> ${cityIndex === 4 ? 'in the Sewers' : 'on the Rooftops'}. Drawing two cards.`);
             extraDraw();
@@ -6430,9 +7515,9 @@ addHRToTopWithInnerHTML();
     // Final cleanup
     defeatBonuses();
     currentVillainLocation = null;
+    removeCosmicThreatBuff(cityIndex);
     updateGameBoard();
 }
-
 
 // Handle Professor X Mind Control option
 async function handleMindControlOption(villainCard) {
@@ -6476,6 +7561,156 @@ async function handleMindControlOption(villainCard) {
             resolve(false);
         };
     });
+}
+
+// Updated original functions to use the combined function
+async function confirmAttack(cityIndex) {
+    await defeatVillain(cityIndex, false);
+}
+
+async function instantDefeatAttack(cityIndex) {
+    await defeatVillain(cityIndex, true);
+}
+
+function cosmicThreat(card, index, attackReduction, className) {
+  // temp buff
+  if (index === 0) city1TempBuff -= attackReduction;
+  else if (index === 1) city2TempBuff -= attackReduction;
+  else if (index === 2) city3TempBuff -= attackReduction;
+  else if (index === 3) city4TempBuff -= attackReduction;
+  else if (index === 4) city5TempBuff -= attackReduction;
+
+  // cosmic threat record
+  if (index === 0) city1CosmicThreat = attackReduction;
+  else if (index === 1) city2CosmicThreat = attackReduction;
+  else if (index === 2) city3CosmicThreat = attackReduction;
+  else if (index === 3) city4CosmicThreat = attackReduction;
+  else if (index === 4) city5CosmicThreat = attackReduction;
+
+  const cardCount = attackReduction / 3;
+  const cardText = cardCount === 1 ? 'card' : 'cards';
+  onscreenConsole.log(`Cosmic Threat! You have revealed ${cardCount} <img src="Visual Assets/Icons/${className}.svg" alt="${className} Icon" class="console-card-icons"> ${cardText}. <span class="console-highlights">${card.name}</span> gets -${attackReduction} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+  updateGameBoard();
+}
+
+
+// Call whenever an attack is completed
+function removeCosmicThreatBuff(cityIndex) {
+    if (cityIndex === 0 && city1CosmicThreat > 0) {
+        city1TempBuff += city1CosmicThreat;
+        city1CosmicThreat = 0;
+    } 
+    else if (cityIndex === 1 && city2CosmicThreat > 0) {
+        city2TempBuff += city2CosmicThreat;
+        city2CosmicThreat = 0;
+    } 
+    else if (cityIndex === 2 && city3CosmicThreat > 0) {
+        city3TempBuff += city3CosmicThreat;
+        city3CosmicThreat = 0;
+    } 
+    else if (cityIndex === 3 && city4CosmicThreat > 0) {
+        city4TempBuff += city4CosmicThreat;
+        city4CosmicThreat = 0;
+    } 
+    else if (cityIndex === 4 && city5CosmicThreat > 0) {
+        city5TempBuff += city5CosmicThreat;
+        city5CosmicThreat = 0;
+    }
+
+    updateGameBoard();
+}
+
+function applyMastermindCosmicThreat(mastermindCard, attackReduction, label) {
+  // Apply temp buff
+  mastermindTempBuff -= attackReduction;
+  // Record for later removal
+  mastermindCosmicThreat = attackReduction;
+
+  const cardCount = attackReduction / 3;
+  const cardText = cardCount === 1 ? 'card' : 'cards';
+
+  onscreenConsole.log(
+    `Cosmic Threat! You have revealed ${cardCount} ${label} ${cardText}. `
+    + `<span class="console-highlights">${mastermindCard.name}</span> gets `
+    + `-${attackReduction} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`
+  );
+
+  updateGameBoard();
+}
+
+// Call when Mastermind attack finishes resolving (to remove temp reduction)
+function removeMastermindCosmicThreatBuff() {
+  if (mastermindCosmicThreat > 0) {
+    mastermindTempBuff += mastermindCosmicThreat;
+    mastermindCosmicThreat = 0;
+    updateGameBoard();
+  }
+}
+
+async function showGalactusClassChoicePopup() {
+  return new Promise((resolve) => {
+    const popup = document.getElementById('card-choice-one-location-popup');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const cardsList = document.getElementById('cards-to-choose-from');
+    const confirmButton = document.getElementById('card-choice-confirm-button');
+    const popupTitle = popup.querySelector('h2');
+    const instructionsDiv = document.getElementById('context');
+    const heroImage = document.getElementById('hero-one-location-image');
+    const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+
+    // Init UI
+    popupTitle.textContent = 'Choose a Class';
+    instructionsDiv.textContent = 'Select a class to reveal for Galactus’s Cosmic Threat.';
+    cardsList.innerHTML = '';
+    confirmButton.style.display = 'inline-block';
+    confirmButton.disabled = true;
+    confirmButton.textContent = 'Select Class';
+    modalOverlay.style.display = 'block';
+    popup.style.display = 'block';
+
+    // Show Galactus card (use your actual Galactus art path)
+    heroImage.src = 'Visual Assets/Masterminds/FantasticFour_Galactus.webp';
+    heroImage.style.display = 'block';
+    oneChoiceHoverText.style.display = 'none';
+
+    const options = ['Strength','Instinct','Covert','Tech','Range'];
+    let selected = null;
+
+    options.forEach(opt => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span style="white-space: nowrap;">
+        <img src="Visual Assets/Icons/${opt}.svg" alt="${opt} Icon" class="popup-card-icons"> ${opt}
+      </span>`;
+      li.onclick = () => {
+        Array.from(cardsList.children).forEach(n => n.classList.remove('selected'));
+        li.classList.add('selected');
+        selected = opt;
+        confirmButton.disabled = false;
+        instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${opt}</span>`;
+      };
+      cardsList.appendChild(li);
+    });
+
+    confirmButton.onclick = () => {
+      if (selected) {
+        closePopup();
+        resolve(selected); // 'Strength'|'Instinct'|'Covert'|'Tech'|'Range'
+      }
+    };
+
+    function closePopup() {
+      // Minimal reset (match your own reset routine if you have one)
+      popupTitle.textContent = 'Hero Ability!';
+      instructionsDiv.textContent = 'Context';
+      confirmButton.textContent = 'Confirm';
+      confirmButton.disabled = true;
+      heroImage.src = '';
+      heroImage.style.display = 'none';
+      oneChoiceHoverText.style.display = 'block';
+      popup.style.display = 'none';
+      modalOverlay.style.display = 'none';
+    }
+  });
 }
 
 
@@ -6693,29 +7928,98 @@ function deleteHeroFromHQ(index) {
     // Add any other cleanup needed for your specific game implementation
 }
 
-function showDiscardCardPopup() {
+function showDiscardCardPopup(escapedVillain) {
 
     if (playerHand.length === 0) {
         onscreenConsole.log(`You have no cards available to discard.`);
         return;
     }
     
-    return new Promise((resolve, reject) => {
-        const discardPopup = document.getElementById('discard-popup');
+    return new Promise(async (resolve) => {
+        const availableCards = playerHand
+            .filter(card => card) 
+            .map((card, index) => ({ ...card, uniqueId: `${card.id}-${index}` }));
+
+
+        const popup = document.getElementById('card-choice-one-location-popup');
         const modalOverlay = document.getElementById('modal-overlay');
-        const discardOptions = document.querySelector('.discard-buttons');
-        const discardImagePlaceholder = document.querySelector('.discard-image');
-        discardOptions.innerHTML = ''; // Clear previous options
+        const cardsList = document.getElementById('cards-to-choose-from');
+        const confirmButton = document.getElementById('card-choice-confirm-button');
+        const popupTitle = popup.querySelector('h2');
+        const instructionsDiv = document.getElementById('context');
+        const heroImage = document.getElementById('hero-one-location-image');
+        const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
 
-const discardImage = document.getElementById('discard-card-image'); // Reference to the img element
-const discardHoverText = document.getElementById('discard-card-popupHoverText');
+        // Hide the "No Thanks" button
+        document.getElementById('close-choice-button').style.display = 'none';
 
- 
-genericCardSort(playerHand);
+        // Initialize UI
+        popupTitle.textContent = 'DISCARD';
+        instructionsDiv.innerHTML = `<span class="console-highlights">${escapedVillain.name}</span> escaped with a Bystander! Discard 1 card.`;
+        cardsList.innerHTML = '';
+        confirmButton.style.display = 'inline-block';
+        confirmButton.disabled = true;
+        confirmButton.textContent = 'Discard';
+        modalOverlay.style.display = 'block';
+        popup.style.display = 'block';
 
-        playerHand.forEach((card, index) => {
-            const cardButton = document.createElement('button');
-                const createTeamIconHTML = (value) => {
+        let selectedCards = [];
+        let activeImage = null;
+
+        function updateConfirmButton() {
+            confirmButton.disabled = selectedCards.length !== 1;
+        }
+
+        function updateInstructions() {
+            if (selectedCards.length < 1) {
+                instructionsDiv.innerHTML = `<span class="console-highlights">${escapedVillain.name}</span> escaped with a Bystander! Discard 1 card.`;
+            } else {
+                const namesList = selectedCards.map(card => 
+                    `<span class="console-highlights">${card.name}</span>`
+                ).join(', ');
+                instructionsDiv.innerHTML = `Selected: ${namesList} will be discarded.`;
+            }
+        }
+
+        function updateCardImage(card) {
+            if (card) {
+                heroImage.src = card.image;
+                heroImage.style.display = 'block';
+                oneChoiceHoverText.style.display = 'none';
+                activeImage = card.image;
+            } else {
+                heroImage.src = '';
+                heroImage.style.display = 'none';
+                oneChoiceHoverText.style.display = 'block';
+                activeImage = null;
+            }
+        }
+
+        function toggleCardSelection(card, listItem) {
+            const index = selectedCards.findIndex(c => c.uniqueId === card.uniqueId);
+            
+            if (index > -1) {
+                selectedCards.splice(index, 1);
+                listItem.classList.remove('selected');
+            } else {
+                if (selectedCards.length >= 1) {
+                    const firstSelected = document.querySelector(`[data-card-id="${selectedCards[0].uniqueId}"]`);
+                    if (firstSelected) firstSelected.classList.remove('selected');
+                    selectedCards.shift();
+                }
+                selectedCards.push(card);
+                listItem.classList.add('selected');
+            }
+
+            updateCardImage(selectedCards[selectedCards.length - 1] || null);
+            updateConfirmButton();
+            updateInstructions();
+        }
+genericCardSort(availableCards);
+        // Populate the list with available cards
+        availableCards.forEach(card => {
+            const li = document.createElement('li');
+            const createTeamIconHTML = (value) => {
         if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
             return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
         }
@@ -6737,35 +8041,66 @@ genericCardSort(playerHand);
     // Combine all icons
     const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
     
-    cardButton.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
-            cardButton.onmouseover = () => {
-                discardImage.src = card.image; // Dynamically change the image src
-                discardImage.style.display = 'block'; // Show the image
-                discardHoverText.style.display = 'none'; // Show the image
-            };
+    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
 
-            // Handle mouse out to restore original state
-            cardButton.onmouseout = () => {
-                discardImage.src = ''; // Clear the image source
-                discardImage.style.display = 'none'; // Hide the image
-                discardHoverText.style.display = 'block'; // Show the image
-            };
+            li.setAttribute('data-card-id', card.uniqueId);
 
-            cardButton.onclick = () => {
-                try {
-                    discardCard(index);
-                    discardPopup.style.display = 'none';
-                    modalOverlay.style.display = 'none';
-                    resolve(); // Resolve the promise after the card is discarded
-                } catch (error) {
-                    reject(error); // Reject the promise if there was an error
+            li.onmouseover = () => {
+                if (!activeImage) {
+                    heroImage.src = card.image;
+                    heroImage.style.display = 'block';
+                    oneChoiceHoverText.style.display = 'none';
                 }
             };
-            discardOptions.appendChild(cardButton);
+
+            li.onmouseout = () => {
+                if (!activeImage) {
+                    heroImage.src = '';
+                    heroImage.style.display = 'none';
+                    oneChoiceHoverText.style.display = 'block';
+                }
+            };
+
+            li.onclick = () => toggleCardSelection(card, li);
+            cardsList.appendChild(li);
         });
 
-        modalOverlay.style.display = 'block';
-        discardPopup.style.display = 'block';
+        confirmButton.onclick = async () => {
+            if (selectedCards.length === 1) {
+                const returnedCards = [];
+                for (const card of selectedCards) {
+                    const indexInHand = playerHand.findIndex(c => c.id === card.id);
+                    if (indexInHand !== -1) {
+                        playerHand.splice(indexInHand, 1);
+                        const { returned } = await checkDiscardForInvulnerability(card);
+                        returnedCards.push(...returned);
+                    }
+                }
+                
+                // Add back any invulnerable cards
+                if (returnedCards.length > 0) {
+                    playerHand.push(...returnedCards);
+                }
+                
+                closePopup();
+                updateGameBoard();
+                resolve();
+            }
+        };
+
+        function closePopup() {
+            popupTitle.textContent = 'Hero Ability!';
+            instructionsDiv.textContent = 'Context';
+            confirmButton.textContent = 'Confirm';
+            confirmButton.disabled = true;
+            heroImage.src = '';
+            heroImage.style.display = 'none';
+            oneChoiceHoverText.style.display = 'block';
+            activeImage = null;
+
+            popup.style.display = 'none';
+            modalOverlay.style.display = 'none';
+        }
     });
 }
 
@@ -6864,10 +8199,16 @@ function recalculateMastermindAttack(mastermind) {
 const handleMastermindClick = () => {
     let mastermind = getSelectedMastermind();
     let mastermindAttack = recalculateMastermindAttack(mastermind);
-    let playerAttackPoints = totalAttackPoints;
+    let playerAttackPoints = 0;
+
+    if (!negativeZoneAttackAndRecruit) {
+        playerAttackPoints = totalAttackPoints;
+    } else {
+        playerAttackPoints = totalRecruitPoints;
+    }
 
     // Calculate effective attack points considering recruit usage and Bribe
-    if (recruitUsedToAttack === true) {
+    if (recruitUsedToAttack === true && !negativeZoneAttackAndRecruit) {
         playerAttackPoints += totalRecruitPoints;
     }
 
@@ -6876,30 +8217,97 @@ const handleMastermindClick = () => {
                            mastermind.keyword2 === "Bribe" || 
                            mastermind.keyword3 === "Bribe";
 
-    if (hasBribeKeyword) {
+    if (hasBribeKeyword && !negativeZoneAttackAndRecruit) {
         playerAttackPoints += totalRecruitPoints;
+    }
+
+    if (hasBribeKeyword && negativeZoneAttackAndRecruit) {
+        playerAttackPoints += totalAttackPoints;
+    }
+
+    // Calculate total available points (any combination)
+    const totalAvailablePoints = totalAttackPoints + totalRecruitPoints;
+
+    // Check if player can pay forcefield AND attack mastermind
+    let canAttack = false;
+    let requiredPoints = mastermindAttack;
+
+    if (invincibleForceField > 0) {
+        // Must pay forcefield first from total points, then have enough appropriate points for mastermind
+        const pointsAfterForcefield = totalAvailablePoints - invincibleForceField;
+        
+        if (pointsAfterForcefield >= 0) {
+            // Now check if we have enough of the right type of points for the mastermind attack
+            if (hasBribeKeyword || recruitUsedToAttack) {
+                // Can use any combination of points for mastermind attack
+                canAttack = pointsAfterForcefield >= mastermindAttack;
+            } else {
+                // Can only use attack points for mastermind attack
+                // Calculate how many attack points are left after paying forcefield
+                // (Forcefield can be paid with any points, but we prioritize using recruit points first)
+                const recruitUsedForForcefield = Math.min(invincibleForceField, totalRecruitPoints);
+                const attackUsedForForcefield = invincibleForceField - recruitUsedForForcefield;
+                const attackPointsLeft = totalAttackPoints - attackUsedForForcefield;
+                
+                canAttack = attackPointsLeft >= mastermindAttack;
+            }
+            requiredPoints = mastermindAttack + invincibleForceField;
+        }
+    } else {
+        // No forcefield - normal rules
+        if (hasBribeKeyword || recruitUsedToAttack) {
+            canAttack = totalAvailablePoints + mastermindReserveAttack >= mastermindAttack;
+        } else {
+            canAttack = playerAttackPoints + mastermindReserveAttack >= mastermindAttack;
+        }
     }
 
     // Handle different attack scenarios
     if (mastermind.tactics.length === 0) {
         const defeatedMasterminds = victoryPile.filter(card => card.type === "Mastermind");
         
-       if (finalBlowEnabled === true && defeatedMasterminds.length < 5) {
-    if (playerAttackPoints >= mastermindAttack) {
+        if (finalBlowEnabled === true && defeatedMasterminds.length < 5) {
+            if (canAttack) {
+                showMastermindAttackButton();
+                onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no tactics remaining - deliver the Final Blow!`);
+                return;
+            } else {
+                if (!negativeZoneAttackAndRecruit) {
+                    if (invincibleForceField > 0) {
+                        onscreenConsole.log(`You need ${requiredPoints}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> (${mastermindAttack} + ${invincibleForceField} forcefield) to deliver the Final Blow to <span class="console-highlights">${mastermind.name}</span>.`);
+                    } else {
+                        onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to deliver the Final Blow to <span class="console-highlights">${mastermind.name}</span>.`);
+                    }
+                } else {
+                    if (invincibleForceField > 0) {
+                        onscreenConsole.log(`Negative Zone! You need ${requiredPoints}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> (${mastermindAttack} + ${invincibleForceField} forcefield) to deliver the Final Blow to <span class="console-highlights">${mastermind.name}</span>.`);
+                    } else {
+                        onscreenConsole.log(`Negative Zone! You need ${mastermindAttack}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to deliver the Final Blow to <span class="console-highlights">${mastermind.name}</span>.`);
+                    }
+                }
+            }
+        } else {
+            onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has been defeated! Finish your turn to win.`);
+        }
+    } else if (canAttack) {
         showMastermindAttackButton();
-        onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has no tactics remaining - deliver the Final Blow!`);
+        return;
     } else {
-        onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to deliver the Final Blow to <span class="console-highlights">${mastermind.name}</span>.`);
+        if (!negativeZoneAttackAndRecruit) {
+            if (invincibleForceField > 0) {
+                onscreenConsole.log(`You need ${invincibleForceField} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> / <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to break through <span class="console-highlights">${mastermind.name}</span><span class="bold-spans">'s</span> force field${invincibleForceField === 1 ? '' : 's'} and ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat them.`);
+            } else {
+                onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
+            }
+        } else {
+            if (invincibleForceField > 0) {
+                onscreenConsole.log(`You need ${invincibleForceField} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> / <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to break through <span class="console-highlights">${mastermind.name}</span><span class="bold-spans">'s</span> force field${invincibleForceField === 1 ? '' : 's'} and ${mastermindAttack}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to defeat them.`);
+            } else {
+                onscreenConsole.log(`Negative Zone! You need ${mastermindAttack}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
+            }
+        }
     }
-} else {
-    onscreenConsole.log(`<span class="console-highlights">${mastermind.name}</span> has been defeated! Finish your turn to win.`);
 }
-} else if (playerAttackPoints >= mastermindAttack) {
-    showMastermindAttackButton();
-} else {
-    onscreenConsole.log(`You need ${mastermindAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to defeat <span class="console-highlights">${mastermind.name}</span>.`);
-}
-};
 // Add the initial listener
 document.getElementById('mastermind').addEventListener('click', handleMastermindClick);
 
@@ -6913,7 +8321,8 @@ function showMastermindAttackButton() {
     mastermindAttackButton.style.display = 'block';
     
     const handleClickOutside = (event) => {
-        if (!mastermindAttackButton.contains(event.target)) {
+        // Check if the click is NOT on the attack button itself
+        if (!mastermindAttackButton.contains(event.target) && event.target !== mastermindAttackButton) {
             mastermindAttackButton.style.display = 'none';
             document.removeEventListener('click', handleClickOutside);
         }
@@ -6923,33 +8332,69 @@ function showMastermindAttackButton() {
         document.addEventListener('click', handleClickOutside);
     }, 0);
 
+    // Remove any existing click handler first to prevent duplicates
+    mastermindAttackButton.onclick = null;
+    
     // Make the click handler async
-    mastermindAttackButton.onclick = async () => {
+    mastermindAttackButton.onclick = async (event) => {
+        // Stop propagation to prevent handleClickOutside from firing
+        event.stopPropagation();
+        
         isAttacking = true;
         mastermindAttackButton.style.display = 'none';
         healingPossible = false;
         
+        // Remove the outside click listener immediately
+        document.removeEventListener('click', handleClickOutside);
+        
         try {
-            confirmMastermindAttack();
+            await confirmMastermindAttack();
         } catch (error) {
             console.error("Attack failed:", error);
-            // Show error message to player if needed
             onscreenConsole.log(`<span class="console-error">Attack failed: ${error.message}</span>`);
         } finally {
             updateGameBoard();
             isAttacking = false;
-            document.removeEventListener('click', handleClickOutside);
         }
     };
 }
 
 async function confirmMastermindAttack() {
-playSFX('attack');
+    playSFX('attack');
     try {
         const mastermind = getSelectedMastermind();
         healingPossible = false;
         const mastermindAttack = recalculateMastermindAttack(mastermind);
 
+        // Handle forcefield cost first
+if (invincibleForceField > 0) {
+    // Calculate maximum allowed usage for forcefield while leaving enough for mastermind
+    let maxAttackForForcefield;
+    let maxRecruitForForcefield;
+    
+    if (canUseRecruitForMastermind()) {
+        // Can use any combination for both forcefield and mastermind
+        // Only limit is total available points
+        maxAttackForForcefield = totalAttackPoints;
+        maxRecruitForForcefield = totalRecruitPoints;
+    } else {
+        // Can only use attack points for mastermind attack
+        // Must leave at least mastermindAttack worth of attack points
+        maxAttackForForcefield = Math.max(0, totalAttackPoints - mastermindAttack);
+        maxRecruitForForcefield = totalRecruitPoints; // Can use all recruit for forcefield
+    }
+    
+    // Also ensure we don't exceed the forcefield cost itself
+    maxAttackForForcefield = Math.min(maxAttackForForcefield, invincibleForceField);
+    maxRecruitForForcefield = Math.min(maxRecruitForForcefield, invincibleForceField);
+    
+    const result = await showForcefieldPopup(mastermind, invincibleForceField, maxAttackForForcefield, maxRecruitForForcefield, mastermindAttack);
+    
+    totalAttackPoints -= result.attackUsed || 0;
+    totalRecruitPoints -= result.recruitUsed || 0;
+    
+    onscreenConsole.log(`You used ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to disable <span class="console-highlights">${mastermind.name}</span><span class="bold-spans">'s</span> force fields.`);
+}
         // Handle doom delay logic
         if (doomDelayEndGameFinalBlow) {
             delayEndGame = (mastermindDefeatTurn === turnCount);
@@ -6957,6 +8402,48 @@ playSFX('attack');
 
         // Create a copy of the mastermind data
         const mastermindCopy = createMastermindCopy(mastermind);
+
+            const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
+                          mastermind.keyword2 === "Bribe" || 
+                          mastermind.keyword3 === "Bribe";
+
+    // Handle point deduction
+if ((!negativeZoneAttackAndRecruit && recruitUsedToAttack) || hasBribeKeyword) {
+    const result = await showCounterPopup(mastermind, mastermindAttack);
+    
+    let attackNeeded = result.attackUsed;
+    let recruitNeeded = result.recruitUsed;
+    
+    // Use Mastermind's reserved attack points first
+    const reservedAttackUsed = Math.min(attackNeeded, mastermindReserveAttack);
+    if (reservedAttackUsed > 0) {
+        mastermindReserveAttack -= reservedAttackUsed;
+        attackNeeded -= reservedAttackUsed;
+    }
+    
+    // Deduct remaining points from regular pools
+    totalAttackPoints -= attackNeeded;
+    totalRecruitPoints -= recruitNeeded;
+    
+    onscreenConsole.log(`You used ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points to attack.`);
+} else {
+    if (!negativeZoneAttackAndRecruit) {
+        // Use Mastermind's reserved attack points first
+        const reservedAttackUsed = Math.min(mastermindAttack, mastermindReserveAttack);
+        if (reservedAttackUsed > 0) {
+            mastermindReserveAttack -= reservedAttackUsed;
+       }
+        
+        // Deduct remaining from regular attack points
+        totalAttackPoints -= (mastermindAttack - reservedAttackUsed);
+    } else {
+        totalRecruitPoints -= mastermindAttack;
+    }
+}
+
+// Update the reserve display after modifying reserved points
+updateReserveAttackAndRecruit();
+removeMastermindCosmicThreatBuff();
 
         // Collect all possible operations
         const operations = await collectMastermindRescueOperations(mastermindCopy);
@@ -6974,6 +8461,80 @@ playSFX('attack');
         console.error("Mastermind attack error:", error);
         throw error;
     }
+}
+
+// Helper function to check if recruit can be used for mastermind attack
+function canUseRecruitForMastermind() {
+    const mastermind = getSelectedMastermind();
+    const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
+                           mastermind.keyword2 === "Bribe" || 
+                           mastermind.keyword3 === "Bribe";
+    
+    return hasBribeKeyword || recruitUsedToAttack;
+}
+
+async function showForcefieldPopup(mastermind, forcefieldCost, maxAttack, maxRecruit, mastermindAttack) {
+    return new Promise((resolve, reject) => {
+        counterResolve = resolve;
+        counterReject = reject;
+        
+        // Store the mastermind attack for validation
+        window.mastermindAttackForValidation = mastermindAttack;
+        
+        // Set up the popup for forcefield
+        const cardImage = document.getElementById('bribe-card-image');
+        if (cardImage) {
+            cardImage.src = mastermind.image;
+            cardImage.style.display = 'block';
+        }
+        
+        const popupH2 = document.getElementById('bribe-popup-h2');
+        if (popupH2) {
+            popupH2.innerHTML = `Break through <span class="console-highlights">${mastermind.name}</span>'s Force Field`;
+        }
+        
+        // Update instructions
+        const instructionsEl = document.getElementById('bribe-instructions');
+        if (instructionsEl) {
+            instructionsEl.innerHTML = 
+                `Pay ${forcefieldCost} points to break the force field, but leave at least ${mastermindAttack} ${canUseRecruitForMastermind() ? 'total' : 'attack'} points for the mastermind.`;
+        }
+        
+        // Use the existing counter initialization
+        initializeCounters(forcefieldCost, maxAttack, maxRecruit);
+        
+        // Run initial validation
+        validateForcefieldSelection(mastermindAttack);
+        
+        // Show popup
+        document.getElementById('bribe-popup').style.display = 'block';
+        document.getElementById('modal-overlay').style.display = 'block';
+    });
+}
+
+// Add reset function to clean up after popup closes
+function resetBribePopup() {
+    const cardImage = document.getElementById('bribe-card-image');
+    if (cardImage) {
+        cardImage.style.display = 'none';
+        cardImage.src = '';
+    }
+    
+    const popupH2 = document.getElementById('bribe-popup-h2');
+    if (popupH2) {
+        popupH2.innerHTML = 'Attack or Recruit?';
+    }
+    
+    const instructionsEl = document.getElementById('bribe-instructions');
+    if (instructionsEl) {
+        instructionsEl.innerHTML = 'What combination of <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons"> and <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="card-icons"> points would you like to use?';
+    }
+    
+    // Reset counters
+    counterA = 0;
+    counterB = 0;
+    document.getElementById('counterA').innerText = '0';
+    document.getElementById('counterB').innerText = '0';
 }
 
 function createMastermindCopy(mastermind) {
@@ -7023,19 +8584,6 @@ async function collectMastermindRescueOperations(mastermindCopy) {
 }
 
 async function handleMastermindPostDefeat(mastermind, mastermindCopy, mastermindAttack) {
-    const hasBribeKeyword = mastermind.keyword1 === "Bribe" || 
-                          mastermind.keyword2 === "Bribe" || 
-                          mastermind.keyword3 === "Bribe";
-
-    // Handle point deduction
-    if (recruitUsedToAttack || hasBribeKeyword) {
-        const result = await showCounterPopup(mastermind, mastermindAttack);
-        totalAttackPoints -= result.attackUsed;
-        totalRecruitPoints -= result.recruitUsed;
-        onscreenConsole.log(`You chose to use ${result.attackUsed} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and ${result.recruitUsed} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points`);
-    } else {
-        totalAttackPoints -= mastermindAttack;
-    }
 
     // Handle extra bystanders
     if (rescueExtraBystanders > 0) {
@@ -7182,12 +8730,13 @@ function closeMessagePopup() {
 
 document.getElementById('return-home-button').addEventListener('click', () => {
     closeDrawPopup();
+    localStorage.setItem('restartFlag', 'true');
     returnHome();
 });
 
 async function showDrawPopup() {
 if (delayEndGame) {
-     onscreenConsole.log(`You would have drawn with your enemies, but you've already stopped the Mastermind. Finish your turn to finalise your victory!`);
+     onscreenConsole.log(`You would have drawn with your enemies, but you've already stopped the Mastermind!`);
     return;
 }
 
@@ -7265,6 +8814,22 @@ if (selectedScheme) {
         case "X-Cutioner's Song":
             drawText.innerHTML = `The X-Cutioner's Song has been silenced, but ${mastermind.name} escaped with allies still loyal to their cause.`;
             break;
+
+        case "Bathe Earth in Cosmic Rays":
+            drawText.innerHTML = `The cosmic ray bombardment has been halted, but ${mastermind.name} escaped to prepare another strike.`;
+            break;
+
+        case "Flood the Planet with Melted Glaciers":
+            drawText.innerHTML = `The flooding has been stopped, but ${mastermind.name} escaped to set their sights on a new and even more dangerous plan.`;
+            break;
+
+        case "Invincible Force Field":
+            drawText.innerHTML = `The force field has been weakened, but ${mastermind.name} remains an active threat!`;
+            break;
+
+        case "Pull Reality into the Negative Zone":
+            drawText.innerHTML = `You've sealed some dimensional breaches but ${mastermind.name} only keeps creating more.`;
+            break;
         
         default:
             drawText.innerHTML = ``;
@@ -7298,55 +8863,102 @@ function closeDrawPopup() {
 }
 
 function returnHome() {
-    location.reload();
+    window.location.href = 'index.html?restart=true';
 }
+
+async function checkDefeat() {
+    // Check if defeat should be delayed due to victory conditions
+    if (finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 5) {
+        onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind!`);
+        return false;
+    }
+
+    if (!finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 4) {
+        onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind!`);
+        return false;
+    }
+
+    if (delayEndGame) {
+        onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind!`);
+        return false;
+    }
+
+    // Check mastermind-specific defeat conditions
+    const mastermind = getSelectedMastermind();
+    const mastermindEndGame = mastermind ? mastermind.endGame : null;
+    
+    if (mastermindEndGame) {
+        switch (mastermindEndGame) {
+            case "fourHorsemen":
+                const villainGroups = escapedVillainsDeck.reduce((acc, card) => {
+                    if (card.villainId) {
+                        if (!acc[card.villainId]) {
+                            acc[card.villainId] = new Set();
+                        }
+                        acc[card.villainId].add(card.name);
+                    }
+                    return acc;
+                }, {});
+
+                const hasFourUniqueFromSameGroup = Object.values(villainGroups).some(
+                    uniqueNames => uniqueNames.size >= 4
+                );
+
+                if (hasFourUniqueFromSameGroup) {
+                    document.getElementById('defeat-context').innerHTML = `<span class="console-highlights">Apocalypse</span><span class="bold-spans">'s</span> Always Leads Villain group have escaped!`;
+                    return true;
+                }
+                break;
+                
+            case "cityDestroyed":
+                const allSpacesDestroyed = destroyedSpaces.every(space => space === true);
+                
+                if (allSpacesDestroyed) {
+                    onscreenConsole.log("The entire city has been destroyed!");
+                    return true;
+                }
+                break;
+
+            default:
+                console.log(`Mastermind End Game "${mastermindEndGame}" is not yet defined.`);
+                break;
+        }
+    }
+
+    return false;
+}
+
 
 function showDefeatPopup() {
-if (finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 5) {
-    onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind. Finish your turn to finalise your victory!`);
-    return;
-}
-
-if (!finalBlowEnabled && victoryPile.filter(obj => obj.type === "Mastermind").length === 4) {
-    onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind. Finish your turn to finalise your victory!`);
-    return;
-}
-
-if (delayEndGame) {
-     onscreenConsole.log(`You would have been defeated, but you've already stopped the Mastermind. Finish your turn to finalise your victory!`);
-    return;
-}
-
     const defeatPopup = document.getElementById('defeat-popup');
-const modalOverlay = document.getElementById('modal-overlay');
+    const modalOverlay = document.getElementById('modal-overlay');
     defeatPopup.style.display = 'block';
-modalOverlay.style.display = 'block';
-playSFX('evil-wins');
+    modalOverlay.style.display = 'block';
+    playSFX('evil-wins');
 
-const totalVictoryPoints = calculateVictoryPoints(victoryPile);
+    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
     document.getElementById('LOSSvictoryPointsTotal').innerText = totalVictoryPoints;
 
     const totalTurnsTaken = turnCount;
     document.getElementById('LOSStotalTurnsTaken').innerText = totalTurnsTaken;
    
     const averageVPPerTurn = totalTurnsTaken > 0 
-    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
-    : "0.0"; // Handle division by zero case
-document.getElementById('LOSSaverageVPPerTurn').innerText = averageVPPerTurn;
+        ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
+        : "0.0";
+    document.getElementById('LOSSaverageVPPerTurn').innerText = averageVPPerTurn;
 
-const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
-document.getElementById('LOSSnumberOfEscapes').innerText = numberOfEscapes;
+    const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+    document.getElementById('LOSSnumberOfEscapes').innerText = numberOfEscapes;
 
-document.getElementById('player-deck-card-back').addEventListener('click', openPlayerDeckPopup);
-document.getElementById('hero-deck-card-back').addEventListener('click', openHeroDeckPopup);
-document.getElementById('villain-deck-card-back').addEventListener('click', openVillainDeckPopup);
-document.getElementById('wound-label').addEventListener('click', openWoundDeckPopup);
-document.getElementById('sidekick-deck-card-back').addEventListener('click', openSidekickDeckPopup);
-document.getElementById('shield-deck-card-back').addEventListener('click', openShieldDeckPopup);
-document.getElementById('bystander-label').addEventListener('click', openBystanderDeckPopup);
+    document.getElementById('player-deck-card-back').addEventListener('click', openPlayerDeckPopup);
+    document.getElementById('hero-deck-card-back').addEventListener('click', openHeroDeckPopup);
+    document.getElementById('villain-deck-card-back').addEventListener('click', openVillainDeckPopup);
+    document.getElementById('wound-label').addEventListener('click', openWoundDeckPopup);
+    document.getElementById('sidekick-deck-card-back').addEventListener('click', openSidekickDeckPopup);
+    document.getElementById('shield-deck-card-back').addEventListener('click', openShieldDeckPopup);
+    document.getElementById('bystander-label').addEventListener('click', openBystanderDeckPopup);
 
-
-    document.getElementById('defeat-return-home-button').addEventListener('click', returnHome);
+    gameIsOver = true;
 }
 
 document.getElementById('defeat-return-home-button').addEventListener('click', () => {
@@ -7487,6 +9099,22 @@ if (selectedScheme) {
         case "X-Cutioner's Song":
             winText.innerHTML = `You've stopped ${mastermind.name} from carrying out the X-Cutioner's Song. All captured heroes have been freed from their captors. Excellent work!`;
             break;
+
+        case "Bathe Earth in Cosmic Rays":
+            winText.innerHTML = `You've stopped ${mastermind.name} from bathing the planet in cosmic rays. Earth's heroes remain unscathed and ready to defend the world. Excellent work!`;
+            break;
+
+        case "Flood the Planet with Melted Glaciers":
+            winText.innerHTML = `You've stopped ${mastermind.name} from flooding the planet with melted glaciers. The waters recede and the world is safe. Excellent work!`;
+            break;
+
+        case "Invincible Force Field":
+            winText.innerHTML = `You've shattered ${mastermind.name}'s invincible force field. With their defenses down, the threat is over. Excellent work!`;
+            break;
+
+        case "Pull Reality into the Negative Zone":
+            winText.innerHTML = `You've stopped ${mastermind.name} from pulling reality into the Negative Zone. The dimensional breach is sealed and the world is safe. Excellent work!`;
+            break;
         
         default:
             winText.innerHTML = `You have defeated the Mastermind and prevented their nefarious scheme! Excellent work!`;
@@ -7517,6 +9145,7 @@ gameIsOver = true;
 }
 
 document.getElementById('win-return-home-button').addEventListener('click', () => {
+    localStorage.setItem('restartFlag', 'true');
     returnHome();
 });
 
@@ -7670,9 +9299,10 @@ function showHeroAbilityMayPopup(promptText, confirmLabel = "Confirm", denyLabel
 
 
 const zoomedImage = document.getElementById('zoomed-image');
+const zoomedImageTop = document.getElementById('zoomed-image-top');
 let activeImage = null; // Track the currently locked image
 
-const excludedZoomClasses = ['console-card-icons', 'card-image-back', 'card-icons', 'overlay-recruit-icons', 'overlay-attack-icons', 'bribe-card-icons', 'hq-explosions', 'popup-card-icons', 'settingsCog' ];
+const excludedZoomClasses = ['console-card-icons', 'card-image-back', 'card-icons', 'overlay-recruit-icons', 'overlay-attack-icons', 'bribe-card-icons', 'hq-explosions', 'popup-card-icons', 'settingsCog', 'reserved-card-icons', 'cosmic-threat-card-icons', 'overlay-focus-icons', 'popup', 'fullscreen-background', 'hq-wrapper', 'container', 'keywords', 'console-log' ];
 
 // Combine all card lists into a single array
 const allCards = [
@@ -7703,6 +9333,8 @@ allCards.forEach((card) => {
 function showZoomedImage(imageUrl) {
     zoomedImage.src = imageUrl;
     zoomedImage.style.display = 'block';
+    zoomedImageTop.src = imageUrl;
+    zoomedImageTop.style.display = 'block';
 }
 
 // Function to hide the zoomed image (only if no image is locked)
@@ -7710,9 +9342,12 @@ function hideZoomedImage() {
     if (!activeImage) { 
         zoomedImage.style.display = 'none';
         zoomedImage.src = '';
+        zoomedImageTop.style.display = 'none';
+        zoomedImageTop.src = '';
     }
 }
 
+// Function to get the correct image URL from an element
 // Function to get the correct image URL from an element
 function getImageFromElement(element) {
     if (excludedZoomClasses.some(className => element.classList.contains(className))) {
@@ -7724,7 +9359,68 @@ function getImageFromElement(element) {
     if (element.tagName === 'IMG') {
         return element.src; // Allow zooming any image
     }
+    
+    // Check for background images - more robust approach
+    const style = window.getComputedStyle(element);
+    const backgroundImage = style.backgroundImage;
+    
+    // Check if there's a background image and it's not 'none'
+    if (backgroundImage && backgroundImage !== 'none' && backgroundImage !== 'initial' && backgroundImage !== 'inherit') {
+        // Extract URL using a more comprehensive regex
+        const urlMatch = backgroundImage.match(/url\(["']?([^"')]+)["']?\)/);
+        
+        if (urlMatch && urlMatch[1]) {
+            return urlMatch[1];
+        }
+    }
+    
+    // Also check inline styles as fallback
+    const inlineBackground = element.style.backgroundImage;
+    if (inlineBackground && inlineBackground !== 'none') {
+        const inlineUrlMatch = inlineBackground.match(/url\(["']?([^"')]+)["']?\)/);
+        if (inlineUrlMatch && inlineUrlMatch[1]) {
+            return inlineUrlMatch[1];
+        }
+    }
+    
     return null;
+}
+
+// Function to check if an element has a background image
+function hasBackgroundImage(element) {
+    if (element.tagName === 'IMG' || element.classList.contains('console-highlights')) {
+        return false; // These are already handled separately
+    }
+    
+    const style = window.getComputedStyle(element);
+    const backgroundImage = style.backgroundImage;
+    
+    return backgroundImage && backgroundImage !== 'none' && backgroundImage !== 'initial' && backgroundImage !== 'inherit';
+}
+
+// Helper function to find the appropriate target element
+function findImageTarget(startElement) {
+    // Check for regular images and console-highlights first
+    let target = startElement.closest('img, .console-highlights');
+    
+    // If not found, check for elements with background images
+    if (!target) {
+        target = startElement;
+        let currentElement = target;
+        while (currentElement && currentElement !== document.body) {
+            if (hasBackgroundImage(currentElement)) {
+                target = currentElement;
+                break;
+            }
+            currentElement = currentElement.parentElement;
+        }
+        // If we didn't find a background image element, return null
+        if (target === startElement && !hasBackgroundImage(target)) {
+            return null;
+        }
+    }
+    
+    return target;
 }
 
 // Function to normalize the image path
@@ -7752,7 +9448,7 @@ function normalizeImagePath(imageUrl) {
 
 // Handle hover (for desktop users)
 document.addEventListener('mouseover', (e) => {
-    const target = e.target.closest('img, .console-highlights'); // Works on any img
+    const target = findImageTarget(e.target);
     if (target) {
         const imageUrl = getImageFromElement(target);
 
@@ -7781,7 +9477,7 @@ document.addEventListener('mouseover', (e) => {
 });
 
 document.addEventListener('mouseout', (e) => {
-    const target = e.target.closest('img, .console-highlights');
+    const target = findImageTarget(e.target);
     if (!activeImage && target) {
         hideZoomedImage();
 
@@ -7789,23 +9485,23 @@ document.addEventListener('mouseout', (e) => {
         const keyword1Display = document.getElementById("keyword1");
         const keyword2Display = document.getElementById("keyword2");
         const keyword3Display = document.getElementById("keyword3");
-	const errataDisplay = document.getElementById("errata");
+        const errataDisplay = document.getElementById("errata");
         keyword1Display.textContent = "";
         keyword2Display.textContent = "";
         keyword3Display.textContent = "";
-	errataDisplay.textContent = "";
+        errataDisplay.textContent = "";
 
         // Clear keyword descriptions
         updateKeywordDescriptions(null, "keyword1Description");
         updateKeywordDescriptions(null, "keyword2Description");
         updateKeywordDescriptions(null, "keyword3Description");
-	updateKeywordDescriptions(null, "errataDescription");
+        updateKeywordDescriptions(null, "errataDescription");
     }
 });
 
 // Handle click (for mobile & desktop)
 document.addEventListener('click', (e) => {
-    const target = e.target.closest('img, .console-highlights'); // Works on any img
+    const target = findImageTarget(e.target);
     if (target) {
         const imageUrl = getImageFromElement(target);
 
@@ -7894,8 +9590,7 @@ function hideModalOverlay() {
 }
 
 function openPlayedCardsPopup() {
-	sortPlayedCards();
-    const playedCardsTable = document.getElementById('playedCardsTable');
+	const playedCardsTable = document.getElementById('playedCardsTable');
     playedCardsTable.innerHTML = '';
 
     // Close popup when clicking outside
@@ -7966,8 +9661,14 @@ if (card.name === "Professor X - Telepathic Probe" &&
                 }
 
                 // Calculate available attack points
-                let playerAttackPoints = totalAttackPoints;
-                if (recruitUsedToAttack || 
+                let playerAttackPoints = 0;
+                if (!negativeZoneAttackAndRecruit) {
+                    playerAttackPoints = totalAttackPoints;
+                } else {
+                    playerAttackPoints = totalRecruitPoints;
+                }
+                
+                if ((!negativeZoneAttackAndRecruit && recruitUsedToAttack) || 
                     topCard.keyword1 === "Bribe" || 
                     topCard.keyword2 === "Bribe" || 
                     topCard.keyword3 === "Bribe") {
@@ -7978,8 +9679,12 @@ if (card.name === "Professor X - Telepathic Probe" &&
                 if (playerAttackPoints >= villainAttack) {
                     attackButton.style.display = attackButton.style.display === 'none' ? 'block' : 'none';
                 } else {
+                    if (!negativeZoneAttackAndRecruit) {
                     onscreenConsole.log(`You need ${villainAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to fight ${topCard.name}`);
+                } else {
+                    onscreenConsole.log(`Negative Zone! You need ${villainAttack}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to fight ${topCard.name}`);
                 }
+            }
             });
 
             // Attack button click handler
@@ -7999,19 +9704,76 @@ if (card.name === "Professor X - Telepathic Probe" &&
             cardContainer.appendChild(indicator);
         }
 
+        if (card.keyword1 === "Focus" || card.keyword2 === "Focus" || card.keyword3 === "Focus") {
+    imgElement.classList.add('clickable-card', 'telepathic-probe-active');
+    imgElement.style.cursor = 'pointer';
+    imgElement.style.border = '3px solid rgb(198 169 104);';
+    
+// Get focus details using the switch-based function
+    const { focusCost, focusFunction } = getFocusDetails(card);
+
+
+    const focusIndicator = document.createElement('div');
+    focusIndicator.className = 'focus-indicator';
+    focusIndicator.innerHTML = `
+        <span style="filter:drop-shadow(0vh 0vh 0.3vh black);">FOCUS ${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span>`;
+    
+    // Create focus button (hidden by default)
+    const focusButton = document.createElement('div');
+    focusButton.className = 'played-cards-focus-button';
+    focusButton.innerHTML = `
+        <span style="filter: drop-shadow(0vh 0vh 0.3vh black);">
+            <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="overlay-focus-icons">
+        </span>`;
+    focusButton.style.display = 'none';
+    focusIndicator.appendChild(focusButton);
+
+    
+    // Indicator click handler
+    focusIndicator.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        // Toggle focus button visibility
+        if (totalRecruitPoints >= focusCost) {
+            focusButton.style.display = focusButton.style.display === 'none' ? 'block' : 'none';
+        } else {
+            onscreenConsole.log(`You need ${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to activate <span class="console-highlights">${card.name}</span><span class="bold-span">'s</span> Focus ability.`);
+        }
+    });
+
+    // Focus button click handler
+    focusButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        focusButton.style.display = 'none'; // Hide button immediately
+        
+        if (focusFunction && typeof focusFunction === 'function') {
+            try {
+                // Execute the focus ability
+                await focusFunction(card);
+            } catch (error) {
+                console.error(`Error executing focus ability for ${card.name}:`, error);
+            }
+        } else {
+            console.error(`Focus ability function not found for ${card.name}`);
+        }
+    });
+
+    cardContainer.appendChild(focusIndicator);
+}
+
         cardContainer.appendChild(imgElement);
         playedCardsTable.appendChild(cardContainer);
     });
 
     // Show the popup
     popup.style.display = 'block';
-    showModalOverlay();
+    document.getElementById('played-cards-modal-overlay').style.display = 'block';
 }
 
 // Function to close the Played Cards popup
 function closePlayedCardsPopup() {
     document.getElementById('played-cards-popup').style.display = 'none';
-    hideModalOverlay();
+    document.getElementById('played-cards-modal-overlay').style.display = 'none';
 }
 
 function openVictoryPilePopup() {
@@ -8312,7 +10074,8 @@ function resetOpacity() {
 }
 
 function recruitSidekick() {
-    if (sidekickDeck.length > 0 && totalRecruitPoints >= 2) {
+    if ((!negativeZoneAttackAndRecruit && sidekickDeck.length > 0 && totalRecruitPoints >= 2) || (negativeZoneAttackAndRecruit && sidekickDeck.length > 0 && totalAttackPoints >= 2))
+{
         const sidekick = sidekickDeck.pop();
 	if (silentMeditationRecruit === true) {
  	playerHand.push(sidekick);
@@ -8329,7 +10092,12 @@ onscreenConsole.log(`Sidekick recruited! <span class="console-highlights">${side
 }    
 addHRToTopWithInnerHTML(); 
 playSFX('recruit');   
-        totalRecruitPoints -= 2;
+
+if (!negativeZoneAttackAndRecruit) {
+totalRecruitPoints -= 2;
+} else {
+    totalAttackPoints -= 2;
+}
         sidekickRecruited = true;
         healingPossible = false;
         updateGameBoard();
@@ -8347,7 +10115,7 @@ function showSidekickRecruitButton() {
     }
 
     // Check if the player has enough recruit points
-    if (totalRecruitPoints >= 2) {
+    if ((!negativeZoneAttackAndRecruit && totalRecruitPoints >= 2) || (negativeZoneAttackAndRecruit && totalAttackPoints >= 2)) {
         // Show the button and its container
         sidekickRecruitButtonContainer.style.display = 'block';
         sidekickRecruitButton.style.display = 'block';
@@ -8385,14 +10153,19 @@ function showSidekickRecruitButton() {
             document.removeEventListener('click', handleClickOutside);
         };
     } else {
+        if (!negativeZoneAttackAndRecruit) {
         onscreenConsole.log(`You need 2<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit a Sidekick.`);
+        } else {
+        onscreenConsole.log(`Negative Zone! You need 2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to recruit a Sidekick.`);    
+        }
     }
 }
 
 document.getElementById('sidekick-deck-card-back').addEventListener('click', showSidekickRecruitButton);
 
 function recruitOfficer() {
-    if (shieldDeck.length > 0 && totalRecruitPoints >= 3) {
+        if ((!negativeZoneAttackAndRecruit && shieldDeck.length > 0 && totalRecruitPoints >= 3) || (negativeZoneAttackAndRecruit && shieldDeck.length > 0 && totalAttackPoints >= 3))
+{
         const officer = shieldDeck.pop();
        	if (silentMeditationRecruit === true) {
  	playerHand.push(officer);
@@ -8409,7 +10182,13 @@ onscreenConsole.log(`Hero recruited! <span class="console-highlights">${officer.
 }      
 addHRToTopWithInnerHTML();
 playSFX('recruit');
-        totalRecruitPoints -= 3;
+
+if (!negativeZoneAttackAndRecruit) {
+totalRecruitPoints -= 3;
+} else {
+    totalAttackPoints -= 3;
+}
+
         updateGameBoard();
     }
 }
@@ -8419,7 +10198,7 @@ function showSHIELDRecruitButton() {
     const SHIELDRecruitButton = document.getElementById('shield-deck-recruit-button');
 
    // Check if the player has enough recruit points
-    if (totalRecruitPoints >= 3) {
+    if ((!negativeZoneAttackAndRecruit && totalRecruitPoints >= 3) || (negativeZoneAttackAndRecruit && totalAttackPoints >= 3)) {
         // Show the button and its container
         SHIELDRecruitButtonContainer.style.display = 'block';
         SHIELDRecruitButton.style.display = 'block';
@@ -8453,8 +10232,12 @@ function showSHIELDRecruitButton() {
             // Remove the event listener after the button is clicked
             document.removeEventListener('click', handleClickOutside);
         };
-    } else {
-        onscreenConsole.log(`You need 3<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit a <span class="console-highlight">SHIELD Officer</span>.`);
+        } else {
+        if (!negativeZoneAttackAndRecruit) {
+        onscreenConsole.log(`You need 3<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);
+        } else {
+        onscreenConsole.log(`Negative Zone! You need 3<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to recruit a <span class="console-highlights">S.H.I.E.L.D. Officer</span>.`);    
+        }
     }
 }
 
@@ -8464,15 +10247,27 @@ function showHeroRecruitButton(hqIndex, hero) {
     const recruitButtonContainer = document.querySelector(`#hq${hqIndex}-recruit-button-container`);
     const recruitButton = document.querySelector(`#hq${hqIndex}-deck-recruit-button`);
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
-    const scheme = schemes.find(scheme => scheme.name === selectedSchemeName); 	
+    const scheme = schemes.find(scheme => scheme.name === selectedSchemeName); 
 
     if (!recruitButtonContainer || !recruitButton) {
         console.error(`Recruit button container or button not found for HQ index ${hqIndex}`);
         return;
     }
 
-    // Check if the player has enough recruit points
-    if (totalRecruitPoints >= hero.cost) {
+    // Get the reserved recruit points for this HQ
+    let hqReservedRecruit = 0;
+    switch(hqIndex) {
+        case 1: hqReservedRecruit = hq1ReserveRecruit; break;
+        case 2: hqReservedRecruit = hq2ReserveRecruit; break;
+        case 3: hqReservedRecruit = hq3ReserveRecruit; break;
+        case 4: hqReservedRecruit = hq4ReserveRecruit; break;
+        case 5: hqReservedRecruit = hq5ReserveRecruit; break;
+    }
+
+    // Check if the player has enough recruit points (including reserved points)
+    if ((!negativeZoneAttackAndRecruit && (totalRecruitPoints + hqReservedRecruit) >= hero.cost) || 
+        (negativeZoneAttackAndRecruit && totalAttackPoints >= hero.cost))
+     {
         // Show the button and its container
         recruitButtonContainer.style.display = 'block';
         recruitButton.style.display = 'block';
@@ -8512,34 +10307,232 @@ function showHeroRecruitButton(hqIndex, hero) {
                 isRecruiting = false;
             }, 500); // Adjust the delay as needed
         };
-    } else {
+        } else {
+        if (!negativeZoneAttackAndRecruit) {
         onscreenConsole.log(`You need ${hero.cost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> to ${scheme.name === 'Save Humanity' && hero.type === 'Bystander' ? 'rescue' : 'recruit'} <span class="console-highlights">${hero.name}</span>.`);
+        } else {
+        onscreenConsole.log(`Negative Zone! You need ${hero.cost}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> to ${scheme.name === 'Save Humanity' && hero.type === 'Bystander' ? 'rescue' : 'recruit'} <span class="console-highlights">${hero.name}</span>.`);    
+        }
     }
 }
 
+async function animateCardToDestination(cardElement, destinationElement, options = {}) {
+    // Check if we have valid elements
+    if (!cardElement || !destinationElement) {
+        console.error('Animation failed: Invalid card or destination element');
+        if (options.onComplete) options.onComplete();
+        return Promise.resolve();
+    }
+    
+    // Check if elements are in the DOM
+    if (!document.body.contains(cardElement) || !document.body.contains(destinationElement)) {
+        console.error('Animation failed: Elements not in DOM');
+        if (options.onComplete) options.onComplete();
+        return Promise.resolve();
+    }
+    
+    // Rest of the animation code remains the same...
+    const {
+        duration = 1000,
+        curveHeight = 100,
+        onComplete = null
+    } = options;
+
+    // Clone the card for animation
+    const flyingCard = cardElement.cloneNode(true);
+    flyingCard.classList.add('flying-card');
+    
+    // Get original card position
+    const originalRect = cardElement.getBoundingClientRect();
+    flyingCard.style.position = 'fixed';
+    flyingCard.style.left = `${originalRect.left}px`;
+    flyingCard.style.top = `${originalRect.top}px`;
+    flyingCard.style.width = `${originalRect.width}px`;
+    flyingCard.style.height = `${originalRect.height}px`;
+    flyingCard.style.zIndex = '1000';
+    
+    // Add to body
+    document.body.appendChild(flyingCard);
+    
+    // Get destination position
+    const destinationRect = destinationElement.getBoundingClientRect();
+    
+    // Calculate animation end position (center of destination)
+    const endX = destinationRect.left + destinationRect.width / 2 - originalRect.width / 2;
+    const endY = destinationRect.top + destinationRect.height / 2 - originalRect.height / 2;
+    
+    // Define bezier curve control points
+const p0 = { x: originalRect.left, y: originalRect.top };
+const p1 = { x: originalRect.left + (endX - originalRect.left) * 0.25, y: originalRect.top - curveHeight };
+const p2 = { x: originalRect.left + (endX - originalRect.left) * 0.85, y: endY - curveHeight/2 }; // Changed from 0.75 to 0.85
+const p3 = { x: endX, y: endY };
+    
+    // Start time for animation
+    const startTime = performance.now();
+    
+    // Return a promise that resolves when animation completes
+    return new Promise((resolve) => {
+        function animate(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            if (progress < 1) {
+                // Calculate position along bezier curve
+                const point = calculateBezierPoint(progress, p0, p1, p2, p3);
+                
+                // Calculate scale (larger in the middle)
+                const scale = 1 + 0.25 * Math.sin(progress * Math.PI);
+                
+                // Apply transformation
+                flyingCard.style.transform = `translate(${point.x - originalRect.left}px, ${point.y - originalRect.top}px) scale(${scale})`;
+                
+                // Continue animation
+                requestAnimationFrame(animate);
+            } else {
+                // Animation complete
+                flyingCard.remove();
+                if (onComplete) onComplete();
+                resolve();
+            }
+        }
+        
+        // Start animation
+        requestAnimationFrame(animate);
+    });
+}
+
+// Add this helper function for bezier curve calculations
+function calculateBezierPoint(t, p0, p1, p2, p3) {
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+    
+    const p = {
+        x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
+        y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
+    };
+    
+    return p;
+}
+
 async function recruitHeroConfirmed(hero, hqIndex) {
-playSFX('recruit');
+    playSFX('recruit');
 
-if (hero.saveHumanityBystander === true) {
-victoryPile.push(hero);
-onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> rescued!`);
-bystanderBonuses();
-await rescueBystanderAbility(hero);
-} else if (silentMeditationRecruit === true) {
- 	playerHand.push(hero);
-	silentMeditationRecruit = false;
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your hand.`);
-} else if (backflipRecruit === true) {
-playerDeck.push(hero);
-hero.revealed = true;
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to the top of your deck.`);
-backflipRecruit = false;
-} else {
-playerDiscardPile.push(hero);
-onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
-}      
+    // Try multiple ways to find the card element
+    let cardElement;
+    
+    // Method 1: Try to find by HQ index
+    const hqCell = document.querySelector(`[data-hq-index="${hqIndex}"]`);
+    if (hqCell) {
+        cardElement = hqCell.querySelector('.card-image') || hqCell.querySelector('.card');
+    }
+    
+    // Method 2: If still not found, try to find by hero ID
+    if (!cardElement && hero.id) {
+        cardElement = document.querySelector(`[data-hero-id="${hero.id}"]`);
+    }
+    
+    // Method 3: As a last resort, try any card in the HQ area
+    if (!cardElement) {
+        const hqCells = document.querySelectorAll('[data-hq-index]');
+        if (hqCells.length > 0) {
+            const randomCell = hqCells[Math.floor(Math.random() * hqCells.length)];
+            cardElement = randomCell.querySelector('.card-image') || randomCell.querySelector('.card');
+        }
+    }
 
-    totalRecruitPoints -= hero.cost;
+    let destinationElement;
+    let destinationId = '';
+    
+    if (hero.saveHumanityBystander === true) {
+        destinationId = 'victory-pile-button';
+        victoryPile.push(hero);
+        onscreenConsole.log(`<span class="console-highlights">${hero.name}</span> rescued!`);
+        bystanderBonuses();
+        await rescueBystanderAbility(hero);
+    } else if (silentMeditationRecruit === true) {
+        destinationId = 'player-card-zone';
+        playerHand.push(hero);
+        silentMeditationRecruit = false;
+        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your hand.`);
+    } else if (backflipRecruit === true) {
+        destinationId = 'player-deck-cell';
+        playerDeck.push(hero);
+        hero.revealed = true;
+        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to the top of your deck.`);
+        backflipRecruit = false;
+    } else {
+        destinationId = 'discard-pile-cell';
+        playerDiscardPile.push(hero);
+        onscreenConsole.log(`Hero recruited! <span class="console-highlights">${hero.name}</span> has been added to your discard pile.`);
+    }
+
+    // Try to find the destination element
+    destinationElement = document.getElementById(destinationId);
+          
+        // If still not found, use the body as fallback (animation will still run but to a default position)
+        if (!destinationElement) {
+            destinationElement = document.body;
+            console.warn(`Destination element ${destinationId} not found, using body as fallback`);
+        }
+    
+
+    // Animate the card to its destination if we found a card element
+    if (cardElement) {
+animateCardToDestination(cardElement, destinationElement, {
+            duration: 1200,
+            curveHeight: 150,
+            onComplete: () => {
+                // Update the game board after animation completes
+                updateGameBoard();
+            }
+        }).then(() => {
+            // Any code that needs to run after animation completes
+        }).catch((error) => {
+            console.error('Animation error:', error);
+            updateGameBoard(); // Still update the board even if animation fails
+        });
+    } else {
+        // If we couldn't find a card element, just update the game board
+        console.warn('Card element not found for animation, updating board directly');
+        updateGameBoard();
+    }
+
+    if (!negativeZoneAttackAndRecruit) {
+        // Get the reserved recruit points for this HQ
+        let hqReservedRecruit = 0;
+        switch(hqIndex) {
+            case 0: hqReservedRecruit = hq1ReserveRecruit; break;
+            case 1: hqReservedRecruit = hq2ReserveRecruit; break;
+            case 2: hqReservedRecruit = hq3ReserveRecruit; break;
+            case 3: hqReservedRecruit = hq4ReserveRecruit; break;
+            case 4: hqReservedRecruit = hq5ReserveRecruit; break;
+        }
+        
+        // Use reserved recruit points first
+        const reservedRecruitUsed = Math.min(hero.cost, hqReservedRecruit);
+        if (reservedRecruitUsed > 0) {
+            // Deduct from the appropriate HQ reserve
+            switch(hqIndex) {
+                case 0: hq1ReserveRecruit -= reservedRecruitUsed; break;
+                case 1: hq2ReserveRecruit -= reservedRecruitUsed; break;
+                case 2: hq3ReserveRecruit -= reservedRecruitUsed; break;
+                case 3: hq4ReserveRecruit -= reservedRecruitUsed; break;
+                case 4: hq5ReserveRecruit -= reservedRecruitUsed; break;
+            }
+            onscreenConsole.log(`Used ${reservedRecruitUsed} reserved <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> points from HQ ${hqIndex}.`);
+        }
+        
+        // Deduct remaining cost from regular recruit points
+        totalRecruitPoints -= (hero.cost - reservedRecruitUsed);
+    } else {
+        totalAttackPoints -= hero.cost;
+    }
+    
+    // Update the reserve display after modifying reserved points
+    updateReserveAttackAndRecruit();
     
     // Get the new card before placing it in HQ
     const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
@@ -8612,6 +10605,30 @@ function updateCounterDisplay() {
     document.getElementById('decreaseB').disabled = counterB <= 0;
     document.getElementById('increaseB').disabled = 
         counterA <= 0 || counterB >= totalRecruitPoints;
+    
+    // ADD THIS LINE: Validate forcefield selection if applicable
+    if (window.mastermindAttackForValidation) {
+        validateForcefieldSelection(window.mastermindAttackForValidation);
+    }
+}
+
+function validateForcefieldSelection(mastermindAttack) {
+    // Calculate if player leaves enough attack points for mastermind
+    const attackPointsLeft = totalAttackPoints - counterA;
+    const hasEnoughForMastermind = canUseRecruitForMastermind() ? true : attackPointsLeft >= mastermindAttack;
+    
+    // Disable confirm button if not enough attack points are left
+    document.getElementById('bribe-confirm-button').disabled = !hasEnoughForMastermind;
+    
+    // Add visual feedback
+    const confirmButton = document.getElementById('bribe-confirm-button');
+    if (!hasEnoughForMastermind) {
+        confirmButton.title = `Need at least ${mastermindAttack} attack points left for mastermind`;
+        confirmButton.style.opacity = "0.5";
+    } else {
+        confirmButton.title = "";
+        confirmButton.style.opacity = "1";
+    }
 }
 
 // Button handlers
@@ -8669,12 +10686,24 @@ async function showCounterPopup(villainCard, villainAttack) {
 
 // Button handlers for popup
 document.getElementById('bribe-confirm-button').addEventListener('click', () => {
+    // Capture the values BEFORE resetting
+    const attackUsed = counterA;
+    const recruitUsed = counterB;
+    
+    // Hide the popup
     document.getElementById('bribe-popup').style.display = 'none';
-document.getElementById('modal-overlay').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'none';
+    
+    // Clean up the validation variable
+    window.mastermindAttackForValidation = null;
+    
+    // Reset the popup to its original state
+    resetBribePopup();
+    
     if (counterResolve) {
         counterResolve({
-            attackUsed: counterA,
-            recruitUsed: counterB
+            attackUsed: attackUsed,
+            recruitUsed: recruitUsed
         });
     }
 });
@@ -9131,5 +11160,158 @@ function openSettingsPopup() {
   if (overlay) overlay.style.display = 'block';
 }
 
+function initFontSelector() {
+  const fontSelector = document.getElementById('font-selector');
+  const body = document.body;
 
+  if (!fontSelector) {
+    console.log('Font selector not found');
+    return;
+  }
 
+  const ALL_FONT_CLASSES = ['font-Core', 'font-DarkCity', 'font-FantasticFour'];
+
+  // Normalise a selector value to an actual font key we know how to apply
+  const normaliseFont = (val) => {
+    if (!val || val === 'default') return 'Core';
+    return ['Core', 'DarkCity', 'FantasticFour'].includes(val) ? val : 'Core';
+  };
+
+  const applyFont = (fontName) => {
+    // Remove all known font classes, add the one we want
+    body.classList.remove(...ALL_FONT_CLASSES);
+    body.classList.add(`font-${fontName}`);
+
+    // Update CSS variables for different elements
+    updateFontVariables(fontName);
+
+    // Keep the selector in sync if it exists
+    if (fontSelector) fontSelector.value = fontName;
+  };
+
+  // Change handler
+  fontSelector.addEventListener('change', function () {
+    const chosen = normaliseFont(this.value);
+    applyFont(chosen);
+    localStorage.setItem('selectedFont', chosen);
+    console.log(`Font changed to: ${chosen}`);
+  });
+
+  // Initial load: use saved font or fall back to Core
+  const savedFontRaw = localStorage.getItem('selectedFont');
+  const initialFont = normaliseFont(savedFontRaw);
+  applyFont(initialFont);
+
+  console.log('Font selector initialized');
+}
+
+function updateFontVariables(fontName) {
+  const root = document.documentElement;
+
+  // Define font mappings for different elements
+  const fontMappings = {
+    Core: {
+      '--heading-font': "'Percolator', Arial, sans-serif",
+      '--heading-size': 'var(--core-heading-size)',
+      '--smaller-heading-size': 'var(--core-smaller-heading-size)',
+      '--letter-spacing': 'var(--core-letter-spacing)',
+      '--text-transform': 'var(--core-text-transform)',
+      '--title-banner-size': 'var(--core-title-banner-size)',
+    },
+    DarkCity: {
+      '--heading-font': "'DarkCity', Arial, sans-serif",
+      '--heading-size': 'var(--darkcity-heading-size)',
+      '--smaller-heading-size': 'var(--darkcity-smaller-heading-size)',
+      '--letter-spacing': 'var(--darkcity-letter-spacing)',
+      '--text-transform': 'var(--darkcity-text-transform)',
+      '--title-banner-size': 'var(--darkcity-title-banner-size)',
+    },
+    FantasticFour: {
+      '--heading-font': "'FantasticFour', Arial, sans-serif",
+      '--heading-size': 'var(--fantasticfour-heading-size)',
+      '--smaller-heading-size': 'var(--fantasticfour-smaller-heading-size)',
+      '--letter-spacing': 'var(--fantasticfour-letter-spacing)',
+      '--text-transform': 'var(--fantasticfour-text-transform)',
+      '--title-banner-size': 'var(--fantasticfour-title-banner-size)',
+    },
+  };
+
+  // Fallback to Core if we get anything unexpected
+  const key = fontMappings[fontName] ? fontName : 'Core';
+  const vars = fontMappings[key];
+
+  for (const [variable, value] of Object.entries(vars)) {
+    root.style.setProperty(variable, value);
+  }
+}
+
+// Initialize both theme switcher and font selector
+function initThemeSwitcher() {
+  // Your existing theme switcher code here
+  const themeButtons = document.querySelectorAll('.theme-button');
+  const body = document.body;
+  
+  if (themeButtons.length === 0) {
+    console.log('No theme buttons found');
+    return;
+  }
+  
+  // Add click event to each theme button
+  themeButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const theme = this.getAttribute('data-theme');
+      
+      // Remove selected class from all buttons
+      themeButtons.forEach(btn => btn.classList.remove('selected'));
+      
+      // Add selected class to clicked button
+      this.classList.add('selected');
+      
+      // Update body class to apply theme
+      body.className = theme;
+      updateThemeImages(theme);
+                                    
+      // Save theme preference to localStorage
+      localStorage.setItem('selectedTheme', theme);
+      
+      console.log(`Theme changed to: ${theme}`);
+    });
+  });
+  
+  // Load saved theme on page load
+  const savedTheme = localStorage.getItem('selectedTheme');
+  if (savedTheme) {
+    body.className = savedTheme;
+    
+    // Find and select the button with the matching data-theme attribute
+    themeButtons.forEach(button => {
+      if (button.getAttribute('data-theme') === savedTheme) {
+        button.classList.add('selected');
+      }
+    });
+    
+    // Update theme images on page load
+    updateThemeImages(savedTheme);
+  }
+  
+  console.log('Theme switcher initialized');
+}
+
+function updateThemeImages(themeName) {
+  // Update settings cog
+  const settingsCog = document.getElementById('settingsCogImage');
+  if (settingsCog) {
+    settingsCog.src = `Visual Assets/Icons/settingsCog_${themeName}.svg`;
+  }
+
+  const gameboardSettingsCog = document.getElementById('gameboardSettingsCog');
+  if (gameboardSettingsCog) {
+    gameboardSettingsCog.src = `Visual Assets/Icons/settingsCog_${themeName}.svg`;
+  }
+  
+}
+
+// Call both initialization functions
+initThemeSwitcher();
+
+initFontSelector();
