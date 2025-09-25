@@ -7647,11 +7647,9 @@ function applyMastermindCosmicThreat(mastermindCard, attackReduction, label) {
 
 // Call when Mastermind attack finishes resolving (to remove temp reduction)
 function removeMastermindCosmicThreatBuff() {
-  if (mastermindCosmicThreat > 0) {
     mastermindTempBuff += mastermindCosmicThreat;
     mastermindCosmicThreat = 0;
     updateGameBoard();
-  }
 }
 
 async function showGalactusClassChoicePopup() {
@@ -11395,6 +11393,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
