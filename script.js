@@ -11319,15 +11319,48 @@ initThemeSwitcher();
 
 initFontSelector();
 
-const scrollTarget = document.getElementById("keyword-content");
+(function setupGlobalWheelRouting() {
+  const gameArea   = document.getElementById('keyword-content');         // element to scroll even when not hovered
+  const sidePanel  = document.getElementById('side-panel');        // visible during gameplay per your correction
+  const consoleSel = '.inner-console-log';                         // selector for your on-screen console(s)
 
-  // Prevent the default scroll so the page itself doesn't move
-  document.addEventListener("wheel", (event) => {
-    event.preventDefault(); 
+  if (!gameArea) {
+    console.warn('setupGlobalWheelRouting: #game-area not found');
+    return;
+  }
 
-    // Scroll the target element instead
-    scrollTarget.scrollTop += event.deltaY;
+  const sidePanelIsVisible = () => {
+    if (!sidePanel) return false;
+    const cs = getComputedStyle(sidePanel);
+    return cs.display !== 'none' && cs.visibility !== 'hidden';
+  };
+
+  const eventTargetsConsole = (e) => {
+    // allow any element matching .inner-console-log (handles multiple consoles)
+    const path = e.composedPath ? e.composedPath() : [];
+    return path.some(node =>
+      node && node.nodeType === 1 && node.matches && node.matches(consoleSel)
+    );
+  };
+
+  document.addEventListener('wheel', (e) => {
+    // If side-panel is NOT visible => normal scrolling everywhere.
+    if (!sidePanelIsVisible()) return;
+
+    // If the wheel is over the console, let it scroll normally.
+    if (eventTargetsConsole(e)) return;
+
+    // Otherwise, game is "engaged": route wheel to #game-area only.
+    e.preventDefault(); // block page/body scroll
+    if (e.shiftKey) {
+      // Let Shift+Wheel act like horizontal scroll
+      gameArea.scrollLeft += (e.deltaY || e.deltaX || 0);
+    } else {
+      gameArea.scrollTop  += (e.deltaY || 0);
+    }
   }, { passive: false });
+})();
+
 
 
 
