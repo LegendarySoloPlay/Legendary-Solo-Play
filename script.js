@@ -11319,81 +11319,74 @@ initThemeSwitcher();
 
 initFontSelector();
 
-(function routeWheelToKeywordWhenSidePanelVisible() {
+// Remote-scroll #keyword-content only when side panel is visible and the hovered target can't scroll.
+(function routeWheelFallbackToKeyword() {
   const keyword   = document.getElementById('keyword-content');
   const sidePanel = document.getElementById('side-panel');
 
-  if (!keyword) {
-    console.warn('routeWheelToKeywordWhenSidePanelVisible: #keyword-content not found');
+  if (!keyword || !sidePanel) {
+    console.warn('routeWheelFallbackToKeyword: missing #keyword-content or #side-panel');
     return;
   }
 
-  const sidePanelIsVisible = () => {
-    if (!sidePanel) return false;
-    const cs = getComputedStyle(sidePanel);
+  const isVisible = (el) => {
+    const cs = getComputedStyle(el);
     return cs.display !== 'none' && cs.visibility !== 'hidden';
   };
 
-  function canElementScroll(el, axis) {
+  const isScrollable = (el, axis) => {
+    if (!el) return false;
     const cs = getComputedStyle(el);
-    const overflow = axis === 'y' ? cs.overflowY : cs.overflowX;
-    if (!(overflow === 'auto' || overflow === 'scroll')) return false;
+    const ov  = axis === 'y' ? cs.overflowY : cs.overflowX;
+    if (!/(auto|scroll|overlay)/i.test(ov)) return false;
     return axis === 'y'
       ? el.scrollHeight > el.clientHeight
       : el.scrollWidth  > el.clientWidth;
-  }
+  };
 
-  function canScrollFurther(el, axis, delta) {
-    if (axis === 'y') {
-      if (delta > 0) return el.scrollTop + el.clientHeight < el.scrollHeight;
-      if (delta < 0) return el.scrollTop > 0;
-    } else {
-      if (delta > 0) return el.scrollLeft + el.clientWidth < el.scrollWidth;
-      if (delta < 0) return el.scrollLeft > 0;
+  const buildChain = (node) => {
+    const chain = [];
+    while (node) {
+      if (node.nodeType === 1) chain.push(node);
+      node = node.parentElement;
     }
-    return false;
-  }
+    return chain;
+  };
 
-  // Is there a real scroll target under the pointer for this gesture?
-  function anyAncestorCanScroll(e) {
-    const axis  = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? 'y' : 'x';
-    const delta = axis === 'y' ? e.deltaY : e.deltaX;
-
-    const path = e.composedPath ? e.composedPath() : [];
-    const chain = path.length
-      ? path.filter(n => n && n.nodeType === 1) // elements only
-      : (function collect(n){ const arr=[]; while(n){ if (n.nodeType===1) arr.push(n); n=n.parentElement; } return arr; })(e.target);
-
-    for (const el of chain) {
-      if (canElementScroll(el, axis) && canScrollFurther(el, axis, delta)) return true;
+  // Does the event's target or any ancestor (or the page) *have* a scroll box on this axis?
+  const hasScrollableAnywhere = (e, axis) => {
+    const path = e.composedPath ? e.composedPath() : buildChain(e.target);
+    for (const n of path) {
+      if (n && n.nodeType === 1 && isScrollable(n, axis)) return true;
+      if (n === document || n === window) break;
     }
-
-    // Also allow the page itself to scroll if it can
+    // Also treat the page itself as a scroll container
     const page = document.scrollingElement || document.documentElement;
-    if (canElementScroll(page, 'y') && canScrollFurther(page, 'y', e.deltaY)) return true;
-    if (canElementScroll(page, 'x') && canScrollFurther(page, 'x', e.deltaX)) return true;
-
-    return false;
-  }
+    return isScrollable(page, axis);
+  };
 
   document.addEventListener('wheel', (e) => {
-    // If side-panel is NOT visible, do nothing: allow normal page/element scrolling.
-    if (!sidePanelIsVisible()) return;
+    // Only apply this behaviour while side panel is visible.
+    if (!isVisible(sidePanel)) return;
 
-    // If something under the pointer can scroll in this direction, let it.
-    if (anyAncestorCanScroll(e)) return;
+    // Let other widgets handle zoom/gesture combos.
+    if (e.ctrlKey) return;
+    if (e.defaultPrevented) return;
 
-    // Otherwise, fall back to #keyword-content.
-    e.preventDefault(); // stop body/page scroll
-    const useX = e.shiftKey ? 'x' : (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? 'x' : 'y');
-    if (useX === 'x') {
-      const dx = e.deltaX || e.deltaY || 0;
-      keyword.scrollLeft += dx;
+    const axis = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? 'y' : 'x';
+
+    // If *anything* under the pointer (or the page) is a scroll container, let it behave normally.
+    if (hasScrollableAnywhere(e, axis)) return;
+
+    // Otherwise, route the wheel to #keyword-content without breaking other scrollers.
+    e.preventDefault();  // stop the body/page from scrolling
+    if (axis === 'y') {
+      keyword.scrollTop  += (e.deltaY || 0);
     } else {
-      const dy = e.deltaY || 0;
-      keyword.scrollTop += dy;
+      const dx = e.deltaX || e.deltaY || 0; // support Shift+wheel trackpad gestures
+      keyword.scrollLeft += dx;
     }
-  }, { passive: false });
+  }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
 
 
