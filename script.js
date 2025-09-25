@@ -11319,6 +11319,17 @@ initThemeSwitcher();
 
 initFontSelector();
 
+const scrollTarget = document.getElementById("keyword-content");
+
+  // Prevent the default scroll so the page itself doesn't move
+  document.addEventListener("wheel", (event) => {
+    event.preventDefault(); 
+
+    // Scroll the target element instead
+    scrollTarget.scrollTop += event.deltaY;
+  }, { passive: false });
+
+
 
 
 
