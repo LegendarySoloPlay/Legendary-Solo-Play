@@ -1,4 +1,4 @@
-//25.09.2025 12.40
+//25.09.2025 13.04
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -9744,7 +9744,9 @@ if (card.name === "Professor X - Telepathic Probe" &&
     // Focus button click handler
     focusButton.addEventListener('click', async (e) => {
         e.stopPropagation();
-        focusButton.style.display = 'none'; // Hide button immediately
+        if (totalRecruitPoints < focusCost) {
+            focusButton.style.display = 'none'; // Hide button immediately
+        }
         
         if (focusFunction && typeof focusFunction === 'function') {
             try {
