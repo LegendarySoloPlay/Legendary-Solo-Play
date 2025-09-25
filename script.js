@@ -1,4 +1,4 @@
-//25.09.2025 13.13
+//25.09.2025 15.34
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -426,6 +426,7 @@ let healingPossible = true;
 let finalBlowEnabled = false;
 let escapedVillainsCount = 0;
 let lastTurn = false;
+let finalTwist = false;
 let mastermindDeck = [];
 let alwaysLeads = '';
 let totalBystanders = 30;
@@ -3923,7 +3924,7 @@ async function processVillainCard() {
             }
             
             // Moved to the very end, after all other processing
-            if (pendingHeroKO && schemeTwistChainDepth === 0) {
+            if (pendingHeroKO && schemeTwistChainDepth === 0 && !finalTwist) {
                 pendingHeroKO = false;
                 await showHeroSelectPopup();
             }
@@ -5661,6 +5662,7 @@ if (lastTurn && !lastTurnMessageShown) {
 
             case "7Twists":
                 if (twistCount >= 7) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `The final Dark Portal has opened. ${mastermind.name} stands triumphant as the Dark Dimension's power seeps into our world. All hope is lost.`;
                     showDefeatPopup();
                 }
@@ -5696,6 +5698,7 @@ if (lastTurn && !lastTurnMessageShown) {
 
             case "8Twists":
                 if (twistCount >= 8) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `The Cosmic Cube is fully charged. With a single thought, ${mastermind.name} reshapes all of existence and the universe will never be the same.`;
                     showDefeatPopup();
                 }
@@ -5746,6 +5749,7 @@ if (lastTurn && !lastTurnMessageShown) {
             case "hqDetonated":
                 if ((hqExplosion1 >= 6 && hqExplosion2 >= 6 && hqExplosion3 >= 6 && 
                     hqExplosion4 >= 6 && hqExplosion5 >= 6) || heroDeck.length === 0) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `All HQ spaces have been destroyed or the Hero Deck has run out. The Helicarrier erupts in a chain of explosions, plunging into the ocean in a fiery wreck.`;
                     showDefeatPopup();
                 }
@@ -5753,6 +5757,7 @@ if (lastTurn && !lastTurnMessageShown) {
 
             case "babyThreeVillainEscape":
                 if (stackedTwistNextToMastermind >= 3) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `Three twists have been stacked next to ${mastermind.name}. Hope Summers has been taken, her future stolen, and the fate of mutantkind has changed forever.`;
                     showDefeatPopup();
                 }
@@ -5774,6 +5779,7 @@ if (lastTurn && !lastTurnMessageShown) {
 
             case "ForceField7Twists":
                 if (twistCount >= 7) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `The final force field is in place. ${mastermind.name} is untouchable and their reign will last forever.`;
                     showDefeatPopup();
                 }
@@ -5781,6 +5787,7 @@ if (lastTurn && !lastTurnMessageShown) {
 
             case "NegativeZone7Twists":
                 if (twistCount >= 7) {
+                    finalTwist = true;
                     document.getElementById('defeat-context').innerHTML = `Reality has been dragged into the Negative Zone. ${mastermind.name} rules over a warped antimatter universe and our world is lost forever.`;
                     showDefeatPopup();
                 }
@@ -11388,7 +11395,6 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
-
 
 
 
