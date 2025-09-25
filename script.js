@@ -1,4 +1,4 @@
-//24.09.2025 10.20
+//25.09.2025 12.40
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -10333,7 +10333,7 @@ async function animateCardToDestination(cardElement, destinationElement, options
     
     // Rest of the animation code remains the same...
     const {
-        duration = 500,
+        duration = 700,
         curveHeight = 100,
         onComplete = null
     } = options;
@@ -10482,7 +10482,7 @@ async function recruitHeroConfirmed(hero, hqIndex) {
     // Animate the card to its destination if we found a card element
     if (cardElement) {
 animateCardToDestination(cardElement, destinationElement, {
-            duration: 500,
+            duration: 700,
             curveHeight: 150,
             onComplete: () => {
                 // Update the game board after animation completes
@@ -11315,6 +11315,7 @@ function updateThemeImages(themeName) {
 initThemeSwitcher();
 
 initFontSelector();
+
 
 
 
