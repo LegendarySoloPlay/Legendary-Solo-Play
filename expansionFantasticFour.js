@@ -1,5 +1,5 @@
 // Fantastic Four Expansion
-// 25/09/2025 12.20
+// 25/09/2025 16.11
 
 //Keywords
 
@@ -1659,7 +1659,8 @@ function moloidsFight() {
             if (selectedCard === null) {
                 instructionsDiv.textContent = 'Select a hero to KO.';
             } else {
-                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.card.name}</span> will be KO'd.`;
+                const location = playerHand.includes(selectedCard) ? '(from Hand)' : '(from Played Cards)';
+                instructionsDiv.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> ${location} will be KO'd.`;
             }
         }
 
@@ -1680,7 +1681,7 @@ function moloidsFight() {
 
         // Toggle card selection
         function toggleCardSelection(card, listItem) {
-            if (selectedCard && selectedCard.card.id === card.id) {
+            if (selectedCard && selectedCard.id === card.id) {
                 // Deselect if clicking the same card
                 selectedCard = null;
                 listItem.classList.remove('selected');
@@ -1688,11 +1689,11 @@ function moloidsFight() {
             } else {
                 // Deselect previous selection if any
                 if (selectedCard) {
-                    const prevListItem = document.querySelector(`[data-card-id="${selectedCard.card.id}"]`);
+                    const prevListItem = document.querySelector(`[data-card-id="${selectedCard.id}"]`);
                     if (prevListItem) prevListItem.classList.remove('selected');
                 }
                 // Select new card
-                selectedCard = { card: card };
+                selectedCard = card;
                 listItem.classList.add('selected');
                 updateHeroImage(card);
             }
@@ -1705,16 +1706,15 @@ function moloidsFight() {
         confirmButton.onclick = () => {
             if (!selectedCard) return;
 
-            const { card } = selectedCard;
-            console.log(`${card.name} has been KO'd.`);
-            onscreenConsole.log(`<span class="console-highlights">${card.name}</span> has been KO'd.`);
+            console.log(`${selectedCard.name} has been KO'd.`);
+            onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> has been KO'd.`);
             koBonuses();
             
             // Remove the card from the correct array (hand or played)
             let removedFromHand = false;
             
             // Try to remove from hand first
-            const handIndex = playerHand.findIndex(c => c.id === card.id);
+            const handIndex = playerHand.findIndex(c => c.id === selectedCard.id);
             if (handIndex !== -1) {
                 playerHand.splice(handIndex, 1);
                 removedFromHand = true;
@@ -1722,11 +1722,11 @@ function moloidsFight() {
             
             // If not found in hand, try to remove from played cards
             if (!removedFromHand) {
-                card.markedToDestroy = true;
+                selectedCard.markedToDestroy = true;
             }
             
             // Add the card to the KO pile
-            koPile.push(card);
+            koPile.push(selectedCard);
             
             closePopup();
             updateGameBoard();
@@ -1748,14 +1748,15 @@ function moloidsFight() {
             modalOverlay.style.display = 'none';
         }
 
-        // Create a copy for display only
-        const displayCards = [...combinedCards];
-        genericCardSort(displayCards);
+        // Sort the cards before displaying them
+        genericCardSort(combinedCards);
 
         // Populate the list with the heroes from the player's hand and played cards
-        displayCards.forEach((card) => {
+        combinedCards.forEach((card) => {
             console.log('Adding card to selection list:', card);
             const li = document.createElement('li');
+            const location = playerHand.includes(card) ? '(Hand)' : '(Played Cards)';
+            
             const createTeamIconHTML = (value) => {
                 if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
                     return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
@@ -1775,7 +1776,7 @@ function moloidsFight() {
             const class2Icon = createClassIconHTML(card.class2);
             const class3Icon = createClassIconHTML(card.class3);
             
-            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name} ${location}</span>`;
             li.setAttribute('data-card-id', card.id);
 
             li.onmouseover = () => {
