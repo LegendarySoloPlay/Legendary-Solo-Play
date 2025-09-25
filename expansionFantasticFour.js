@@ -1722,12 +1722,7 @@ function moloidsFight() {
             
             // If not found in hand, try to remove from played cards
             if (!removedFromHand) {
-                const playedIndex = cardsPlayedThisTurn.findIndex(c => c.id === card.id);
-                if (playedIndex !== -1) {
-                    cardsPlayedThisTurn.splice(playedIndex, 1);
-                } else {
-                    console.error('Selected card not found in hand or played cards');
-                }
+                card.markedToDestroy = true;
             }
             
             // Add the card to the KO pile
