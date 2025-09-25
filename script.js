@@ -10333,7 +10333,7 @@ async function animateCardToDestination(cardElement, destinationElement, options
     
     // Rest of the animation code remains the same...
     const {
-        duration = 1000,
+        duration = 500,
         curveHeight = 100,
         onComplete = null
     } = options;
@@ -11315,4 +11315,5 @@ function updateThemeImages(themeName) {
 initThemeSwitcher();
 
 initFontSelector();
+
 
