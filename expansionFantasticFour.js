@@ -577,26 +577,25 @@ async function cosmicRaysRecruit(maxCost) {
             if (!selectedCard) return;
 
             // Remove from HQ
-            const idx = hq.findIndex(c =>
-                (c && (c.id ?? c.uniqueId)) === (selectedCard.id ?? selectedCard.uniqueId)
-            );
-            if (idx !== -1) {
-                hq.splice(idx, 1);
-            }
+const idx = hq.findIndex(c =>
+    (c && (c.id ?? c.uniqueId)) === (selectedCard.id ?? selectedCard.uniqueId)
+);
 
+if (idx !== -1) {
+    // Instead of splice + assignment, just replace the element directly
     const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
-    hq[idx] = newCard;
+    hq[idx] = newCard; // ✅ Direct replacement maintains array structure
     
     if (newCard) {
         onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
-    } 
-
-addHRToTopWithInnerHTML();
+    }
+    
+    addHRToTopWithInnerHTML();
     
     if (!hq[idx] && heroDeck.length === 0) {
         heroDeckHasRunOut = true;
     }
-
+}
             // Add to hand
             playerHand.push(selectedCard);
 	playSFX('recruit');
