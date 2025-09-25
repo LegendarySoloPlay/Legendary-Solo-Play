@@ -1,4 +1,4 @@
-//25.09.2025 13.04
+//25.09.2025 13.13
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -9744,10 +9744,6 @@ if (card.name === "Professor X - Telepathic Probe" &&
     // Focus button click handler
     focusButton.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (totalRecruitPoints < focusCost) {
-            focusButton.style.display = 'none'; // Hide button immediately
-			return;
-        }
         
         if (focusFunction && typeof focusFunction === 'function') {
             try {
@@ -9758,6 +9754,10 @@ if (card.name === "Professor X - Telepathic Probe" &&
             }
         } else {
             console.error(`Focus ability function not found for ${card.name}`);
+        }
+
+		if (totalRecruitPoints < focusCost) {
+            focusButton.style.display = 'none'; // Hide button immediately
         }
     });
 
@@ -11318,6 +11318,7 @@ function updateThemeImages(themeName) {
 initThemeSwitcher();
 
 initFontSelector();
+
 
 
 
