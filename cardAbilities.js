@@ -1,5 +1,5 @@
 // cardAbilities.js
-//25.09.2025 11.45
+//25.09.2025 16.39
 
 function koBonuses() {
 playSFX('ko');
@@ -5077,10 +5077,7 @@ function HenchmenKOHeroYouHave() {
                 }
             } else {
                 // Find the index in the original cardsPlayedThisTurn array
-                const playedIndex = cardsPlayedThisTurn.findIndex(c => c === card);
-                if (playedIndex !== -1) {
-                    cardsPlayedThisTurn.splice(playedIndex, 1);
-                }
+            card.markedToDestroy = true;
             }
             
             // Add the card to the KO pile
@@ -5273,10 +5270,7 @@ function FightKOHeroYouHave() {
                 }
             } else {
                 // Find the index in the original cardsPlayedThisTurn array
-                const playedIndex = cardsPlayedThisTurn.findIndex(c => c === card);
-                if (playedIndex !== -1) {
-                    cardsPlayedThisTurn.splice(playedIndex, 1);
-                }
+               card.markedToDestroy = true;
             }
             
             // Add the card to the KO pile
@@ -8666,7 +8660,7 @@ function chooseHeroesToKO() {
                     const indexInHand = playerHand.findIndex(c => c.id === originalCard.id);
 
                     if (indexInCardsPlayed !== -1) {
-                        cardsPlayedThisTurn.splice(indexInCardsPlayed, 1);
+                        originalCard.markedToDestroy = true;
                     } else if (indexInHand !== -1) {
                         playerHand.splice(indexInHand, 1);
                     }
@@ -9672,8 +9666,7 @@ function strengthHeroesNumberToKO() {
                 );
 
                 if (indexInCardsPlayed !== -1) {
-                    const koedCard = cardsPlayedThisTurn.splice(indexInCardsPlayed, 1)[0];
-                    koPile.push(koedCard);
+                    card.markedToDestroy = true;
                 } else if (indexInHand !== -1) {
                     const koedCard = playerHand.splice(indexInHand, 1)[0];
                     koPile.push(koedCard);
