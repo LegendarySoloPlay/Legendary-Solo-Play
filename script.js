@@ -6001,11 +6001,11 @@ function updateEvilWinsTracker() {
       break;
 
         case "Bathe the Earth in Cosmic Rays":
-      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/6 Non Grey Heroes KO'd or Carried Off`;
+      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/6 Non Grey Heroes in KO Pile`;
       break;
 
         case "Flood the Planet with Melted Glaciers":
-      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/20 Non Grey Heroes KO'd or Carried Off`;
+      evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/20 Non Grey Heroes in KO Pile`;
       break;
 
         case "Invincible Force Field":
@@ -11315,3 +11315,4 @@ function updateThemeImages(themeName) {
 initThemeSwitcher();
 
 initFontSelector();
+
