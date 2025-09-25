@@ -393,35 +393,36 @@ function zabuKOChoice() {
       updateInstructions();
     }
 
-genericCardSort(playerDiscardPile);
+    // Create sorted copies for display only
+    const sortedDiscardPile = [...playerDiscardPile];
+    const sortedHand = [...playerHand];
+    genericCardSort(sortedDiscardPile);
+    genericCardSort(sortedHand);
 
-    // Populate discard pile
-    playerDiscardPile.forEach((card) => {
+    // Populate discard pile using sorted copy
+    sortedDiscardPile.forEach((card) => {
       const li = document.createElement('li');
-    const createTeamIconHTML = (value) => {
+      const createTeamIconHTML = (value) => {
         if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
             return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
         }
         return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
+      };
 
-    const createClassIconHTML = (value) => {
+      const createClassIconHTML = (value) => {
         if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
             return '';
         }
         return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(card.team);
-    const class1Icon = createClassIconHTML(card.class1);
-    const class2Icon = createClassIconHTML(card.class2);
-    const class3Icon = createClassIconHTML(card.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
-     
+      };
+      
+      const teamIcon = createTeamIconHTML(card.team);
+      const class1Icon = createClassIconHTML(card.class1);
+      const class2Icon = createClassIconHTML(card.class2);
+      const class3Icon = createClassIconHTML(card.class3);
+      
+      li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+      
       li.dataset.cardId = card.id;
 
       li.onmouseover = () => {
@@ -444,34 +445,29 @@ genericCardSort(playerDiscardPile);
       discardPileList.appendChild(li);
     });
 
-genericCardSort(playerHand);
-
-    // Populate hand
-    playerHand.forEach((card) => {
+    // Populate hand using sorted copy
+    sortedHand.forEach((card) => {
       const li = document.createElement('li');
-          const createTeamIconHTML = (value) => {
+      const createTeamIconHTML = (value) => {
         if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
             return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
         }
         return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
+      };
 
-    const createClassIconHTML = (value) => {
+      const createClassIconHTML = (value) => {
         if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
             return '';
         }
         return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(card.team);
-    const class1Icon = createClassIconHTML(card.class1);
-    const class2Icon = createClassIconHTML(card.class2);
-    const class3Icon = createClassIconHTML(card.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
+      };
+      
+      const teamIcon = createTeamIconHTML(card.team);
+      const class1Icon = createClassIconHTML(card.class1);
+      const class2Icon = createClassIconHTML(card.class2);
+      const class3Icon = createClassIconHTML(card.class3);
+      
+      li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${card.name}</span>`;
       li.dataset.cardId = card.id;
 
       li.onmouseover = () => {
@@ -509,7 +505,7 @@ genericCardSort(playerHand);
         if (koIndex !== -1) {
           koPile.push(selectedCard);
           onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> KO'd.`);
-koBonuses();
+          koBonuses();
           closePopup();
           updateGameBoard();
           resolve(selectedCard);
@@ -1076,34 +1072,33 @@ async function prodigyCopyPowers() {
             updateInstructions();
         }
 
-genericCardSort(heroesToCopy);
+        // Create sorted copy for display only
+        const sortedHeroesToCopy = [...heroesToCopy];
+        genericCardSort(sortedHeroesToCopy);
 
-        // Populate hero list
-        heroesToCopy.forEach(hero => {
+        // Populate hero list using sorted copy
+        sortedHeroesToCopy.forEach(hero => {
             const li = document.createElement('li');
-                const createTeamIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
+            const createTeamIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
 
-    const createClassIconHTML = (value) => {
-        if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-            return '';
-        }
-        return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-    };
-    
-    const teamIcon = createTeamIconHTML(hero.team);
-    const class1Icon = createClassIconHTML(hero.class1);
-    const class2Icon = createClassIconHTML(hero.class2);
-    const class3Icon = createClassIconHTML(hero.class3);
-    
-    // Combine all icons
-    const allIcons = teamIcon + class1Icon + class2Icon + class3Icon;
-    
-    li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
+            const createClassIconHTML = (value) => {
+                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+                    return '';
+                }
+                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+            };
+            
+            const teamIcon = createTeamIconHTML(hero.team);
+            const class1Icon = createClassIconHTML(hero.class1);
+            const class2Icon = createClassIconHTML(hero.class2);
+            const class3Icon = createClassIconHTML(hero.class3);
+            
+            li.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
             li.dataset.cardId = hero.id;
 
             li.onmouseover = () => {
@@ -1236,18 +1231,17 @@ genericCardSort(heroesToCopy);
             }
         };
 
-closeButton.onclick = () => {
-    onscreenConsole.log(`You've cancelled <span class="console-highlights">Prodigy</span><span class="bold-spans">'s</span> ability.`);
-    const prodigyCardIndex = cardsPlayedThisTurn.findIndex(c => c.name === 'Prodigy' && !c.isCopied);
-    if (prodigyCardIndex !== -1) {
-        const prodigyCard = cardsPlayedThisTurn[prodigyCardIndex];
-        cardsPlayedThisTurn.splice(prodigyCardIndex, 1);  // <-- Corrected
-        playerHand.push(prodigyCard);
-    }
-    closePopup();
-    resolve(false);
-};
-
+        closeButton.onclick = () => {
+            onscreenConsole.log(`You've cancelled <span class="console-highlights">Prodigy</span><span class="bold-spans">'s</span> ability.`);
+            const prodigyCardIndex = cardsPlayedThisTurn.findIndex(c => c.name === 'Prodigy' && !c.isCopied);
+            if (prodigyCardIndex !== -1) {
+                const prodigyCard = cardsPlayedThisTurn[prodigyCardIndex];
+                cardsPlayedThisTurn.splice(prodigyCardIndex, 1);
+                playerHand.push(prodigyCard);
+            }
+            closePopup();
+            resolve(false);
+        };
 
         function closePopup() {
             // Reset UI
@@ -1766,3 +1760,4 @@ async function handleCardPlacement(card, options = {}) {
   updateGameBoard();
 
 }
+
