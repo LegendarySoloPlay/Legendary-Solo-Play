@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//25.09.2025 14.50
+//25.09.2025 16.32
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -5168,7 +5168,7 @@ function handlePhalanxNoTechRevealed() {
                 const indexInHand = playerHand.findIndex(c => c.id === selectedCard.id);
 
                 if (indexInCardsPlayed !== -1) {
-                    cardsPlayedThisTurn.splice(indexInCardsPlayed, 1);
+                    selectedCard.markedToDestroy = true;
                 } else if (indexInHand !== -1) {
                     playerHand.splice(indexInHand, 1);
                 }
@@ -5526,8 +5526,7 @@ function bystanderRadiationScientist() {
                     if (index !== -1) playerHand.splice(index, 1);
                 }
                 else if (selectedLocation === 'played') {
-                    const index = cardsPlayedThisTurn.findIndex(card => card.id === selectedCard.id);
-                    if (index !== -1) cardsPlayedThisTurn.splice(index, 1);
+                    selectedCard.markedToDestroy = true;
                 }
                 
                 koPile.push(selectedCard);
@@ -7248,12 +7247,10 @@ function hammerheadFight() {
                 if (handIndex !== -1) {
                     playerHand.splice(handIndex, 1);
                 }
-            } else {
-                const playedIndex = cardsPlayedThisTurn.findIndex(playedCard => playedCard === card.card);
-                if (playedIndex !== -1) {
-                    cardsPlayedThisTurn.splice(playedIndex, 1);
-                }
-            }
+} else {
+    // Directly mark the card to be destroyed instead of splicing
+    card.card.markedToDestroy = true;
+}
             
             // Add the card to the KO pile
             koPile.push(card.card);
@@ -7866,10 +7863,7 @@ function bullseyeFight() {
                         playerHand.splice(index, 1);
                     }
                 } else {
-                    const index = cardsPlayedThisTurn.findIndex(c => c.id === selectedRecruitCard.card.id);
-                    if (index !== -1) {
-                        cardsPlayedThisTurn.splice(index, 1);
-                    }
+                    selectedRecruitCard.card.markedToDestroy = true;
                 }
                 koPile.push(selectedRecruitCard.card);
                 onscreenConsole.log(`<img src='Visual Assets/Icons/Recruit.svg' alt='Recruit Icon' class='console-card-icons'> Choice: <span class="console-highlights">${selectedRecruitCard.card.name}</span> has been KO'd.`);
@@ -7885,10 +7879,7 @@ function bullseyeFight() {
                         playerHand.splice(index, 1);
                     }
                 } else {
-                    const index = cardsPlayedThisTurn.findIndex(c => c.id === selectedAttackCard.card.id);
-                    if (index !== -1) {
-                        cardsPlayedThisTurn.splice(index, 1);
-                    }
+                    selectedAttackCard.card.markedToDestroy = true;
                 }
                 koPile.push(selectedAttackCard.card);
                 onscreenConsole.log(`<img src='Visual Assets/Icons/Attack.svg' alt='Attack Icon' class='console-card-icons'> Choice: <span class="console-highlights">${selectedAttackCard.card.name}</span> has been KO'd.`);
