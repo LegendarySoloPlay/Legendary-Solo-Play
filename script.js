@@ -11319,48 +11319,77 @@ initThemeSwitcher();
 
 initFontSelector();
 
-(function setupGlobalWheelRouting() {
-  const gameArea   = document.getElementById('keyword-content');         // element to scroll even when not hovered
-  const sidePanel  = document.getElementById('side-panel');        // visible during gameplay per your correction
-  const consoleSel = '.inner-console-log';                         // selector for your on-screen console(s)
-
-  if (!gameArea) {
-    console.warn('setupGlobalWheelRouting: #game-area not found');
+(function routeWheelToKeywordWhenNeeded() {
+  const keyword = document.getElementById('keyword-content');
+  if (!keyword) {
+    console.warn('routeWheelToKeywordWhenNeeded: #keyword-content not found');
     return;
   }
 
-  const sidePanelIsVisible = () => {
-    if (!sidePanel) return false;
-    const cs = getComputedStyle(sidePanel);
-    return cs.display !== 'none' && cs.visibility !== 'hidden';
-  };
+  // Utility: can this element (or its scroll box) scroll along axis?
+  function canElementScroll(el, axis) {
+    const cs = getComputedStyle(el);
+    const overflow = axis === 'y' ? cs.overflowY : cs.overflowX;
+    if (!(overflow === 'auto' || overflow === 'scroll')) return false;
 
-  const eventTargetsConsole = (e) => {
-    // allow any element matching .inner-console-log (handles multiple consoles)
+    if (axis === 'y') return el.scrollHeight > el.clientHeight;
+    return el.scrollWidth > el.clientWidth;
+  }
+
+  // Utility: is the element actually able to move further in the direction of delta?
+  function canScrollFurther(el, axis, delta) {
+    if (axis === 'y') {
+      if (delta > 0) return el.scrollTop + el.clientHeight < el.scrollHeight; // not at bottom
+      if (delta < 0) return el.scrollTop > 0;                                  // not at top
+      return false;
+    } else {
+      if (delta > 0) return el.scrollLeft + el.clientWidth < el.scrollWidth;   // not at right
+      if (delta < 0) return el.scrollLeft > 0;                                 // not at left
+      return false;
+    }
+  }
+
+  // Walk up from the event target to see if any ancestor can scroll in this gesture’s direction
+  function anyAncestorCanScroll(e) {
+    const axis = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? 'y' : 'x';
+    const delta = axis === 'y' ? e.deltaY : e.deltaX;
+
+    // Use composedPath for shadow DOM safety; fallback to DOM parents
     const path = e.composedPath ? e.composedPath() : [];
-    return path.some(node =>
-      node && node.nodeType === 1 && node.matches && node.matches(consoleSel)
-    );
-  };
+    const chain = path.length
+      ? path.filter(n => n && n.nodeType === 1)  // elements only
+      : (function collect(n){ const arr=[]; while(n){ if (n.nodeType===1) arr.push(n); n=n.parentElement; } return arr; })(e.target);
+
+    for (const el of chain) {
+      if (canElementScroll(el, axis) && canScrollFurther(el, axis, delta)) {
+        return true; // a real scroll target exists under the pointer
+      }
+    }
+
+    // Also consider the page itself as a scroll container
+    const scroller = document.scrollingElement || document.documentElement;
+    if (canElementScroll(scroller, 'y') && canScrollFurther(scroller, 'y', e.deltaY)) return true;
+    if (canElementScroll(scroller, 'x') && canScrollFurther(scroller, 'x', e.deltaX)) return true;
+
+    return false;
+  }
 
   document.addEventListener('wheel', (e) => {
-    // If side-panel is NOT visible => normal scrolling everywhere.
-    if (!sidePanelIsVisible()) return;
+    // If something under the pointer can scroll in this direction, let it do so naturally.
+    if (anyAncestorCanScroll(e)) return;
 
-    // If the wheel is over the console, let it scroll normally.
-    if (eventTargetsConsole(e)) return;
-
-    // Otherwise, game is "engaged": route wheel to #game-area only.
-    e.preventDefault(); // block page/body scroll
-    if (e.shiftKey) {
-      // Let Shift+Wheel act like horizontal scroll
-      gameArea.scrollLeft += (e.deltaY || e.deltaX || 0);
+    // Otherwise, route the wheel to #keyword-content.
+    e.preventDefault(); // stop body/page scrolling
+    const useX = e.shiftKey ? 'x' : (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? 'x' : 'y');
+    if (useX === 'x') {
+      const dx = e.deltaX || e.deltaY || 0;
+      keyword.scrollLeft += dx;
     } else {
-      gameArea.scrollTop  += (e.deltaY || 0);
+      const dy = e.deltaY || 0;
+      keyword.scrollTop += dy;
     }
   }, { passive: false });
 })();
-
 
 
 
