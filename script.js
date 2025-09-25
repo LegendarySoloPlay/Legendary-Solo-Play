@@ -9746,6 +9746,7 @@ if (card.name === "Professor X - Telepathic Probe" &&
         e.stopPropagation();
         if (totalRecruitPoints < focusCost) {
             focusButton.style.display = 'none'; // Hide button immediately
+			return;
         }
         
         if (focusFunction && typeof focusFunction === 'function') {
@@ -11317,6 +11318,7 @@ function updateThemeImages(themeName) {
 initThemeSwitcher();
 
 initFontSelector();
+
 
 
 
