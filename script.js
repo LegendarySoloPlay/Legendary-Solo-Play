@@ -1,4 +1,4 @@
-//25.09.2025 15.34
+//26.09.2025 10.05
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -5356,32 +5356,66 @@ if (mastermind.name === 'Galactus') {
     </div>
   `;
 
-    keywordButton.addEventListener('click', async (e) => {
-      // set guard BEFORE anything that might trigger a redraw
-      mastermindCosmicThreatResolved = true;
-      // remove the actual clicked element to avoid visual lag/dupes
-      e.currentTarget.remove();
+  keywordButton.addEventListener('click', async (e) => {
+    // Visually remove to avoid duplicate overlays, but do NOT mark resolved yet
+    e.currentTarget.remove();
 
-      const chosenClass = await showGalactusClassChoicePopup(); // returns 'Strength'|'Instinct'|'Covert'|'Tech'|'Range'
-      const count = allRevealable.filter(c => hasClass(c, chosenClass)).length * 3;
-      applyMastermindCosmicThreat(mastermind, count, chosenClass);
-    });
+    const chosenClass = await showGalactusClassChoicePopup(); // returns 'Strength' | ... | null
+    if (!chosenClass) {
+      // Cancelled: ensure the flag stays false and re-render so button returns
+      mastermindCosmicThreatResolved = false;
+      updateGameBoard();
+      return;
+    }
 
-  } else {
-    const threshold = mastermind.name === 'The Beyonder' ? 5 : 6;
-keywordButtonText.innerHTML = `
-  <div>Cosmic Threat:</div>
-  <div>${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards</div>
-`;
+    // Recompute revealables live
+    const livePool = [
+      ...playerHand,
+      ...cardsPlayedThisTurn.filter(c => !c?.isCopied && !c?.sidekickToDestroy)
+    ];
+    const hasClass = (card, wanted) =>
+      ['class1','class2','class3'].some(k =>
+        String(card?.[k] ?? '').trim().toLowerCase() === String(wanted).trim().toLowerCase()
+      );
 
-    const count = allRevealable.filter(c => typeof c?.cost === 'number' && c.cost >= threshold).length * 3;
+    const attackReduction = livePool.filter(c => hasClass(c, chosenClass)).length * 3;
 
-    keywordButton.addEventListener('click', (e) => {
-      mastermindCosmicThreatResolved = true;
-      e.currentTarget.remove();
-      applyMastermindCosmicThreat(mastermind, count, `${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards`);
-    });
-  }
+    applyMastermindCosmicThreat(mastermind, attackReduction, chosenClass);
+    // Only now mark it resolved
+    mastermindCosmicThreatResolved = true;
+    updateGameBoard();
+  });
+
+} else {
+  const threshold = mastermind.name === 'The Beyonder' ? 5 : 6;
+  keywordButtonText.innerHTML = `
+    <div>Cosmic Threat:</div>
+    <div>${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards</div>
+  `;
+
+  keywordButton.addEventListener('click', () => {
+    // Recompute revealables live
+    const livePool = [
+      ...playerHand,
+      ...cardsPlayedThisTurn.filter(c => !c?.isCopied && !c?.sidekickToDestroy)
+    ];
+    const attackReduction = livePool
+      .filter(c => typeof c?.cost === 'number' && c.cost >= threshold).length * 3;
+
+    // Remove visual button, apply reduction, then flag as resolved
+    const btn = mastermindContainer.querySelector(`#${MM_BTN_ID}`);
+    if (btn) btn.remove();
+
+    applyMastermindCosmicThreat(
+      mastermind,
+      attackReduction,
+      `${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards`
+    );
+
+    mastermindCosmicThreatResolved = true;
+    updateGameBoard();
+  });
+}
 
   keywordButton.appendChild(keywordButtonText);
   mastermindContainer.appendChild(keywordButton);
@@ -7662,8 +7696,9 @@ async function showGalactusClassChoicePopup() {
     const instructionsDiv = document.getElementById('context');
     const heroImage = document.getElementById('hero-one-location-image');
     const oneChoiceHoverText = document.getElementById('oneChoiceHoverText');
+    const closeBtn = document.getElementById('close-choice-button'); // <- use this
 
-    // Init UI
+    // Init UI (same as you had)
     popupTitle.textContent = 'Choose a Class';
     instructionsDiv.textContent = 'Select a class to reveal for Galactus’s Cosmic Threat.';
     cardsList.innerHTML = '';
@@ -7673,13 +7708,29 @@ async function showGalactusClassChoicePopup() {
     modalOverlay.style.display = 'block';
     popup.style.display = 'block';
 
-    // Show Galactus card (use your actual Galactus art path)
     heroImage.src = 'Visual Assets/Masterminds/FantasticFour_Galactus.webp';
     heroImage.style.display = 'block';
     oneChoiceHoverText.style.display = 'none';
 
     const options = ['Strength','Instinct','Covert','Tech','Range'];
     let selected = null;
+
+    function resetPopupUI() {
+      popupTitle.textContent = 'Hero Ability!';
+      instructionsDiv.textContent = 'Context';
+      confirmButton.textContent = 'Confirm';
+      confirmButton.disabled = true;
+      heroImage.src = '';
+      heroImage.style.display = 'none';
+      oneChoiceHoverText.style.display = 'block';
+      popup.style.display = 'none';
+      modalOverlay.style.display = 'none';
+    }
+
+    function finish(result) {
+      resetPopupUI();
+      resolve(result); // 'Strength' | 'Instinct' | 'Covert' | 'Tech' | 'Range' | null
+    }
 
     options.forEach(opt => {
       const li = document.createElement('li');
@@ -7697,27 +7748,20 @@ async function showGalactusClassChoicePopup() {
     });
 
     confirmButton.onclick = () => {
-      if (selected) {
-        closePopup();
-        resolve(selected); // 'Strength'|'Instinct'|'Covert'|'Tech'|'Range'
-      }
+      if (selected) finish(selected);
     };
 
-    function closePopup() {
-      // Minimal reset (match your own reset routine if you have one)
-      popupTitle.textContent = 'Hero Ability!';
-      instructionsDiv.textContent = 'Context';
-      confirmButton.textContent = 'Confirm';
-      confirmButton.disabled = true;
-      heroImage.src = '';
-      heroImage.style.display = 'none';
-      oneChoiceHoverText.style.display = 'block';
-      popup.style.display = 'none';
-      modalOverlay.style.display = 'none';
+    // NEW: cancel path with the provided button
+    if (closeBtn) {
+      closeBtn.style.display = 'inline-block';
+      closeBtn.onclick = () => finish(null);
     }
+    // (Optional) overlay click to cancel:
+    modalOverlay.onclick = (e) => {
+      if (e.target === modalOverlay) finish(null);
+    };
   });
 }
-
 
 // Helper function
 function getSelectedScheme() {
@@ -11393,6 +11437,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
