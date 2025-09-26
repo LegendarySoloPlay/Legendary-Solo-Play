@@ -393,6 +393,7 @@ var city3PermBuff = 0;
 var city4PermBuff = 0;
 var city5PermBuff = 0;
 var mastermindPermBuff = 0;
+let mastermindPermBuffDynamicPrev = 0;
 var mastermindReserveAttack = 0;
 var bridgeReserveAttack = 0;
 var streetsReserveAttack = 0;
@@ -3441,15 +3442,21 @@ function updateMastermindOverlay() {
     if (existingXCutionerOverlay) existingXCutionerOverlay.remove();
     if (existingXCutionerExpanded) existingXCutionerExpanded.remove();
 
-    // Update mastermindPermBuff for Mr. Sinister
-    if (mastermind.name === 'Mr. Sinister') {
-        mastermindPermBuff = bystanderCount;
-    }
+let mastermindPermBuffDynamicNow = 0;
 
-        // Update mastermindPermBuff for Mole Man
-    if (mastermind.name === 'Mole Man') {
-        mastermindPermBuff = alwaysLeadsEscapeCount;
-    }
+if (mastermind.name === 'Mr. Sinister') {
+  mastermindPermBuffDynamicNow += bystanderCount;
+}
+
+if (mastermind.name === 'Mole Man') {
+  mastermindPermBuffDynamicNow += alwaysLeadsEscapeCount;
+}
+
+// Adjust the total by the delta only (so other buffs remain intact)
+mastermindPermBuff += (mastermindPermBuffDynamicNow - mastermindPermBuffDynamicPrev);
+
+// Remember this value for next render
+mastermindPermBuffDynamicPrev = mastermindPermBuffDynamicNow;
 
     // XCutioner Heroes section
     if (mastermind.XCutionerHeroes && mastermind.XCutionerHeroes.length > 0) {
@@ -11437,6 +11444,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
