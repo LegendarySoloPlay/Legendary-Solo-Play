@@ -5767,11 +5767,13 @@ return;
 
 if (topCardOfVillainDeck.type === "Master Strike") {
 onscreenConsole.log(`You revealed a <span class="console-highlights">Master Strike</span> and gain a Wound.`);
+topCardOfVillainDeck.revealed = true;
 drawWound();
+updateGameBoard();
 } else {
-         updateGameBoard();
 onscreenConsole.log(`You revealed <span class="console-highlights">${topCardOfVillainDeck.name}</span>. It is not a Master Strike and you have avoided gaining a Wound.`);
 topCardOfVillainDeck.revealed = true;
+updateGameBoard();
 return;
 }
 
@@ -5795,9 +5797,9 @@ if (topCardOfVillainDeck.type === "Scheme Twist") {
 onscreenConsole.log(`You revealed a <span class="console-highlights">Scheme Twist</span>. It will now be played.`);
 drawVillainCard();
 } else {
-        updateGameBoard();
 onscreenConsole.log(`You revealed <span class="console-highlights">${topCardOfVillainDeck.name}</span>. It is not a Scheme Twist and does not need to be played.`);
 topCardOfVillainDeck.revealed = true;
+updateGameBoard();
 return;
 }
 }
@@ -5816,9 +5818,9 @@ if (topCardOfVillainDeck.type === "Villain") {
 onscreenConsole.log(`You revealed <span class="console-highlights">${topCardOfVillainDeck.name}</span>. It will now be played.`);
 drawVillainCard();
 } else {
-        updateGameBoard();
 onscreenConsole.log(`You revealed <span class="console-highlights">${topCardOfVillainDeck.name}</span>. It is not a Villain and does not need to be played.`);
 topCardOfVillainDeck.revealed = true;
+updateGameBoard();
 return;
 }
 
@@ -5849,10 +5851,9 @@ function gladiatorAmbush(gladiatorCard) {
         
         updateGameBoard();
     } else {
-        updateGameBoard();
         onscreenConsole.log(`You revealed <span class="console-highlights">${topCardOfVillainDeck.name}</span>. It is not a Bystander and is not captured by <span class="console-highlights">Gladiator</span>.`);
 topCardOfVillainDeck.revealed = true;
-        
+        updateGameBoard();
     }
 }
 
