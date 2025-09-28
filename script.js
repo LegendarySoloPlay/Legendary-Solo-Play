@@ -1,4 +1,4 @@
-//26.09.2025 10.05
+//29.09.2025 09.20
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -7805,6 +7805,8 @@ function showHeroKOPopup() {
 
         heroKOPopup.appendChild(confirmButton);
 
+		updateGameBoard();
+
         // Build list retaining original HQ indices
         const eligible = hq
             .map((hero, hqIndex) => ({ hero, hqIndex }))
@@ -11444,6 +11446,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
