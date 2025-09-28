@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//25.09.2025 16.32
+//29.09.2025 09.20
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -9535,6 +9535,13 @@ async function stryfePsychicTorment() {
                 playerHand.push(selectedCard);
                 onscreenConsole.log(`<span class="console-highlights">${selectedCard.name}</span> added to hand.`);
 
+			await discardAvoidance();
+            if (hasDiscardAvoidance) {
+                onscreenConsole.log(`You have revealed <span class="console-highlights">Iceman - Impenetrable Ice Wall</span> and avoided discarding.`);
+                hasDiscardAvoidance = false;
+                return; 
+            }
+
                 // Discard the remaining cards - filter by ID to avoid reference issues
                 const cardsToDiscard = revealedCards.filter(card => card.id !== selectedCardId);
                 for (const card of cardsToDiscard) {
@@ -11687,3 +11694,4 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
