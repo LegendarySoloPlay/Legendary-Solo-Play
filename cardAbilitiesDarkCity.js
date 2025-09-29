@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//29.09.2025 15.30
+//29.09.2025 16.15
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -4353,196 +4353,180 @@ function professorXClassDismissedKO() {
 }
 
 function professorXClassDismissed() {
-    return new Promise((resolve) => {
-        const heroSelectPopup = document.getElementById('hero-select-popup');
-        const modalOverlay = document.getElementById('modal-overlay');
-        const heroOptions = document.getElementById('hero-options');
-        const context = document.getElementById('hero-select-context');
-        const heroImage = document.getElementById('hero-select-image');
-        const hoverText = document.getElementById('selectHoverText');
-        const confirmButton = document.createElement('button');
-        const noThanksButton = document.createElement('button');
-        
-        noThanksButton.class = 'heroSelectNoThanksButton';
-        noThanksButton.innerHTML = 'No Thanks';
-        noThanksButton.style.width = '50%';
-        confirmButton.id = 'hero-select-confirm';
-        confirmButton.textContent = 'CONFIRM';
-        confirmButton.style.display = 'inline-block';
-        confirmButton.disabled = true;
+  updateGameBoard();
 
-        heroImage.style.display = 'none';
-        hoverText.style.display = 'block';
-        context.innerHTML = 'You may choose a Hero to return to the bottom of the Hero deck.';
+  return new Promise((resolve) => {
+    const heroSelectPopup = document.getElementById('hero-select-popup');
+    const modalOverlay     = document.getElementById('modal-overlay');
+    const heroOptions      = document.getElementById('hero-options');
+    const context          = document.getElementById('hero-select-context');
+    const heroImage        = document.getElementById('hero-select-image');
+    const hoverText        = document.getElementById('selectHoverText');
 
-        heroOptions.innerHTML = '';
-        let selectedHero = null;
-        let activeImage = null;
+    // Clean any old buttons
+    const existingConfirm = document.getElementById('hero-select-confirm');
+    if (existingConfirm) heroSelectPopup.removeChild(existingConfirm);
+    const existingNoThanks = heroSelectPopup.querySelector('.heroSelectNoThanksButton');
+    if (existingNoThanks) heroSelectPopup.removeChild(existingNoThanks);
 
-        // Add buttons to popup
-        heroSelectPopup.appendChild(confirmButton);
-        heroSelectPopup.appendChild(noThanksButton);
+    // Build buttons
+    const confirmButton = document.createElement('button');
+    confirmButton.id = 'hero-select-confirm';
+    confirmButton.textContent = 'CONFIRM';
+    confirmButton.style.display = 'inline-block';
+    confirmButton.disabled = true;
 
-        // Filter eligible heroes - now checks for null/undefined first
-        const eligibleHeroes = hq.filter(hero => 
-            hero && hero.type === 'Hero' && hero.cost <= 10
-        );
+    const noThanksButton = document.createElement('button');
+    noThanksButton.className = 'heroSelectNoThanksButton';
+    noThanksButton.textContent = 'No Thanks';
+    noThanksButton.style.width = '50%';
 
-        if (eligibleHeroes.length === 0) {
-            onscreenConsole.log('No Heroes available to place on the bottom of the Hero deck.');
-            resolve();
-            return;
-        }
+    // UI copy (no Scheme Twist wording)
+    context.innerHTML = 'You may choose a Hero in the HQ to return to the bottom of the Hero Deck.';
 
-        // Create a sorted copy for display only
-        const sortedEligibleHeroes = [...eligibleHeroes];
-        genericCardSort(sortedEligibleHeroes);
+    heroImage.style.display = 'none';
+    hoverText.style.display = 'block';
+    heroOptions.innerHTML = '';
 
-        // Populate hero options using sorted copy
-        sortedEligibleHeroes.forEach((hero) => {
-            const heroButton = document.createElement('button');
-            const createTeamIconHTML = (value) => {
-                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-                    return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
-                }
-                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-            };
+    let selectedHQIndex = null;
+    let activeImage = null;
 
-            const createClassIconHTML = (value) => {
-                if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
-                    return '';
-                }
-                return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
-            };
-            
-            const teamIcon = createTeamIconHTML(hero.team);
-            const class1Icon = createClassIconHTML(hero.class1);
-            const class2Icon = createClassIconHTML(hero.class2);
-            const class3Icon = createClassIconHTML(hero.class3);
-            
-            heroButton.innerHTML = `<span style="white-space: nowrap;">| ${teamIcon} | ${class1Icon} ${class2Icon} ${class3Icon} | ${hero.name}</span>`;
+    heroSelectPopup.appendChild(confirmButton);
+    heroSelectPopup.appendChild(noThanksButton);
 
-            heroButton.classList.add('hero-option');
+    // Preserve original HQ order
+    const eligible = hq
+      .map((hero, hqIndex) => ({ hero, hqIndex }))
+      .filter(x => x.hero && x.hero.type === 'Hero' && x.hero.cost <= 10);
 
-            // Hover functionality
-            heroButton.onmouseover = () => {
-                if (!activeImage) {
-                    heroImage.src = hero.image;
-                    heroImage.style.display = 'block';
-                    hoverText.style.display = 'none';
-                }
-            };
-
-            heroButton.onmouseout = () => {
-                if (!activeImage) {
-                    heroImage.src = '';
-                    heroImage.style.display = 'none';
-                    hoverText.style.display = 'block';
-                }
-            };
-
-            // Selection functionality - store the hero object itself, not the index
-            heroButton.onclick = () => {
-                if (selectedHero === hero) {
-                    // Deselect
-                    selectedHero = null;
-                    heroButton.classList.remove('selected');
-                    activeImage = null;
-                    heroImage.src = '';
-                    heroImage.style.display = 'none';
-                    hoverText.style.display = 'block';
-                    confirmButton.disabled = true;
-                } else {
-                    // Deselect previous
-                    if (selectedHero !== null) {
-                        const prevButtons = heroOptions.querySelectorAll('button.selected');
-                        prevButtons.forEach(btn => btn.classList.remove('selected'));
-                    }
-                    // Select new
-                    selectedHero = hero;
-                    heroButton.classList.add('selected');
-                    activeImage = hero.image;
-                    heroImage.src = hero.image;
-                    heroImage.style.display = 'block';
-                    hoverText.style.display = 'none';
-                    confirmButton.disabled = false;
-                }
-            };
-
-            heroOptions.appendChild(heroButton);
-        });
-
-        // Confirm button handler
-        confirmButton.onclick = (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            if (selectedHero === null) return;
-
-            setTimeout(() => {
-                onscreenConsole.log(`You have chosen to return <span class="console-highlights">${selectedHero.name}</span> to the bottom of the Hero Deck.`);
-                
-                // Find the hero in the original hq array by ID and remove it
-                const heroIndex = hq.findIndex(h => h.id === selectedHero.id);
-                if (heroIndex !== -1) {
-                    const [hero] = hq.splice(heroIndex, 1);
-                    heroDeck.push(hero); // Add to bottom of hero deck
-                }
-                
-                updateGameBoard();
-                
-                // Clean up
-                heroSelectPopup.removeChild(confirmButton);
-                heroSelectPopup.removeChild(noThanksButton);
-                context.innerHTML = 'SCHEME TWIST: SELECT A HERO FROM THE HQ TO RETURN TO THE BOTTOM OF THE HERO DECK:';
-                heroSelectPopup.style.display = 'none';
-                modalOverlay.style.display = 'none';
-                resolve();
-            }, 100);
-        };
-
-        // No Thanks button handler
-        noThanksButton.onclick = (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            setTimeout(() => {
-                onscreenConsole.log(`You have chosen not to return a Hero to the bottom of the Hero Deck.`);
-                updateGameBoard();
-                
-                // Clean up
-                heroSelectPopup.removeChild(confirmButton);
-                heroSelectPopup.removeChild(noThanksButton);
-                context.innerHTML = 'SCHEME TWIST: SELECT A HERO FROM THE HQ TO RETURN TO THE BOTTOM OF THE HERO DECK:';
-                heroSelectPopup.style.display = 'none';
-                modalOverlay.style.display = 'none';
-                resolve();
-            }, 100);
-        };
-
-        // Show popup
-        modalOverlay.style.display = 'block';
-        heroSelectPopup.style.display = 'block';
-    });
-}
-
-function returnHeroToDeck(index) {
-    const hero = hq[index];
-    if (hero) {
-        heroDeck.unshift(hero); // Add the Hero to the bottom of the Hero deck
-        
-        // Get the new card before placing it in HQ
-        const newCard = heroDeck.length > 0 ? heroDeck.pop() : null;
-        hq[index] = newCard; // Fill the HQ slot with the top card of the Hero deck
-        
-        if (newCard) {
-            onscreenConsole.log(`<span class="console-highlights">${newCard.name}</span> has entered the HQ.`);
-        } else {
-            onscreenConsole.log(`HQ Update: No new card available.`);
-        }
-        
-        updateGameBoard();
+    if (eligible.length === 0) {
+      onscreenConsole.log('No eligible Heroes in the HQ (cost 10 or less).');
+      heroSelectPopup.removeChild(confirmButton);
+      heroSelectPopup.removeChild(noThanksButton);
+      heroSelectPopup.style.display = 'none';
+      modalOverlay.style.display = 'none';
+      resolve();
+      return;
     }
+
+    // Helpers
+    const createTeamIconHTML = (value) => {
+      if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+        return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="popup-card-icons">';
+      }
+      return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+    const createClassIconHTML = (value) => {
+      if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') return '';
+      return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="popup-card-icons">`;
+    };
+
+    // Populate options strictly in HQ order
+    eligible.forEach(({ hero, hqIndex }) => {
+      const heroButton = document.createElement('button');
+      heroButton.classList.add('hero-option');
+      heroButton.setAttribute('data-hq-index', String(hqIndex));
+
+      const teamIcon = createTeamIconHTML(hero.team);
+      const class1   = createClassIconHTML(hero.class1);
+      const class2   = createClassIconHTML(hero.class2);
+      const class3   = createClassIconHTML(hero.class3);
+
+      heroButton.innerHTML =
+        `<span style="white-space: nowrap;">HQ-${hqIndex + 1} | ${teamIcon} | ${class1} ${class2} ${class3} | ${hero.name}</span>`;
+
+      // Hover preview
+      heroButton.onmouseover = () => {
+        if (!activeImage) {
+          heroImage.src = hero.image;
+          heroImage.style.display = 'block';
+          hoverText.style.display = 'none';
+        }
+      };
+      heroButton.onmouseout = () => {
+        if (!activeImage) {
+          heroImage.src = '';
+          heroImage.style.display = 'none';
+          hoverText.style.display = 'block';
+        }
+      };
+
+      // Selection (by HQ index)
+      heroButton.onclick = () => {
+        const thisHQIndex = Number(heroButton.getAttribute('data-hq-index'));
+        if (selectedHQIndex === thisHQIndex) {
+          selectedHQIndex = null;
+          heroButton.classList.remove('selected');
+          activeImage = null;
+          heroImage.src = '';
+          heroImage.style.display = 'none';
+          hoverText.style.display = 'block';
+          confirmButton.disabled = true;
+        } else {
+          if (selectedHQIndex !== null) {
+            const prev = heroOptions.querySelector(`button[data-hq-index="${selectedHQIndex}"]`);
+            if (prev) prev.classList.remove('selected');
+          }
+          selectedHQIndex = thisHQIndex;
+          heroButton.classList.add('selected');
+          activeImage = hero.image;
+          heroImage.src = hero.image;
+          heroImage.style.display = 'block';
+          hoverText.style.display = 'none';
+          confirmButton.disabled = false;
+        }
+      };
+
+      heroOptions.appendChild(heroButton);
+    });
+
+    // Confirm
+    confirmButton.onclick = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (selectedHQIndex === null) return;
+
+      setTimeout(() => {
+        const chosen = hq[selectedHQIndex];
+        if (chosen) {
+          onscreenConsole.log(
+            `You have chosen to return <span class="console-highlights">${chosen.name}</span> to the bottom of the Hero Deck.`
+          );
+        }
+        returnHeroToDeck(selectedHQIndex); // keep your existing implementation
+        updateGameBoard();
+
+        // Cleanup
+        heroSelectPopup.removeChild(confirmButton);
+        heroSelectPopup.removeChild(noThanksButton);
+        heroSelectPopup.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        resolve();
+      }, 100);
+    };
+
+    // No Thanks
+    noThanksButton.onclick = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      setTimeout(() => {
+        onscreenConsole.log('You chose not to return a Hero to the bottom of the Hero Deck.');
+        updateGameBoard();
+
+        // Cleanup
+        heroSelectPopup.removeChild(confirmButton);
+        heroSelectPopup.removeChild(noThanksButton);
+        heroSelectPopup.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        resolve();
+      }, 100);
+    };
+
+    // Show popup
+    modalOverlay.style.display = 'block';
+    heroSelectPopup.style.display = 'block';
+  });
 }
 
 async function bishopFirepowerFromTheFuture() {
@@ -11694,5 +11678,6 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
 
 
