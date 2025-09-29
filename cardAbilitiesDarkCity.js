@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//29.09.2025 09.20
+//29.09.2025 15.30
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -3073,8 +3073,8 @@ function dominoSpecializedAmmunition() {
 }
 
 function cableStrike() {
-mastermindTempBuff--;
-mastermindTempBuff--;
+mastermindReserveAttack++;
+mastermindReserveAttack++;
 onscreenConsole.log(`You get +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> when fighting the Mastermind this turn.`);
 updateGameBoard();
 }
@@ -11694,4 +11694,5 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
+
 
