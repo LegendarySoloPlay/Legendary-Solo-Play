@@ -1,4 +1,4 @@
-//29.09.2025 11.30
+//29.09.2025 12.05
 
 const bystanders = [
 { id: 1, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" },
@@ -748,7 +748,7 @@ const villains = [
         cards: [
             { id: 9, villainGroupName: "HYDRA", villainId: 3, team: "HYDRA", name: "Viper", type: "Villain", quantity: 1, attack: 5, originalAttack: 5, victoryPoints: 3, ambushEffect: "None", fightEffect: "FightHYDRAVPOrWound", escapeEffect: "EscapeHYDRAVPOrWound", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "false", image: "Visual Assets/Villains/HYDRA_Viper.webp" },
             { id: 10, villainGroupName: "HYDRA", villainId: 3, team: "HYDRA", name: "Supreme HYDRA", type: "Villain", quantity: 1, attack: 6, originalAttack: 6, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "false", image: "Visual Assets/Villains/HYDRA_SupremeHYDRA.webp" },
-            { id: 11, villainGroupName: "HYDRA", villainId: 3, team: "HYDRA", name: "Endless Armies of HYDRA", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 3, ambushEffect: "None", fightEffect: "villainDrawX2", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "false", image: "Visual Assets/Villains/HYDRA_EndlessArmies.webp" },
+            { id: 11, villainGroupName: "HYDRA", villainId: 3, team: "HYDRA", name: "Endless Armies of HYDRA", type: "Villain", quantity: 3, attack: 4, originalAttack: 4, victoryPoints: 3, ambushEffect: "None", fightEffect: "None", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "false", image: "Visual Assets/Villains/HYDRA_EndlessArmies.webp" },
             { id: 12, villainGroupName: "HYDRA", villainId: 3, team: "HYDRA", name: "HYDRA Kidnappers", type: "Villain", quantity: 3, attack: 3, originalAttack: 3, victoryPoints: 1, ambushEffect: "None", fightEffect: "chooseToGainSHIELDOfficer", escapeEffect: "None", fightCondition: "None", conditionType: "None", condition: "None", alwaysLeads: "false", image: "Visual Assets/Villains/HYDRA_HYDRAKidnappers.webp" }
         ]
     },
@@ -1352,3 +1352,4 @@ window.villains = villains;
 
 
 window.heroes = heroes;
+
