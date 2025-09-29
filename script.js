@@ -1,4 +1,4 @@
-//29.09.2025 13.55
+//29.09.2025 14.55
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -35,6 +35,11 @@ window.addEventListener("load", async () => {
     blackout.classList.remove('show');
   }, remaining);
 });
+
+document.getElementById('donate-call-to-action')
+  .addEventListener('click', () => {
+    window.open('https://www.paypal.me/benjaminb21', '_blank', 'noopener');
+  });
 
 // Custom on-screen log function
 const onscreenConsole = {
@@ -11562,6 +11567,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
