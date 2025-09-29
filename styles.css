@@ -1286,6 +1286,7 @@ position: inherit;
     margin-left: auto;
     margin-right: auto;
     position: inherit;
+	height: 5vh;
 }
 
 #final-blow-section {
@@ -5184,4 +5185,5 @@ display:flex;
     transform: none !important;
 
 }
+
 
