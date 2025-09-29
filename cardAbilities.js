@@ -1,5 +1,5 @@
 // cardAbilities.js
-//29.09.2025 12.00
+//29.09.2025 12.01
 
 function koBonuses() {
 playSFX('ko');
@@ -8745,14 +8745,14 @@ function ambushBystander() {
     }
 }
 
-function extraVillainDraw() {
+async function extraVillainDraw() {
 let sewersIndex = city.length - 1;
     onscreenConsole.log(`Ambush! <span class="console-highlights">${city[sewersIndex].name}</span> forces you to play the top card of the Villain Deck.`);
 
-drawVillainCard();
+await drawVillainCard();
 }
 
-function villainDrawX2() {
+async function villainDrawX2() {
 let sewersIndex = city.length - 1;
      onscreenConsole.log(`Fight! Play the top two cards of the Villain Deck.`);
 await drawVillainCard();
@@ -10696,4 +10696,5 @@ async function genericDiscardChoice() {
         }
     });
 }
+
 
