@@ -1,4 +1,4 @@
-//29.09.2025 14.55
+//29.09.2025 15.25
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -37,6 +37,11 @@ window.addEventListener("load", async () => {
 });
 
 document.getElementById('donate-call-to-action')
+  .addEventListener('click', () => {
+    window.open('https://www.paypal.me/benjaminb21', '_blank', 'noopener');
+  });
+
+  document.getElementById('donate-call-to-action-in-game')
   .addEventListener('click', () => {
     window.open('https://www.paypal.me/benjaminb21', '_blank', 'noopener');
   });
@@ -11567,20 +11572,3 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
