@@ -1,5 +1,5 @@
 // cardAbilities.js
-//29.09.2025 12.01
+//29.09.2025 13.25
 
 function koBonuses() {
 playSFX('ko');
@@ -8752,13 +8752,6 @@ let sewersIndex = city.length - 1;
 await drawVillainCard();
 }
 
-async function villainDrawX2() {
-let sewersIndex = city.length - 1;
-     onscreenConsole.log(`Fight! Play the top two cards of the Villain Deck.`);
-await drawVillainCard();
-await drawVillainCard();
-}
-
 function chooseHeroesToKOFromDiscardPile() {
     onscreenConsole.log(`Ambush! You must KO two Heroes from your discard pile.`);
     return new Promise((resolve) => {
@@ -10696,5 +10689,6 @@ async function genericDiscardChoice() {
         }
     });
 }
+
 
 
