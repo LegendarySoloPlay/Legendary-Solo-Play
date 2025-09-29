@@ -1,5 +1,5 @@
 // cardAbilities.js
-//25.09.2025 16.39
+//29.09.2025 12.00
 
 function koBonuses() {
 playSFX('ko');
@@ -8755,8 +8755,8 @@ drawVillainCard();
 function villainDrawX2() {
 let sewersIndex = city.length - 1;
      onscreenConsole.log(`Fight! Play the top two cards of the Villain Deck.`);
-drawVillainCard();
-drawVillainCard();
+await drawVillainCard();
+await drawVillainCard();
 }
 
 function chooseHeroesToKOFromDiscardPile() {
@@ -10696,3 +10696,4 @@ async function genericDiscardChoice() {
         }
     });
 }
+
