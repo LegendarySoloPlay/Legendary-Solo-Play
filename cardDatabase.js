@@ -1,4 +1,4 @@
-//24.09.2025 10.20
+//29.09.2025 11.30
 
 const bystanders = [
 { id: 1, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" },
@@ -376,7 +376,7 @@ image: "Visual Assets/Schemes/cosmiccube.webp"
     },
     {
     id: 17,
-        name: "Bathe the Earth in Cosmic Rays",
+        name: "Bathe Earth in Cosmic Rays",
         bystanderCount: 1,
         twistCount: 6,
         endGame: "sixNonGreyHeroesKOd",
@@ -1349,5 +1349,6 @@ const keywordDescriptions = {
 
 window.henchmen = henchmen;
 window.villains = villains;
+
 
 window.heroes = heroes;
