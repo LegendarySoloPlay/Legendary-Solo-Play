@@ -1,4 +1,4 @@
-//29.09.2025 11.20
+//29.09.2025 12.05
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -7567,6 +7567,11 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
     defeatBonuses();
     currentVillainLocation = null;
     removeCosmicThreatBuff(cityIndex);
+
+	if (villainCard.name === "Endless Armies of HYDRA") {
+		await villainDrawX2();
+	}
+	
     updateGameBoard();
 }
 
@@ -11449,6 +11454,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
