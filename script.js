@@ -1,4 +1,4 @@
-//29.09.2025 15.25
+//29.09.2025 16.15
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -6525,7 +6525,7 @@ function confirmActions() {
                             });
                         }
                     } else {
-                        console.log(`Unable to use ability.`);
+                        console.log(`Unable to use conditional ability.`);
                     }
                 }
             }).then(() => {
@@ -11572,3 +11572,4 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
