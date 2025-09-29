@@ -5084,7 +5084,17 @@ display:flex;
 
 .flying-card:hover {
     transform: none !important;
-
 }
+
+#console-log-export {
+    position: absolute;
+    color: var(--accent);
+    font-family: 'Roboto Condensed';
+    right: 2.5%;
+    bottom: 0vh;
+    font-size: calc(.5vh + 0.5vw);
+    cursor: pointer;
+}
+
 
 
