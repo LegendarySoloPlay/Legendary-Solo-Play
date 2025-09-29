@@ -1,4 +1,4 @@
-//29.09.2025 09.20
+//29.09.2025 11.20
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -428,6 +428,7 @@ let finalBlowEnabled = false;
 let escapedVillainsCount = 0;
 let lastTurn = false;
 let finalTwist = false;
+let schemeTwistTuckComplete = false;
 let mastermindDeck = [];
 let alwaysLeads = '';
 let totalBystanders = 30;
@@ -3931,8 +3932,9 @@ async function processVillainCard() {
             }
             
             // Moved to the very end, after all other processing
-            if (pendingHeroKO && schemeTwistChainDepth === 0 && !finalTwist) {
+            if (pendingHeroKO && schemeTwistChainDepth === 0 && !finalTwist && !schemeTwistTuckComplete) {
                 pendingHeroKO = false;
+				schemeTwistTuckComplete = true;
                 await showHeroSelectPopup();
             }
         } catch (error) {
@@ -6650,6 +6652,7 @@ secondDocOc = false;
 deadpoolRare = false;
 schemeTwistChainDepth = 0;  // Tracks nested Scheme Twists
 pendingHeroKO = false; 
+schemeTwistTuckComplete = false;
 
 playerHand.forEach(card => {
     if (card.temporaryTeleport === true) {
@@ -11446,6 +11449,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
