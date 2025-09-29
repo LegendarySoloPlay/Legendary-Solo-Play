@@ -1191,17 +1191,123 @@ margin-bottom: 1vh;
 
 .startup-centered-buttons {
     display: block;
+    justify-content: center;
+    margin-top: 2vh;
+    width: 15vw;
+    margin-bottom: 1vh;
+    position: fixed;
+    right: 2vh;
+    bottom: 1vh;
+}
+
+#randomize-all, #load-last-setup-1, #start-game, #randomize-all2, #load-last-setup-2, #start-game2 {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+#donate-call-to-action {
+margin-top: 10px;
+    width: 15vw;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #06a2d2;
+    color: #282828;
+    position: fixed;
+    left: 2vh;
+    bottom: 1vh;
+    margin-bottom: 1vh;
+}
+
+#donate-call-to-action:hover {
+    background-color: #0070a3;
+    color: #f4f1f1;
+}
+
+#final-blow-section {
+    display: block;
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: clamp(8pt, 1.7vh, 1.5em);
+    font-weight: 400;
+    font-style: normal;
+    position: fixed;
+    right: 2vh;
+    width: 15vw;
+    bottom: 23vh;
+}
+
+.banner-settings-icon {
+    position: fixed;
+    top: 2vh;
+    right: 2vh;
+    cursor: pointer;
+}
+
+.banner-settings-icon img {
+  width: 6vh;
+  filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
+}
+
+
+        @media (max-width: 500px) {  /* Adjust breakpoint as needed */
+.startup-centered-buttons {
+    display: block;
     margin: 2vh auto 0;
     justify-content: center;
     margin-top: 2vh;
     width: 50%;
 margin-bottom: 1vh;
+position: inherit;
 }
 
+#randomize-all, #load-last-setup-1, #start-game, #randomize-all2, #load-last-setup-2, #start-game2 {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    }
+
+#donate-call-to-action {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    position: inherit;
+}
+
+#final-blow-section {
+  display:block;
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: clamp(8pt, 1.7vh, 1.5em);
+  font-weight: 400;
+  font-style: normal;
+  padding: 0 2vw 2vh 2vw;
+  position: inherit;
+  width: 50%;
+}
+
+.banner-settings-icon {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.banner-settings-icon img {
+  width: 4.5vh;
+  filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
+}
+
+.section {
+    width: 85%;
+}
+
+.centered-button {
+    width: 112%;
+}
+    }
+
 #start-game, #start-game2, #load-last-setup-1, #load-last-setup-2 {
-   
-    margin-top: 10px;
-    
+   margin-top: 10px;
 }
 
 #home-screen, #game-board {
@@ -1592,16 +1698,6 @@ background-color: var(--accent);
 
 #message-popup #confirm-message-btn:active {
     background-color: var(--hoverAccent);
-}
-
-#final-blow-section {
-  display:block;
-font-family: "Roboto Condensed", sans-serif;
-  font-size: clamp(8pt, 1.7vh, 1.5em);
-  font-weight: 400;
-  font-style: normal;
-padding: 0 2vw 2vh 2vw;
-
 }
 
 .popup button {
@@ -2715,19 +2811,6 @@ color: white;
 filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
 text-shadow: 0.2vh 0.2vh #2a2a2a;
 font-size: 250%;
-}
-
-.banner-settings-icon {
-  position: absolute;
-  top: 0px;
-  right: 10px;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.banner-settings-icon img {
-  width: 4.5vh;
-  filter: drop-shadow(0.2vh 0.2vh 0.2vh #2a2a2a);
 }
 
 @keyframes filter-animation {
@@ -5084,6 +5167,7 @@ display:flex;
 
 .flying-card:hover {
     transform: none !important;
+
 }
 
 #console-log-export {
@@ -5095,6 +5179,4 @@ display:flex;
     font-size: calc(.5vh + 0.5vw);
     cursor: pointer;
 }
-
-
 
