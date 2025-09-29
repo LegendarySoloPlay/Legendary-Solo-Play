@@ -6050,7 +6050,7 @@ function updateEvilWinsTracker() {
       evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/9 Non Grey Heroes KO'd or Carried Off`;
       break;
 
-        case "Bathe the Earth in Cosmic Rays":
+        case "Bathe Earth in Cosmic Rays":
       evilWinsText.innerHTML = `${KOdHeroes + carriedOffHeroes}/6 Non Grey Heroes in KO Pile`;
       break;
 
@@ -11449,6 +11449,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
