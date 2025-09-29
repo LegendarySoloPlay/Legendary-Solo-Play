@@ -1,4 +1,4 @@
-//29.09.2025 13.25
+//29.09.2025 13.55
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -64,6 +64,114 @@ document.querySelector('.inner-console-log').addEventListener('scroll', function
   // If the user manually scrolls, nothing will change here. 
   // You can still track the user's scrolling if needed for any other logic.
 });
+
+(function () {
+  const originalConsoleLog = console.log;
+  window._debugLogBuffer = [];
+
+  console.log = function (...args) {
+    // Save to buffer
+    const msg = args.map(arg =>
+      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+    ).join(' ');
+    window._debugLogBuffer.push(msg);
+
+    // Call original
+    originalConsoleLog.apply(console, args);
+  };
+})();
+
+// ============================
+// EXPORT CONSOLE LOG FUNCTION
+// ============================
+function exportConsoleLogs() {
+  const now = new Date();
+  const timestamp = now.toLocaleString();
+
+  // --- helpers ---
+  function imgToPlaceholder(imgHtml) {
+    // ALT first
+    const altMatch = imgHtml.match(/\balt=(["'])(.*?)\1/i);
+    let label = altMatch ? altMatch[2] : '';
+
+    // Fallback: filename from SRC
+    if (!label) {
+      const srcMatch = imgHtml.match(/\bsrc=(["'])(.*?)\1/i);
+      if (srcMatch) {
+        const base = srcMatch[2].split('/').pop().replace(/\.\w+$/,'');
+        label = base;
+      }
+    }
+
+    // Normalise: drop "Icon", tidy, uppercase
+    label = String(label).replace(/\s*icon\s*/i, '').replace(/[_\-]/g, ' ').trim();
+    return `[${label ? label.toUpperCase() : 'ICON'}]`;
+  }
+
+  function replaceImgsWithPlaceholders(htmlString) {
+    if (!htmlString) return '';
+    // Replace every <img ...> with [LABEL]
+    const replaced = htmlString.replace(/<img[^>]*>/gi, (img) => imgToPlaceholder(img));
+    // Strip any remaining HTML to plain text
+    const tmp = document.createElement('div');
+    tmp.innerHTML = replaced;
+    return tmp.innerText;
+  }
+
+  // ---- User-Friendly (from on-screen log) ----
+  const onscreenLogContainer = document.querySelector('.inner-console-log');
+  const onscreenMessages = Array.from(onscreenLogContainer.querySelectorAll('p'));
+
+  const userFriendlyText = onscreenMessages
+    .reverse()
+    .map(el => replaceImgsWithPlaceholders(el.innerHTML).trim())
+    .join('\n');
+
+  // ---- Debug Copy (captured console.log buffer) ----
+  // If you used the earlier wrapper, window._debugLogBuffer contains strings.
+  // Some may include HTML fragments (e.g., <img ...> inside object strings).
+  const debugLines = (window._debugLogBuffer || []).map(line =>
+    replaceImgsWithPlaceholders(line)
+  );
+  const debugText = debugLines.join('\n');
+
+  // ---- Build final plain-text export ----
+  const exportContent =
+`For debugging, please email a copy to legendarysoloplay@gmail.com
+
+CONSOLE LOG EXPORT: ${timestamp}
+
+User-Friendly:
+${userFriendlyText}
+
+Debug Copy:
+${debugText}`;
+
+  // ---- Open tab titled "DEBUG" and render as plain text (no HTML rendering) ----
+  const newTab = window.open('', '_blank');
+  newTab.document.open();
+  newTab.document.write(`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DEBUG</title>
+</head>
+<body></body>
+</html>`);
+  newTab.document.close();
+
+  const pre = newTab.document.createElement('pre');
+  pre.style.whiteSpace = 'pre-wrap';
+  pre.style.fontFamily = 'monospace';
+  pre.textContent = exportContent; // important: no HTML rendering
+  newTab.document.body.appendChild(pre);
+}
+
+
+// ============================
+// CLICK HANDLER
+// ============================
+document.getElementById('console-log-export').addEventListener('click', exportConsoleLogs);
 
 // Function to toggle dropdowns when clicking either anchor or anchor2
 document.querySelectorAll('.dropdown-check-list').forEach(function(checkList) {
@@ -11454,6 +11562,7 @@ initFontSelector();
     }
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
+
 
 
 
