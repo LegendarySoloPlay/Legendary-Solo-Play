@@ -1,5 +1,5 @@
 // Fantastic Four Expansion
-// 25/09/2025 16.11
+// 29/09/2025 11.30
 
 //Keywords
 
@@ -320,7 +320,7 @@ async function batheEarthInCosmicRaysTwist() {
         cardsList.innerHTML = '';
         confirmButton.style.display = 'inline-block';
         confirmButton.disabled = true;
-        confirmButton.textContent = 'Return Card';
+        confirmButton.textContent = 'Confirm KO';
         modalOverlay.style.display = 'block';
         popup.style.display = 'block';
         document.getElementById('close-choice-button').style.display = 'none';
