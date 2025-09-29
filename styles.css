@@ -247,7 +247,7 @@ color: white;
     background-repeat: no-repeat;
     background-position: center;
    width: 90%;
-    aspect-ratio: 140 / 60; /* Maintain the aspect ratio of the image */
+    aspect-ratio: 140 / 50; /* Maintain the aspect ratio of the image */
 font-family:var(--heading-font);
 font-size: var(--heading-size);
 text-transform: var(--text-transform);
@@ -330,6 +330,11 @@ text-align:center;
   background-color: #e3e3e3;
   border-radius: 3px;
   border: 0.5vh solid var(--accent);
+}
+
+.side-panel-bottom-buttons {
+    width: 8vw;
+    height: 3vh;
 }
 
 h1 {
@@ -1219,6 +1224,16 @@ margin-top: 10px;
     margin-bottom: 1vh;
 }
 
+#donate-call-to-action-in-game {
+    background-color: #06a2d2;
+    color: #282828;
+}
+
+#donate-call-to-action-in-game:hover {
+    background-color: #0070a3;
+    color: #f4f1f1;
+}
+
 #donate-call-to-action:hover {
     background-color: #0070a3;
     color: #f4f1f1;
@@ -1271,7 +1286,6 @@ position: inherit;
     margin-left: auto;
     margin-right: auto;
     position: inherit;
-	height: 5vh;
 }
 
 #final-blow-section {
@@ -3950,7 +3964,7 @@ font-size: clamp(7.5pt, 1.7vh, 1em);
 }
 
 .keywordDescriptions {
-font-size: clamp(7pt, 1.5vh, 1em);
+font-size: clamp(8pt, 1.7vh, 1.5em);
 	text-transform: none;
 }
 
@@ -5170,15 +5184,4 @@ display:flex;
     transform: none !important;
 
 }
-
-#console-log-export {
-    position: absolute;
-    color: var(--accent);
-    font-family: 'Roboto Condensed';
-    right: 2.5%;
-    bottom: 0vh;
-    font-size: calc(.5vh + 0.5vw);
-    cursor: pointer;
-}
-
 
