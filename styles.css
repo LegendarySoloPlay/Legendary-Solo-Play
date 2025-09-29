@@ -4534,7 +4534,7 @@ width: 50%;
 .mastermind-keyword-overlay {
     width: 60%;
     background-color: var(--accent);
-    z-index: 2;
+    z-index: 998;
     position: absolute;
     border-radius: .5vh;
     cursor: pointer;
@@ -5185,5 +5185,6 @@ display:flex;
     transform: none !important;
 
 }
+
 
 
