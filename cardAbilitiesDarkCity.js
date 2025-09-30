@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//29.09.2025 16.15
+//30.09.2025 20.55
 
 function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -11678,6 +11678,3 @@ async function doubleVillainDraw() {
     await processVillainCard();
     await processVillainCard();
 }
-
-
-

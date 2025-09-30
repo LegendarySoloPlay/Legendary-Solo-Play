@@ -1,4 +1,4 @@
-//24.09.2025 10.20
+//30.09.2025 20.55
 
 function returnToSidekickDeck(card) {
     if (!card) {
@@ -1760,4 +1760,3 @@ async function handleCardPlacement(card, options = {}) {
   updateGameBoard();
 
 }
-

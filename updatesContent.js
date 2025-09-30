@@ -1,6 +1,18 @@
 // updatesContent.js
-//24.09.2025 10.20
+//30.09.2025 20.55
 const updatesHTML = `
+<h3>✨ <i>Version 3.0.1</i> - Fantastic Fixes<img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"></h3>
+<p>Latest patch to fix early Fantastic Four issue and add some new game features.</p>
+<p>Thanks for the feedback around this expansion so far!</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p>🎮 <span style="text-decoration:underline;"><strong>UPDATES:</strong></span></p>
+<ul>
+<li><strong>Cosmic Threat -</strong> Galactus is proving a mighty foe after all - hopefully all issues with his Cosmic Threat button have been resolved now.
+<li><strong>End Game Stats -</strong> New additions to the end game popups will now give you your game stats, including game length and traditional score, as well as a panel with all your cards to track which Heroes you use the most. 
+<li><strong>Stand your ground -</strong> A new floating menu on the main screen will stay present as you scroll, allowing you to start the game at any point.
+<li><strong>Just a tip -</strong> If you play on a mobile device, try adding the site to your homescreen - this removes the Safari menu ribbon, allowing fullscreen much easier!
+</ul>
+<hr>
 <h3>✨ <i>Version 3.0.0</i> - Fantastic Four <img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"></h3>
 <p>Welcome to our next expansion! This update brings you the <strong>Fantastic Four</strong> at their finest - all new cards and mechanics! There have also been some major patches and changes under the hood.</p>
 <p>Another massive thank you to this incredible community! Keep the feedback coming!</p>

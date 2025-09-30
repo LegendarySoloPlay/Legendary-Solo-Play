@@ -247,7 +247,7 @@ color: white;
     background-repeat: no-repeat;
     background-position: center;
    width: 90%;
-    aspect-ratio: 140 / 50; /* Maintain the aspect ratio of the image */
+    aspect-ratio: 140 / 40; /* Maintain the aspect ratio of the image */
 font-family:var(--heading-font);
 font-size: var(--heading-size);
 text-transform: var(--text-transform);
@@ -1286,7 +1286,7 @@ position: inherit;
     margin-left: auto;
     margin-right: auto;
     position: inherit;
-	height: 5vh;
+    height: 5vh;
 }
 
 #final-blow-section {
@@ -4534,7 +4534,7 @@ width: 50%;
 .mastermind-keyword-overlay {
     width: 60%;
     background-color: var(--accent);
-    z-index: 998;
+    z-index: 2;
     position: absolute;
     border-radius: .5vh;
     cursor: pointer;
@@ -5186,5 +5186,227 @@ display:flex;
 
 }
 
+#game-stats-popup {
+    background-image: var( --popup-image);
+    width: 25vw;
+    height: 60vh;
+    position: absolute;
+    background-size: 100% 100%;
+    transform: rotate(90deg);
+    right: 5vw;
+    top: 18vh;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 
+#game-stats-popup2 {
+    background-image: var( --popup-image);
+    width: 25vw;
+    height: 60vh;
+    position: absolute;
+    background-size: 100% 100%;
+    transform: rotate(-90deg);
+    left: 5vw;
+    top: 18vh;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 
+.stats-card-icons {
+    width: 2vh;
+    height: 2vh;
+    margin-right: 5px;
+    vertical-align: middle;
+    filter: drop-shadow(0 0 0.2vh white);
+    margin-top: 0.2vh;
+}
+
+.card-line {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: var(--popupText);
+}
+
+.hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    color: var(--accent);
+}
+
+.hero-name-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    min-width: 0; /* Allows text to shrink */
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.hero-name-text {
+    font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hero-count {
+    font-weight: bold;
+    margin-left: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.card-name {
+    flex-grow: 1;
+    margin-left: 10px;
+    font-size: clamp(0.7rem, 1.3vw, 1rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-count {
+    color: var(--popupText);
+    margin-left: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.category-section {
+    margin-top: 10px;
+}
+
+.category-header {
+    display: flex;
+}
+
+#stats-content {
+    position: absolute;
+    width: 17%;
+    height: 60vh;
+    right: 2vw;
+    top: 18vh;
+    color: #fdb716;
+    overflow-y: auto;
+    padding: 2px;
+    z-index: 999;
+    font-size: calc(0.4vh + 0.4vw);
+    background-color: var(--panel-backgrounds);
+    border-radius: 20px;
+    border: 1vh solid var(--accent);
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1.1);
+    font-family: 'Roboto Condensed';
+}
+
+/* Ensure all text elements can shrink properly */
+.hero-header, .card-line, .hero-name-text, .card-name {
+    max-width: 100%;
+    font-size: calc(0.4vh + 0.4vw);
+    margin-top: 1px;
+}
+
+#score-content {
+    position: absolute;
+    width: 17%;
+    height: 60vh;
+    left: 2vw;
+    top: 18vh;
+    color: #fdb716;
+    overflow-y: auto;
+    padding: 2px;
+    z-index: 999;
+    font-size: calc(0.4vh + 0.4vw);
+    background-color: var(--panel-backgrounds);
+    border-radius: 20px;
+    border: 1vh solid var(--accent);
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1.1); 
+    font-family: 'Roboto Condensed';
+}
+
+#score-content h3 {
+    font-size: calc(0.6vh + 0.6vw);
+    text-transform: uppercase;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: center;
+    color: var(--accent);
+}
+
+#score-content p {
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: clamp(9pt, 2vh, 1.5em);
+    margin-top: 0px;
+    margin-bottom: 2px;
+	margin-left: 2px;
+    margin-right: 2px;
+    text-align: center;
+    color: var(--popupText);
+}
+
+.score-section {
+    margin-top: 10px;
+}
+
+.score-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.score-label {
+    flex-grow: 1;
+    font-size: calc(0.4vh + 0.4vw);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--popupText);
+    text-transform: uppercase;
+}
+
+.score-value {
+    font-weight: bold;
+    margin-left: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #ccc;
+    margin-top: 3px;
+}
+
+.end-game-your-cards-header {
+    font-weight: bold;
+    font-size: calc(0.8vh + 0.8vw);
+    text-align: center;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+#traditionalScoreExplainer {
+    font-size: calc(0.35vh + 0.35vw);
+    color: var(--popupText);
+    font-style: italic;
+}
+
+#endGameHeroImage {
+    background-image: url('Visual Assets/Heroes/Reskinned Core/Core_SpiderMan_AstonishingStrength.webp');
+    width: 52%;
+    aspect-ratio: 1 / 1;
+    box-shadow: 0 0 8px 8px var(--panel-backgrounds) inset;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    background-position: 50% 22%;
+    background-size: 120%;
+}

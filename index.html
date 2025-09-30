@@ -17,7 +17,7 @@
 <body>
   <div class="fullscreen-background"></div>
 
-  <div style="display:none;">29.09.2025 15.30</div>
+  <div style="display:none;">30.09.2025 20.55</div>
   
   <div id="background-for-expansion-popup"></div>
   
@@ -834,14 +834,6 @@
     <div class="popup-content">
       <h1>DRAW!</h1>
       <p style="margin-bottom: 10px;" id="draw-context">You've run out of Villains to battle. The Mastermind has not succeeded, but neither have you.</p>
-      <h3>Victory Points:</h3>
-      <p id="villainDRAWvictoryPointsTotal"></p>
-      <h3>Total Turns Taken:</h3>
-      <p id="villainDRAWtotalTurnsTaken"></p>
-      <h3>Average VP Per Turn:</h3>
-      <p id="villainDRAWaverageVPPerTurn"></p>
-      <h3>Number of Escapes:</h3>
-      <p id="villainDRAWnumberOfEscapes"></p> 
       <button id="return-home-button">Restart</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
@@ -858,15 +850,7 @@
 </div>
     <div class="popup-content">
       <h1>EVIL WINS!</h1>
-      <p style="margin-bottom: 10px;" id="defeat-context">The Mastermind has succeeded in their scheme. All hope is lost!</p>
-      <h3>Victory Points:</h3>
-      <p id="LOSSvictoryPointsTotal"></p>
-      <h3>Total Turns Taken:</h3>
-      <p id="LOSStotalTurnsTaken"></p>
-      <h3>Average VP Per Turn:</h3>
-      <p id="LOSSaverageVPPerTurn"></p>
-      <h3>Number of Escapes:</h3>
-      <p id="LOSSnumberOfEscapes"></p>      
+      <p style="margin-bottom: 10px;" id="defeat-context">The Mastermind has succeeded in their scheme. All hope is lost!</p> 
       <button id="defeat-return-home-button">Restart</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
@@ -895,14 +879,6 @@
     <div class="popup-content">
       <h1>GOOD WINS!</h1>
       <p style="margin-bottom: 10px;" id="win-context">You have defeated the Mastermind and prevented their nefarious scheme! Excellent work!</p>
-      <h3>Victory Points:</h3>
-      <p id="WINvictoryPointsTotal"></p>
-      <h3>Total Turns Taken:</h3>
-      <p id="WINtotalTurnsTaken"></p>
-      <h3>Average VP Per Turn:</h3>
-      <p id="WINaverageVPPerTurn"></p>
-      <h3>Number of Escapes:</h3>
-      <p id="WINnumberOfEscapes"></p>
       <button id="win-return-home-button">Return Home</button>
 <br>
 <h3>💖 Support the Project 💖</h3>
@@ -913,7 +889,64 @@
     </div>
   </div>
 
-  <div id="final-blow-popup" class="popup" style="display: none;">
+<div id="score-content" style="display: none;">
+    <div class="end-game-your-cards-header">SCORE:</div>
+    
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">TIME TAKEN</span>
+            <span class="score-value" id="time-total">00:00:00</span>
+        </div>
+        <hr>
+    </div>
+
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">Victory Points</span>
+            <span class="score-value" id="ENDGAMEvictoryPointsTotal">0</span>
+        </div>
+        <hr>
+    </div>
+
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">Total Turns Taken</span>
+            <span class="score-value" id="ENDGAMEtotalTurnsTaken">0</span>
+        </div>
+        <hr>
+    </div>
+
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">Average VP Per Turn</span>
+            <span class="score-value" id="ENDGAMEaverageVPPerTurn">0</span>
+        </div>
+        <hr>
+    </div>
+
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">Number of Escapes</span>
+            <span class="score-value" id="ENDGAMEnumberOfEscapes">0</span>
+        </div>
+        <hr>
+    </div>
+
+    <div class="score-section">
+        <div class="score-line">
+            <span class="score-label">TRADITIONAL SCORE</span>
+            <span class="score-value" id="traditional-score">0</span>
+        </div>
+        <span id="traditionalScoreExplainer">(VP  minus 3 per Scheme Twist and 1 per Villain and Bystander in Escape Pile)</span>
+    </div>
+
+    <div id="endGameHeroImage"></div>
+</div>
+
+  <div id="stats-content" style="display: none;">
+  </div>
+
+    <div id="final-blow-popup" class="popup" style="display: none;">
       <div class="minimize-triangle-btn" aria-label="Minimize">
   <span class="inner-triangle"></span>
 </div>
@@ -1425,4 +1458,3 @@ document.head.appendChild(cardDatabaseScript);
 </div>
 </body>
 </html>
-

@@ -1,4 +1,4 @@
-//29.09.2025 16.15
+//30.09.2025 20.55
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -138,8 +138,6 @@ function exportConsoleLogs() {
     .join('\n');
 
   // ---- Debug Copy (captured console.log buffer) ----
-  // If you used the earlier wrapper, window._debugLogBuffer contains strings.
-  // Some may include HTML fragments (e.g., <img ...> inside object strings).
   const debugLines = (window._debugLogBuffer || []).map(line =>
     replaceImgsWithPlaceholders(line)
   );
@@ -157,26 +155,20 @@ ${userFriendlyText}
 Debug Copy:
 ${debugText}`;
 
-  // ---- Open tab titled "DEBUG" and render as plain text (no HTML rendering) ----
-  const newTab = window.open('', '_blank');
-  newTab.document.open();
-  newTab.document.write(`<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>DEBUG</title>
-</head>
-<body></body>
-</html>`);
-  newTab.document.close();
-
-  const pre = newTab.document.createElement('pre');
-  pre.style.whiteSpace = 'pre-wrap';
-  pre.style.fontFamily = 'monospace';
-  pre.textContent = exportContent; // important: no HTML rendering
-  newTab.document.body.appendChild(pre);
+  // ---- Create and download .txt file ----
+  const blob = new Blob([exportContent], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `debug-logs-${now.getTime()}.txt`; // Unique filename with timestamp
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  
+  // Clean up the URL object
+  URL.revokeObjectURL(url);
 }
-
 
 // ============================
 // CLICK HANDLER
@@ -2556,7 +2548,31 @@ function allowPaint() {
   });
 }
 
+let gameStartTime;
+
+// Function to start the timer
+function startGameTimer() {
+    gameStartTime = new Date(); // Record the current time when game starts
+}
+
+// Function to format time as HH:MM:SS
+function formatTime(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    // Pad with leading zeros
+    return [
+        hours.toString().padStart(2, '0'),
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0')
+    ].join(':');
+}
+
 async function onBeginGame(e) {
+startGameTimer();
+
   const loader   = document.querySelector('.loading-container');
   const blackout = document.querySelector('.blackout-overlay');
 
@@ -4544,16 +4560,23 @@ document.getElementById('modal-overlay').style.display = 'block';
 
 // Helper to find controls associated with a popup
 function getAssociatedControls(popup) {
-    // You can customize this based on your popup-control relationships
     const controls = [];
-    
-    // Example: Find controls with data-popup-id matching the popup's id
     const popupId = popup.id;
+    
     if (popupId) {
+        // Find controls with data-popup-id matching the popup's id
         controls.push(...document.querySelectorAll(`[data-popup-id="${popupId}"]`));
+        
+        // Add stats and score content for win/draw/defeat popups
+        if (popupId === 'win-popup' || popupId === 'draw-popup' || popupId === 'defeat-popup') {
+            const statsContent = document.getElementById('stats-content');
+            const scoreContent = document.getElementById('score-content');
+            
+            if (statsContent) controls.push(statsContent);
+            if (scoreContent) controls.push(scoreContent);
+        }
     }
     
-    // Add any other control selection logic here
     return controls.filter(control => !!control);
 }
 
@@ -6641,6 +6664,9 @@ async function endTurn() {
         if (gameIsOver) return;
     }
 
+    mastermindCosmicThreatResolved = false;
+    mastermindCosmicThreat = 0;
+
     onscreenConsole.log("Turn ended.");
     turnCount += 1;
     onscreenConsole.log(`<span class="console-highlights" style="text-decoration:underline;">Turn&nbsp;</span><span class="console-highlights" style="text-decoration:underline;">${turnCount}</span><span class="console-highlights" style="text-decoration:underline;">:</span>`);
@@ -7634,8 +7660,10 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
       onscreenConsole.log(`The Streets are ${destroyedSpaces[1] === false ? 'occupied' : 'destroyed'} so <span class="console-highlights">${villainCard.name}</span> cannot burrow and has been defeated!`);
     }
   } else {
-    victoryPile.push(villainCard);
-    onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
+    if (!villainCard.skrulled) {
+        victoryPile.push(villainCard);
+        onscreenConsole.log(`<span class="console-highlights">${villainCard.name}</span> has been defeated.`);
+    }    
   }
 
   if (villainCard.killbot === true) {
@@ -7685,6 +7713,10 @@ async function handlePostDefeat(villainCard, villainCopy, villainAttack, cityInd
   if (villainCard.name === "Endless Armies of HYDRA") {
 	  onscreenConsole.log(`Fight! <span class="console-highlights">Endless Armies of HYDRA</span> forces you to play the top two cards of the Villain Deck.`);
     await drawVillainCardsSequential(2);
+  }
+
+  if (villainCard.wasSkrulled === true) {
+    victoryPile.pop(villainCard);
   }
 
   // One redraw at the end of post-defeat processing
@@ -8924,11 +8956,25 @@ if (delayEndGame) {
     return;
 }
 
+    const gameEndTime = new Date();
+    const timePlayed = gameEndTime - gameStartTime; // Difference in milliseconds
+    
+    // Format and display the time
+    const formattedTime = formatTime(timePlayed);
+    document.getElementById('time-total').textContent = formattedTime;
+
+generateStatsScreen();
+generateGameScore();
+
     const drawPopup = document.getElementById('draw-popup');
     const modalOverlay = document.getElementById('modal-overlay');
     const drawText = document.getElementById('draw-context');
+    const score = document.getElementById('score-content');
+    const stats = document.getElementById('stats-content');
     drawPopup.style.display = 'block';
     modalOverlay.style.display = 'block';
+    score.style.display = 'block';
+    stats.style.display = 'block';
 playSFX('game-draw');
 
     const selectedSchemeName = document.querySelector('#scheme-section input[type=radio]:checked').value;
@@ -9022,20 +9068,6 @@ if (selectedScheme) {
         }
     }
 
-    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
-    document.getElementById('villainDRAWvictoryPointsTotal').innerText = totalVictoryPoints;
-
-    const totalTurnsTaken = turnCount;
-    document.getElementById('villainDRAWtotalTurnsTaken').innerText = totalTurnsTaken;
-   
-const averageVPPerTurn = totalTurnsTaken > 0 
-    ? Math.ceil((totalVictoryPoints / totalTurnsTaken) * 10) / 10 
-    : 0.0;
-document.getElementById('villainDRAWaverageVPPerTurn').innerText = averageVPPerTurn;
-
-const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
-document.getElementById('villainDRAWnumberOfEscapes').innerText = numberOfEscapes;
-
 gameIsOver = true;
 }
 
@@ -9044,6 +9076,33 @@ function closeDrawPopup() {
     const modalOverlay = document.getElementById('modal-overlay');
     drawPopup.style.display = 'none';
     modalOverlay.style.display = 'none';
+    const score = document.getElementById('score-content');
+    const stats = document.getElementById('stats-content');
+    score.style.display = 'none';
+    stats.style.display = 'none';
+}
+
+function generateGameScore() {
+    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
+    document.getElementById('ENDGAMEvictoryPointsTotal').innerText = totalVictoryPoints;
+
+    const totalTurnsTaken = turnCount;
+    document.getElementById('ENDGAMEtotalTurnsTaken').innerText = totalTurnsTaken;
+   
+const averageVPPerTurn = totalTurnsTaken > 0 
+    ? Math.ceil((totalVictoryPoints / totalTurnsTaken) * 10) / 10 
+    : 0.0;
+document.getElementById('ENDGAMEaverageVPPerTurn').innerText = averageVPPerTurn;
+
+const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
+document.getElementById('ENDGAMEnumberOfEscapes').innerText = numberOfEscapes;
+
+const minusSchemes = schemeTwistCount * 3;
+const minusVillains = escapedVillainsDeck.filter(item => item.type === 'Villain').length;
+const minusBystanders = escapedVillainsDeck.filter(item => item.type === 'Bystander').length;;
+
+const traditionalScore = Math.max(0, totalVictoryPoints - minusSchemes - minusVillains - minusBystanders);
+document.getElementById('traditional-score').innerText = traditionalScore;
 }
 
 function returnHome() {
@@ -9114,25 +9173,25 @@ async function checkDefeat() {
 
 
 function showDefeatPopup() {
+    const gameEndTime = new Date();
+    const timePlayed = gameEndTime - gameStartTime; // Difference in milliseconds
+    
+    // Format and display the time
+    const formattedTime = formatTime(timePlayed);
+    document.getElementById('time-total').textContent = formattedTime;
+
+    generateStatsScreen();
+    generateGameScore();
+
     const defeatPopup = document.getElementById('defeat-popup');
     const modalOverlay = document.getElementById('modal-overlay');
+    const score = document.getElementById('score-content');
+    const stats = document.getElementById('stats-content');
     defeatPopup.style.display = 'block';
     modalOverlay.style.display = 'block';
+    score.style.display = 'block';
+    stats.style.display = 'block';
     playSFX('evil-wins');
-
-    const totalVictoryPoints = calculateVictoryPoints(victoryPile);
-    document.getElementById('LOSSvictoryPointsTotal').innerText = totalVictoryPoints;
-
-    const totalTurnsTaken = turnCount;
-    document.getElementById('LOSStotalTurnsTaken').innerText = totalTurnsTaken;
-   
-    const averageVPPerTurn = totalTurnsTaken > 0 
-        ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
-        : "0.0";
-    document.getElementById('LOSSaverageVPPerTurn').innerText = averageVPPerTurn;
-
-    const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
-    document.getElementById('LOSSnumberOfEscapes').innerText = numberOfEscapes;
 
     document.getElementById('player-deck-card-back').addEventListener('click', openPlayerDeckPopup);
     document.getElementById('hero-deck-card-back').addEventListener('click', openHeroDeckPopup);
@@ -9153,8 +9212,12 @@ document.getElementById('defeat-return-home-button').addEventListener('click', (
 function closeDefeatPopup() {
     const defeatPopup = document.getElementById('defeat-popup');
 const modalOverlay = document.getElementById('modal-overlay');
+    const score = document.getElementById('score-content');
+    const stats = document.getElementById('stats-content');
     defeatPopup.style.display = 'none';
 modalOverlay.style.display = 'none';
+    score.style.display = 'none';
+    stats.style.display = 'none';
 }
 
 function showFinishTurnPopup() {
@@ -9198,9 +9261,20 @@ if (delayEndGame) {
     delayedWin = true;
     return;
 }
+    const gameEndTime = new Date();
+    const timePlayed = gameEndTime - gameStartTime; // Difference in milliseconds
+    
+    // Format and display the time
+    const formattedTime = formatTime(timePlayed);
+    document.getElementById('time-total').textContent = formattedTime;
+
+    generateStatsScreen();
+    generateGameScore();
 
 const winPopup = document.getElementById('win-popup');
 const modalOverlay = document.getElementById('modal-overlay');
+    const score = document.getElementById('score-content');
+    const stats = document.getElementById('stats-content');
 
 const winText = document.getElementById('win-context');
 
@@ -9236,7 +9310,7 @@ if (selectedScheme) {
             winText.innerHTML = `You've stopped ${mastermind.name} from unleashing Killbots on Earth's leadership. The threat is contained and global order is intact. Excellent work!`;
             break;
 
-        case "Secret Invasion of the Skrull SHapeshifters":
+        case "Secret Invasion of the Skrull Shapeshifters":
             winText.innerHTML = `You've stopped ${mastermind.name} from replacing Earth's heroes with Skrull imposters. All abducted heroes have been freed and returned to the fight. Excellent work!`;
             break;
 
@@ -9307,22 +9381,10 @@ if (selectedScheme) {
         }
     }
 
-const totalVictoryPoints = calculateVictoryPoints(victoryPile);
-    document.getElementById('WINvictoryPointsTotal').innerText = totalVictoryPoints;
-
-    const totalTurnsTaken = turnCount;
-    document.getElementById('WINtotalTurnsTaken').innerText = totalTurnsTaken;
-   
-    const averageVPPerTurn = totalTurnsTaken > 0 
-    ? (totalVictoryPoints / totalTurnsTaken).toFixed(1) 
-    : "0.0"; // Handle division by zero case
-document.getElementById('WINaverageVPPerTurn').innerText = averageVPPerTurn;
-
-const numberOfEscapes = escapedVillainsDeck.filter(item => item.type !== 'Bystander').length;
-document.getElementById('WINnumberOfEscapes').innerText = numberOfEscapes;
-
-    winPopup.style.display = 'block';
+winPopup.style.display = 'block';
 modalOverlay.style.display = 'block';
+    score.style.display = 'block';
+    stats.style.display = 'block';
 playSFX('good-wins');
 
 gameIsOver = true;
@@ -11573,3 +11635,261 @@ initFontSelector();
   }, { passive: false, capture: true }); // capture so our check runs early without blocking defaults
 })();
 
+// Helpers for icons
+const createTeamIconHTML = (value) => {
+    if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') {
+        return '<img src="Visual Assets/Icons/Unaffiliated.svg" alt="Unaffiliated Icon" class="stats-card-icons">';
+    }
+    return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="stats-card-icons">`;
+};
+
+const createClassIconHTML = (value) => {
+    if (!value || value === 'none' || value === 'null' || value === 'undefined' || value === 'None') return '';
+    return `<img src="Visual Assets/Icons/${value}.svg" alt="${value} Icon" class="stats-card-icons">`;
+};
+
+function generateStatsScreen() {
+    // Combine all arrays
+    const combinedCards = [...playerDeck, ...cardsPlayedThisTurn, ...playerDiscardPile, ...playerHand];
+    
+    // Categorize cards
+    const categories = {
+        heroes: {},
+        shield: [],
+        wounds: [],
+        other: []
+    };
+
+    combinedCards.forEach(card => {
+        // Check for SHIELD cards
+        if (card.name === "SHIELD Agent" || card.name === "SHIELD Officer" || card.name === "SHIELD Trooper") {
+            categories.shield.push(card);
+        }
+        // Check for Wounds
+        else if (card.type === "Wound") {
+            categories.wounds.push(card);
+        }
+        // Check for Heroes
+        else if (card.heroName) {
+            if (!categories.heroes[card.heroName]) {
+                categories.heroes[card.heroName] = {};
+            }
+            if (!categories.heroes[card.heroName][card.name]) {
+                categories.heroes[card.heroName][card.name] = [];
+            }
+            categories.heroes[card.heroName][card.name].push(card);
+        }
+        // Everything else
+        else {
+            categories.other.push(card);
+        }
+    });
+
+    // Calculate MVP(s)
+    const heroTotals = {};
+    Object.keys(categories.heroes).forEach(heroName => {
+        heroTotals[heroName] = Object.values(categories.heroes[heroName]).reduce((total, cards) => total + cards.length, 0);
+    });
+    
+    const maxCards = Math.max(...Object.values(heroTotals));
+    const mvpHeroes = Object.keys(heroTotals).filter(heroName => heroTotals[heroName] === maxCards);
+    
+    // Set the hero image based on MVP
+    if (mvpHeroes.length > 0) {
+        // Use the first MVP hero for the image (or you could choose randomly)
+        setEndGameHeroImage(mvpHeroes[0]);
+    } else if (Object.keys(categories.heroes).length > 0) {
+        // If no MVP but there are heroes, use the first one alphabetically
+        const firstHero = Object.keys(categories.heroes).sort()[0];
+        setEndGameHeroImage(firstHero);
+    } else {
+        // No heroes found, set a default image
+        setEndGameHeroImage('default');
+    }
+    
+    // Rest of your existing HTML building code...
+    let html = '';
+
+    html += `<div class="end-game-your-cards-header">YOUR CARDS:</div>`;
+
+    // Heroes (alphabetically)
+    const heroNames = Object.keys(categories.heroes).sort();
+    heroNames.forEach(heroName => {
+        const heroCards = categories.heroes[heroName];
+        const totalHeroCards = heroTotals[heroName];
+        const isMVP = mvpHeroes.includes(heroName);
+        const mvpText = isMVP ? (mvpHeroes.length > 1 ? " - Tied MVP" : " - MVP") : "";
+        
+        html += `<div class="category-section">`;
+        html += `<div class="hero-header">`;
+        html += `<span class="hero-name-container">`;
+        html += createTeamIconHTML(heroCards[Object.keys(heroCards)[0]][0].team);
+        html += `<span class="hero-name-text">${heroName}${mvpText}</span>`;
+        html += `</span>`;
+        html += `<span class="hero-count">&nbsp;x${totalHeroCards}</span>`;
+        html += `</div>`;
+        html += `<hr>`;
+        
+        // Sort card names alphabetically within hero
+        const cardNames = Object.keys(heroCards).sort();
+        cardNames.forEach(cardName => {
+            const cards = heroCards[cardName];
+            const card = cards[0];
+            
+            html += `<div class="card-line">`;
+            
+            if (card.class1) html += createClassIconHTML(card.class1);
+            if (card.class2) html += createClassIconHTML(card.class2);
+            if (card.class3) html += createClassIconHTML(card.class3);
+            
+            html += `<span class="card-name">${cardName}</span>`;
+            html += `<span class="card-count">&nbsp;x${cards.length}</span>`;
+            html += `</div>`;
+        });
+        
+        html += `</div>`;
+    });
+
+    // SHIELD Cards
+    if (categories.shield.length > 0) {
+        html += `<div class="category-section">`;
+        html += `<div class="category-header">`;
+        html += `<span class="hero-name-container">`;
+        html += createTeamIconHTML("SHIELD");
+        html += `<span class="hero-name-text">SHIELD</span>`;
+        html += `</span>`;
+        html += `<span class="hero-count">&nbsp;x${categories.shield.length}</span>`;
+        html += `</div>`;
+        html += `<hr>`;
+        
+        // Group SHIELD cards by name
+        const shieldGroups = {};
+        categories.shield.forEach(card => {
+            if (!shieldGroups[card.name]) shieldGroups[card.name] = [];
+            shieldGroups[card.name].push(card);
+        });
+        
+        Object.keys(shieldGroups).sort().forEach(cardName => {
+            const cards = shieldGroups[cardName];
+            const card = cards[0];
+            
+            html += `<div class="card-line">`;
+            
+            // Class icons for SHIELD cards
+            if (card.class1) html += createClassIconHTML(card.class1);
+            if (card.class2) html += createClassIconHTML(card.class2);
+            if (card.class3) html += createClassIconHTML(card.class3);
+            
+            html += `<span class="card-name">${cardName}</span>`;
+            html += `<span class="card-count">&nbsp;x${cards.length}</span>`;
+            html += `</div>`;
+        });
+        
+        html += `</div>`;
+    }
+
+        // Other cards
+    if (categories.other.length > 0) {
+        html += `<div class="category-section">`;
+        html += `<div class="category-header">`;
+        html += `<span class="hero-name-container">`;
+        html += `<span class="hero-name-text">OTHER</span>`;
+        html += `</span>`;
+        html += `<span class="hero-count">&nbsp;x${categories.other.length}</span>`;  // <-- Move count here
+        html += `</div>`;
+        html += `<hr>`;
+        
+        const otherGroups = {};
+        categories.other.forEach(card => {
+            if (!otherGroups[card.name]) otherGroups[card.name] = [];
+            otherGroups[card.name].push(card);
+        });
+        
+        Object.keys(otherGroups).sort().forEach(cardName => {
+            const cards = otherGroups[cardName];
+            const card = cards[0];
+            
+            html += `<div class="card-line">`;
+            
+            // Class icons for other cards
+            if (card.class1) html += createClassIconHTML(card.class1);
+            if (card.class2) html += createClassIconHTML(card.class2);
+            if (card.class3) html += createClassIconHTML(card.class3);
+            
+            html += `<span class="card-name">${cardName}</span>`;
+            html += `<span class="card-count">&nbsp;x${cards.length}</span>`;
+            html += `</div>`;
+        });
+        
+        html += `</div>`;
+    }
+
+        // Wounds
+    if (categories.wounds.length > 0) {
+        html += `<div class="category-section">`;
+        html += `<div class="category-header">`;
+        html += `<span class="hero-name-container">`;
+        html += `<span class="hero-name-text">WOUNDS</span>`;
+        html += `</span>`;
+        html += `<span class="hero-count">&nbsp;x${categories.wounds.length}</span>`;
+        html += `</div>`;
+        html += `</div>`; // No individual wound lines, just the header with count
+        html += `<hr>`;
+    }
+
+    document.getElementById('stats-content').innerHTML = html;
+}
+
+function setEndGameHeroImage(heroName, customImagePath = '') {
+    const heroImageElement = document.getElementById('endGameHeroImage');
+    if (!heroImageElement) return;
+    
+    let imagePath = customImagePath;
+    
+    // If no custom path provided, use the mapping
+    if (!imagePath) {
+        const heroImageMap = {
+            'black widow': 'Visual Assets/Heroes/Reskinned Core/Core_BlackWidow_DangerousRescue.webp',
+            'captain america': 'Visual Assets/Heroes/Reskinned Core/Core_CaptainAmerica_ADayUnlikeAnyOther.webp',
+            'cyclops': 'Visual Assets/Heroes/Reskinned Core/Core_Cyclops_OpticBlast.webp',
+            'deadpool': 'Visual Assets/Heroes/Reskinned Core/Core_Deadpool_HereHoldThisForASecond.webp',
+            'emma frost': 'Visual Assets/Heroes/Reskinned Core/Core_EmmaFrost_ShadowedThoughts.webp',
+            'gambit': 'Visual Assets/Heroes/Reskinned Core/Core_Gambit_CardShark.webp',
+            'hawkeye': 'Visual Assets/Heroes/Reskinned Core/Core_Hawkeye_QuickDraw.webp',
+            'hulk': 'Visual Assets/Heroes/Reskinned Core/Core_Hulk_HulkSmash.webp',
+            'iron man': 'Visual Assets/Heroes/Reskinned Core/Core_IronMan_ArcReactor.webp',
+            'nick fury': 'Visual Assets/Heroes/Reskinned Core/Core_NickFury_LegendaryCommander.webp',
+            'rogue': 'Visual Assets/Heroes/Reskinned Core/Core_Rogue_StealAbilities.webp',
+            'spider-man': 'Visual Assets/Heroes/Reskinned Core/Core_SpiderMan_WebShooters.webp',
+            'storm': 'Visual Assets/Heroes/Reskinned Core/Core_Storm_TidalWave.webp',
+            'thor': 'Visual Assets/Heroes/Reskinned Core/Core_Thor_GodOfThunder.webp',
+            'wolverine': 'Visual Assets/Heroes/Reskinned Core/Core_Wolverine_FrenziedSlashing.webp',
+            'angel': 'Visual Assets/Heroes/Dark City/DarkCity_Angel_DropOffAFriend.webp',
+            'bishop': 'Visual Assets/Heroes/Dark City/DarkCity_Bishop_FirepowerFromTheFuture.webp',
+            'blade': 'Visual Assets/Heroes/Dark City/DarkCity_Blade_StalkThePrey.webp',
+            'cable': 'Visual Assets/Heroes/Dark City/DarkCity_Cable_RapidResponseForce.webp',
+            'colossus': 'Visual Assets/Heroes/Dark City/DarkCity_Colossus_Invulnerability.webp',
+            'daredevil': 'Visual Assets/Heroes/Dark City/DarkCity_Daredevil_RadarSense.webp',
+            'domino': 'Visual Assets/Heroes/Dark City/DarkCity_Domino_LuckyBreak.webp',
+            'elektra': 'Visual Assets/Heroes/Dark City/DarkCity_Elektra_Ninjitsu.webp',
+            'forge': 'Visual Assets/Heroes/Dark City/DarkCity_Forge_DirtyWork.webp',
+            'ghost rider': 'Visual Assets/Heroes/Dark City/DarkCity_GhostRider_HellOnWheels.webp',
+            'iceman': 'Visual Assets/Heroes/Dark City/DarkCity_Iceman_IceSlide.webp',
+            'iron fist': 'Visual Assets/Heroes/Dark City/DarkCity_IronFist_WieldTheIronFist.webp',
+            'jean grey': 'Visual Assets/Heroes/Dark City/DarkCity_JeanGrey_TelekineticMastery.webp',
+            'nightcrawler': 'Visual Assets/Heroes/Dark City/DarkCity_Nightcrawler_AlongForTheRide.webp',
+            'professor x': 'Visual Assets/Heroes/Dark City/DarkCity_ProfessorX_TelepathicProbe.webp',
+            'punisher': 'Visual Assets/Heroes/Dark City/DarkCity_Punisher_HostileInterrogation.webp',
+            'x-force wolverine': 'Visual Assets/Heroes/Dark City/DarkCity_X-ForceWolverine_SuddenAmbush.webp',
+            'human torch': 'Visual Assets/Heroes/Fantastic Four/FantasticFour_HumanTorch_FlameOn.webp',
+            'invisible woman': 'Visual Assets/Heroes/Fantastic Four/FantasticFour_InvisibleWoman_InvisibleBarrier.webp',
+            'mr. fantastic': 'Visual Assets/Heroes/Fantastic Four/FantasticFour_MrFantastic_TwistingEquations.webp',
+            'silver surfer': 'Visual Assets/Heroes/Fantastic Four/FantasticFour_SilverSurfer_WarpSpeed.webp',
+            'thing': 'Visual Assets/Heroes/Fantastic Four/FantasticFour_Thing_ItsClobberinTime.webp'
+        };
+        
+        imagePath = heroImageMap[heroName.toLowerCase()] || 'Visual Assets/CardBack.webp';
+    }
+    
+    heroImageElement.style.backgroundImage = `url('${imagePath}')`;
+}

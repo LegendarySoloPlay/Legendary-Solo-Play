@@ -1,4 +1,4 @@
-//29.09.2025 12.05
+//30.09.2025 20.55
 
 const bystanders = [
 { id: 1, name: 'Bystander', type: 'Bystander', victoryPoints: 1, image: "Visual Assets/Other/Bystander.webp" },
@@ -1352,4 +1352,3 @@ window.villains = villains;
 
 
 window.heroes = heroes;
-
