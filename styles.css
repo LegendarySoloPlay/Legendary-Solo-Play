@@ -4319,6 +4319,7 @@ letter-spacing: var(--letter-spacing);
     opacity: 1 !important;
     filter: drop-shadow(0 0 8px red) !important;
     animation: pulse 0.5s infinite alternate;
+	clip-path: inset(2% 2% 2% 2%);
 }
 
 @keyframes pulse {
@@ -5409,4 +5410,5 @@ hr {
     margin-top: 20px;
     background-position: 50% 22%;
     background-size: 120%;
+
 }
