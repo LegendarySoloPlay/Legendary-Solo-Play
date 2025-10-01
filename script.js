@@ -1,4 +1,4 @@
-//30.09.2025 20.55
+//02.10.2025 07.50
 
 console.log('Script loaded');
 console.log(window.henchmen);
@@ -3338,10 +3338,12 @@ async function drawVillainCard() {
     return;
   }
 
+if (isFirstTurn) {
   const highCostHeroCount = hq.filter(hero => hero.cost >= 7).length;
-  if (isFirstTurn && highCostHeroCount >= 2) {
+  if (highCostHeroCount >= 2) {
     await mulliganChoice();
   }
+}
 
   const drawCount = isFirstTurn ? 3 : 1;
   isFirstTurn = false;
@@ -11912,3 +11914,4 @@ function setEndGameHeroImage(heroName, customImagePath = '') {
     heroImageElement.style.backgroundImage = `url('${imagePath}')`;
 
 }
+
