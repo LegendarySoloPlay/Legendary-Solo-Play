@@ -1,6 +1,37 @@
 // updatesContent.js
-//30.09.2025 20.55
+//12.11.2025 15.55
 const updatesHTML = `
+<h3>✨ <i>Version 4.0.2</i> - Paint the Town Red <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="popup-card-icons"></h3>
+<p>NEW EXPANSION! Along with countless bug fixes, new visuals and audio updates, this patch brings you all the content of <strong>Paint the Town Red</strong>.</p>
+<p>Another massive thank you to the community for making this project so fun! Special thanks to Bageltop Games for endless support and many of the new visuals you'll encounter as well as my dedicated playtesters who have made this expansion the most perfect release yet: Blade_Omicron, Deadeye, Hatephd, Hersh, Jean-Sebastian, KB Driver, lycanknight_, maxwatto and Tozar.</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p><img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="popup-card-icons"> <span style="text-decoration:underline;"><strong>PAINT THE TOWN RED:</strong></span></p>
+<ul>
+<li><strong>New Heroes -</strong> 5 new Heroes to recruit: Black Cat, Moon Knight, Scarlet Spider, Spider-Woman and Symbiote Spider-Man.
+<li><strong>New Threats -</strong> Take on four new schemes, Mysterio, Carnage, Maximum Carnage and the Sinister Six. 
+<li><strong>New Keywords -</strong> Recruit to the top of your deck with <i>Wall-Crawl</i> and beware enemies who <i>Feast</i> on your Heroes. The rules for each will show in the Keywords panel.
+<li><strong>New Theme -</strong> Another theme and font that you can use to customise your gameboard.
+</ul>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>Standard Issue -</strong> Popups have been redesigned to work better on all screens - they now allow you to scroll through images of cards to make selections and will automatically grey out inelligible choices in the HQ and city. 
+<li><strong>My eyes!</strong> Some color combinations have been corrected for better contrast. New easier-to-read overlays will also help you track Bystanders, captured Heroes or the number of cards in a stack. 
+<li><strong>A little variety -</strong> Scheme Twists now have custom images based on the selected Scheme thanks to Bageltop Games!
+<li><strong>Music to my ears -</strong> All Keywords now have sound effects.
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>Too many to name!</strong> In revamping all popups, a lot of gameplay mechanics have had under-the-hood updates. The most noticeable will be <i>Investigate</i> and <i>Cosmic Threat</i> popups which should be a little more player-friendly now. In particular, <i>Cosmic Threat</i> will let you select a class, when necessary, and then choose how many cards to reveal - but to save you time, the default will be the max.
+<li><strong>No false hope -</strong> Game ending conditions like Galactus destroying the city will now correctly end the game as soon as any Villain escapes are resolved.
+</ul>
+<p>🔁 <span style="text-decoration:underline;"><strong>GAME SETUP:</strong></span></p>
+<ul>
+<li><strong>I choose you! </strong> The Scheme selection pane now includes drop-downs so you can customise which Hero is shuffled into the Villain deck for X-Cutioner's Song, and which Henchmen is used for Invade the Daily Bugle News HQ. If you do not select an option, they will be randomized and avoid your other selections.
+</ul>
+<p>I hope you enjoy this new expansion!</p>
+<p><i>Warning: Side effects may include webbed-up criminals, shattered illusions, and a dramatically improved skyline.</i></p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3>✨ <i>Version 3.0.1</i> - Fantastic Fixes<img src="Visual Assets/Icons/Fantastic Four.svg" alt="Fantastic Four Icon" class="popup-card-icons"></h3>
 <p>Latest patch to fix early Fantastic Four issue and add some new game features.</p>
 <p>Thanks for the feedback around this expansion so far!</p>
@@ -407,9 +438,8 @@ const updatesHTML = `
 <p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
 `;
 
-
-  function loadUpdatesContent() {
-  const updatesContainer = document.getElementById('updates');
+function loadUpdatesContent() {
+  const updatesContainer = document.getElementById("updates");
   if (updatesContainer) {
     updatesContainer.innerHTML = updatesHTML;
   }
