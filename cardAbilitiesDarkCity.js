@@ -11503,6 +11503,7 @@ function azazelFight() {
     confirmButton.onclick = (e) => {
       e.stopPropagation();
       e.preventDefault();
+      closeCardChoicePopup();
       if (!selectedCard) return;
 
       setTimeout(() => {
@@ -11524,7 +11525,6 @@ function azazelFight() {
         );
 
         updateGameBoard();
-        closeCardChoicePopup();
         resolve(true);
       }, 100);
     };

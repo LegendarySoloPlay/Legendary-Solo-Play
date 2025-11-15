@@ -5007,7 +5007,9 @@ function handleSchemeTwist(schemeTwistCard) {
   updateGameBoard();
   return new Promise(async (resolve) => {
     const selectedScheme = getSelectedScheme();
-    koPile.push(schemeTwistCard);
+    if (selectedScheme.name !== "Replace Earth's Leaders with Killbots") {
+      koPile.push(schemeTwistCard);
+    }
     schemeTwistCount += 1;
 
     // Log appropriate message
@@ -6286,8 +6288,11 @@ function updateDeckCounts() {
     );
 
 
-  twistCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Scheme Twist").length + killbotSchemeTwistCount}/${selectedScheme.twistCount}`;
-  masterStrikeCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Master Strike").length}/5`;
+  twistCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Scheme Twist").length + killbotSchemeTwistCount}/${selectedScheme.twistCount + 3}`;
+masterStrikeCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Master Strike").length + 
+                                     koPile.filter((card) => card.name === "Mysterio Mastermind Tactic").length + 
+                                     victoryPile.filter((card) => card.name === "Mysterio Mastermind Tactic").length + 
+                                     (mastermind?.tactics?.filter(tactic => tactic.name === "Mysterio Mastermind Tactic").length || 0)}/5`;
   escapePileCountNumber.innerHTML = `${escapedVillainsDeck.length}`;
   koPileCountNumber.innerHTML = `${koPile.length}`;
   woundDeckCountNumber.innerHTML = `${woundDeck.length}`;
@@ -7788,6 +7793,8 @@ if (stackedTwistNextToMastermind > 0) {
           mastermind.name === "The Beyonder" ||
           mastermind.name === "Epic Beyonder");
 
+console.log(`Update Game Board, Mastermind Cosmic Threat check. ${mastermindCosmicThreatResolved}`);
+
       if (
         isTargetMastermind &&
         !mastermindCosmicThreatResolved &&
@@ -7823,6 +7830,7 @@ if (stackedTwistNextToMastermind > 0) {
             if (!chosenClass) {
               // Cancelled: ensure the flag stays false and re-render so button returns
               mastermindCosmicThreatResolved = false;
+              console.log(`Keyword click, Mastermind Cosmic Threat check. ${mastermindCosmicThreatResolved}`);
               updateGameBoard();
               return;
             }
@@ -7839,6 +7847,7 @@ if (stackedTwistNextToMastermind > 0) {
               );
               // Only now mark it resolved
               mastermindCosmicThreatResolved = true;
+              console.log(`After Mastermind Cosmic Threat applied. ${mastermindCosmicThreatResolved}`);
             } else {
               // Cancelled: re-render button
               mastermindCosmicThreatResolved = false;
@@ -7869,6 +7878,7 @@ if (stackedTwistNextToMastermind > 0) {
                 `${threshold}+ <img src='Visual Assets/Icons/Cost.svg' alt='Cost Icon' class='cosmic-threat-card-icons'> Cards`,
               );
               mastermindCosmicThreatResolved = true;
+              console.log(`After Mastermind Cosmic Threat applied. ${mastermindCosmicThreatResolved}`);
             } else {
               // Cancelled: re-render button
               mastermindCosmicThreatResolved = false;
@@ -9933,6 +9943,7 @@ async function endTurn() {
   }
 
   mastermindCosmicThreatResolved = false;
+  console.log(`End of turn, Mastermind Cosmic Threat restored. ${mastermindCosmicThreatResolved}`);
   mastermindCosmicThreat = 0;
 
   onscreenConsole.log("Turn ended.");
@@ -9973,10 +9984,13 @@ async function endTurn() {
       continue; // Skip any further logic for this card
     }
 
-    if (card.temporaryTeleport === true) {
-      delete card.temporaryTeleport;
-      card.keyword3 = "None";
-    }
+if (card.temporaryTeleport === true) {
+  delete card.temporaryTeleport;
+  // Remove "Teleport" from the keywords array if it exists
+  if (card.keywords && Array.isArray(card.keywords)) {
+    card.keywords = card.keywords.filter(keyword => keyword !== "Teleport");
+  }
+}
 
     // Handle sidekickToDestroy logic
     if (card.hasOwnProperty("sidekickToDestroy")) {

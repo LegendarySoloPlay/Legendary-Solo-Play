@@ -1551,8 +1551,8 @@ function EmmaFrostVoluntaryVillainForAttack() {
   return new Promise((resolve) => {
     setTimeout(() => {
       const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-        `DO YOU WISH TO PLAY AN EXTRA VILLAIN CARD FOR +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">?`,
-        "Play Villain",
+        `DO YOU WISH TO PLAY A CARD FROM THE VILLAIN DECK TO GET +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">?`,
+        "Play a Card",
         "No Thanks!",
       );
 
@@ -1578,16 +1578,16 @@ function EmmaFrostVoluntaryVillainForAttack() {
         previewArea.style.display = "block";
       }
 
-      confirmButton.onclick = function () {
+      confirmButton.onclick = async function () {
         console.log("Extra villain card played. +2 attack granted.");
         onscreenConsole.log(
           `Extra Villain card played. +2<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> gained.`,
         );
-        drawVillainCard();
+        closeInfoChoicePopup();
+        await drawVillainCard();
         totalAttackPoints += 2;
         cumulativeAttackPoints += 2;
         updateGameBoard();
-        closeInfoChoicePopup();
         resolve();
       };
 
@@ -15382,6 +15382,7 @@ async function KOAllHeroesInHQ() {
 
 async function killbotAttackIncrease() {
   stackedTwistNextToMastermind++;
+  killbotSchemeTwistCount++;
   killbotAttack++;
   console.log(`Killbot attack increased to ${killbotAttack}`);
   updateGameBoard(); // Optional, if this should update the UI
