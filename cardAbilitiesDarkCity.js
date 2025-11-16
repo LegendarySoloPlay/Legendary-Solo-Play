@@ -418,17 +418,17 @@ function angelDropOffAFriend() {
           const actuallyDiscarded =
             discarded && discarded.length ? discarded[0] : null;
           if (actuallyDiscarded) {
-            totalAttackPoints += actuallyDiscarded.cost;
-            onscreenConsole.log(
-              `You have discarded <span class="console-highlights">${actuallyDiscarded.name}</span>. You gain +${actuallyDiscarded.cost}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> (equal to its cost).`,
+            console.log(
+              `${actuallyDiscarded.name} discarded during checkDiscardForInvulnerability.`,
             );
           } else if (returned && returned.length) {
             // Card came back to hand; no attack gain.
             playerHand.push(...returned);
-            onscreenConsole.log(
-              `<span class="console-highlights">${returned[0].name}</span> was returned to your hand (you gained no attack).`,
-            );
           }
+          onscreenConsole.log(
+            `You gain +${selectedCard.cost}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`);
+          totalAttackPoints += selectedCard.cost;
+          cumulativeAttackPoints += selectedCard.cost;
 
           updateGameBoard();
           resolve(true);
@@ -8417,10 +8417,23 @@ function deathFight() {
     `<span class="console-highlights">Death</span> - fight effect!`,
   );
   return new Promise((resolve, reject) => {
-    // Create array with original indices from playerHand
-    const heroesThatCostMoreThanOne = playerHand
-      .map((card, index) => ({ card, originalIndex: index }))
-      .filter((item) => item.card.cost >= 1);
+    // Combine heroes from the player's hand and cards played this turn
+    // Exclude cards that are already marked for destruction
+    const handHeroes = playerHand
+      .map((card, index) => ({ card, originalIndex: index, location: "hand" }))
+      .filter((item) => item.card.cost >= 1 && !item.card.markedToDestroy);
+    
+    const playedHeroes = cardsPlayedThisTurn
+      .map((card, index) => ({ card, originalIndex: index, location: "played" }))
+      .filter((item) => 
+        item.card.isCopied !== true && 
+        item.card.sidekickToDestroy !== true && 
+        item.card.cost >= 1 && 
+        !item.card.markedToDestroy
+      );
+
+    // Combine both arrays
+    const heroesThatCostMoreThanOne = [...handHeroes, ...playedHeroes];
 
     // Check if there are any heroes in the combined list
     if (heroesThatCostMoreThanOne.length === 0) {
@@ -8435,6 +8448,15 @@ function deathFight() {
     const selectionRow1 = document.querySelector(
       ".card-choice-popup-selectionrow1",
     );
+    const selectionRow2 = document.querySelector(
+      ".card-choice-popup-selectionrow2",
+    );
+    const selectionRow1Label = document.querySelector(
+      ".card-choice-popup-selectionrow1label",
+    );
+    const selectionRow2Label = document.querySelector(
+      ".card-choice-popup-selectionrow2label",
+    );
     const selectionContainer = document.querySelector(
       ".card-choice-popup-selection-container",
     );
@@ -8448,32 +8470,32 @@ function deathFight() {
     titleElement.textContent = "Death - Fight!";
     instructionsElement.textContent = "Select a Hero to KO.";
 
-    // Hide row labels and row2
-    document.querySelector(
-      ".card-choice-popup-selectionrow1label",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow2label",
-    ).style.display = "none";
-    document.querySelector(".card-choice-popup-selectionrow2").style.display =
-      "none";
+    // Show both rows and labels
+    selectionRow1Label.style.display = "block";
+    selectionRow2Label.style.display = "block";
+    selectionRow2.style.display = "flex";
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.height = "50%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.top = "28%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.transform = "translateY(-50%)";
+    ).style.display = "block";
+    selectionRow1Label.textContent = "Hand";
+    selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
 
+    // Reset container styles for two-row layout
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.height = "40%";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.top = "0";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.transform = "none";
+
     // Clear existing content
     selectionRow1.innerHTML = "";
+    selectionRow2.innerHTML = "";
     previewElement.innerHTML = "";
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
@@ -8482,24 +8504,22 @@ function deathFight() {
     let isDragging = false;
     let startX, startY, scrollLeft, startTime;
 
-    // Sort the array (now it will sort by card but preserve originalIndex)
-    genericCardSort(heroesThatCostMoreThanOne, (item) => item.card);
+    // Sort the arrays for display
+    const handHeroesSorted = handHeroes.sort((a, b) => genericCardSort([a.card, b.card]));
+    const playedHeroesSorted = playedHeroes.sort((a, b) => genericCardSort([a.card, b.card]));
 
     const row1 = selectionRow1;
-    const row2Visible = false;
+    const row2Visible = true;
 
     // Initialize scroll gradient detection on the container
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
-    // Create card elements for each eligible hero
-    heroesThatCostMoreThanOne.forEach((cardItem, index) => {
+    // Create card element helper function
+    function createCardElement(cardItem, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
-      cardElement.setAttribute("data-card-index", String(index));
-      cardElement.setAttribute(
-        "data-original-index",
-        String(cardItem.originalIndex),
-      );
+      cardElement.setAttribute("data-original-index", String(cardItem.originalIndex));
+      cardElement.setAttribute("data-location", cardItem.location);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -8529,7 +8549,10 @@ function deathFight() {
         // Only clear preview if no card is selected AND we're not hovering over another card
         if (selectedCard === null) {
           setTimeout(() => {
-            if (!selectionRow1.querySelector(":hover") && !isDragging) {
+            const isHoveringAnyCard =
+              selectionRow1.querySelector(":hover") ||
+              selectionRow2.querySelector(":hover");
+            if (!isHoveringAnyCard && !isDragging) {
               previewElement.innerHTML = "";
               previewElement.style.backgroundColor = "var(--panel-backgrounds)";
             }
@@ -8548,12 +8571,7 @@ function deathFight() {
           return;
         }
 
-        const cardIndex = Number(cardElement.getAttribute("data-card-index"));
-        const originalIndex = Number(
-          cardElement.getAttribute("data-original-index"),
-        );
-
-        if (selectedCard && selectedCard.index === cardIndex) {
+        if (selectedCard && selectedCard.cardItem === cardItem) {
           // Deselect if clicking the same card
           selectedCard = null;
           selectedCardImage.classList.remove("selected");
@@ -8570,9 +8588,10 @@ function deathFight() {
 
           // Select new card
           selectedCard = {
+            cardItem: cardItem,
             card: cardItem.card,
-            originalIndex: originalIndex,
-            index: cardIndex,
+            originalIndex: cardItem.originalIndex,
+            location: cardItem.location
           };
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
@@ -8594,7 +8613,17 @@ function deathFight() {
       });
 
       cardElement.appendChild(cardImage);
-      selectionRow1.appendChild(cardElement);
+      row.appendChild(cardElement);
+    }
+
+    // Populate row1 with Hand heroes
+    handHeroesSorted.forEach((cardItem) => {
+      createCardElement(cardItem, selectionRow1);
+    });
+
+    // Populate row2 with Played Cards heroes
+    playedHeroesSorted.forEach((cardItem) => {
+      createCardElement(cardItem, selectionRow2);
     });
 
     function updateInstructions() {
@@ -8605,49 +8634,31 @@ function deathFight() {
       }
     }
 
-    if (heroesThatCostMoreThanOne.length > 20) {
+    // Adjust layout based on number of cards
+    const totalCards = heroesThatCostMoreThanOne.length;
+    const handCardsCount = handHeroesSorted.length;
+    const playedCardsCount = playedHeroesSorted.length;
+
+    if (totalCards > 20) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.add("three-row"); // Add a special class for 3-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "75%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "40%";
-      selectionRow1.style.gap = "0.3vw";
-    } else if (heroesThatCostMoreThanOne.length > 10) {
+      selectionRow1.classList.add("three-row");
+      selectionRow2.classList.add("multi-row");
+      selectionRow2.classList.add("three-row");
+    } else if (totalCards > 10 || handCardsCount > 5 || playedCardsCount > 5) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles when in multi-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
-    } else if (heroesThatCostMoreThanOne.length > 5) {
-      selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "42%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
+      selectionRow1.classList.remove("three-row");
+      selectionRow2.classList.add("multi-row");
+      selectionRow2.classList.remove("three-row");
     } else {
       selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles for normal mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "28%";
+      selectionRow1.classList.remove("three-row");
+      selectionRow2.classList.remove("multi-row");
+      selectionRow2.classList.remove("three-row");
     }
 
-    // Drag scrolling functionality
+    // Drag scrolling functionality for both rows
     setupDragScrolling(selectionRow1);
+    setupDragScrolling(selectionRow2);
 
     // Set up button handlers
     const confirmButton = document.getElementById("card-choice-popup-confirm");
@@ -8673,14 +8684,20 @@ function deathFight() {
       if (!selectedCard) return;
 
       setTimeout(() => {
-        const { card, originalIndex } = selectedCard;
+        const { card, location, originalIndex } = selectedCard;
         onscreenConsole.log(
           `<span class="console-highlights">${card.name}</span> has been KO'd.`,
         );
         koBonuses();
 
-        // Remove the card from playerHand using the original index
-        playerHand.splice(originalIndex, 1);
+        // Remove the card from the correct location
+        if (location === "hand") {
+          // Remove from playerHand using the original index
+          playerHand.splice(originalIndex, 1);
+        } else {
+          // Mark the played card to be destroyed at the end of the turn
+          card.markedToDestroy = true;
+        }
 
         // Add the card to the KO pile
         koPile.push(card);
@@ -8702,10 +8719,23 @@ function deathEscape() {
     `<span class="console-highlights">Death</span> has escaped!`,
   );
   return new Promise((resolve, reject) => {
-    // Create array with original indices from playerHand
-    const heroesThatCostMoreThanOne = playerHand
-      .map((card, index) => ({ card, originalIndex: index }))
-      .filter((item) => item.card.cost >= 1);
+    // Combine heroes from the player's hand and cards played this turn
+    // Exclude cards that are already marked for destruction
+    const handHeroes = playerHand
+      .map((card, index) => ({ card, originalIndex: index, location: "hand" }))
+      .filter((item) => item.card.cost >= 1 && !item.card.markedToDestroy);
+    
+    const playedHeroes = cardsPlayedThisTurn
+      .map((card, index) => ({ card, originalIndex: index, location: "played" }))
+      .filter((item) => 
+        item.card.isCopied !== true && 
+        item.card.sidekickToDestroy !== true && 
+        item.card.cost >= 1 && 
+        !item.card.markedToDestroy
+      );
+
+    // Combine both arrays
+    const heroesThatCostMoreThanOne = [...handHeroes, ...playedHeroes];
 
     // Check if there are any heroes in the combined list
     if (heroesThatCostMoreThanOne.length === 0) {
@@ -8720,6 +8750,15 @@ function deathEscape() {
     const selectionRow1 = document.querySelector(
       ".card-choice-popup-selectionrow1",
     );
+    const selectionRow2 = document.querySelector(
+      ".card-choice-popup-selectionrow2",
+    );
+    const selectionRow1Label = document.querySelector(
+      ".card-choice-popup-selectionrow1label",
+    );
+    const selectionRow2Label = document.querySelector(
+      ".card-choice-popup-selectionrow2label",
+    );
     const selectionContainer = document.querySelector(
       ".card-choice-popup-selection-container",
     );
@@ -8733,32 +8772,32 @@ function deathEscape() {
     titleElement.textContent = "Death - Escape!";
     instructionsElement.textContent = "Select a Hero to KO.";
 
-    // Hide row labels and row2
-    document.querySelector(
-      ".card-choice-popup-selectionrow1label",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow2label",
-    ).style.display = "none";
-    document.querySelector(".card-choice-popup-selectionrow2").style.display =
-      "none";
+    // Show both rows and labels
+    selectionRow1Label.style.display = "block";
+    selectionRow2Label.style.display = "block";
+    selectionRow2.style.display = "flex";
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.height = "50%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.top = "28%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.transform = "translateY(-50%)";
+    ).style.display = "block";
+    selectionRow1Label.textContent = "Hand";
+    selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
 
+    // Reset container styles for two-row layout
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.height = "40%";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.top = "0";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.transform = "none";
+
     // Clear existing content
     selectionRow1.innerHTML = "";
+    selectionRow2.innerHTML = "";
     previewElement.innerHTML = "";
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
@@ -8767,24 +8806,22 @@ function deathEscape() {
     let isDragging = false;
     let startX, startY, scrollLeft, startTime;
 
-    // Sort the array (now it will sort by card but preserve originalIndex)
-    genericCardSort(heroesThatCostMoreThanOne, (item) => item.card);
+    // Sort the arrays for display
+    const handHeroesSorted = handHeroes.sort((a, b) => genericCardSort([a.card, b.card]));
+    const playedHeroesSorted = playedHeroes.sort((a, b) => genericCardSort([a.card, b.card]));
 
     const row1 = selectionRow1;
-    const row2Visible = false;
+    const row2Visible = true;
 
     // Initialize scroll gradient detection on the container
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
-    // Create card elements for each eligible hero
-    heroesThatCostMoreThanOne.forEach((cardItem, index) => {
+    // Create card element helper function
+    function createCardElement(cardItem, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
-      cardElement.setAttribute("data-card-index", String(index));
-      cardElement.setAttribute(
-        "data-original-index",
-        String(cardItem.originalIndex),
-      );
+      cardElement.setAttribute("data-original-index", String(cardItem.originalIndex));
+      cardElement.setAttribute("data-location", cardItem.location);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -8814,7 +8851,10 @@ function deathEscape() {
         // Only clear preview if no card is selected AND we're not hovering over another card
         if (selectedCard === null) {
           setTimeout(() => {
-            if (!selectionRow1.querySelector(":hover") && !isDragging) {
+            const isHoveringAnyCard =
+              selectionRow1.querySelector(":hover") ||
+              selectionRow2.querySelector(":hover");
+            if (!isHoveringAnyCard && !isDragging) {
               previewElement.innerHTML = "";
               previewElement.style.backgroundColor = "var(--panel-backgrounds)";
             }
@@ -8833,12 +8873,7 @@ function deathEscape() {
           return;
         }
 
-        const cardIndex = Number(cardElement.getAttribute("data-card-index"));
-        const originalIndex = Number(
-          cardElement.getAttribute("data-original-index"),
-        );
-
-        if (selectedCard && selectedCard.index === cardIndex) {
+        if (selectedCard && selectedCard.cardItem === cardItem) {
           // Deselect if clicking the same card
           selectedCard = null;
           selectedCardImage.classList.remove("selected");
@@ -8855,9 +8890,10 @@ function deathEscape() {
 
           // Select new card
           selectedCard = {
+            cardItem: cardItem,
             card: cardItem.card,
-            originalIndex: originalIndex,
-            index: cardIndex,
+            originalIndex: cardItem.originalIndex,
+            location: cardItem.location
           };
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
@@ -8879,7 +8915,17 @@ function deathEscape() {
       });
 
       cardElement.appendChild(cardImage);
-      selectionRow1.appendChild(cardElement);
+      row.appendChild(cardElement);
+    }
+
+    // Populate row1 with Hand heroes
+    handHeroesSorted.forEach((cardItem) => {
+      createCardElement(cardItem, selectionRow1);
+    });
+
+    // Populate row2 with Played Cards heroes
+    playedHeroesSorted.forEach((cardItem) => {
+      createCardElement(cardItem, selectionRow2);
     });
 
     function updateInstructions() {
@@ -8890,49 +8936,31 @@ function deathEscape() {
       }
     }
 
-    if (heroesThatCostMoreThanOne.length > 20) {
+    // Adjust layout based on number of cards
+    const totalCards = heroesThatCostMoreThanOne.length;
+    const handCardsCount = handHeroesSorted.length;
+    const playedCardsCount = playedHeroesSorted.length;
+
+    if (totalCards > 20) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.add("three-row"); // Add a special class for 3-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "75%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "40%";
-      selectionRow1.style.gap = "0.3vw";
-    } else if (heroesThatCostMoreThanOne.length > 10) {
+      selectionRow1.classList.add("three-row");
+      selectionRow2.classList.add("multi-row");
+      selectionRow2.classList.add("three-row");
+    } else if (totalCards > 10 || handCardsCount > 5 || playedCardsCount > 5) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles when in multi-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
-    } else if (heroesThatCostMoreThanOne.length > 5) {
-      selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "42%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
+      selectionRow1.classList.remove("three-row");
+      selectionRow2.classList.add("multi-row");
+      selectionRow2.classList.remove("three-row");
     } else {
       selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles for normal mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "28%";
+      selectionRow1.classList.remove("three-row");
+      selectionRow2.classList.remove("multi-row");
+      selectionRow2.classList.remove("three-row");
     }
 
-    // Drag scrolling functionality
+    // Drag scrolling functionality for both rows
     setupDragScrolling(selectionRow1);
+    setupDragScrolling(selectionRow2);
 
     // Set up button handlers
     const confirmButton = document.getElementById("card-choice-popup-confirm");
@@ -8958,14 +8986,20 @@ function deathEscape() {
       if (!selectedCard) return;
 
       setTimeout(() => {
-        const { card, originalIndex } = selectedCard;
+        const { card, location, originalIndex } = selectedCard;
         onscreenConsole.log(
           `<span class="console-highlights">${card.name}</span> has been KO'd.`,
         );
         koBonuses();
 
-        // Remove the card from playerHand using the original index
-        playerHand.splice(originalIndex, 1);
+        // Remove the card from the correct location
+        if (location === "hand") {
+          // Remove from playerHand using the original index
+          playerHand.splice(originalIndex, 1);
+        } else {
+          // Mark the played card to be destroyed at the end of the turn
+          card.markedToDestroy = true;
+        }
 
         // Add the card to the KO pile
         koPile.push(card);
@@ -10121,7 +10155,7 @@ function hammerheadFight() {
     confirmButton.disabled = true;
     confirmButton.textContent = "KO HERO";
     otherChoiceButton.style.display = "none";
-    noThanksButton.style.display = "block";
+    noThanksButton.style.display = "none";
     noThanksButton.textContent = "NO THANKS!"; // Added exclamation mark
 
     // Confirm button handler
@@ -10156,15 +10190,6 @@ function hammerheadFight() {
         closeCardChoicePopup();
         resolve();
       }, 100);
-    };
-
-    // No Thanks button handler
-    noThanksButton.onclick = (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      onscreenConsole.log(`No hero was KO'd.`);
-      closeCardChoicePopup();
-      resolve();
     };
 
     // Show popup

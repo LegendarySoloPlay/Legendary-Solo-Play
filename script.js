@@ -1982,9 +1982,9 @@ function randomizeScheme() {
     document.querySelectorAll('#schemelist input[type="checkbox"]:checked'),
   ).map((cb) => cb.getAttribute("data-set"));
 
-  // Get all scheme radio buttons
+  // Get only scheme radio buttons (exclude hero/henchmen dropdowns)
   const schemeRadioButtons = Array.from(
-    document.querySelectorAll('#scheme-selection input[type="radio"]'),
+    document.querySelectorAll('#scheme-selection input[type="radio"][name="scheme"]'),
   );
 
   // Filter the radio buttons by the selected filters
@@ -1994,7 +1994,7 @@ function randomizeScheme() {
   });
 
   if (filteredRadioButtons.length === 0) {
-    return;
+    return null;
   }
 
   const randomIndex = Math.floor(Math.random() * filteredRadioButtons.length);
@@ -2012,6 +2012,9 @@ function randomizeScheme() {
   }
 
   updateSchemeImage(selectedRadioButton.value);
+  
+  // Return the selected scheme value
+  return selectedRadioButton.value;
 }
 
 function randomizeMastermind() {

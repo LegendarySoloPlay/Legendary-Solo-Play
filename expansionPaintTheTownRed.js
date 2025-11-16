@@ -4538,12 +4538,6 @@ function spiderWomanArachnoPheromones() {
       // Recruit the hero using the original function
       recruitHeroConfirmed(hero, selectedHQIndex);
 
-      if (!negativeZoneAttackAndRecruit) {
-        totalRecruitPoints += hero.cost;
-      } else {
-        totalAttackPoints += hero.cost;
-      }
-
       console.log(`${hero.name} has been recruited.`);
       onscreenConsole.log(
         `You have recruited <span class="console-highlights">${hero.name}</span> for free.`,
@@ -5605,9 +5599,12 @@ async function mysterioMistsOfDeception() {
   if (mastermind.tactics.length !== 0) {
     onscreenConsole.log(`This is not the final Tactic.`);
 
-    // Get top 5 cards from villain deck
+    // Create a temporary holding array for revealed cards
     const revealedCards = [];
-    for (let i = 0; i < 5 && villainDeck.length > 0; i++) {
+    const cardsToRemoveFromDeck = Math.min(5, villainDeck.length);
+    
+    // Move cards to holding array
+    for (let i = 0; i < cardsToRemoveFromDeck; i++) {
       revealedCards.push(villainDeck.pop());
     }
 
@@ -5626,16 +5623,14 @@ async function mysterioMistsOfDeception() {
 
     // Separate master strikes from other cards
     const masterStrikes = revealedCards.filter((card) => {
-      // Try multiple conditions to see which one matches
       return (
         card.name === "Master Strike" ||
         card.name === "Mysterio Mastermind Tactic"
       );
     });
     const otherCards = revealedCards.filter((card) => {
-      // Try multiple conditions to see which one matches
       return (
-        card.name !== "Master Strike" ||
+        card.name !== "Master Strike" &&
         card.name !== "Mysterio Mastermind Tactic"
       );
     });
@@ -5646,7 +5641,7 @@ async function mysterioMistsOfDeception() {
         `Playing ${masterStrikes.length} Master Strike${masterStrikes.length !== 1 ? "s" : ""} now.`,
       );
 
-      // Play each
+      // Play each master strike
       for (const strike of masterStrikes) {
         // Add to top of deck first
         villainDeck.push(strike);
@@ -5658,20 +5653,17 @@ async function mysterioMistsOfDeception() {
     // Handle remaining cards
     if (otherCards.length > 0) {
       shuffleArray(otherCards);
-
       onscreenConsole.log(
         `Shuffling the other cards and placing them on the bottom of the Villain deck.`,
       );
 
       // Add to bottom of deck
       villainDeck.unshift(...otherCards);
-    } else if (masterStrikes.length === 0) {
-      onscreenConsole.log(
-        "No Master Strikes were revealed. All revealed cards have been shuffled and placed at the bottom of the Villain deck.",
-      );
     }
 
+    // Update game state
     updateGameBoard();
+    
   } else {
     onscreenConsole.log(`This is the final Tactic. No effect.`);
   }
