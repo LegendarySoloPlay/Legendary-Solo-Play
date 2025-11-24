@@ -1,5 +1,5 @@
 // updatesContent.js
-//12.11.2025 15.55
+//24.11.2025 17.35
 const updatesHTML = `
 <h3>✨ <i>Version 4.0.2</i> - Paint the Town Red <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="popup-card-icons"></h3>
 <p>NEW EXPANSION! Along with countless bug fixes, new visuals and audio updates, this patch brings you all the content of <strong>Paint the Town Red</strong>.</p>

@@ -1,5 +1,5 @@
 // Core Mechanics
-//12.11.2025 15.15
+//24.11.2025 17.35
 
 console.log("Script loaded");
 console.log(window.henchmen);
@@ -4618,21 +4618,34 @@ async function attachBystanderToVillain(villainIndex, bystanderCard) {
 async function villainEffectAttachBystanderToVillain(
   villainIndex,
   bystanderCard,
+  isHQ = false
 ) {
-  if (city[villainIndex].bystander) {
-    city[villainIndex].bystander.push(bystanderCard);
+  let villain;
+  
+  if (isHQ) {
+    // Handle HQ villain
+    if (hq[villainIndex].bystander) {
+      hq[villainIndex].bystander.push(bystanderCard);
+    } else {
+      hq[villainIndex].bystander = [bystanderCard];
+    }
+    villain = hq[villainIndex];
   } else {
-    city[villainIndex].bystander = [bystanderCard];
+    // Handle city villain (original behavior)
+    if (city[villainIndex].bystander) {
+      city[villainIndex].bystander.push(bystanderCard);
+    } else {
+      city[villainIndex].bystander = [bystanderCard];
+    }
+    villain = city[villainIndex];
   }
-
-  // Access the villain object using the index to get its name
-  const villain = city[villainIndex];
 
   updateGameBoard();
 
-  // Log the villain's name correctly
+  // Log the villain's name correctly with location context
+  const location = isHQ ? "in HQ" : "";
   onscreenConsole.log(
-    `<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${villain.name}</span>.`,
+    `<span class="console-highlights">${bystanderCard.name}</span> captured by <span class="console-highlights">${villain.name}</span> ${location}.`,
   );
   addHRToTopWithInnerHTML();
 }
@@ -6290,8 +6303,12 @@ function updateDeckCounts() {
       (scheme) => scheme.name === selectedSchemeName,
     );
 
-
+if (selectedScheme.name === "Replace Earth's Leaders with Killbots") {
   twistCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Scheme Twist").length + killbotSchemeTwistCount}/${selectedScheme.twistCount + 3}`;
+} else {
+  twistCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Scheme Twist").length}/${selectedScheme.twistCount}`;
+}
+
 masterStrikeCountNumber.innerHTML = `${koPile.filter((card) => card.type === "Master Strike").length + 
                                      koPile.filter((card) => card.name === "Mysterio Mastermind Tactic").length + 
                                      victoryPile.filter((card) => card.name === "Mysterio Mastermind Tactic").length + 
@@ -8969,7 +8986,7 @@ function updateVillainAttackValues(villain, i) {
     villain.attackFromScheme = 3;
   }
 
-  //Attack from Villain Effects - (Dracula and Skrulls handled within function)
+  //Attack from Villain Effects - (Skrulls handled within function)
 
   if (
     villain.name === `Blockbuster` &&
@@ -9169,7 +9186,7 @@ function updateHQVillainAttackValues(villain) {
     villain.attackFromScheme = 3;
   }
 
-  //Attack from Villain Effects - (Dracula and Skrulls handled within function)
+  //Attack from Villain Effects - (Skrulls handled within function)
 
   if (
     villain.name === `Blockbuster` &&
@@ -10547,7 +10564,7 @@ updateVillainAttackValues(villainCard, cityIndex);
       const tempBuff = window[`city${cityIndex + 1}TempBuff`] || 0;
       const permBuff = window[`city${cityIndex + 1}PermBuff`] || 0;
       const shattered = villainCard.shattered || 0;
-      finalAttack += tempBuff + permBuff - shattered;
+      finalAttack += tempBuff - shattered;
     }
   } catch (e) {
     console.warn("Buff calculation error:", e);
@@ -10782,6 +10799,78 @@ async function defeatVillain(cityIndex, isInstantDefeat = false) {
     villainAttack,
     cityIndex,
     isInstantDefeat,
+  );
+
+  // Wait for the cosmetic animation to finish (keeps UI silky)
+  await animationPromise;
+}
+
+    // Helper function for defeating HQ villain
+    async function instantDefeatHQVillain(hqIndex) {
+  playSFX("attack");
+
+  // Get fresh references
+  const villainCard = hq[hqIndex];
+  if (!villainCard) {
+    console.error("Villain disappeared during attack");
+    onscreenConsole.log(`Error: Villain could not be targeted.`);
+    return;
+  }
+
+  const hqCell = document.querySelector(`[data-hq-index="${hqIndex}"]`);
+  if (!hqCell) {
+    console.error("HQ cell not found for index:", hqIndex);
+    return;
+  }
+
+  const cardContainer = document.querySelector(
+    `.card-container[data-hq-index="${hqIndex}"]`,
+  );
+  if (!cardContainer) {
+    console.error("Card container not found in HQ cell:", hqIndex);
+    return;
+  }
+
+  const cardImage = cardContainer.querySelector(".card-image");
+  if (!cardImage) {
+    console.error("Card image not found");
+    return;
+  }
+
+  // Snapshot geometry BEFORE mutating game state; animation is cosmetic-only
+  const rect = cardContainer.getBoundingClientRect();
+  const animationPromise = animateDefeatFromRect(cardImage.src, rect);
+
+  // ---- GAME STATE CHANGES HAPPEN FIRST ----
+  currentVillainLocation = hqIndex;
+  const villainCopy = createVillainCopy(villainCard);
+  const villainAttack = 0; // Instant defeat means no attack cost
+
+  // Update game board to reflect the cleared HQ slot
+  updateGameBoard();
+
+  // NO point deduction for instant defeat - skip all the attack cost logic
+
+  // Update the reserve display
+  updateReserveAttackAndRecruit();
+
+  // Collect and execute operations (bystander rescues and fight effects)
+  const operations = await collectDefeatOperations(villainCopy);
+
+  // Let player choose order if there are multiple operations
+  if (operations.length > 1) {
+    await executeOperationsInPlayerOrder(operations, villainCopy);
+  } else if (operations.length === 1) {
+    await operations[0].execute();
+  }
+
+  // Post-defeat handling for HQ villains
+  await handleHQPostDefeat(
+    villainCard,
+    villainCopy,
+    villainAttack,
+    hqIndex,
+    true // isInstantDefeat = true
   );
 
   // Wait for the cosmetic animation to finish (keeps UI silky)
@@ -14535,7 +14624,7 @@ function openPlayedCardsPopup() {
       const focusIndicator = document.createElement("div");
       focusIndicator.className = "focus-indicator";
       focusIndicator.innerHTML = `
-        <span style="filter:drop-shadow(0vh 0vh 0.3vh black);">FOCUS ${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span>`;
+        <span style="filter:drop-shadow(0vh 0vh 0.3vh black);">FOCUS<br>${focusCost}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"></span>`;
 
       // Create focus button (hidden by default)
       const focusButton = document.createElement("div");
@@ -17086,90 +17175,13 @@ function closeHQCityCardChoicePopup() {
   );
   const preview = document.querySelector(".card-choice-city-hq-popup-preview");
   const confirm = document.getElementById("card-choice-city-hq-popup-confirm");
-  const otherChoice = document.getElementById(
-    "card-choice-city-hq-popup-otherchoice",
-  );
-  const nothanks = document.getElementById(
-    "card-choice-city-hq-popup-nothanks",
-  );
-  const mastermindImage = document.getElementById(
-    "hq-city-table-mastermind-image",
-  );
-  const mastermindLabel = document.getElementById("hq-city-table-mastermind");
-
-  if (cardchoicepopup) cardchoicepopup.style.display = "none";
-  if (title) title.textContent = "POPUP TITLE";
-  if (instructions) instructions.textContent = "INSTRUCTIONS";
-
-  if (mastermindImage) {
-    mastermindImage.style.display = "none";
-    mastermindLabel.style.display = "none";
-  }
-
-  if (preview) preview.innerHTML = "";
-  if (otherChoice) otherChoice.style.display = "none";
-  if (nothanks) nothanks.style.display = "none";
-
-  // Reset all HQ slots
-  for (let i = 1; i <= 5; i++) {
-    const cell = document.querySelector(
-      `#hq-city-table-city-hq-${i} .hq-popup-cell`,
-    );
-    const cardImage = document.querySelector(
-      `#hq-city-table-city-hq-${i} .city-hq-chosen-card-image`,
-    );
-    const explosion = document.querySelector(
-      `#hq-city-table-city-hq-${i} .hq-popup-explosion`,
-    );
-    const explosionCount = document.querySelector(
-      `#hq-city-table-city-hq-${i} .hq-popup-explosion-count`,
-    );
-    const recruitContainer = document.querySelector(
-      `#hq-city-table-city-hq-${i} .hq-popup-recruit-container`,
-    );
-
-    // Reset card image
-    cardImage.src = "Visual Assets/CardBack.webp";
-    cardImage.alt = `HQ City Cell ${i}`;
-    cardImage.classList.remove("greyed-out", "selected");
-
-    // Reset explosion indicators
-    explosion.style.display = "none";
-    explosionCount.style.display = "none";
-    explosion.classList.remove("max-explosions");
-    cell.classList.remove("destroyed");
-
-    // Reset recruit button
-    if (recruitContainer) recruitContainer.style.display = "none";
-  }
-
-  document.getElementById("hq-city-table-city-hq-1-label").innerHTML = "Bridge";
-  document.getElementById("hq-city-table-city-hq-2-label").innerHTML =
-    "Rooftops";
-  document.getElementById("hq-city-table-city-hq-3-label").innerHTML =
-    "Streets";
-  document.getElementById("hq-city-table-city-hq-4-label").innerHTML = "Bank";
-  document.getElementById("hq-city-table-city-hq-5-label").innerHTML = "Sewers";
-
-  // Hide modal overlay
-  const modalOverlay = document.getElementById("modal-overlay");
-  if (modalOverlay) modalOverlay.style.display = "none";
-}
-
-function closeHQCityCardChoicePopup() {
-  const cardchoicepopup = document.querySelector(".card-choice-city-hq-popup");
-  const title = document.querySelector(".card-choice-city-hq-popup-title");
-  const instructions = document.querySelector(
-    ".card-choice-city-hq-popup-instructions",
-  );
-  const preview = document.querySelector(".card-choice-city-hq-popup-preview");
-  const confirm = document.getElementById("card-choice-city-hq-popup-confirm");
   const otherChoiceButton = document.getElementById(
     "card-choice-city-hq-popup-otherchoice",
   );
   const nothanks = document.getElementById(
     "card-choice-city-hq-popup-nothanks",
   );
+
   const mastermindImage = document.getElementById(
     "hq-city-table-mastermind-image",
   );
@@ -17207,6 +17219,41 @@ function closeHQCityCardChoicePopup() {
     nothanks.style.animation = "";
     nothanks.textContent = "NO THANKS!";
     nothanks.style.display = "none";
+  }
+
+  //Reset additional buttons
+  const choice1 = document.getElementById("card-choice-city-hq-popup-choice1");
+  const choice2 = document.getElementById("card-choice-city-hq-popup-choice2");
+  const choice3 = document.getElementById("card-choice-city-hq-popup-choice3");
+  
+  if (choice1) {
+    choice1.innerHTML = "CHOICE 1";
+    choice1.style.display = "none";
+    choice1.style.transform = `none`;
+    choice1.style.boxShadow = `none`;
+    choice1.style.animation = `none`;
+    choice1.style.outline = "none";
+    choice1.style.outlineStyle = "none";
+  }
+  
+  if (choice2) {
+    choice2.innerHTML = "CHOICE 2";
+    choice2.style.display = "none";
+    choice2.style.transform = `none`;
+    choice2.style.boxShadow = `none`;
+    choice2.style.animation = `none`;
+    choice2.style.outline = "none";
+    choice2.style.outlineStyle = "none";
+  }
+
+    if (choice3) {
+    choice3.innerHTML = "CHOICE 3";
+    choice3.style.display = "none";
+    choice3.style.transform = `none`;
+    choice3.style.boxShadow = `none`;
+    choice3.style.animation = `none`;
+    choice3.style.outline = "none";
+    choice3.style.outlineStyle = "none";
   }
 
   const previewContainer = document.querySelector(

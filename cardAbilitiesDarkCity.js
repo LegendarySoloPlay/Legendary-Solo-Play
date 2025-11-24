@@ -1,5 +1,5 @@
 // Card Abilities for Dark City
-//12.11.2025 15.15
+//24.11.2025 17.35
 
 async function angelDivingCatch(card) {
   return new Promise((resolve) => {
@@ -1645,10 +1645,20 @@ function ghostRiderInfernalChains() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCityIndex = null;
+    let selectedHQIndex = null;
     let selectedCell = null;
     let telepathicProbeVillain = null;
     let telepathicProbeSelected = false;
     let demonGoblinSelected = false;
+    let viewingHQ = false; // Track whether we're viewing city or HQ
+
+    const selectedScheme = schemes.find(
+      (s) =>
+        s.name ===
+        document.querySelector(
+          "#scheme-section input[type=radio]:checked",
+        ).value,
+    );
 
     // Check for eligible villains in city
     const eligibleVillainsInCity = city.some((card, index) => {
@@ -1658,6 +1668,16 @@ function ghostRiderInfernalChains() {
       }
       return false;
     });
+
+    // Check for eligible villains in HQ if scheme is active
+    const eligibleVillainsInHQ = selectedScheme.name === 'Invade the Daily Bugle News HQ' ? 
+      hq.some((card, index) => {
+        if (card && card.type === "Villain") {
+          const villainAttack = recalculateHQVillainAttack(card);
+          return villainAttack < 4;
+        }
+        return false;
+      }) : false;
 
     // Check for Professor X - Telepathic Probe revealed villain
     const telepathicProbeCard = cardsPlayedThisTurn.find(
@@ -1686,143 +1706,171 @@ function ghostRiderInfernalChains() {
     const hasDemonGoblin = demonGoblinDeck.length > 0;
 
     // If no eligible villains at all
-    if (!eligibleVillainsInCity && !telepathicProbeVillain && !hasDemonGoblin) {
+    if (!eligibleVillainsInCity && !telepathicProbeVillain && !hasDemonGoblin && !eligibleVillainsInHQ) {
       onscreenConsole.log("There are no Villains available to defeat.");
       resolve();
       return;
     }
 
-    // Process each city slot (0-4)
-    for (let i = 0; i < 5; i++) {
-      const slot = i + 1;
-      const cell = document.querySelector(
-        `#hq-city-table-city-hq-${slot} .hq-popup-cell`,
-      );
-      const cardImage = document.querySelector(
-        `#hq-city-table-city-hq-${slot} .city-hq-chosen-card-image`,
-      );
+    // Function to render city cards
+    function renderCityCards() {
+      viewingHQ = false;
+      
+      // Process each city slot (0-4)
+      for (let i = 0; i < 5; i++) {
+        const slot = i + 1;
+        const cell = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-cell`,
+        );
+        const cardImage = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .city-hq-chosen-card-image`,
+        );
 
-      const card = city[i];
+        const card = city[i];
 
-      // Update label to show city location
-      document.getElementById(
-        `hq-city-table-city-hq-${slot}-label`,
-      ).textContent = ["Bridge", "Streets", "Rooftops", "Bank", "Sewers"][i];
+        // Update label to show city location
+        document.getElementById(
+          `hq-city-table-city-hq-${slot}-label`,
+        ).textContent = ["Bridge", "Streets", "Rooftops", "Bank", "Sewers"][i];
 
-      // Remove any existing selection classes from cell
-      cell.classList.remove("selected");
-      cell.classList.remove("destroyed");
+        // Remove any existing selection classes from cell
+        cell.classList.remove("selected");
+        cell.classList.remove("destroyed");
 
-      const explosion = document.querySelector(
-        `#hq-city-table-city-hq-${slot} .hq-popup-explosion`,
-      );
-      const explosionCount = document.querySelector(
-        `#hq-city-table-city-hq-${slot} .hq-popup-explosion-count`,
-      );
+        const explosion = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-explosion`,
+        );
+        const explosionCount = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-explosion-count`,
+        );
 
-      if (explosion) explosion.style.display = "none";
-      if (explosionCount) explosionCount.style.display = "none";
+        if (explosion) explosion.style.display = "none";
+        if (explosionCount) explosionCount.style.display = "none";
 
-      // Remove any existing popup containers before creating a new one
-      const existingContainers = cell.querySelectorAll(".popup-card-container");
-      existingContainers.forEach((container) => container.remove());
+        // Remove any existing popup containers before creating a new one
+        const existingContainers = cell.querySelectorAll(".popup-card-container");
+        existingContainers.forEach((container) => container.remove());
 
-      // Create card container for overlays
-      const cardContainer = document.createElement("div");
-      cardContainer.className = "card-container popup-card-container";
-      cell.appendChild(cardContainer);
+        // Create card container for overlays
+        const cardContainer = document.createElement("div");
+        cardContainer.className = "card-container popup-card-container";
+        cell.appendChild(cardContainer);
 
-      // Check if this space is destroyed
-      if (destroyedSpaces[i]) {
-        // For destroyed spaces, use Master Strike image with same styling
-        const destroyedImage = document.createElement("img");
-        destroyedImage.src =
-          "Visual Assets/Masterminds/Galactus_MasterStrike.webp";
-        destroyedImage.alt = "Destroyed City Space";
-        destroyedImage.className = "city-hq-chosen-card-image";
-        destroyedImage.style.cursor = "not-allowed";
-        cardContainer.appendChild(destroyedImage);
-        destroyedImage.classList.add("greyed-out");
+        // Check if this space is destroyed
+        if (destroyedSpaces[i]) {
+          // For destroyed spaces, use Master Strike image with same styling
+          const destroyedImage = document.createElement("img");
+          destroyedImage.src =
+            "Visual Assets/Masterminds/Galactus_MasterStrike.webp";
+          destroyedImage.alt = "Destroyed City Space";
+          destroyedImage.className = "city-hq-chosen-card-image";
+          destroyedImage.style.cursor = "not-allowed";
+          cardContainer.appendChild(destroyedImage);
+          destroyedImage.classList.add("greyed-out");
 
-        // Hide the original card image
-        cardImage.style.display = "none";
+          // Hide the original card image
+          cardImage.style.display = "none";
 
-        continue;
-      }
-
-      if (card) {
-        // Set the actual card image and MOVE IT INTO THE CONTAINER
-        cardImage.src = card.image;
-        cardImage.alt = card.name;
-        cardImage.className = "city-hq-chosen-card-image";
-        cardImage.style.display = "block";
-        cardContainer.appendChild(cardImage);
-
-        // Determine eligibility - Villains with less than 4 attack
-        const isVillain = card.type === "Villain";
-        const villainAttack = isVillain ? recalculateVillainAttack(card) : 0;
-        const isEligible = isVillain && villainAttack < 4;
-
-        // Apply greyed out styling for ineligible cards
-        if (!isEligible) {
-          cardImage.classList.add("greyed-out");
-        } else {
-          cardImage.classList.remove("greyed-out");
+          continue;
         }
 
-        // Add all relevant overlays
-        addCardOverlays(cardContainer, card, i);
+        if (card) {
+          // Set the actual card image and MOVE IT INTO THE CONTAINER
+          cardImage.src = card.image;
+          cardImage.alt = card.name;
+          cardImage.className = "city-hq-chosen-card-image";
+          cardImage.style.display = "block";
+          cardContainer.appendChild(cardImage);
 
-        // Add click handler for eligible cards only
-        if (isEligible) {
-          cardImage.style.cursor = "pointer";
+          // Determine eligibility - Villains with less than 4 attack
+          const isVillain = card.type === "Villain";
+          const villainAttack = isVillain ? recalculateVillainAttack(card) : 0;
+          const isEligible = isVillain && villainAttack < 4;
 
-          // Click handler
-          cardImage.onclick = (e) => {
-            e.stopPropagation();
+          // Apply greyed out styling for ineligible cards
+          if (!isEligible) {
+            cardImage.classList.add("greyed-out");
+          } else {
+            cardImage.classList.remove("greyed-out");
+          }
 
-            if (selectedCityIndex === i) {
-              // Deselect
-              selectedCityIndex = null;
-              cell.classList.remove("selected");
-              selectedCell = null;
-              previewElement.innerHTML = "";
-              previewElement.style.backgroundColor = "var(--panel-backgrounds)";
+          // Add all relevant overlays
+          addCardOverlays(cardContainer, card, i);
 
-              // Update instructions and confirm button
-              instructionsElement.textContent =
-                "SELECT A VILLAIN WITH LESS THAN 4 ATTACK TO DEFEAT:";
-              document.getElementById(
-                "card-choice-city-hq-popup-confirm",
-              ).disabled = true;
-            } else {
-              // Deselect previous
-              if (selectedCell) {
-                selectedCell.classList.remove("selected");
+          // Add click handler for eligible cards only
+          if (isEligible) {
+            cardImage.style.cursor = "pointer";
+
+            // Click handler
+            cardImage.onclick = (e) => {
+              e.stopPropagation();
+
+              if (selectedCityIndex === i) {
+                // Deselect
+                selectedCityIndex = null;
+                cell.classList.remove("selected");
+                selectedCell = null;
+                previewElement.innerHTML = "";
+                previewElement.style.backgroundColor = "var(--panel-backgrounds)";
+
+                // Update instructions and confirm button
+                instructionsElement.textContent =
+                  "SELECT A VILLAIN WITH LESS THAN 4 ATTACK TO DEFEAT:";
+                document.getElementById(
+                  "card-choice-city-hq-popup-confirm",
+                ).disabled = true;
+              } else {
+                // Deselect previous
+                if (selectedCell) {
+                  selectedCell.classList.remove("selected");
+                }
+
+                // Select new
+                selectedCityIndex = i;
+                selectedHQIndex = null; // Clear HQ selection
+                selectedCell = cell;
+                cell.classList.add("selected");
+
+                // Deselect Telepathic Probe and Demon Goblin if they were selected
+                if (telepathicProbeSelected) {
+                  telepathicProbeSelected = false;
+                  choice1.style.backgroundColor = "rgb(204, 204, 204)";
+                  choice1.style.transform = `none`;
+                  choice1.style.boxShadow = `none`;
+                  choice1.style.animation = `none`;
+                  choice1.style.outline = "none";
+                  choice1.style.outlineStyle = "none";
+                }
+                if (demonGoblinSelected) {
+                  demonGoblinSelected = false;
+                  choice2.style.backgroundColor = "rgb(204, 204, 204)";
+                  choice2.style.transform = `none`;
+                  choice2.style.boxShadow = `none`;
+                  choice2.style.animation = `none`;
+                  choice2.style.outline = "none";
+                  choice2.style.outlineStyle = "none";
+                }
+
+                // Update preview
+                previewElement.innerHTML = "";
+                const previewImage = document.createElement("img");
+                previewImage.src = card.image;
+                previewImage.alt = card.name;
+                previewImage.className = "popup-card-preview-image";
+                previewElement.appendChild(previewImage);
+                previewElement.style.backgroundColor = "var(--accent)";
+
+                // Update instructions and confirm button
+                instructionsElement.innerHTML = `Selected: <span class="console-highlights">${card.name}</span> will be defeated.`;
+                document.getElementById(
+                  "card-choice-city-hq-popup-confirm",
+                ).disabled = false;
               }
+            };
 
-              // Select new
-              selectedCityIndex = i;
-              selectedCell = cell;
-              cell.classList.add("selected");
-
-              // Deselect Telepathic Probe and Demon Goblin if they were selected
-              if (telepathicProbeSelected) {
-                telepathicProbeSelected = false;
-                otherChoiceButton.style.backgroundColor =
-                  "var(--panel-backgrounds)";
-                otherChoiceButton.style.transform = `none`;
-                otherChoiceButton.style.boxShadow = `none`;
-                otherChoiceButton.style.animation = `none`;
-              }
-              if (demonGoblinSelected) {
-                demonGoblinSelected = false;
-                noThanksButton.style.backgroundColor =
-                  "var(--panel-backgrounds)";
-                noThanksButton.style.transform = `none`;
-                noThanksButton.style.boxShadow = `none`;
-                noThanksButton.style.animation = `none`;
-              }
+            // Hover effects for eligible cards
+            cardImage.onmouseover = () => {
+              if (selectedCityIndex !== null && selectedCityIndex !== i) return;
 
               // Update preview
               previewElement.innerHTML = "";
@@ -1831,108 +1879,319 @@ function ghostRiderInfernalChains() {
               previewImage.alt = card.name;
               previewImage.className = "popup-card-preview-image";
               previewElement.appendChild(previewImage);
-              previewElement.style.backgroundColor = "var(--accent)";
 
-              // Update instructions and confirm button
-              instructionsElement.innerHTML = `Selected: <span class="console-highlights">${card.name}</span> will be defeated.`;
-              document.getElementById(
-                "card-choice-city-hq-popup-confirm",
-              ).disabled = false;
-            }
-          };
+              // Only change background if no card is selected
+              if (selectedCityIndex === null) {
+                previewElement.style.backgroundColor = "var(--accent)";
+              }
+            };
 
-          // Hover effects for eligible cards
-          cardImage.onmouseover = () => {
-            if (selectedCityIndex !== null && selectedCityIndex !== i) return;
+            cardImage.onmouseout = () => {
+              if (selectedCityIndex !== null && selectedCityIndex !== i) return;
 
-            // Update preview
-            previewElement.innerHTML = "";
-            const previewImage = document.createElement("img");
-            previewImage.src = card.image;
-            previewImage.alt = card.name;
-            previewImage.className = "popup-card-preview-image";
-            previewElement.appendChild(previewImage);
-
-            // Only change background if no card is selected
-            if (selectedCityIndex === null) {
-              previewElement.style.backgroundColor = "var(--accent)";
-            }
-          };
-
-          cardImage.onmouseout = () => {
-            if (selectedCityIndex !== null && selectedCityIndex !== i) return;
-
-            // Only clear preview if no card is selected AND we're not hovering over another eligible card
-            if (selectedCityIndex === null) {
-              setTimeout(() => {
-                const hoveredCard = document.querySelector(
-                  ".city-hq-chosen-card-image:hover:not(.greyed-out)",
-                );
-                if (!hoveredCard) {
-                  previewElement.innerHTML = "";
-                  previewElement.style.backgroundColor =
-                    "var(--panel-backgrounds)";
-                }
-              }, 50);
-            }
-          };
+              // Only clear preview if no card is selected AND we're not hovering over another eligible card
+              if (selectedCityIndex === null) {
+                setTimeout(() => {
+                  const hoveredCard = document.querySelector(
+                    ".city-hq-chosen-card-image:hover:not(.greyed-out)",
+                  );
+                  if (!hoveredCard) {
+                    previewElement.innerHTML = "";
+                    previewElement.style.backgroundColor =
+                      "var(--panel-backgrounds)";
+                  }
+                }, 50);
+              }
+            };
+          } else {
+            // For ineligible cards, remove event handlers and make non-clickable
+            cardImage.style.cursor = "not-allowed";
+            cardImage.onclick = null;
+            cardImage.onmouseover = null;
+            cardImage.onmouseout = null;
+          }
         } else {
-          // For ineligible cards, remove event handlers and make non-clickable
+          // Empty city slot - show blank card and grey out
+          cardImage.src = "Visual Assets/BlankCardSpace.webp";
+          cardImage.alt = "Empty City Space";
+          cardImage.classList.add("greyed-out");
           cardImage.style.cursor = "not-allowed";
           cardImage.onclick = null;
           cardImage.onmouseover = null;
           cardImage.onmouseout = null;
+          cardContainer.appendChild(cardImage);
         }
-      } else {
-        // Empty city slot - show blank card and grey out
-        cardImage.src = "Visual Assets/BlankCardSpace.webp";
-        cardImage.alt = "Empty City Space";
-        cardImage.classList.add("greyed-out");
-        cardImage.style.cursor = "not-allowed";
-        cardImage.onclick = null;
-        cardImage.onmouseover = null;
-        cardImage.onmouseout = null;
-        cardContainer.appendChild(cardImage);
       }
     }
+
+    // Function to render HQ cards
+    function renderHQCards() {
+      viewingHQ = true;
+      
+      // Get HQ slots (1-5) and explosion values
+      const hqSlots = [1, 2, 3, 4, 5];
+      const explosionValues = [
+        hqExplosion1,
+        hqExplosion2,
+        hqExplosion3,
+        hqExplosion4,
+        hqExplosion5,
+      ];
+
+      // Process each HQ slot
+      hqSlots.forEach((slot, index) => {
+        const cell = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-cell`,
+        );
+        const cardImage = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .city-hq-chosen-card-image`,
+        );
+        const explosion = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-explosion`,
+        );
+        const explosionCount = document.querySelector(
+          `#hq-city-table-city-hq-${slot} .hq-popup-explosion-count`,
+        );
+
+        const card = hq[index];
+        const explosionValue = explosionValues[index] || 0;
+
+        // Update explosion indicators
+        if (explosionValue > 0) {
+          explosion.style.display = "block";
+          explosionCount.style.display = "block";
+          explosionCount.textContent = explosionValue;
+
+          if (explosionValue >= 6) {
+            explosion.classList.add("max-explosions");
+            cell.classList.add("destroyed");
+          } else {
+            explosion.classList.remove("max-explosions");
+            cell.classList.remove("destroyed");
+          }
+        } else {
+          if (explosion) explosion.style.display = "none";
+          if (explosionCount) explosionCount.style.display = "none";
+          cell.classList.remove("destroyed");
+        }
+
+        // Update label
+        document.getElementById(
+          `hq-city-table-city-hq-${slot}-label`,
+        ).textContent = `HQ-${slot}`;
+
+        // Remove any existing selection classes from cell
+        cell.classList.remove("selected");
+
+        // Remove any existing popup containers before creating a new one
+        const existingContainers = cell.querySelectorAll(".popup-card-container");
+        existingContainers.forEach((container) => container.remove());
+
+        // Create card container for overlays
+        const cardContainer = document.createElement("div");
+        cardContainer.className = "card-container popup-card-container";
+        cell.appendChild(cardContainer);
+
+        if (card) {
+          // Set the actual card image and MOVE IT INTO THE CONTAINER
+          cardImage.src = card.image;
+          cardImage.alt = card.name;
+          cardImage.className = "city-hq-chosen-card-image";
+          cardImage.style.display = "block";
+          cardContainer.appendChild(cardImage);
+
+          // Determine eligibility - Villains with less than 4 attack
+          const isVillain = card.type === "Villain";
+          const villainAttack = isVillain ? recalculateHQVillainAttack(card) : 0;
+          const isDestroyed = explosionValue >= 6;
+          const isEligible = isVillain && villainAttack < 4 && !isDestroyed;
+
+          // Apply greyed out styling for ineligible cards
+          if (!isEligible) {
+            cardImage.classList.add("greyed-out");
+          } else {
+            cardImage.classList.remove("greyed-out");
+          }
+
+          // Only add overlays for villain cards to avoid the city-specific attack calculation error
+          if (isVillain && card) {
+            addCardOverlays(cardContainer, card, index, 'hq');
+          }
+
+          // Add click handler for eligible cards only
+          if (isEligible) {
+            cardImage.style.cursor = "pointer";
+
+            // Click handler
+            cardImage.onclick = (e) => {
+              e.stopPropagation();
+
+              if (selectedHQIndex === index) {
+                // Deselect
+                selectedHQIndex = null;
+                cell.classList.remove("selected");
+                selectedCell = null;
+                previewElement.innerHTML = "";
+                previewElement.style.backgroundColor = "var(--panel-backgrounds)";
+
+                // Update instructions and confirm button
+                instructionsElement.textContent =
+                  "SELECT A VILLAIN WITH LESS THAN 4 ATTACK TO DEFEAT:";
+                document.getElementById(
+                  "card-choice-city-hq-popup-confirm",
+                ).disabled = true;
+              } else {
+                // Deselect previous
+                if (selectedCell) {
+                  selectedCell.classList.remove("selected");
+                }
+
+                // Select new
+                selectedHQIndex = index;
+                selectedCityIndex = null; // Clear city selection
+                selectedCell = cell;
+                cell.classList.add("selected");
+
+                // Deselect Telepathic Probe and Demon Goblin if they were selected
+                if (telepathicProbeSelected) {
+                  telepathicProbeSelected = false;
+                  choice1.style.backgroundColor = "rgb(204, 204, 204)";
+                  choice1.style.transform = `none`;
+                  choice1.style.boxShadow = `none`;
+                  choice1.style.animation = `none`;
+                  choice1.style.outline = "none";
+                  choice1.style.outlineStyle = "none";
+                }
+                if (demonGoblinSelected) {
+                  demonGoblinSelected = false;
+                  choice2.style.backgroundColor = "rgb(204, 204, 204)";
+                  choice2.style.transform = `none`;
+                  choice2.style.boxShadow = `none`;
+                  choice2.style.animation = `none`;
+                  choice2.style.outline = "none";
+                  choice2.style.outlineStyle = "none";
+                }
+
+                // Update preview
+                previewElement.innerHTML = "";
+                const previewImage = document.createElement("img");
+                previewImage.src = card.image;
+                previewImage.alt = card.name;
+                previewImage.className = "popup-card-preview-image";
+                previewElement.appendChild(previewImage);
+                previewElement.style.backgroundColor = "var(--accent)";
+
+                // Update instructions and confirm button
+                instructionsElement.innerHTML = `Selected: <span class="console-highlights">${card.name}</span> will be defeated.`;
+                document.getElementById(
+                  "card-choice-city-hq-popup-confirm",
+                ).disabled = false;
+              }
+            };
+
+            // Hover effects for eligible cards
+            cardImage.onmouseover = () => {
+              if (selectedHQIndex !== null && selectedHQIndex !== index) return;
+
+              // Update preview
+              previewElement.innerHTML = "";
+              const previewImage = document.createElement("img");
+              previewImage.src = card.image;
+              previewImage.alt = card.name;
+              previewImage.className = "popup-card-preview-image";
+              previewElement.appendChild(previewImage);
+
+              // Only change background if no card is selected
+              if (selectedHQIndex === null) {
+                previewElement.style.backgroundColor = "var(--accent)";
+              }
+            };
+
+            cardImage.onmouseout = () => {
+              if (selectedHQIndex !== null && selectedHQIndex !== index) return;
+
+              // Only clear preview if no card is selected AND we're not hovering over another eligible card
+              if (selectedHQIndex === null) {
+                setTimeout(() => {
+                  const hoveredCard = document.querySelector(
+                    ".city-hq-chosen-card-image:hover:not(.greyed-out)",
+                  );
+                  if (!hoveredCard) {
+                    previewElement.innerHTML = "";
+                    previewElement.style.backgroundColor =
+                      "var(--panel-backgrounds)";
+                  }
+                }, 50);
+              }
+            };
+          } else {
+            // For ineligible cards, remove event handlers and make non-clickable
+            cardImage.style.cursor = "not-allowed";
+            cardImage.onclick = null;
+            cardImage.onmouseover = null;
+            cardImage.onmouseout = null;
+          }
+        } else {
+          // No card in this slot - show card back and grey out
+          cardImage.src = "Visual Assets/CardBack.webp";
+          cardImage.alt = "Empty HQ Slot";
+          cardImage.classList.add("greyed-out");
+          cardImage.style.cursor = "not-allowed";
+          cardImage.onclick = null;
+          cardImage.onmouseover = null;
+          cardImage.onmouseout = null;
+          cardContainer.appendChild(cardImage);
+        }
+      });
+    }
+
+    // Initial render - start with city
+    renderCityCards();
 
     // Set up button handlers
     const confirmButton = document.getElementById(
       "card-choice-city-hq-popup-confirm",
     );
+    const choice1 = document.getElementById(
+      "card-choice-city-hq-popup-choice1",
+    );
+    const choice2 = document.getElementById(
+      "card-choice-city-hq-popup-choice2",
+    );
     const otherChoiceButton = document.getElementById(
       "card-choice-city-hq-popup-otherchoice",
-    );
-    const noThanksButton = document.getElementById(
-      "card-choice-city-hq-popup-nothanks",
     );
 
     // Configure buttons
     confirmButton.disabled = true;
     confirmButton.textContent = "DEFEAT SELECTED VILLAIN";
 
-    // Set up Other Choice button for Telepathic Probe villain
+    // Set up Choice1 button for Telepathic Probe villain
     if (telepathicProbeVillain) {
-      otherChoiceButton.style.display = "inline-block";
-      otherChoiceButton.textContent = `DEFEAT ${telepathicProbeVillain.name} (TELEPATHIC PROBE)`;
-      otherChoiceButton.style.backgroundColor = "var(--panel-backgrounds)";
-      otherChoiceButton.style.border = `0.5vh solid var(--accent)`;
-      otherChoiceButton.style.color = "#282828";
-      otherChoiceButton.disabled = false;
+      choice1.style.display = "inline-block";
+      choice1.textContent = `DEFEAT ${telepathicProbeVillain.name} (TELEPATHIC PROBE)`;
+      choice1.style.backgroundColor = "rgb(204, 204, 204)";
+      choice1.style.border = `0.5vh solid var(--accent)`;
+      choice1.style.color = "#282828";
+      choice1.disabled = false;
 
-      // Other Choice button handler for Telepathic Probe villain
-      otherChoiceButton.onclick = (e) => {
+      // Choice1 button handler for Telepathic Probe villain
+      choice1.onclick = (e) => {
         e.stopPropagation();
         e.preventDefault();
 
         if (telepathicProbeSelected) {
           // Deselect Telepathic Probe
           telepathicProbeSelected = false;
-          otherChoiceButton.style.backgroundColor = "var(--panel-backgrounds)";
-          otherChoiceButton.style.transform = `none`;
-          otherChoiceButton.style.boxShadow = `none`;
-          otherChoiceButton.style.animation = `none`;
+          choice1.style.backgroundColor = "rgb(204, 204, 204)";
+          choice1.style.transform = `none`;
+          choice1.style.boxShadow = `none`;
+          choice1.style.animation = `none`;
+          choice1.style.outline = "none";
+          choice1.style.outlineStyle = "none";
+          
           selectedCityIndex = null;
+          selectedHQIndex = null;
           if (selectedCell) {
             selectedCell.classList.remove("selected");
             selectedCell = null;
@@ -1945,24 +2204,29 @@ function ghostRiderInfernalChains() {
         } else {
           // Select Telepathic Probe
           telepathicProbeSelected = true;
-          otherChoiceButton.style.backgroundColor = "#ccc";
-          otherChoiceButton.style.color = "#282828";
-          otherChoiceButton.style.transform = `scale(1.02)`;
-          otherChoiceButton.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.3)`;
-          otherChoiceButton.style.animation = `filter-animation 1s infinite`;
+          choice1.style.backgroundColor = "rgb(204, 204, 204)";
+          choice1.style.color = "#282828";
+          choice1.style.transform = `scale(1.02)`;
+          choice1.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.3)`;
+          choice1.style.animation = `filter-animation 1s infinite`;
+          choice1.style.outline = "var(--selectedButton)";
+          choice1.style.outlineStyle = "solid";
 
-          // Deselect any city selection and Demon Goblin
+          // Deselect any city/HQ selection and Demon Goblin
           selectedCityIndex = null;
+          selectedHQIndex = null;
           if (selectedCell) {
             selectedCell.classList.remove("selected");
             selectedCell = null;
           }
           if (demonGoblinSelected) {
             demonGoblinSelected = false;
-            noThanksButton.style.backgroundColor = "var(--panel-backgrounds)";
-            noThanksButton.style.transform = `none`;
-            noThanksButton.style.boxShadow = `none`;
-            noThanksButton.style.animation = `none`;
+            choice2.style.backgroundColor = "rgb(204, 204, 204)";
+            choice2.style.transform = `none`;
+            choice2.style.boxShadow = `none`;
+            choice2.style.animation = `none`;
+            choice2.style.outline = "none";
+            choice2.style.outlineStyle = "none";
           }
 
           // Update preview
@@ -1980,31 +2244,34 @@ function ghostRiderInfernalChains() {
         }
       };
     } else {
-      otherChoiceButton.style.display = "none";
+      choice1.style.display = "none";
     }
 
-    // Set up No Thanks button for Demon Goblin
+    // Set up Choice2 button for Demon Goblin
     if (hasDemonGoblin) {
-      noThanksButton.style.display = "inline-block";
-      noThanksButton.textContent = `DEFEAT DEMON GOBLIN`;
-      noThanksButton.style.backgroundColor = "var(--panel-backgrounds)";
-      noThanksButton.style.border = `0.5vh solid var(--accent)`;
-      noThanksButton.style.color = "#282828";
-      noThanksButton.disabled = false;
+      choice2.style.display = "inline-block";
+      choice2.textContent = `DEFEAT DEMON GOBLIN`;
+      choice2.style.backgroundColor = "rgb(204, 204, 204)";
+      choice2.style.border = `0.5vh solid var(--accent)`;
+      choice2.style.color = "#282828";
+      choice2.disabled = false;
 
-      // No Thanks button handler for Demon Goblin
-      noThanksButton.onclick = (e) => {
+      // Choice2 button handler for Demon Goblin
+      choice2.onclick = (e) => {
         e.stopPropagation();
         e.preventDefault();
 
         if (demonGoblinSelected) {
           // Deselect Demon Goblin
           demonGoblinSelected = false;
-          noThanksButton.style.backgroundColor = "var(--panel-backgrounds)";
-          noThanksButton.style.transform = `none`;
-          noThanksButton.style.boxShadow = `none`;
-          noThanksButton.style.animation = `none`;
+          choice2.style.backgroundColor = "rgb(204, 204, 204)";
+          choice2.style.transform = `none`;
+          choice2.style.boxShadow = `none`;
+          choice2.style.animation = `none`;
+          choice2.style.outline = "none";
+          choice2.style.outlineStyle = "none";
           selectedCityIndex = null;
+          selectedHQIndex = null;
           if (selectedCell) {
             selectedCell.classList.remove("selected");
             selectedCell = null;
@@ -2017,26 +2284,30 @@ function ghostRiderInfernalChains() {
         } else {
           // Select Demon Goblin
           demonGoblinSelected = true;
-          noThanksButton.style.backgroundColor = "#ccc";
-          noThanksButton.style.color = "#282828";
-          noThanksButton.style.transform = `scale(1.02)`;
-          noThanksButton.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.3)`;
-          noThanksButton.style.animation = `filter-animation 1s infinite`;
-          noThanksButton.textContent = "DEFEAT DEMON GOBLIN";
+          choice2.style.backgroundColor = "rgb(204, 204, 204)";
+          choice2.style.color = "#282828";
+          choice2.style.transform = `scale(1.02)`;
+          choice2.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.3)`;
+          choice2.style.animation = `filter-animation 1s infinite`;
+          choice2.textContent = "DEFEAT DEMON GOBLIN";
+          choice2.style.outline = "var(--selectedButton)";
+          choice2.style.outlineStyle = "solid";
 
-          // Deselect any city selection and Telepathic Probe
+          // Deselect any city/HQ selection and Telepathic Probe
           selectedCityIndex = null;
+          selectedHQIndex = null;
           if (selectedCell) {
             selectedCell.classList.remove("selected");
             selectedCell = null;
           }
           if (telepathicProbeSelected) {
             telepathicProbeSelected = false;
-            otherChoiceButton.style.backgroundColor =
-              "var(--panel-backgrounds)";
-            otherChoiceButton.style.transform = `none`;
-            otherChoiceButton.style.boxShadow = `none`;
-            otherChoiceButton.style.animation = `none`;
+            choice1.style.backgroundColor = "rgb(204, 204, 204)";
+            choice1.style.transform = `none`;
+            choice1.style.boxShadow = `none`;
+            choice1.style.animation = `none`;
+            choice1.style.outline = "none";
+            choice1.style.outlineStyle = "none";
           }
 
           // Update preview
@@ -2055,7 +2326,63 @@ function ghostRiderInfernalChains() {
         }
       };
     } else {
-      noThanksButton.style.display = "none";
+      choice2.style.display = "none";
+    }
+
+    // Set up Other Choice button as toggle between City and HQ
+    if (selectedScheme.name === 'Invade the Daily Bugle News HQ' && eligibleVillainsInHQ) {
+      otherChoiceButton.style.display = "inline-block";
+      otherChoiceButton.textContent = "SWITCH TO HQ";
+      otherChoiceButton.disabled = false;
+
+      otherChoiceButton.onclick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        // Clear any selections
+        selectedCityIndex = null;
+        selectedHQIndex = null;
+        telepathicProbeSelected = false;
+        demonGoblinSelected = false;
+        if (selectedCell) {
+          selectedCell.classList.remove("selected");
+          selectedCell = null;
+        }
+        previewElement.innerHTML = "";
+        previewElement.style.backgroundColor = "var(--panel-backgrounds)";
+        confirmButton.disabled = true;
+
+        // Reset choice buttons if they were selected
+        if (telepathicProbeVillain) {
+          choice1.style.backgroundColor = "rgb(204, 204, 204)";
+          choice1.style.transform = `none`;
+          choice1.style.boxShadow = `none`;
+          choice1.style.animation = `none`;
+          choice1.style.outline = "none";
+          choice1.style.outlineStyle = "none";
+        }
+        if (hasDemonGoblin) {
+          choice2.style.backgroundColor = "rgb(204, 204, 204)";
+          choice2.style.transform = `none`;
+          choice2.style.boxShadow = `none`;
+          choice2.style.animation = `none`;
+          choice2.style.outline = "none";
+          choice2.style.outlineStyle = "none";
+        }
+
+        // Toggle between City and HQ views
+        if (viewingHQ) {
+          renderCityCards();
+          otherChoiceButton.textContent = "SWITCH TO HQ";
+          instructionsElement.textContent = "SELECT A VILLAIN WITH LESS THAN 4 ATTACK TO DEFEAT:";
+        } else {
+          renderHQCards();
+          otherChoiceButton.textContent = "SWITCH TO CITY";
+          instructionsElement.textContent = "SELECT A VILLAIN WITH LESS THAN 4 ATTACK TO DEFEAT:";
+        }
+      };
+    } else {
+      otherChoiceButton.style.display = "none";
     }
 
     // Store the original resolve function to use in event handler
@@ -2068,6 +2395,7 @@ function ghostRiderInfernalChains() {
 
       if (
         selectedCityIndex === null &&
+        selectedHQIndex === null &&
         !telepathicProbeSelected &&
         !demonGoblinSelected
       )
@@ -2098,12 +2426,19 @@ function ghostRiderInfernalChains() {
         defeatBonuses();
         bystanderBonuses();
         await rescueBystanderAbility(demonBystander);
-      } else {
+      } else if (selectedCityIndex !== null) {
         // Handle regular city villain defeat
         onscreenConsole.log(
           `You have defeated <span class="console-highlights">${city[selectedCityIndex].name}</span> for free.`,
         );
         await instantDefeatAttack(selectedCityIndex);
+      } else if (selectedHQIndex !== null) {
+        // Handle HQ villain defeat
+        const hqVillain = hq[selectedHQIndex];
+        onscreenConsole.log(
+          `You have defeated <span class="console-highlights">${hqVillain.name}</span> in HQ for free.`,
+        );
+        await instantDefeatHQVillain(selectedHQIndex);
       }
 
       originalResolve();
@@ -2187,6 +2522,7 @@ function ghostRiderInfernalChains() {
     }
   });
 }
+
 
 function ghostRiderPenanceStare() {
   return new Promise((resolve) => {
@@ -11119,6 +11455,22 @@ function draculaAmbush(draculaCard) {
     return;
   }
 
+const lastCard = heroDeck[heroDeck.length - 1];
+
+// Check if the card exists and has the expected properties
+if (!lastCard) {
+  onscreenConsole.log("The last card in the Hero deck is undefined.");
+  return;
+}
+
+if (lastCard.type !== "Hero") {
+  onscreenConsole.log(`<span class="console-highlights">${lastCard.name || 'Unknown card'}</span> is not a Hero and cannot be captured.`);
+  if (lastCard) {
+    lastCard.revealed = true;
+  }
+  return;
+}
+
   const hero = heroDeck.pop();
   const draculaIndex = city.findIndex((c) => c === draculaCard);
 
@@ -11149,10 +11501,7 @@ function draculaAmbush(draculaCard) {
   if (typeof dracula.originalAttack !== "number") {
     dracula.originalAttack = dracula.attack;
   }
-  dracula.heroAttack = hero.cost;
-  dracula.attack = (dracula.originalAttack || 0) + (hero.cost || 0);
-  dracula.attackFromOwnEffects =
-    (dracula.attackFromOwnEffects || 0) + (hero.cost || 0);
+  dracula.heroAttack = hero.cost;  
 
   // Store hero in captured pile with code
   capturedCardsDeck.push({ ...hero, captured: captureCode });
@@ -16479,9 +16828,7 @@ async function confirmInstantMastermindAttack() {
       revealMastermindTactic(mastermind);
     }
 
-    // Clear the mastermind data after operations are complete
-    mastermind.bystanders = [];
-    mastermind.XCutionerHeroes = [];
+await handleMastermindPostDefeat(mastermind, mastermindCopy, 0);
 
   } catch (error) {
     console.error("Instant Mastermind attack error:", error);

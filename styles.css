@@ -1,5 +1,5 @@
 /* Styles */
-/* //12.11.2025 15.15 */
+/* //24.11.2025 17.35 */
 
 body {
   font-family: Arial, sans-serif;
@@ -2047,6 +2047,7 @@ h2 {
   border-radius: 5px;
   display: grid;
   align-items: center;
+  text-align: center;
   height: 12%;
   line-height: 1.6;
   font-family: var(--heading-font);
@@ -2067,6 +2068,7 @@ h2 {
   white-space: nowrap;
   display: grid;
   align-items: center;
+  text-align: center;
   height: 12%;
   line-height: 1.6;
   font-family: var(--heading-font);
@@ -4893,7 +4895,7 @@ button:disabled:hover {
   height: 1.5vh;
   margin-bottom: 0.5vh;
   font-family: var(--heading-font);
-  font-size: 70%;
+  font-size: 61%;
   text-transform: var(--text-transform);
   letter-spacing: var(--letter-spacing);
   color: white;
@@ -7431,7 +7433,7 @@ hr {
   height: 40%;
   margin-top: 1vh;
   overflow: hidden;
-  height: 55%;
+  height: 58%;
   top: 35%;
   transform: translateY(-50%);
 }
@@ -7514,6 +7516,18 @@ hr {
   gap: 1vw;
 }
 
+.card-choice-city-hq-popup-bonus-buttonhousing {
+    height: 5vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+    margin-top: 0vh;
+    position: absolute;
+    top: 48vh;
+    width: 100%;
+}
+
 #card-choice-city-hq-popup-confirm,
 #card-choice-city-hq-popup-otherchoice,
 #card-choice-city-hq-popup-nothanks {
@@ -7537,6 +7551,30 @@ hr {
   text-transform: uppercase;
 }
 
+#card-choice-city-hq-popup-choice1,
+#card-choice-city-hq-popup-choice2,
+#card-choice-city-hq-popup-choice3 {
+  padding: 0vh 2vw;
+  background-color: var(--accent);
+  color: var(--buttonText);
+  border: none;
+  border-radius: 1vh;
+  cursor: pointer;
+  width: 28%;
+  margin-left: 0;
+  font-size: clamp(0.6em, 1.7vh, 1.5em);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  height: calc(3vh + 3vw);
+  max-height: 6vh;
+  text-transform: uppercase;
+}
+
+
 #card-choice-city-hq-popup-confirm:disabled,
 #card-choice-city-hq-popup-otherchoice:disabled,
 #card-choice-city-hq-popup-nothanks:disabled {
@@ -7544,9 +7582,23 @@ hr {
   cursor: not-allowed;
 }
 
+#card-choice-city-hq-popup-choice1:disabled,
+#card-choice-city-hq-popup-choice2:disabled,
+#card-choice-city-hq-popup-choice3:disabled {
+  background-color: var(--disabledAccent);
+  cursor: not-allowed;
+}
+
 #card-choice-city-hq-popup-confirm:hover,
 #card-choice-city-hq-popup-otherchoice:hover,
 #card-choice-city-hq-popup-nothanks:hover {
+  background-color: var(--hoverAccent);
+  color: var(--contrastText);
+}
+
+#card-choice-city-hq-popup-choice1:hover,
+#card-choice-city-hq-popup-choice2:hover,
+#card-choice-city-hq-popup-choice3:hover {
   background-color: var(--hoverAccent);
   color: var(--contrastText);
 }
