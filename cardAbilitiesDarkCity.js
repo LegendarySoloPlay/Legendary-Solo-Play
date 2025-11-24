@@ -11912,7 +11912,7 @@ function azazelFight() {
 // Dark City Mastermind Abilities
 
 async function apocalypseStrike() {
-  const cardsAboveOneCost = [...playerHand.filter((card) => card.cost > 1)];
+  const cardsAboveOneCost = [...playerHand.filter((card) => card.cost > 0)];
   if (cardsAboveOneCost.length === 0) {
     onscreenConsole.log(`No cards need to be returned to your deck.`);
     return;

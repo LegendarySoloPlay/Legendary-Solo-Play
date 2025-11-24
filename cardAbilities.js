@@ -14995,7 +14995,7 @@ function chooseHeroesToKOFromDiscardPile() {
   });
 }
 
-function AmbushRightHeroSkrull() {
+async function AmbushRightHeroSkrull() {
   onscreenConsole.log(
     `Ambush! The rightmost Hero from the HQ is captured by <span class="console-highlights">Skrull Shapeshifters</span>.`,
   );
@@ -15061,7 +15061,7 @@ function AmbushRightHeroSkrull() {
   updateGameBoard();
 }
 
-function highestCostHeroSkrullQueen() {
+async function highestCostHeroSkrullQueen() {
   onscreenConsole.log(
     `Ambush! The highest-cost Hero from the HQ is captured by <span class="console-highlights">Skrull Queen Veranke</span>.`,
   );
@@ -15080,7 +15080,7 @@ function highestCostHeroSkrullQueen() {
     captureHeroBySkrullQueen(highestCostHeroes[0]);
   } else if (highestCostHeroes.length > 1) {
     // If there are multiple heroes with the same highest cost, prompt the player to choose
-    showHeroSelectionPopup(highestCostHeroes, captureHeroBySkrullQueen);
+    await showHeroSelectionPopup(highestCostHeroes, captureHeroBySkrullQueen);
   } else {
     onscreenConsole.log("No Heroes available in the HQ.");
   }
@@ -15129,7 +15129,7 @@ function captureHeroBySkrullQueen(hero) {
   updateGameBoard();
 }
 
-function showHeroSelectionPopup(heroes, onHeroSelected) {
+async function showHeroSelectionPopup(heroes, onHeroSelected) {
   updateGameBoard();
   return new Promise((resolve) => {
     const popup = document.querySelector(".card-choice-city-hq-popup");
