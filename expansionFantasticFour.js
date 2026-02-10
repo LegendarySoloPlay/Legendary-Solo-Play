@@ -1,5 +1,5 @@
 // Fantastic Four Expansion
-//24.11.2025 17.35
+//10.02.26 20:45
 
 //Keywords
 
@@ -64,8 +64,9 @@ async function handleCosmicThreatCardSelection(
 ) {
   const allRevealableCards = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -197,8 +198,9 @@ async function handleCosmicThreatCardSelection(
 async function handleGalactusCosmicThreatCardSelection(chosenClass) {
   const allRevealableCards = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -318,8 +320,9 @@ async function handleGalactusCosmicThreatCardSelection(chosenClass) {
 async function handleBeyonderCosmicThreatCardSelection(threshold) {
   const allRevealableCards = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -431,8 +434,9 @@ async function handleCosmicThreatChoice(card, index) {
     setTimeout(() => {
       const allRevealableCards = [
         ...playerHand,
+        ...playerArtifacts,
         ...cardsPlayedThisTurn.filter(
-          (card) => !card.isCopied && !card.sidekickToDestroy,
+          (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
         ),
       ];
 
@@ -568,7 +572,7 @@ function cosmicThreat(card, index, attackReduction, className) {
   const cardCount = attackReduction / 3;
   const cardText = cardCount === 1 ? "card" : "cards";
   onscreenConsole.log(
-    `Cosmic Threat! You have revealed ${cardCount} <img src="Visual Assets/Icons/${className}.svg" alt="${capitalizedClassName} Icon" class="console-card-icons"> ${cardText}. <span class="console-highlights">${card.name}</span> gets -${attackReduction} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`,
+    `Cosmic Threat! You have revealed ${cardCount} <img src="Visual Assets/Icons/${capitalizedClassName}.svg" alt="${capitalizedClassName} Icon" class="console-card-icons"> ${cardText}. <span class="console-highlights">${card.name}</span> gets -${attackReduction} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">.`,
   );
   updateGameBoard();
 }
@@ -689,13 +693,20 @@ async function batheEarthInCosmicRaysTwist() {
   return new Promise((resolve) => {
     // Build an array of eligible (non-grey) heroes you can access later
     const COLOURS = new Set(["Green", "Yellow", "Black", "Blue", "Red"]);
-    const eligibleCards = playerHand.filter(
+    
+    // Get eligible cards from hand
+    const eligibleHandCards = playerHand.filter(
       (c) => c && COLOURS.has(String(c.color || "").trim()),
     );
+    
+    // Get eligible cards from artifacts
+ const eligibleArtifactCards = playerArtifacts.filter(
+  (c) => c && c.type === "Hero" && COLOURS.has(String(c.color || "").trim()),
+);
 
-    if (eligibleCards.length === 0) {
+    if (eligibleHandCards.length === 0 && eligibleArtifactCards.length === 0) {
       console.log(
-        "No eligible coloured cards in hand (Green/Yellow/Black/Blue/Red).",
+        "No eligible coloured cards in hand or artifacts (Green/Yellow/Black/Blue/Red).",
       );
       onscreenConsole.log("No non-grey Heroes available to KO.");
       resolve();
@@ -707,6 +718,15 @@ async function batheEarthInCosmicRaysTwist() {
     const selectionRow1 = document.querySelector(
       ".card-choice-popup-selectionrow1",
     );
+    const selectionRow1Label = document.querySelector(
+      ".card-choice-popup-selectionrow1label",
+    );
+    const selectionRow2 = document.querySelector(
+      ".card-choice-popup-selectionrow2",
+    );
+    const selectionRow2Label = document.querySelector(
+      ".card-choice-popup-selectionrow2label",
+    );
     const previewElement = document.querySelector(".card-choice-popup-preview");
     const titleElement = document.querySelector(".card-choice-popup-title");
     const instructionsElement = document.querySelector(
@@ -716,31 +736,29 @@ async function batheEarthInCosmicRaysTwist() {
     // Set popup content
     titleElement.textContent = "SCHEME TWIST";
     instructionsElement.innerHTML =
-      "Select a non-grey Hero to KO from your hand. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.";
+      "Select a non-grey Hero to KO. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.";
 
-    // Hide row labels and row2
-    document.querySelector(
-      ".card-choice-popup-selectionrow1label",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow2label",
-    ).style.display = "none";
-    document.querySelector(".card-choice-popup-selectionrow2").style.display =
-      "none";
+    // Show row1 label, hide row2 and its label
+    selectionRow1Label.style.display = "block";
+    selectionRow1Label.textContent = "Artifacts & Hand";
+    selectionRow2Label.style.display = "none";
+    selectionRow2.style.display = "none";
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.height = "50%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.top = "28%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.transform = "translateY(-50%)";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
+
+    // Reset container styles
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.height = "";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.top = "";
+    document.querySelector(
+      ".card-choice-popup-selectionrow1-container",
+    ).style.transform = "";
 
     // Clear existing content
     selectionRow1.innerHTML = "";
@@ -748,6 +766,7 @@ async function batheEarthInCosmicRaysTwist() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCard = null;
+    let selectedLocation = null; // 'hand' or 'artifacts'
     let selectedCardImage = null;
     let isDragging = false;
 
@@ -756,15 +775,33 @@ async function batheEarthInCosmicRaysTwist() {
     const row2Visible = false;
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
-    // Create a copy of eligibleCards to sort for display only
-    const displayCards = [...eligibleCards];
-    genericCardSort(displayCards);
+    // Sort cards for display
+    const displayHandCards = [...eligibleHandCards];
+    const displayArtifactCards = [...eligibleArtifactCards];
+    genericCardSort(displayHandCards);
+    genericCardSort(displayArtifactCards);
 
-    // Create card elements for each eligible card
-    displayCards.forEach((card) => {
+    // Update the confirm button state and instructions
+    function updateUI() {
+      const confirmButton = document.getElementById(
+        "card-choice-popup-confirm",
+      );
+      confirmButton.disabled = selectedCard === null;
+
+      if (selectedCard === null) {
+        instructionsElement.innerHTML =
+          "Select a non-grey Hero to KO from your hand or artifacts. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.";
+      } else {
+        instructionsElement.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be KO'd from ${selectedLocation === 'hand' ? 'hand' : 'artifacts'}.`;
+      }
+    }
+
+    // Create card element helper function (similar to radiationScientist)
+    function createCardElement(card, location, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
-      cardElement.setAttribute("data-card-id", String(card.id));
+      cardElement.setAttribute("data-card-id", card.id);
+      cardElement.setAttribute("data-location", location);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -813,22 +850,16 @@ async function batheEarthInCosmicRaysTwist() {
           return;
         }
 
-        const cardId = cardElement.getAttribute("data-card-id");
-
-        if (selectedCard && String(selectedCard.id) === cardId) {
+        if (selectedCard === card && selectedLocation === location) {
           // Deselect current card
           selectedCard = null;
+          selectedLocation = null;
           cardImage.classList.remove("selected");
           selectedCardImage = null;
 
-          // Clear preview and reset to hover state
+          // Clear preview and reset
           previewElement.innerHTML = "";
           previewElement.style.backgroundColor = "var(--panel-backgrounds)";
-
-          // Update instructions and confirm button
-          instructionsElement.innerHTML =
-            "Select a non-grey Hero to KO from your hand. You will then be able to choose a Hero from the HQ with the same or lower cost and put it into your hand.";
-          document.getElementById("card-choice-popup-confirm").disabled = true;
         } else {
           // Deselect previous card if any
           if (selectedCardImage) {
@@ -837,6 +868,7 @@ async function batheEarthInCosmicRaysTwist() {
 
           // Select new card
           selectedCard = card;
+          selectedLocation = location;
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
 
@@ -848,20 +880,44 @@ async function batheEarthInCosmicRaysTwist() {
           previewImage.className = "popup-card-preview-image";
           previewElement.appendChild(previewImage);
           previewElement.style.backgroundColor = "var(--accent)";
-
-          // Update instructions and confirm button
-          instructionsElement.innerHTML = `Selected: <span class="console-highlights">${card.name}</span> will be KO'd.`;
-          document.getElementById("card-choice-popup-confirm").disabled = false;
         }
+
+        updateUI();
       });
 
       cardElement.appendChild(cardImage);
-      selectionRow1.appendChild(cardElement);
+      row.appendChild(cardElement);
+    }
+
+    if (displayArtifactCards.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    displayArtifactCards.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
     });
 
-    if (displayCards.length > 20) {
+    // Populate row1 with Hand cards first, then Artifacts (with labels)
+    if (displayHandCards.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
+    displayHandCards.forEach((card) => {
+      createCardElement(card, "hand", selectionRow1);
+    });
+
+    // Adjust row height based on total cards (hand + artifacts)
+    const totalCards = displayHandCards.length + displayArtifactCards.length;
+    
+    if (totalCards > 20) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.add("three-row"); // Add a special class for 3-row mode
+      selectionRow1.classList.add("three-row");
       document.querySelector(
         ".card-choice-popup-selectionrow1-container",
       ).style.height = "75%";
@@ -869,19 +925,18 @@ async function batheEarthInCosmicRaysTwist() {
         ".card-choice-popup-selectionrow1-container",
       ).style.top = "40%";
       selectionRow1.style.gap = "0.3vw";
-    } else if (displayCards.length > 10) {
+    } else if (totalCards > 10) {
       selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles when in multi-row mode
+      selectionRow1.classList.remove("three-row");
       document.querySelector(
         ".card-choice-popup-selectionrow1-container",
       ).style.height = "50%";
       document.querySelector(
         ".card-choice-popup-selectionrow1-container",
       ).style.top = "25%";
-    } else if (displayCards.length > 5) {
+    } else if (totalCards > 5) {
       selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
+      selectionRow1.classList.remove("three-row");
       document.querySelector(
         ".card-choice-popup-selectionrow1-container",
       ).style.height = "42%";
@@ -890,8 +945,7 @@ async function batheEarthInCosmicRaysTwist() {
       ).style.top = "25%";
     } else {
       selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles for normal mode
+      selectionRow1.classList.remove("three-row");
       document.querySelector(
         ".card-choice-popup-selectionrow1-container",
       ).style.height = "50%";
@@ -922,35 +976,45 @@ async function batheEarthInCosmicRaysTwist() {
     confirmButton.onclick = async (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (selectedCard === null) return;
+      if (selectedCard === null || selectedLocation === null) return;
 
       setTimeout(async () => {
         console.log("Card KO'd:", selectedCard);
 
-        // Find the selected card's current index in the *actual* hand
-        const indexInHand = playerHand.findIndex(
-          (c) => c && c.id === selectedCard.id,
-        );
-        if (indexInHand !== -1) {
-          // Remove the card from the player's hand
-          const koedCard = playerHand.splice(indexInHand, 1)[0];
-          koPile.push(koedCard);
-          onscreenConsole.log(
-            `<span class="console-highlights">${koedCard.name}</span> has been KO'd.`,
+        // Perform the KO from the correct location using ID lookup
+        if (selectedLocation === "hand") {
+          const index = playerHand.findIndex(
+            (card) => card.id === selectedCard.id,
           );
-          koBonuses();
-          updateGameBoard();
-
-          // Close popup before proceeding to next phase
-          closeCardChoicePopup();
-
-          // Proceed to recruitment phase
-          await cosmicRaysRecruit(selectedCard.cost);
-        } else {
-          console.error("Selected card not found in player hand");
-          onscreenConsole.log("Error: Selected card not found in hand.");
-          closeCardChoicePopup();
+          if (index !== -1) {
+            const koedCard = playerHand.splice(index, 1)[0];
+            koPile.push(koedCard);
+            onscreenConsole.log(
+              `<span class="console-highlights">${koedCard.name}</span> has been KO'd.`,
+            );
+          }
+        } else if (selectedLocation === "artifacts") {
+          const index = playerArtifacts.findIndex(
+            (card) => card.id === selectedCard.id,
+          );
+          if (index !== -1) {
+            const koedCard = playerArtifacts.splice(index, 1)[0];
+            koPile.push(koedCard);
+            onscreenConsole.log(
+              `<span class="console-highlights">${koedCard.name}</span> has been KO'd.`,
+            );
+          }
         }
+
+        koBonuses();
+        updateGameBoard();
+
+        // Close popup before proceeding to next phase
+        closeCardChoicePopup();
+
+        // Proceed to recruitment phase
+        await cosmicRaysRecruit(selectedCard.cost);
+        
         resolve();
       }, 100);
     };
@@ -1312,7 +1376,8 @@ async function galactusCosmicEntity() {
   // Build the same pool & counts as your original
   const cardsPool = [
     ...playerHand,
-    ...cardsPlayedThisTurn.filter((c) => !c?.isCopied && !c?.sidekickToDestroy),
+    ...playerArtifacts,
+    ...cardsPlayedThisTurn.filter((c) => !c?.isCopied && !c?.sidekickToDestroy  && !c?.markedForDeletion && !c?.isSimulation),
   ];
 
   const cardHasClass = (card, cls) =>
@@ -1569,7 +1634,8 @@ async function galactusPanickedMobs() {
   // Build the pool & counts (same logic you use elsewhere)
   const cardsPool = [
     ...playerHand,
-    ...cardsPlayedThisTurn.filter((c) => !c?.isCopied && !c?.sidekickToDestroy),
+    ...playerArtifacts,
+    ...cardsPlayedThisTurn.filter((c) => !c?.isCopied && !c?.sidekickToDestroy && !c?.markedForDeletion && !c?.isSimulation),
   ];
   const cardHasClass = (card, cls) =>
     !!card && card.classes && card.classes.includes(cls);
@@ -2239,7 +2305,7 @@ function moleManDigToFreedom() {
 
   if (subterraneaInVP.length === 0) {
     onscreenConsole.log(
-      `Mastermind Tactic! <span class="console-highlights">Mole Man</span> always leads your chosen Adversary group; however, there are no suitable Villain cards available in your Victory Pile.`,
+      `Mastermind Tactic! <span class="console-highlights">Mole Man</span> always leads your chosen Villain group; however, there are no suitable Villain cards available in your Victory Pile.`,
     );
     return false;
   }
@@ -2250,7 +2316,7 @@ function moleManDigToFreedom() {
     const index = victoryPile.findIndex((card) => card.id === subterranean.id);
     if (index !== -1) {
       onscreenConsole.log(
-        `<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: <span class="console-highlights">${subterranean.name}</span> was the only suitable Villain in your Victory Pile. Placing in the Escape Pile now.`,
+        `<span class="console-highlights">Mole Man</span> always leads your chosen Villain group: <span class="console-highlights">${subterranean.name}</span> was the only suitable Villain in your Victory Pile. Placing in the Escape Pile now.`,
       );
       victoryPile.splice(index, 1);
       escapedVillainsDeck.push(subterranean);
@@ -2275,7 +2341,7 @@ function moleManDigToFreedom() {
     // Set popup content
     titleElement.textContent = "TACTIC";
     instructionsElement.innerHTML =
-      '<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to move to the Escaped Villains pile.';
+      '<span class="console-highlights">Mole Man</span> always leads your chosen Villain group: select a Villain from your Victory Pile to move to the Escaped Villains pile.';
 
     // Hide row labels and row2
     document.querySelector(
@@ -2317,7 +2383,7 @@ function moleManDigToFreedom() {
     function updateInstructions() {
       if (selectedCard === null) {
         instructionsElement.innerHTML =
-          '<span class="console-highlights">Mole Man</span> always leads your chosen Adversary group: select a Villain from your Victory Pile to move to the Escaped Villains pile.';
+          '<span class="console-highlights">Mole Man</span> always leads your chosen Villain group: select a Villain from your Victory Pile to move to the Escaped Villains pile.';
       } else {
         instructionsElement.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> will be moved to the Escaped Villains pile.`;
       }
@@ -2572,7 +2638,9 @@ async function moleManMasterOfMonsters() {
     for (const villain of subterraneaVillains) {
       // Place on top (end) of deck, then draw normally
       villainDeck.push(villain);
+      enterCityNotDraw = true;
       await drawVillainCard(); // this should consume from the top
+      enterCityNotDraw = false;
     }
   }
 
@@ -2654,20 +2722,19 @@ async function megataurAmbush(megataur) {
 function moloidsFight() {
   onscreenConsole.log(`Fight! KO one of your Heroes.`);
   return new Promise((resolve, reject) => {
-    // Combine heroes from the player's hand and cards played this turn
+    // Get heroes from artifacts, hand, and played cards
+    const artifactHeroes = playerArtifacts.filter((card) => card.type === "Hero");
     const handHeroes = playerHand.filter((card) => card.type === "Hero");
     const playedHeroes = cardsPlayedThisTurn.filter(
       (card) =>
-        card.type === "Hero" && !card.isCopied && !card.sidekickToDestroy,
+        card.type === "Hero" && !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     );
 
-    const combinedCards = [...handHeroes, ...playedHeroes];
-
-    // Check if there are any heroes in the combined list
-    if (combinedCards.length === 0) {
-      console.log("No heroes in hand or played to KO.");
+    // Check if there are any heroes available
+    if (artifactHeroes.length === 0 && handHeroes.length === 0 && playedHeroes.length === 0) {
+      console.log("No heroes in artifacts, hand, or played to KO.");
       onscreenConsole.log(
-        `<span class="console-highlights">Sentinel's</span> Fight effect negated. No Heroes available to KO.`,
+        `<span class="console-highlights">Moloids</span> Fight effect negated. No Heroes available to KO.`,
       );
       resolve(); // Resolve immediately if there are no heroes to KO
       return;
@@ -2704,7 +2771,7 @@ function moloidsFight() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -2720,18 +2787,14 @@ function moloidsFight() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCard = null;
+    let selectedLocation = null; // 'artifacts', 'hand', or 'played'
     let selectedCardImage = null;
     let isDragging = false;
 
-    // Separate cards by location for display
-    const handCards = combinedCards.filter((card) => playerHand.includes(card));
-    const playedCards = combinedCards.filter((card) =>
-      cardsPlayedThisTurn.includes(card),
-    );
-
     // Sort the arrays for display
-    genericCardSort(handCards);
-    genericCardSort(playedCards);
+    genericCardSort(artifactHeroes);
+    genericCardSort(handHeroes);
+    genericCardSort(playedHeroes);
 
     // Update the confirm button state and instructions
     function updateUI() {
@@ -2743,9 +2806,14 @@ function moloidsFight() {
       if (selectedCard === null) {
         instructionsElement.textContent = "Select a hero to KO.";
       } else {
-        const location = playerHand.includes(selectedCard)
-          ? "(from Hand)"
-          : "(from Played Cards)";
+        let location = "";
+        if (selectedLocation === "artifacts") {
+          location = "(from Artifacts)";
+        } else if (selectedLocation === "hand") {
+          location = "(from Hand)";
+        } else if (selectedLocation === "played") {
+          location = "(from Played Cards)";
+        }
         instructionsElement.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> ${location} will be KO'd.`;
       }
     }
@@ -2767,14 +2835,11 @@ function moloidsFight() {
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
     // Create card element helper function
-    function createCardElement(card, row) {
+    function createCardElement(card, location, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
       cardElement.setAttribute("data-card-id", card.id);
-      cardElement.setAttribute(
-        "data-location",
-        playerHand.includes(card) ? "hand" : "played",
-      );
+      cardElement.setAttribute("data-location", location);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -2828,9 +2893,10 @@ function moloidsFight() {
           return;
         }
 
-        if (selectedCard === card) {
+        if (selectedCard === card && selectedLocation === location) {
           // Deselect
           selectedCard = null;
+          selectedLocation = null;
           selectedCardImage = null;
           cardImage.classList.remove("selected");
           previewElement.innerHTML = "";
@@ -2843,6 +2909,7 @@ function moloidsFight() {
 
           // Select new
           selectedCard = card;
+          selectedLocation = location;
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
 
@@ -2863,14 +2930,32 @@ function moloidsFight() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand heroes
-    handCards.forEach((card) => {
-      createCardElement(card, selectionRow1);
+    // Populate row1 with Artifacts first, then Hand heroes (with labels)
+    if (artifactHeroes.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactHeroes.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
+    });
+
+    if (handHeroes.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
+    handHeroes.forEach((card) => {
+      createCardElement(card, "hand", selectionRow1);
     });
 
     // Populate row2 with Played Cards heroes
-    playedCards.forEach((card) => {
-      createCardElement(card, selectionRow2);
+    playedHeroes.forEach((card) => {
+      createCardElement(card, "played", selectionRow2);
     });
 
     // Set up drag scrolling for both rows
@@ -2897,7 +2982,7 @@ function moloidsFight() {
     confirmButton.onclick = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (selectedCard === null) return;
+      if (selectedCard === null || selectedLocation === null) return;
 
       setTimeout(() => {
         console.log(`${selectedCard.name} has been KO'd.`);
@@ -2906,18 +2991,18 @@ function moloidsFight() {
         );
         koBonuses();
 
-        // Remove the card from the correct array (hand or played)
-        let removedFromHand = false;
-
-        // Try to remove from hand first
-        const handIndex = playerHand.findIndex((c) => c.id === selectedCard.id);
-        if (handIndex !== -1) {
-          playerHand.splice(handIndex, 1);
-          removedFromHand = true;
-        }
-
-        // If not found in hand, try to remove from played cards
-        if (!removedFromHand) {
+        // Remove the card from the correct location
+        if (selectedLocation === "artifacts") {
+          const index = playerArtifacts.findIndex((c) => c.id === selectedCard.id);
+          if (index !== -1) {
+            playerArtifacts.splice(index, 1);
+          }
+        } else if (selectedLocation === "hand") {
+          const index = playerHand.findIndex((c) => c.id === selectedCard.id);
+          if (index !== -1) {
+            playerHand.splice(index, 1);
+          }
+        } else if (selectedLocation === "played") {
           selectedCard.markedToDestroy = true;
         }
 
@@ -3069,8 +3154,9 @@ async function firelordEscape() {
 function FirelordRevealRangeOrWound() {
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -3153,7 +3239,14 @@ function morgAmbush() {
       if (!hasInstinct) {
         // Move non-Instinct hero to bottom of deck
         heroDeck.unshift(hq[i]);
-        hq[i] = null; // Clear the HQ slot
+        
+           if (hq[i].shards && hq[i].shards > 0) {
+            playSFX("shards");
+            shardSupply += hq[i].shards;
+            hq[i].shards = 0;
+            onscreenConsole.log(`The Shard <span class="console-highlights">${hq[i].name}</span> had in the HQ has been returned to the supply.`);
+  }
+  hq[i] = null; // Clear the HQ slot
         heroesMovedCounter++;
       }
     }
@@ -3185,17 +3278,27 @@ function stardustFight() {
     `Fight! Choose one of your <img src="Visual Assets/Icons/Covert.svg" alt="Covert Icon" class="console-card-icons"> Heroes to add to next turn's draw as a seventh card.`,
   );
   return new Promise((resolve) => {
-    const cardsYouHave = [
-      ...playerHand,
-      ...cardsPlayedThisTurn.filter(
-        (card) => !card.isCopied && !card.sidekickToDestroy,
-      ),
-    ];
-
-    const CovertCardsYouHave = cardsYouHave.filter(
-      (item) =>
-        item.type === "Hero" && item.classes && item.classes.includes("Covert"),
+    // Get Covert Heroes from artifacts, hand, and played cards
+    const artifactCovertCards = playerArtifacts.filter(
+      (card) => card.type === "Hero" && card.classes && card.classes.includes("Covert")
     );
+    
+    const handCovertCards = playerHand.filter(
+      (card) => card.type === "Hero" && card.classes && card.classes.includes("Covert")
+    );
+    
+    const playedCovertCards = cardsPlayedThisTurn.filter(
+      (card) => 
+        card.type === "Hero" && 
+        card.classes && 
+        card.classes.includes("Covert") &&
+        !card.isCopied && 
+        !card.sidekickToDestroy && 
+        !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
+    );
+
+    // Combine all Covert cards
+    const CovertCardsYouHave = [...artifactCovertCards, ...handCovertCards, ...playedCovertCards];
 
     if (CovertCardsYouHave.length === 0) {
       console.log("No available Covert Heroes.");
@@ -3237,7 +3340,7 @@ function stardustFight() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -3253,18 +3356,12 @@ function stardustFight() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCard = null;
+    let selectedLocation = null; // 'artifacts', 'hand', or 'played'
     let selectedCardImage = null;
     let isDragging = false;
 
-    // Separate cards by location for display
-    const handCovertCards = CovertCardsYouHave.filter((card) =>
-      playerHand.includes(card),
-    );
-    const playedCovertCards = CovertCardsYouHave.filter((card) =>
-      cardsPlayedThisTurn.includes(card),
-    );
-
     // Sort the arrays for display
+    genericCardSort(artifactCovertCards);
     genericCardSort(handCovertCards);
     genericCardSort(playedCovertCards);
 
@@ -3278,9 +3375,14 @@ function stardustFight() {
       if (selectedCard === null) {
         instructionsElement.innerHTML = `Choose one of your <img src='Visual Assets/Icons/Covert.svg' alt='Covert Icon' class='card-icons'> Heroes to add to next turn's draw.`;
       } else {
-        const location = playerHand.includes(selectedCard)
-          ? "(from Hand)"
-          : "(from Played Cards)";
+        let location = "";
+        if (selectedLocation === "artifacts") {
+          location = "(from Artifacts)";
+        } else if (selectedLocation === "hand") {
+          location = "(from Hand)";
+        } else if (selectedLocation === "played") {
+          location = "(from Played Cards)";
+        }
         instructionsElement.innerHTML = `Selected: <span class="console-highlights">${selectedCard.name}</span> ${location} will be added to next turn's draw.`;
       }
     }
@@ -3302,14 +3404,11 @@ function stardustFight() {
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
     // Create card element helper function
-    function createCardElement(card, row) {
+    function createCardElement(card, location, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
       cardElement.setAttribute("data-card-id", card.id);
-      cardElement.setAttribute(
-        "data-location",
-        playerHand.includes(card) ? "hand" : "played",
-      );
+      cardElement.setAttribute("data-location", location);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -3363,9 +3462,10 @@ function stardustFight() {
           return;
         }
 
-        if (selectedCard === card) {
+        if (selectedCard === card && selectedLocation === location) {
           // Deselect
           selectedCard = null;
+          selectedLocation = null;
           selectedCardImage = null;
           cardImage.classList.remove("selected");
           previewElement.innerHTML = "";
@@ -3378,6 +3478,7 @@ function stardustFight() {
 
           // Select new
           selectedCard = card;
+          selectedLocation = location;
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
 
@@ -3398,14 +3499,32 @@ function stardustFight() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand Covert cards
+    // Populate row1 with Artifacts first, then Hand Covert cards (with labels)
+    if (artifactCovertCards.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactCovertCards.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
+    });
+
+    if (handCovertCards.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
     handCovertCards.forEach((card) => {
-      createCardElement(card, selectionRow1);
+      createCardElement(card, "hand", selectionRow1);
     });
 
     // Populate row2 with Played Cards Covert cards
     playedCovertCards.forEach((card) => {
-      createCardElement(card, selectionRow2);
+      createCardElement(card, "played", selectionRow2);
     });
 
     // Set up drag scrolling for both rows
@@ -3432,15 +3551,30 @@ function stardustFight() {
     confirmButton.onclick = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (selectedCard === null) return;
+      if (selectedCard === null || selectedLocation === null) return;
 
       setTimeout(() => {
         const cardCopy = { ...selectedCard };
         cardsToBeDrawnNextTurn.push(cardCopy);
         nextTurnsDraw++;
 
-        // Mark the original card to be destroyed later
-        selectedCard.markedToDrawNextTurn = true;
+        // Mark the original card to be destroyed later based on location
+        if (selectedLocation === "artifacts") {
+          const index = playerArtifacts.findIndex(card => card.id === selectedCard.id);
+          if (index !== -1) {
+            playerArtifacts[index].markedToDrawNextTurn = true;
+          }
+        } else if (selectedLocation === "hand") {
+          const index = playerHand.findIndex(card => card.id === selectedCard.id);
+          if (index !== -1) {
+            playerHand[index].markedToDrawNextTurn = true;
+          }
+        } else if (selectedLocation === "played") {
+          const index = cardsPlayedThisTurn.findIndex(card => card.id === selectedCard.id);
+          if (index !== -1) {
+            cardsPlayedThisTurn[index].markedToDrawNextTurn = true;
+          }
+        }
 
         console.log(`${selectedCard.name} has been reserved for next turn.`);
         onscreenConsole.log(
@@ -4202,7 +4336,7 @@ function canRevealInvisibleWomanInvisibleBarrier() {
   const cardsYouHave = [
     ...playerHand,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     ),
   ];
   return cardsYouHave.some(
@@ -4303,7 +4437,7 @@ function canRevealMrFantasticUltimateNullifier() {
   const cardsYouHave = [
     ...playerHand,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     ),
   ];
   return cardsYouHave.some(
@@ -4311,7 +4445,7 @@ function canRevealMrFantasticUltimateNullifier() {
   );
 }
 
-async function promptNegateFightEffectWithMrFantastic() {
+async function promptNegateFightEffectWithMrFantastic(villainCopy, villainCard) {
   const MR_FANTASTIC_IMAGE =
     "Visual Assets/Heroes/Fantastic Four/FantasticFour_MrFantastic_UltimateNullifier.webp";
 
@@ -4350,6 +4484,9 @@ async function promptNegateFightEffectWithMrFantastic() {
           `You used <span class="console-highlights">Mr. Fantastic – Ultimate Nullifier</span> to cancel a fight effect.`,
         );
         closeInfoChoicePopup();
+        if (villainCard.team === "Infinity Gems") {
+          villainCard.nullified = true;
+        }
         resolve(true); // negate
       };
 
@@ -4693,6 +4830,13 @@ function thingCrimeStopperFocus() {
           plutoniumOverlay.innerHTML = `<span class="plutonium-count">${city[i].plutoniumCaptured.length}</span><img src="Visual Assets/Other/Plutonium.webp" alt="Plutonium" class="captured-plutonium-image-overlay">`;
           cardContainer.appendChild(plutoniumOverlay);
         }
+
+      if (city[i].shards && city[i].shards > 0) {
+      const shardsOverlay = document.createElement("div");
+      shardsOverlay.classList.add("villain-shards-class");
+      shardsOverlay.innerHTML = `<span class="villain-shards-count">${city[i].shards}</span><img src="Visual Assets/Icons/Shards.svg" alt="Shards" class="villain-shards-overlay">`;
+      cardContainer.appendChild(shardsOverlay);
+    }
       } else {
         // If no villain, add a blank card image
         const blankCardImage = document.createElement("img");

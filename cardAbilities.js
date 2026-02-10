@@ -1,5 +1,5 @@
 // cardAbilities.js
-//24.11.2025 17.35
+//10.02.26 20:45
 
 function koBonuses() {
   playSFX("ko");
@@ -11,14 +11,18 @@ function koBonuses() {
     );
     updateGameBoard();
   }
+  const kodCard = koPile[koPile.length - 1];
+     if (kodCard.team && kodCard.team === "Infinity Gems") {
+          kodCard.attack = kodCard.originalAttack;
+        }
 }
 
 function defeatBonuses() {
-  if (extraThreeRecruitAvailable === true) {
-    totalRecruitPoints += 3;
-    cumulativeRecruitPoints += 3;
+  if (extraThreeRecruitAvailable > 0) {
+    totalRecruitPoints += extraThreeRecruitAvailable;
+    cumulativeRecruitPoints += extraThreeRecruitAvailable;
     onscreenConsole.log(
-      `You defeated a Villain or Mastermind. +3 <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`,
+      `You defeated a Villain or Mastermind. +${extraThreeRecruitAvailable} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons"> gained.`,
     );
   }
 }
@@ -104,8 +108,9 @@ function EmmaFrostExtraDraw() {
     const previousCards = cardsPlayedThisTurn.slice(0, -1);
     const cardsYouHave = [
       ...playerHand,
+      ...playerArtifacts,
       ...previousCards.filter(
-        (card) => !card.isCopied && !card.sidekickToDestroy,
+        (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
       ),
     ];
 
@@ -1407,8 +1412,9 @@ function DeadpoolApplyOddCostBonus() {
 function CaptainAmericaCountUniqueColorsAndAddAttack() {
   const allCards = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -1437,8 +1443,9 @@ function CaptainAmericaCountUniqueColorsAndAddAttack() {
 function CaptainAmericaCountUniqueColorsAndAddRecruit() {
   const allCards = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -1843,7 +1850,7 @@ function rescueThreeBystanders() {
 }
 
 function EmmaFrostExtraThreeRecruit() {
-  extraThreeRecruitAvailable = true;
+  extraThreeRecruitAvailable += 3;
 
   console.log(
     "Whenever you defeat a villain or mastermind this turn, you will gain 3 Recruit points.",
@@ -2781,120 +2788,167 @@ function showSequentialCardSelectionPopup({
   });
 }
 
-function RogueCopyTopCardEffect() {
+function RogueStealAbilities() {
   return new Promise((resolve) => {
-    // Check if the player deck is empty and needs reshuffling
+    // 1. Check if deck is empty and needs reshuffling
     if (playerDeck.length === 0) {
       if (playerDiscardPile.length > 0) {
         playerDeck = shuffle(playerDiscardPile);
         playerDiscardPile = [];
+        onscreenConsole.log("Discard pile shuffled into deck.");
       } else {
-        console.log("No cards left in deck or discard pile.");
-        onscreenConsole.log("No cards available to draw and discard.");
+        console.log("No cards available to draw.");
+        onscreenConsole.log("No cards available to be drawn.");
         resolve();
         return;
       }
     }
 
-    // Draw the top card and immediately send it to the discard pile
+    // 2. Draw the top card
     playSFX("card-draw");
     const topCard = playerDeck.pop();
+    
+    // 3. Immediately discard it
     playerDiscardPile.push(topCard);
-
-    // Simulate the play of the card by adding its full details to cardsPlayedThisTurn
-    const simulatedCard = { ...topCard };
+    
+    // 4. Create a CLEAN simulated copy for display only
+    const simulatedCard = createCleanSimulatedCard(topCard);
+    
+    // 5. Add simulation marker for endTurn cleanup
+    simulatedCard.isSimulation = true;
+    simulatedCard.markedForDeletion = true;
+    
+    // 6. Add to cardsPlayedThisTurn for display
     cardsPlayedThisTurn.push(simulatedCard);
-
-    // Extract card details for simulation
-    const cardName = simulatedCard.name;
-    const cardAttack = simulatedCard.attack || 0;
-    const cardRecruit = simulatedCard.recruit || 0;
-    const cardUnconditionalAbility =
-      simulatedCard.unconditionalAbility || "None";
-    const cardConditionalAbility = simulatedCard.conditionalAbility || "None";
-    const cardConditionType = simulatedCard.conditionType || null;
-    const cardCondition = simulatedCard.condition || null;
-
-    if (
-      simulatedCard.name !== "Rogue - Copy Powers" &&
-      simulatedCard.name !== "Prodigy"
-    ) {
-      simulatedCard.isCopied = true;
-    }
-
-    console.log(
-      `You reveal the top card of your deck: ${cardName}. It has ${cardAttack} attack and ${cardRecruit} recruit points.`,
-    );
+    
+    // 7. Log what happened
+    console.log(`Steal Abilities: Revealed and discarded ${topCard.name}`);
     onscreenConsole.log(
-      `You revealed the top card of your deck: <span class="console-highlights">${cardName}</span>. It has been discarded so that <span class="console-highlights">Rogue</span> can copy it.`,
+      `Revealed <span class="console-highlights">${topCard.name}</span> from deck and discarded it. Copying its abilities...`
     );
-    onscreenConsole.log(
-      `You have gained +${cardAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> attack and +${cardRecruit} <img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`,
-    );
-
-    // Simulate attack and recruit points
+    
+    // 8. Apply the card's attack and recruit points
+    const cardAttack = topCard.attack || 0;
+    const cardRecruit = topCard.recruit || 0;
+    
     totalAttackPoints += cardAttack;
     totalRecruitPoints += cardRecruit;
     cumulativeAttackPoints += cardAttack;
     cumulativeRecruitPoints += cardRecruit;
-
-    // Handle unconditional ability
-    let abilityPromise = Promise.resolve();
-    if (cardUnconditionalAbility && cardUnconditionalAbility !== "None") {
-      const abilityFunction = window[cardUnconditionalAbility];
-      if (typeof abilityFunction === "function") {
-        // Wrap the result in a Promise if it isn't one
-        abilityPromise = new Promise((resolve, reject) => {
-          try {
-            const result = abilityFunction(simulatedCard);
-            resolve(result);
-          } catch (error) {
-            reject(error);
-          }
-        });
-      } else {
-        console.error(
-          `Unconditional ability function ${cardUnconditionalAbility} not found`,
-        );
-      }
+    
+    if (cardAttack > 0 || cardRecruit > 0) {
+      onscreenConsole.log(
+        `Gained +${cardAttack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and +${cardRecruit}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`
+      );
     }
-
-    // Handle conditional ability
-    abilityPromise
+   
+// 9. Execute all abilities (unconditional + conditional) with special case handling
+    executeAbilityWithSpecialCases(topCard, "steal")
       .then(() => {
-        if (cardConditionalAbility && cardConditionalAbility !== "None") {
-          if (isConditionMet(cardConditionType, cardCondition)) {
-            const conditionalAbilityFunction = window[cardConditionalAbility];
-            if (typeof conditionalAbilityFunction === "function") {
-              // Wrap the result in a Promise if it isn't one
-              return new Promise((resolve, reject) => {
-                try {
-                  const result = conditionalAbilityFunction(simulatedCard);
-                  resolve(result);
-                } catch (error) {
-                  reject(error);
-                }
-              });
-            } else {
-              console.error(
-                `Conditional ability function ${cardConditionalAbility} not found`,
-              );
-            }
-          } else {
-            console.log(`Condition not met for: ${cardConditionalAbility}`);
-          }
-        }
-      })
-      .then(() => {
-        // Update game state/UI
+        // 10. Update UI and resolve
         updateGameBoard();
         resolve();
       })
-      .catch((err) => {
-        console.error("Error during copy effect simulation:", err);
+      .catch((error) => {
+        console.error("Error in RogueStealAbilities:", error);
+        updateGameBoard();
         resolve();
       });
   });
+}
+
+// Helper function to create a clean simulated card without transformation properties
+function createCleanSimulatedCard(originalCard) {
+  // Create a new object with only display properties
+  const simulatedCard = {
+    // Basic card properties for display
+    id: `simulated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: originalCard.name,
+    type: originalCard.type,
+    rarity: originalCard.rarity,
+    team: originalCard.team,
+    classes: originalCard.classes ? [...originalCard.classes] : [],
+    color: originalCard.color,
+    cost: originalCard.cost || 0,
+    attack: originalCard.attack || 0,
+    recruit: originalCard.recruit || 0,
+    attackIcon: originalCard.attackIcon || false,
+    recruitIcon: originalCard.recruitIcon || false,
+    image: originalCard.image,
+    
+    // Visual styling for simulations
+    isCopied: true, // For greyed out display
+    opacity: 0.7,   // Visual indicator it's a simulation
+    
+    // DO NOT copy any of these transformation properties:
+    // - originalAttributes
+    // - isCopied (we set our own for display)
+    // - any other game state properties
+  };
+  
+  // Optional: Add keywords if they exist (for display only)
+  if (originalCard.keywords && Array.isArray(originalCard.keywords)) {
+    simulatedCard.keywords = [...originalCard.keywords];
+  } else if (originalCard.keywords && originalCard.keywords !== "None") {
+    simulatedCard.keywords = [originalCard.keywords];
+  }
+  
+  return simulatedCard;
+}
+
+// Shared helper for executing abilities with special cases
+async function executeAbilityWithSpecialCases(card, context = "steal", options = {}) {
+  const {
+    skipConditionCheck = false,      // Skip condition check for unconditional execution
+    autoActivate = true,             // Auto-activate conditional abilities (true by default)
+    skipStats = false                // Skip adding attack/recruit stats
+  } = options;
+  
+  const cardName = card.name;
+  
+  // Handle special cases first
+  switch(cardName) {
+    case "Lockjaw":
+      console.log(`${context} copying Lockjaw's +2 attack`);
+      if (!skipStats) {
+        totalAttackPoints += 2;
+        cumulativeAttackPoints += 2;
+      }
+      onscreenConsole.log(`Copied <span class="console-highlights">Lockjaw</span>: +2 <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="card-icons">.`);
+      return;
+      
+    case "Gamora - Godslayer Blade":
+      console.log(`${context} copying Gamora Godslayer Blade`);
+      await gamoraGodslayerBladeCopy(card);
+      return;
+      
+    default:
+      // Standard unconditional ability
+      if (card.unconditionalAbility && card.unconditionalAbility !== "None") {
+        const abilityFunction = window[card.unconditionalAbility];
+        if (typeof abilityFunction === "function") {
+          await abilityFunction(card);
+        } else {
+          console.error(`Ability function ${card.unconditionalAbility} not found`);
+        }
+      }
+      
+      // Standard conditional ability - ALWAYS execute if condition met (no popup)
+      if (card.conditionalAbility && card.conditionalAbility !== "None") {
+        const conditionMet = skipConditionCheck || isConditionMet(card.conditionType, card.condition);
+        
+        if (conditionMet) {
+          const conditionalAbilityFunction = window[card.conditionalAbility];
+          if (typeof conditionalAbilityFunction === "function") {
+            await conditionalAbilityFunction(card);
+          } else {
+            console.error(`Conditional ability function ${card.conditionalAbility} not found`);
+          }
+        } else {
+          console.log(`Condition not met for ${card.name}'s ability`);
+        }
+      }
+  }
 }
 
 function findCardsWithBystanders() {
@@ -3852,6 +3906,7 @@ function CyclopsOpticBlastDiscardToPlay() {
     confirmButton.disabled = true; // Initially disabled until card is selected
     otherChoiceButton.style.display = "none";
     noThanksButton.style.display = "flex";
+    noThanksButton.textContent = "Cancel";
 
     // Confirm button handler
     confirmButton.onclick = async (e) => {
@@ -7365,97 +7420,73 @@ function RogueKOHandOrDiscardForRecruit() {
 
 function RogueCopyPowers() {
   return new Promise((resolve) => {
-    // Check if any cards have been played this turn
-    if (cardsPlayedThisTurn.length === 1) {
-      console.log("No heroes have been played yet.");
-      onscreenConsole.log(
-        "No Heroes have been played this turn. There are no powers to copy.",
-      );
+    // 1. Check if any cards have been played (excluding this Rogue card)
+    const eligibleCards = cardsPlayedThisTurn.slice(0, -1);
+    
+    // Filter out simulated cards
+    const realCardsOnly = eligibleCards.filter(card => 
+      !card.isSimulation && !card.markedForDeletion && !card.markedToDestroy && !card.isCopied
+    );
+    
+    if (realCardsOnly.length === 0) {
+      console.log("No real heroes have been played yet to copy.");
+      onscreenConsole.log("No Heroes available to copy.");
       resolve(false);
       return;
     }
-
+    
     updateGameBoard();
-
+    
+    // 2. Show card selection UI (using your existing popup system)
     const cardchoicepopup = document.querySelector(".card-choice-popup");
     const modalOverlay = document.getElementById("modal-overlay");
-    const selectionRow1 = document.querySelector(
-      ".card-choice-popup-selectionrow1",
-    );
-    const selectionContainer = document.querySelector(
-      ".card-choice-popup-selection-container",
-    );
+    const selectionRow1 = document.querySelector(".card-choice-popup-selectionrow1");
     const previewElement = document.querySelector(".card-choice-popup-preview");
     const titleElement = document.querySelector(".card-choice-popup-title");
-    const instructionsElement = document.querySelector(
-      ".card-choice-popup-instructions",
-    );
-    const closeButton = document.querySelector(
-      ".card-choice-popup-closebutton",
-    );
-
+    const instructionsElement = document.querySelector(".card-choice-popup-instructions");
+    
     // Set popup content
     titleElement.textContent = "Rogue - Copy Powers";
     instructionsElement.innerHTML = "Select a Hero to copy:";
-
-    // Hide row labels and row2, hide close button (no cancellation option)
-    document.querySelector(
-      ".card-choice-popup-selectionrow1label",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow2label",
-    ).style.display = "none";
-    document.querySelector(".card-choice-popup-selectionrow2").style.display =
-      "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow2-container",
-    ).style.display = "none";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.height = "50%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.top = "28%";
-    document.querySelector(
-      ".card-choice-popup-selectionrow1-container",
-    ).style.transform = "translateY(-50%)";
-    closeButton.style.display = "none";
-
+    
+    // Hide unnecessary UI elements
+    document.querySelector(".card-choice-popup-selectionrow1label").style.display = "none";
+    document.querySelector(".card-choice-popup-selectionrow2label").style.display = "none";
+    document.querySelector(".card-choice-popup-selectionrow2").style.display = "none";
+    document.querySelector(".card-choice-popup-selectionrow2-container").style.display = "none";
+    document.querySelector(".card-choice-popup-selectionrow1-container").style.height = "50%";
+    document.querySelector(".card-choice-popup-selectionrow1-container").style.top = "28%";
+    document.querySelector(".card-choice-popup-selectionrow1-container").style.transform = "translateY(-50%)";
+    document.querySelector(".card-choice-popup-closebutton").style.display = "none";
+    
     // Clear existing content
     selectionRow1.innerHTML = "";
     previewElement.innerHTML = "";
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
-
-    // Filter eligible heroes (excluding last played card)
-    const heroesToCopy = cardsPlayedThisTurn.slice(0, -1);
+    
+    // Filter and sort eligible heroes
+    const heroesToCopy = [...realCardsOnly];
     genericCardSort(heroesToCopy);
-
+    
     let selectedHero = null;
     let selectedCardImage = null;
     let isDragging = false;
-
-    const row1 = selectionRow1;
-    const row2Visible = false;
-
-    // Initialize scroll gradient detection
-    setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
-
+    
     // Create card elements for each eligible hero
     heroesToCopy.forEach((hero) => {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
       cardElement.setAttribute("data-card-id", hero.id);
-
-      // Create card image
+      
       const cardImage = document.createElement("img");
       cardImage.src = hero.image;
       cardImage.alt = hero.name;
       cardImage.className = "popup-card-image";
-
+      
       // Hover effects
       const handleHover = () => {
         if (isDragging) return;
-
+        
         // Update preview
         previewElement.innerHTML = "";
         const previewImage = document.createElement("img");
@@ -7463,17 +7494,15 @@ function RogueCopyPowers() {
         previewImage.alt = hero.name;
         previewImage.className = "popup-card-preview-image";
         previewElement.appendChild(previewImage);
-
-        // Only change background if no card is selected
+        
         if (selectedHero === null) {
           previewElement.style.backgroundColor = "var(--accent)";
         }
       };
-
+      
       const handleHoverOut = () => {
         if (isDragging) return;
-
-        // Only clear preview if no card is selected AND we're not hovering over another card
+        
         if (selectedHero === null) {
           setTimeout(() => {
             if (!selectionRow1.querySelector(":hover") && !isDragging) {
@@ -7483,10 +7512,10 @@ function RogueCopyPowers() {
           }, 50);
         }
       };
-
+      
       cardElement.addEventListener("mouseover", handleHover);
       cardElement.addEventListener("mouseout", handleHoverOut);
-
+      
       // Selection click handler
       cardElement.addEventListener("click", (e) => {
         if (isDragging) {
@@ -7494,7 +7523,7 @@ function RogueCopyPowers() {
           e.stopPropagation();
           return;
         }
-
+        
         if (selectedHero === hero) {
           // Deselect
           selectedHero = null;
@@ -7502,8 +7531,7 @@ function RogueCopyPowers() {
           selectedCardImage = null;
           previewElement.innerHTML = "";
           previewElement.style.backgroundColor = "var(--panel-backgrounds)";
-
-          // Update instructions and confirm button
+          
           instructionsElement.innerHTML = "Select a Hero to copy:";
           document.getElementById("card-choice-popup-confirm").disabled = true;
         } else {
@@ -7511,12 +7539,12 @@ function RogueCopyPowers() {
           if (selectedCardImage) {
             selectedCardImage.classList.remove("selected");
           }
-
+          
           // Select new
           selectedHero = hero;
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
-
+          
           // Update preview
           previewElement.innerHTML = "";
           const previewImage = document.createElement("img");
@@ -7525,202 +7553,158 @@ function RogueCopyPowers() {
           previewImage.className = "popup-card-preview-image";
           previewElement.appendChild(previewImage);
           previewElement.style.backgroundColor = "var(--accent)";
-
-          // Update instructions and confirm button
+          
           instructionsElement.innerHTML = `Selected: <span class="console-highlights">${hero.name}</span> will be copied.`;
           document.getElementById("card-choice-popup-confirm").disabled = false;
         }
       });
-
+      
       cardElement.appendChild(cardImage);
       selectionRow1.appendChild(cardElement);
     });
-
-    if (heroesToCopy.length > 20) {
-      selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.add("three-row"); // Add a special class for 3-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "75%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "40%";
-      selectionRow1.style.gap = "0.3vw";
-    } else if (heroesToCopy.length > 10) {
-      selectionRow1.classList.add("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles when in multi-row mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
-    } else if (heroesToCopy.length > 5) {
-      selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "42%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "25%";
-    } else {
-      selectionRow1.classList.remove("multi-row");
-      selectionRow1.classList.remove("three-row"); // Remove 3-row class if present
-      // Reset container styles for normal mode
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.height = "50%";
-      document.querySelector(
-        ".card-choice-popup-selectionrow1-container",
-      ).style.top = "28%";
-    }
-
-    // Drag scrolling functionality
+    
+    // Setup drag scrolling (use your existing setupDragScrolling function)
     setupDragScrolling(selectionRow1);
-
+    
     // Set up button handlers
     const confirmButton = document.getElementById("card-choice-popup-confirm");
-    const otherChoiceButton = document.getElementById(
-      "card-choice-popup-otherchoice",
-    );
-    const noThanksButton = document.getElementById(
-      "card-choice-popup-nothanks",
-    );
-
-    // Configure buttons - hide all except confirm, which is required
+    const otherChoiceButton = document.getElementById("card-choice-popup-otherchoice");
+    const noThanksButton = document.getElementById("card-choice-popup-nothanks");
+    
     confirmButton.textContent = "Confirm";
-    confirmButton.disabled = true; // Initially disabled until card is selected
+    confirmButton.disabled = true;
     otherChoiceButton.style.display = "none";
     noThanksButton.style.display = "none";
-
-    // Confirm button handler
+    
+    // THIS IS THE CRITICAL PART - Connect the callback
     confirmButton.onclick = async (e) => {
       e.stopPropagation();
       e.preventDefault();
+      
       if (!selectedHero) return;
-
-      closeCardChoicePopup();
-
+      
+      // Close the popup
+      modalOverlay.style.display = "none";
+      cardchoicepopup.style.display = "none";
+      
       try {
-        // Find Rogue card
-        const rogueCardIndex = cardsPlayedThisTurn.findIndex(
-          (c) => c.name === "Rogue - Copy Powers" && !c.isCopied,
+        // 3. Find the Rogue - Copy Powers card in cardsPlayedThisTurn
+        const rogueIndex = cardsPlayedThisTurn.findIndex(
+          card => card.name === "Rogue - Copy Powers" && !card.isSimulation
         );
-        if (rogueCardIndex === -1) {
-          console.log("Rogue has already copied a card.");
+        
+        if (rogueIndex === -1) {
+          console.error("Rogue - Copy Powers card not found");
           resolve(false);
           return;
         }
-
-        const rogueCard = cardsPlayedThisTurn[rogueCardIndex];
-
-        // Mark Rogue as copied
-        rogueCard.isCopied = true;
-
-        // Store original attributes
-        rogueCard.originalAttributes = {
-          name: rogueCard.name,
-          type: rogueCard.type,
-          rarity: rogueCard.rarity,
-          team: rogueCard.team,
-          classes: rogueCard.classes,
-          color: rogueCard.color,
-          cost: rogueCard.cost,
-          attack: rogueCard.attack,
-          recruit: rogueCard.recruit,
-          attackIcon: rogueCard.attackIcon,
-          recruitIcon: rogueCard.recruitIcon,
-          bonusAttack: rogueCard.bonusAttack,
-          bonusRecruit: rogueCard.bonusRecruit,
-          multiplier: rogueCard.multiplier,
-          multiplierAttribute: rogueCard.multiplierAttribute,
-          mulitplierLocation: rogueCard.mulitplierLocation,
-          unconditionalAbility: rogueCard.unconditionalAbility,
-          conditionalAbility: rogueCard.conditionalAbility,
-          conditionType: rogueCard.conditionType,
-          condition: rogueCard.condition,
-          invulnerability: rogueCard.invulnerability,
-          keywords: rogueCard.kewyords,
-          image: rogueCard.image,
-        };
-
-        // Copy selected hero's attributes (keeping Covert)
+        
+        const rogueCard = cardsPlayedThisTurn[rogueIndex];
+        
+        // 4. Store original attributes BEFORE transformation
+        if (!rogueCard.originalAttributes) {
+          rogueCard.originalAttributes = {
+            name: rogueCard.name,
+            type: rogueCard.type,
+            rarity: rogueCard.rarity,
+            team: rogueCard.team,
+            classes: rogueCard.classes ? [...rogueCard.classes] : [],
+            color: rogueCard.color,
+            cost: rogueCard.cost || 0,
+            attack: rogueCard.attack || 0,
+            recruit: rogueCard.recruit || 0,
+            attackIcon: rogueCard.attackIcon || false,
+            recruitIcon: rogueCard.recruitIcon || false,
+            bonusAttack: rogueCard.bonusAttack || 0,
+            bonusRecruit: rogueCard.bonusRecruit || 0,
+            multiplier: rogueCard.multiplier || "None",
+            multiplierAttribute: rogueCard.multiplierAttribute || "None",
+            unconditionalAbility: rogueCard.unconditionalAbility || "None",
+            conditionalAbility: rogueCard.conditionalAbility || "None",
+            conditionType: rogueCard.conditionType || "None",
+            condition: rogueCard.condition || "None",
+            invulnerability: rogueCard.invulnerability || "None",
+            keywords: rogueCard.keywords ? [...rogueCard.keywords] : [],
+            image: rogueCard.image
+          };
+        }
+        
+        // 5. Transform Rogue to look like the selected hero
+        // But keep Covert class and remove Artifact keyword
+        const transformedClasses = ["Covert"];
+        if (selectedHero.classes && Array.isArray(selectedHero.classes)) {
+          selectedHero.classes.forEach(cls => {
+            if (cls !== "Covert" && !transformedClasses.includes(cls)) {
+              transformedClasses.push(cls);
+            }
+          });
+        }
+        
+        const filteredKeywords = [];
+        if (selectedHero.keywords && Array.isArray(selectedHero.keywords)) {
+          selectedHero.keywords.forEach(keyword => {
+            if (keyword !== "Artifact" && keyword !== "artifact") {
+              filteredKeywords.push(keyword);
+            }
+          });
+        }
+        
+        // Apply transformation
         Object.assign(rogueCard, {
-          name: selectedHero.name || "None",
-          type: selectedHero.type || "None",
+          name: selectedHero.name,
+          type: selectedHero.type || "Hero",
           rarity: selectedHero.rarity || "None",
           team: selectedHero.team || "None",
-          classes: selectedHero.classes
-            ? selectedHero.classes.includes("Covert")
-              ? [...selectedHero.classes]
-              : ["Covert", ...selectedHero.classes]
-            : ["Covert"],
+          classes: transformedClasses,
           color: selectedHero.color || "None",
           cost: selectedHero.cost || 0,
           attack: selectedHero.attack || 0,
           recruit: selectedHero.recruit || 0,
-          attackIcon: selectedHero.attackIcon || "None",
-          recruitIcon: selectedHero.recruitIcon || "None",
+          attackIcon: selectedHero.attackIcon || false,
+          recruitIcon: selectedHero.recruitIcon || false,
           bonusAttack: selectedHero.bonusAttack || 0,
           bonusRecruit: selectedHero.bonusRecruit || 0,
           multiplier: selectedHero.multiplier || "None",
           multiplierAttribute: selectedHero.multiplierAttribute || "None",
-          mulitplierLocation: selectedHero.mulitplierLocation || "None",
           unconditionalAbility: selectedHero.unconditionalAbility || "None",
           conditionalAbility: selectedHero.conditionalAbility || "None",
           conditionType: selectedHero.conditionType || "None",
           condition: selectedHero.condition || "None",
           invulnerability: selectedHero.invulnerability || "None",
-          keywords: selectedHero.keywords || [],
-          image: selectedHero.image || "None",
+          keywords: filteredKeywords,
+          image: selectedHero.image
         });
-
-        console.log(
-          `Copied: ${selectedHero.name}. Gained ${rogueCard.attack} attack and ${rogueCard.recruit} recruit.`,
-        );
+        
+        // 6. Apply the copied card's attack and recruit
+        totalAttackPoints += selectedHero.attack || 0;
+        totalRecruitPoints += selectedHero.recruit || 0;
+        cumulativeAttackPoints += selectedHero.attack || 0;
+        cumulativeRecruitPoints += selectedHero.recruit || 0;
+        
+        console.log(`Copied ${selectedHero.name}: +${selectedHero.attack || 0} attack, +${selectedHero.recruit || 0} recruit`);
         onscreenConsole.log(
-          `Copied <span class="console-highlights">${selectedHero.name}</span>. Gained +${rogueCard.attack}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and +${rogueCard.recruit}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`,
+          `Copied <span class="console-highlights">${selectedHero.name}</span>. Gained +${selectedHero.attack || 0}<img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons"> and +${selectedHero.recruit || 0}<img src="Visual Assets/Icons/Recruit.svg" alt="Recruit Icon" class="console-card-icons">.`
         );
+        
+// 7. Execute the copied ability with special case handling
+  await executeAbilityWithSpecialCases(selectedHero, "copy");
 
-        // Handle unconditional ability if it exists
-if (
-  selectedHero.unconditionalAbility &&  // Use the ORIGINAL hero's ability
-  selectedHero.unconditionalAbility !== "None"
-) {
-  const abilityFn = window[selectedHero.unconditionalAbility];
-  if (typeof abilityFn === "function") {
-    // Temporarily swap the last card to be the original hero for the ability execution
-    const originalLastCard = cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1];
-    cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1] = selectedHero;
-    
-    await abilityFn(selectedHero);  // Pass the original hero
-    
-    // Restore the last card
-    cardsPlayedThisTurn[cardsPlayedThisTurn.length - 1] = originalLastCard;
-  } else {
-    console.error(
-      `Ability function ${selectedHero.unconditionalAbility} not found`,
-    );
-  }
-}
-
-        // Update game state
-        totalAttackPoints += rogueCard.attack;
-        totalRecruitPoints += rogueCard.recruit;
-        cumulativeAttackPoints += rogueCard.attack;
-        cumulativeRecruitPoints += rogueCard.recruit;
-
+  rogueCard.conditionalAbility = "None";
+rogueCard.conditionType = "None";
+rogueCard.condition = "None";
+rogueCard.isCopied = true;
+        
+        // 8. Update UI and resolve
         updateGameBoard();
         resolve(true);
+        
       } catch (error) {
-        console.error("Error copying powers:", error);
+        console.error("Error in RogueCopyPowers:", error);
         resolve(false);
       }
     };
-
-    // Show popup
+    
+    // Show the popup
     modalOverlay.style.display = "block";
     cardchoicepopup.style.display = "block";
   });
@@ -8084,6 +8068,13 @@ function StormMoveVillain() {
           plutoniumOverlay.innerHTML = `<span class="plutonium-count">${city[i].plutoniumCaptured.length}</span><img src="Visual Assets/Other/Plutonium.webp" alt="Plutonium" class="captured-plutonium-image-overlay">`;
           cardContainer.appendChild(plutoniumOverlay);
         }
+
+            if (city[i].shards && city[i].shards > 0) {
+      const shardsOverlay = document.createElement("div");
+      shardsOverlay.classList.add("villain-shards-class");
+      shardsOverlay.innerHTML = `<span class="villain-shards-count">${city[i].shards}</span><img src="Visual Assets/Icons/Shards.svg" alt="Shards" class="villain-shards-overlay">`;
+      cardContainer.appendChild(shardsOverlay);
+    }
       } else {
         // If no villain, add a blank card image
         const blankCardImage = document.createElement("img");
@@ -8346,15 +8337,16 @@ function add1Recruit() {
 function HenchmenKOHeroYouHave() {
   updateGameBoard();
   return new Promise((resolve) => {
-    // Get heroes from hand and played cards separately
+    // Get heroes from hand, played cards, and artifacts separately
     const handHeroes = playerHand.filter((card) => card.type === "Hero");
     const playedHeroes = cardsPlayedThisTurn.filter(
       (card) =>
-        card.type === "Hero" && !card.isCopied && !card.sidekickToDestroy,
+        card.type === "Hero" && !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
     );
+    const artifactHeroes = playerArtifacts.filter((card) => card.type === "Hero");
 
     // Check if there are any heroes available
-    if (handHeroes.length === 0 && playedHeroes.length === 0) {
+    if (handHeroes.length === 0 && playedHeroes.length === 0 && artifactHeroes.length === 0) {
       console.log("No heroes in hand or played to KO.");
       onscreenConsole.log(
         `<span class="console-highlights">Sentinel's</span> Fight effect negated. No Heroes available to KO.`,
@@ -8394,7 +8386,7 @@ function HenchmenKOHeroYouHave() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -8410,11 +8402,12 @@ function HenchmenKOHeroYouHave() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCard = null;
-    let selectedLocation = null; // 'hand' or 'played'
+    let selectedLocation = null; // 'artifacts', 'hand', or 'played'
     let selectedCardImage = null;
     let isDragging = false;
 
     // Sort the arrays for display
+    genericCardSort(artifactHeroes);
     genericCardSort(handHeroes);
     genericCardSort(playedHeroes);
 
@@ -8544,7 +8537,25 @@ function HenchmenKOHeroYouHave() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand heroes
+    // Populate row1 with Artifacts first, then Hand heroes
+    if (artifactHeroes.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactHeroes.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
+    });
+
+    if (handHeroes.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
     handHeroes.forEach((card) => {
       createCardElement(card, "hand", selectionRow1);
     });
@@ -8588,6 +8599,13 @@ function HenchmenKOHeroYouHave() {
           if (index !== -1) {
             playerHand.splice(index, 1);
           }
+        } else if (selectedLocation === "artifacts") {
+          const index = playerArtifacts.findIndex(
+            (card) => card.id === selectedCard.id,
+          );
+          if (index !== -1) {
+            playerArtifacts.splice(index, 1);
+          }
         } else if (selectedLocation === "played") {
           selectedCard.markedToDestroy = true;
         }
@@ -8616,19 +8634,18 @@ function HenchmenKOHeroYouHave() {
 function FightKOHeroYouHave() {
   onscreenConsole.log(`Fight! KO one of your Heroes.`);
   return new Promise((resolve, reject) => {
-    // Combine heroes from the player's hand and cards played this turn
+    // Get heroes from artifacts, hand, and played cards
+    const artifactHeroes = playerArtifacts.filter((card) => card.type === "Hero");
     const handHeroes = playerHand.filter((card) => card.type === "Hero");
     const playedHeroes = cardsPlayedThisTurn.filter(
       (card) =>
         card.type === "Hero" &&
         card.isCopied !== true &&
-        card.sidekickToDestroy !== true,
+        card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     );
 
-    const combinedCards = [...handHeroes, ...playedHeroes];
-
-    // Check if there are any heroes in the combined list
-    if (combinedCards.length === 0) {
+    // Check if there are any heroes available
+    if (artifactHeroes.length === 0 && handHeroes.length === 0 && playedHeroes.length === 0) {
       onscreenConsole.log(`No Heroes available to KO.`);
       resolve(); // Resolve immediately if there are no heroes to KO
       return;
@@ -8665,7 +8682,7 @@ function FightKOHeroYouHave() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -8681,10 +8698,12 @@ function FightKOHeroYouHave() {
     previewElement.style.backgroundColor = "var(--panel-backgrounds)";
 
     let selectedCard = null;
+    let selectedLocation = null; // 'artifacts', 'hand', or 'played'
     let selectedCardImage = null;
     let isDragging = false;
 
     // Sort the arrays for display
+    genericCardSort(artifactHeroes);
     genericCardSort(handHeroes);
     genericCardSort(playedHeroes);
 
@@ -8777,9 +8796,10 @@ function FightKOHeroYouHave() {
           return;
         }
 
-        if (selectedCard === card) {
+        if (selectedCard === card && selectedLocation === location) {
           // Deselect
           selectedCard = null;
+          selectedLocation = null;
           selectedCardImage = null;
           cardImage.classList.remove("selected");
           previewElement.innerHTML = "";
@@ -8792,6 +8812,7 @@ function FightKOHeroYouHave() {
 
           // Select new
           selectedCard = card;
+          selectedLocation = location;
           selectedCardImage = cardImage;
           cardImage.classList.add("selected");
 
@@ -8812,7 +8833,25 @@ function FightKOHeroYouHave() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand heroes
+    // Populate row1 with Artifacts first, then Hand heroes (with labels)
+    if (artifactHeroes.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactHeroes.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
+    });
+
+    if (handHeroes.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
     handHeroes.forEach((card) => {
       createCardElement(card, "hand", selectionRow1);
     });
@@ -8845,7 +8884,7 @@ function FightKOHeroYouHave() {
     confirmButton.onclick = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (selectedCard === null) return;
+      if (selectedCard === null || selectedLocation === null) return;
 
       setTimeout(() => {
         onscreenConsole.log(
@@ -8853,13 +8892,18 @@ function FightKOHeroYouHave() {
         );
         koBonuses();
 
-        // Remove the card from the correct array (hand or played)
-        if (playerHand.includes(selectedCard)) {
-          const handIndex = playerHand.findIndex((c) => c === selectedCard);
-          if (handIndex !== -1) {
-            playerHand.splice(handIndex, 1);
+        // Remove the card from the correct location
+        if (selectedLocation === "artifacts") {
+          const index = playerArtifacts.findIndex((c) => c.id === selectedCard.id);
+          if (index !== -1) {
+            playerArtifacts.splice(index, 1);
           }
-        } else {
+        } else if (selectedLocation === "hand") {
+          const index = playerHand.findIndex((c) => c.id === selectedCard.id);
+          if (index !== -1) {
+            playerHand.splice(index, 1);
+          }
+        } else if (selectedLocation === "played") {
           // Mark the card to be destroyed at the end of the turn
           selectedCard.markedToDestroy = true;
         }
@@ -9237,7 +9281,10 @@ function doomStrike() {
             card.classes &&
             card.classes.includes("Tech") &&
             card.isCopied !== true &&
-            card.sidekickToDestroy !== true,
+            card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
+        ) ||
+        playerArtifacts.some(
+          (card) => card.classes && card.classes.includes("Tech"),
         );
 
       if (!hasTech) {
@@ -9664,8 +9711,9 @@ function magnetoStrike() {
         playerHand.some((card) => card.team === "X-Men") ||
         cardsPlayedThisTurn.some(
           (card) =>
-            card.team === "X-Men" && !card.isCopied && !card.sidekickToDestroy,
-        );
+            card.team === "X-Men" && !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
+        ) ||
+        playerArtifacts.some((card) => card.team === "X-Men");
 
       if (!hasXMen) {
         onscreenConsole.log(
@@ -10326,8 +10374,9 @@ function RedSkullKOHandHero() {
 function revealStrengthOrWound() {
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -10437,8 +10486,9 @@ async function LokiRevealStrengthOrWound() {
 
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => !card.isCopied && !card.sidekickToDestroy,
+      (card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -10552,7 +10602,7 @@ async function revealTechOrWound() {
   const cardsYouHave = [
     ...playerHand,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -10630,8 +10680,9 @@ async function EscapeRevealTechOrWound() {
 
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -10699,8 +10750,9 @@ async function EscapeRevealTechOrWound() {
 function revealRangeOrWound() {
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -10800,7 +10852,7 @@ async function AmbushRevealRangeOrWound() {
   const cardsYouHave = [
     ...playerHand,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -11622,6 +11674,13 @@ function addCardOverlays(cardContainer, card, index, location = 'city') {
     cardContainer.appendChild(plutoniumOverlay);
   }
 
+      if (card.shards && card.shards > 0) {
+      const shardsOverlay = document.createElement("div");
+      shardsOverlay.classList.add("villain-shards-class");
+      shardsOverlay.innerHTML = `<span class="villain-shards-count">${card.shards}</span><img src="Visual Assets/Icons/Shards.svg" alt="Shards" class="villain-shards-overlay">`;
+      cardContainer.appendChild(shardsOverlay);
+    }
+
   // Add location attack overlays if applicable (only for city)
   if (location === 'city') {
     const locationAttacks = [
@@ -11759,6 +11818,13 @@ function addMastermindOverlays(cardContainer, mastermind, isPopup = true) {
     plutoniumOverlay.innerHTML = `<span class="plutonium-count">${mastermind.plutoniumCaptured.length}</span><img src="Visual Assets/Other/Plutonium.webp" alt="Plutonium" class="captured-plutonium-image-overlay">`;
     cardContainer.appendChild(plutoniumOverlay);
   }
+
+      if (mastermind.shards && mastermind.shards > 0) {
+      const shardsOverlay = document.createElement("div");
+      shardsOverlay.classList.add("villain-shards-class");
+      shardsOverlay.innerHTML = `<span class="villain-shards-count">${mastermind.shards}</span><img src="Visual Assets/Icons/Shards.svg" alt="Shards" class="villain-shards-overlay">`;
+      cardContainer.appendChild(shardsOverlay);
+    }
 }
 
 function KO1To4FromDiscard() {
@@ -12966,10 +13032,11 @@ async function MagnetoRevealXMenOrWound() {
 
   const cardsYouHave = [
     ...playerHand, // Include all cards in hand (unchanged)
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
       (card) =>
         !card.isCopied && // Exclude copied cards
-        !card.sidekickToDestroy, // Exclude sidekicks marked for destruction
+        !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation, // Exclude sidekicks marked for destruction
     ),
   ];
 
@@ -13039,8 +13106,9 @@ async function MagnetoRevealXMenOrWound() {
 function revealXMenOrWound() {
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
 
@@ -13137,10 +13205,11 @@ async function FightRevealXMenOrWound() {
 async function XMenToBystanders() {
   const cardsYouHave = [
     ...playerHand, // Include all cards in hand (unchanged)
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
       (card) =>
         !card.isCopied && // Exclude copied cards
-        !card.sidekickToDestroy, // Exclude sidekicks marked for destruction
+        !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation, // Exclude sidekicks marked for destruction
     ),
   ];
 
@@ -13173,8 +13242,9 @@ async function AvengersToBystanders() {
   );
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation,
     ),
   ];
   const AvengersCardsYouHave = cardsYouHave.filter(
@@ -13208,8 +13278,17 @@ function XMen7thDraw() {
       location: "(Hand)",
     }));
 
+    const artifactCards = playerArtifacts
+      .filter((card) => card.type === "Hero") // Only include Hero artifacts
+      .map((card, index) => ({
+        ...card,
+        source: "artifacts",
+        originalIndex: index,
+        location: "(Artifacts)",
+      }));
+
     const playedCards = cardsPlayedThisTurn
-      .filter((card) => !card.isCopied && !card.sidekickToDestroy)
+      .filter((card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,)
       .map((card, index) => ({
         ...card,
         source: "played",
@@ -13217,7 +13296,7 @@ function XMen7thDraw() {
         location: "(Played Cards)",
       }));
 
-    const XMenCardsYouHave = [...handCards, ...playedCards].filter(
+    const XMenCardsYouHave = [...handCards, ...artifactCards, ...playedCards].filter(
       (item) => item.team === "X-Men",
     );
 
@@ -13261,7 +13340,7 @@ function XMen7thDraw() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -13284,12 +13363,16 @@ function XMen7thDraw() {
     const handXMenCards = XMenCardsYouHave.filter(
       (card) => card.source === "hand",
     );
+    const artifactXMenCards = XMenCardsYouHave.filter(
+      (card) => card.source === "artifacts",
+    );
     const playedXMenCards = XMenCardsYouHave.filter(
       (card) => card.source === "played",
     );
 
     // Sort the arrays for display
     genericCardSort(handXMenCards);
+    genericCardSort(artifactXMenCards);
     genericCardSort(playedXMenCards);
 
     // Update the confirm button state and instructions
@@ -13416,7 +13499,25 @@ function XMen7thDraw() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand X-Men cards
+    // Populate row1 with Artifacts first, then Hand X-Men cards (with labels)
+    if (artifactXMenCards.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactXMenCards.forEach((card) => {
+      createCardElement(card, selectionRow1);
+    });
+
+    if (handXMenCards.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
     handXMenCards.forEach((card) => {
       createCardElement(card, selectionRow1);
     });
@@ -13459,9 +13560,10 @@ function XMen7thDraw() {
         // Mark the original card to be destroyed later using the tracked source and index
         if (selectedCard.source === "hand") {
           playerHand[selectedCard.originalIndex].markedToDrawNextTurn = true;
+        } else if (selectedCard.source === "artifacts") {
+          playerArtifacts[selectedCard.originalIndex].markedToDrawNextTurn = true;
         } else {
-          cardsPlayedThisTurn[selectedCard.originalIndex].markedToDrawNextTurn =
-            true;
+          cardsPlayedThisTurn[selectedCard.originalIndex].markedToDrawNextTurn = true;
         }
 
         console.log(`${selectedCard.name} has been reserved for next turn.`);
@@ -14275,16 +14377,26 @@ function EscapeChooseHandHeroesToKO() {
 
 function chooseHeroesToKO() {
   return new Promise((resolve, reject) => {
-    const availableHeroes = [
-      ...playerHand.filter((card) => card && card.type === "Hero"),
-      ...cardsPlayedThisTurn.filter(
-        (card) =>
-          card &&
-          card.type === "Hero" &&
-          !card.isCopied &&
-          !card.sidekickToDestroy,
-      ),
-    ].map((card, index) => ({ ...card, uniqueId: `${card.id}-${index}` }));
+    // Get heroes from artifacts, hand, and played cards
+    const artifactHeroes = playerArtifacts
+      .filter((card) => card && card.type === "Hero")
+      .map((card, index) => ({ ...card, uniqueId: `${card.id}-artifacts-${index}`, source: "artifacts" }));
+    
+    const handHeroes = playerHand
+      .filter((card) => card && card.type === "Hero")
+      .map((card, index) => ({ ...card, uniqueId: `${card.id}-hand-${index}`, source: "hand" }));
+    
+    const playedHeroes = cardsPlayedThisTurn
+      .filter((card) =>
+        card &&
+        card.type === "Hero" &&
+        !card.isCopied &&
+        !card.sidekickToDestroy && 
+        !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation,
+      )
+      .map((card, index) => ({ ...card, uniqueId: `${card.id}-played-${index}`, source: "played" }));
+
+    const availableHeroes = [...artifactHeroes, ...handHeroes, ...playedHeroes];
 
     if (availableHeroes.length === 0) {
       onscreenConsole.log("No Heroes available to KO.");
@@ -14294,15 +14406,19 @@ function chooseHeroesToKO() {
 
     if (availableHeroes.length <= 2) {
       availableHeroes.forEach((card) => {
-        const indexInCardsPlayed = cardsPlayedThisTurn.findIndex(
-          (c) => c.id === card.id,
-        );
-        const indexInHand = playerHand.findIndex((c) => c.id === card.id);
-
-        if (indexInCardsPlayed !== -1) {
-          cardsPlayedThisTurn.splice(indexInCardsPlayed, 1);
-        } else if (indexInHand !== -1) {
-          playerHand.splice(indexInHand, 1);
+        // Remove from the correct location based on source
+        if (card.source === "artifacts") {
+          const index = playerArtifacts.findIndex((c) => c.id === card.id);
+          if (index !== -1) {
+            playerArtifacts.splice(index, 1);
+          }
+        } else if (card.source === "hand") {
+          const index = playerHand.findIndex((c) => c.id === card.id);
+          if (index !== -1) {
+            playerHand.splice(index, 1);
+          }
+        } else if (card.source === "played") {
+          card.markedToDestroy = true;
         }
 
         koPile.push(card);
@@ -14347,7 +14463,7 @@ function chooseHeroesToKO() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -14365,15 +14481,8 @@ function chooseHeroesToKO() {
     let selectedHeroes = [];
     let isDragging = false;
 
-    // Separate cards by location for display
-    const handHeroes = availableHeroes.filter((card) =>
-      playerHand.some((c) => c.id === card.id),
-    );
-    const playedHeroes = availableHeroes.filter((card) =>
-      cardsPlayedThisTurn.some((c) => c.id === card.id),
-    );
-
     // Sort the arrays for display
+    genericCardSort(artifactHeroes);
     genericCardSort(handHeroes);
     genericCardSort(playedHeroes);
 
@@ -14412,11 +14521,11 @@ function chooseHeroesToKO() {
     setupIndependentScrollGradients(row1, row2Visible ? selectionRow2 : null);
 
     // Create card element helper function
-    function createCardElement(card, location, row) {
+    function createCardElement(card, row) {
       const cardElement = document.createElement("div");
       cardElement.className = "popup-card";
       cardElement.setAttribute("data-card-id", card.uniqueId);
-      cardElement.setAttribute("data-location", location);
+      cardElement.setAttribute("data-source", card.source);
 
       // Create card image
       const cardImage = document.createElement("img");
@@ -14526,14 +14635,32 @@ function chooseHeroesToKO() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand heroes
+    // Populate row1 with Artifacts first, then Hand heroes (with labels)
+    if (artifactHeroes.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    artifactHeroes.forEach((card) => {
+      createCardElement(card, selectionRow1);
+    });
+
+    if (handHeroes.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
     handHeroes.forEach((card) => {
-      createCardElement(card, "hand", selectionRow1);
+      createCardElement(card, selectionRow1);
     });
 
     // Populate row2 with Played Cards heroes
     playedHeroes.forEach((card) => {
-      createCardElement(card, "played", selectionRow2);
+      createCardElement(card, selectionRow2);
     });
 
     // Set up drag scrolling for both rows
@@ -14563,28 +14690,24 @@ function chooseHeroesToKO() {
 
       setTimeout(() => {
         selectedHeroes.forEach((card) => {
-          // Find the original card to ensure we have the correct reference
-          const originalCard = availableHeroes.find(
-            (c) => c.uniqueId === card.uniqueId,
-          );
-          if (!originalCard) return;
-
-          const indexInCardsPlayed = cardsPlayedThisTurn.findIndex(
-            (c) => c.id === originalCard.id,
-          );
-          const indexInHand = playerHand.findIndex(
-            (c) => c.id === originalCard.id,
-          );
-
-          if (indexInCardsPlayed !== -1) {
-            originalCard.markedToDestroy = true;
-          } else if (indexInHand !== -1) {
-            playerHand.splice(indexInHand, 1);
+          // Remove from the correct location based on source
+          if (card.source === "artifacts") {
+            const index = playerArtifacts.findIndex((c) => c.id === card.id);
+            if (index !== -1) {
+              playerArtifacts.splice(index, 1);
+            }
+          } else if (card.source === "hand") {
+            const index = playerHand.findIndex((c) => c.id === card.id);
+            if (index !== -1) {
+              playerHand.splice(index, 1);
+            }
+          } else if (card.source === "played") {
+            card.markedToDestroy = true;
           }
 
-          koPile.push(originalCard);
+          koPile.push(card);
           onscreenConsole.log(
-            `<span class="console-highlights">${originalCard.name}</span> has been KO'd.`,
+            `<span class="console-highlights">${card.name}</span> has been KO'd.`,
           );
           koBonuses();
         });
@@ -14622,9 +14745,10 @@ function handleMystiqueEscape() {
       onscreenConsole.log(
         `Escape! <span class="console-highlights">Mystique</span> has transformed into a Scheme Twist.`,
       );
-
+      enterCityNotDraw = true;
       // Draw the top card of the villain deck
-      drawVillainCard()
+      drawVillainCard();
+      enterCityNotDraw = false
         .then(() => {
           resolve(); // Resolve the promise after the card is drawn
         })
@@ -15049,6 +15173,13 @@ async function AmbushRightHeroSkrull() {
     `<span class="console-highlights">Skrull Shapeshifters</span> has captured <span class="console-highlights">${hero.name}</span>. This Villain now has ${hero.cost} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">. Fight this Villain to gain the captured Hero.`,
   );
 
+    if (hero.shards && hero.shards > 0) {
+      playSFX("shards");
+            shardSupply += hero.shards;
+            hero.shards = 0;
+            onscreenConsole.log(`The Shard <span class="console-highlights">${hero.name}</span> had in the HQ has been returned to the supply.`);
+  }
+
   // Replace the rightmost HQ space with the top card from the hero deck, if available
   hq[hqIndex] = heroDeck.length > 0 ? heroDeck.pop() : null;
 
@@ -15124,6 +15255,14 @@ function captureHeroBySkrullQueen(hero) {
   onscreenConsole.log(
     `<span class="console-highlights">Skrull Queen Veranke</span> has captured <span class="console-highlights">${hero.name}</span>. This Villain now has ${hero.cost} <img src="Visual Assets/Icons/Attack.svg" alt="Attack Icon" class="console-card-icons">. Fight this Villain to gain the captured Hero.`,
   );
+
+          
+  if (hero.shards && hero.shards > 0) {
+    playSFX("shards");
+            shardSupply += hero.shards;
+            hero.shards = 0;
+            onscreenConsole.log(`The Shard <span class="console-highlights">${hero.name}</span> had in the HQ has been returned to the supply.`);
+  }
 
   // Update the game board to reflect the changes
   updateGameBoard();
@@ -15913,6 +16052,15 @@ function KOAllSHIELD() {
     }
   }
 
+    for (let i = playerArtifacts.length - 1; i >= 0; i--) {
+    if (playerArtifacts[i].team === "S.H.I.E.L.D." && playerArtifacts[i].type === "Hero") {
+      // Move the card to the KO pile
+      koPile.push(playerArtifacts.splice(i, 1)[0]);
+      shieldKOCounter++; // Increment the counter
+      koBonuses();
+    }
+  }
+
   // KO S.H.I.E.L.D. cards from cards played this turn
   for (let i = cardsPlayedThisTurn.length - 1; i >= 0; i--) {
     if (
@@ -15968,13 +16116,23 @@ function strengthHeroesNumberToKO() {
     'Fight! For each of your <img src="Visual Assets/Icons/Strength.svg" alt="Strength Icon" class="console-card-icons"> Heroes, KO one of your Heroes.',
   );
   return new Promise((resolve, reject) => {
-    // Get references to the actual card objects from the game arrays
-    const availableHeroes = [...cardsPlayedThisTurn, ...playerHand].filter(
+    // Get available heroes from artifacts, hand, and played cards
+    const availableArtifactHeroes = playerArtifacts.filter(
+      (card) => card && card.type === "Hero"
+    );
+    
+    const availableHandHeroes = playerHand.filter(
+      (card) => card && card.type === "Hero"
+    );
+    
+    const availablePlayedHeroes = cardsPlayedThisTurn.filter(
       (card) =>
         card &&
         card.type === "Hero" &&
-        (card.fromHand || (!card.isCopied && !card.sidekickToDestroy)),
+        (card.fromHand || (!card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation)),
     );
+
+    const availableHeroes = [...availableArtifactHeroes, ...availableHandHeroes, ...availablePlayedHeroes];
 
     if (availableHeroes.length === 0) {
       onscreenConsole.log("No Heroes available to KO.");
@@ -15982,11 +16140,20 @@ function strengthHeroesNumberToKO() {
       return;
     }
 
-    // Find all Strength Heroes
-    const strengthHeroes = [...cardsPlayedThisTurn, ...playerHand].filter(
-      (card) => card && card.classes && card.classes.includes("Strength"),
+    // Find all Strength Heroes from all locations
+    const artifactStrengthHeroes = playerArtifacts.filter(
+      (card) => card && card.classes && card.classes.includes("Strength")
+    );
+    
+    const handStrengthHeroes = playerHand.filter(
+      (card) => card && card.classes && card.classes.includes("Strength")
+    );
+    
+    const playedStrengthHeroes = cardsPlayedThisTurn.filter(
+      (card) => card && card.classes && card.classes.includes("Strength")
     );
 
+    const strengthHeroes = [...artifactStrengthHeroes, ...handStrengthHeroes, ...playedStrengthHeroes];
     const numberToKO = strengthHeroes.length;
 
     if (numberToKO === 0) {
@@ -16003,19 +16170,22 @@ function strengthHeroesNumberToKO() {
 
     if (availableHeroes.length <= numberToKO) {
       availableHeroes.forEach((card) => {
-        // More robust card finding using unique identifier
-        const indexInCardsPlayed = cardsPlayedThisTurn.findIndex(
-          (c) => c.id === card.id && c.name === card.name,
-        );
-        const indexInHand = playerHand.findIndex(
-          (c) => c.id === card.id && c.name === card.name,
-        );
-
-        if (indexInCardsPlayed !== -1) {
+        // Remove from the correct location
+        if (playerArtifacts.includes(card)) {
+          const index = playerArtifacts.findIndex((c) => c.id === card.id && c.name === card.name);
+          if (index !== -1) {
+            playerArtifacts.splice(index, 1);
+            koPile.push(card);
+          }
+        } else if (playerHand.includes(card)) {
+          const index = playerHand.findIndex((c) => c.id === card.id && c.name === card.name);
+          if (index !== -1) {
+            playerHand.splice(index, 1);
+            koPile.push(card);
+          }
+        } else if (cardsPlayedThisTurn.includes(card)) {
           card.markedToDestroy = true;
-        } else if (indexInHand !== -1) {
-          const koedCard = playerHand.splice(indexInHand, 1)[0];
-          koPile.push(koedCard);
+          koPile.push(card);
         }
 
         onscreenConsole.log(
@@ -16059,7 +16229,7 @@ function strengthHeroesNumberToKO() {
     document.querySelector(
       ".card-choice-popup-selectionrow2-container",
     ).style.display = "block";
-    selectionRow1Label.textContent = "Hand";
+    selectionRow1Label.textContent = "Artifacts & Hand";
     selectionRow2Label.textContent = "Played Cards";
     document.querySelector(".card-choice-popup-closebutton").style.display =
       "none";
@@ -16077,17 +16247,10 @@ function strengthHeroesNumberToKO() {
     let selectedHeroes = [];
     let isDragging = false;
 
-    // Separate cards by location for display
-    const handHeroes = availableHeroes.filter((card) =>
-      playerHand.some((c) => c.id === card.id),
-    );
-    const playedHeroes = availableHeroes.filter((card) =>
-      cardsPlayedThisTurn.some((c) => c.id === card.id),
-    );
-
     // Sort the arrays for display
-    genericCardSort(handHeroes);
-    genericCardSort(playedHeroes);
+    genericCardSort(availableArtifactHeroes);
+    genericCardSort(availableHandHeroes);
+    genericCardSort(availablePlayedHeroes);
 
     // Update the confirm button state and instructions
     function updateUI() {
@@ -16248,13 +16411,31 @@ function strengthHeroesNumberToKO() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Hand heroes
-    handHeroes.forEach((card) => {
+    // Populate row1 with Artifacts first, then Hand heroes (with labels)
+    if (availableArtifactHeroes.length > 0) {
+      const artifactLabel = document.createElement("span");
+      artifactLabel.textContent = "Artifacts: ";
+      artifactLabel.className = "row-divider-text";
+      selectionRow1.appendChild(artifactLabel);
+    }
+
+    availableArtifactHeroes.forEach((card) => {
+      createCardElement(card, "artifacts", selectionRow1);
+    });
+
+    if (availableHandHeroes.length > 0) {
+      const handLabel = document.createElement("span");
+      handLabel.textContent = "Hand: ";
+      handLabel.className = "row-divider-text";
+      selectionRow1.appendChild(handLabel);
+    }
+
+    availableHandHeroes.forEach((card) => {
       createCardElement(card, "hand", selectionRow1);
     });
 
     // Populate row2 with Played Cards heroes
-    playedHeroes.forEach((card) => {
+    availablePlayedHeroes.forEach((card) => {
       createCardElement(card, "played", selectionRow2);
     });
 
@@ -16285,23 +16466,22 @@ function strengthHeroesNumberToKO() {
 
       setTimeout(() => {
         selectedHeroes.forEach((card) => {
-          // More robust card finding using multiple properties
-          const indexInCardsPlayed = cardsPlayedThisTurn.findIndex(
-            (c) => c.id === card.id && c.name === card.name,
-          );
-          const indexInHand = playerHand.findIndex(
-            (c) => c.id === card.id && c.name === card.name,
-          );
-
-          if (indexInCardsPlayed !== -1) {
-            const koedCard = cardsPlayedThisTurn.splice(
-              indexInCardsPlayed,
-              1,
-            )[0];
-            koPile.push(koedCard);
-          } else if (indexInHand !== -1) {
-            const koedCard = playerHand.splice(indexInHand, 1)[0];
-            koPile.push(koedCard);
+          // Remove from the correct location
+          if (playerArtifacts.includes(card)) {
+            const index = playerArtifacts.findIndex((c) => c.id === card.id && c.name === card.name);
+            if (index !== -1) {
+              playerArtifacts.splice(index, 1);
+              koPile.push(card);
+            }
+          } else if (playerHand.includes(card)) {
+            const index = playerHand.findIndex((c) => c.id === card.id && c.name === card.name);
+            if (index !== -1) {
+              playerHand.splice(index, 1);
+              koPile.push(card);
+            }
+          } else if (cardsPlayedThisTurn.includes(card)) {
+            card.markedToDestroy = true;
+            koPile.push(card);
           }
 
           onscreenConsole.log(
@@ -16762,6 +16942,7 @@ async function KOAllHeroesInHQ() {
   for (let i = hq.length - 1; i >= 0; i--) {
     if (hq[i] && hq[i].type === "Hero") {
       koPile.push(hq.splice(i, 1)[0]);
+      playSFX("ko");
       heroesKOCounter++;
     }
   }
@@ -16830,8 +17011,9 @@ function heroSkrulled(hero) {
   if (!hq[heroIndex]) {
     showHeroDeckEmptyPopup();
   }
-
+enterCityNotDraw = true;
   drawVillainCard();
+  enterCityNotDraw = false;
 
   // Attach an overlay to the villain
   hero.overlayText = `<span style="filter:drop-shadow(0vh 0vh 0.3vh black);">SKRULL</span>`;

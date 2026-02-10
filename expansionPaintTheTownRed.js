@@ -1,5 +1,5 @@
 // Paint the Town Red Expansion
-//24.11.2025 17.35
+//10.02.26 20:45
 
 //Schemes
 
@@ -950,8 +950,9 @@ async function weaveAWebOfLiesTwist() {
 async function theCloneSagaTwist() {
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -1353,25 +1354,18 @@ async function theCloneSagaDiscard() {
 //Keywords
 
 async function wallCrawlRecruit(card) {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     const drawChoicePopup = document.querySelector(".draw-choice-popup");
     const modalOverlay = document.getElementById("modal-overlay");
-    const drawChoicePopupTitle = document.querySelector(
-      ".draw-choice-popup-title",
-    );
-    const drawChoicePopupInstructions = document.querySelector(
-      ".draw-choice-popup-instructions",
-    );
+    const drawChoicePopupTitle = document.querySelector(".draw-choice-popup-title");
+    const drawChoicePopupInstructions = document.querySelector(".draw-choice-popup-instructions");
     const cardNameElement = document.getElementById("draw-choice-card-name");
     const previewElement = document.querySelector(".draw-choice-popup-preview");
     const confirmButton = document.getElementById("draw-choice-popup-confirm");
-    const noThanksButton = document.getElementById(
-      "draw-choice-popup-nothanks",
-    );
+    const noThanksButton = document.getElementById("draw-choice-popup-nothanks");
 
     // Track modal overlay's original state
-    const wasModalOverlayVisible =
-      modalOverlay && modalOverlay.style.display === "block";
+    const wasModalOverlayVisible = modalOverlay && modalOverlay.style.display === "block";
 
     drawChoicePopupTitle.innerHTML = `WALL-CRAWL`;
     drawChoicePopupInstructions.innerHTML = `Wall-Crawl allows you to put this card on top of your deck. Where do you wish to recruit to?`;
@@ -1390,36 +1384,58 @@ async function wallCrawlRecruit(card) {
       previewElement.style.backgroundPosition = "center";
     }
 
-    // Set up button handlers - now they resolve with the destinationId
-    confirmButton.onclick = async () => {
+    // Set up button handlers
+    const onConfirm = async () => {
       playSFX("wall-crawl");
-      playerDeck.push(card);
-      card.revealed = true;
       onscreenConsole.log(
         `<span class="console-highlights">${card.name}</span> has been put on top of your deck.`,
       );
       closeDrawChoicePopup(wasModalOverlayVisible);
-      resolve("player-deck-cell"); // Return the destinationId
+      
+      // Clean up event listeners
+      confirmButton.removeEventListener('click', onConfirm);
+      noThanksButton.removeEventListener('click', onNoThanks);
+      
+      // Handle stingOfTheSpider BEFORE resolving
       if (stingOfTheSpider) {
         await scarletSpiderStingOfTheSpiderDrawChoice(card);
       }
+      
+      // Return both destinationId and location
+      resolve({
+        destinationId: "player-deck-cell",
+        location: "deck"
+      });
     };
 
-    noThanksButton.onclick = () => {
-      playerDiscardPile.push(card);
+    const onNoThanks = () => {
       onscreenConsole.log(
         `<span class="console-highlights">${card.name}</span> has been added to your discard pile.`,
       );
       closeDrawChoicePopup(wasModalOverlayVisible);
-      resolve("discard-pile-cell"); // Return the destinationId
+      
+      // Clean up event listeners
+      confirmButton.removeEventListener('click', onConfirm);
+      noThanksButton.removeEventListener('click', onNoThanks);
+      
+      resolve({
+        destinationId: "discard-pile-cell",
+        location: "discard"
+      });
     };
 
-    // Show the popup - only show modal overlay if it's not already visible
+    // Use addEventListener instead of onclick to avoid overwriting
+    confirmButton.addEventListener('click', onConfirm);
+    noThanksButton.addEventListener('click', onNoThanks);
+
+    // Show the popup
     if (modalOverlay && !wasModalOverlayVisible) {
       modalOverlay.style.display = "block";
     }
 
-    if (drawChoicePopup) drawChoicePopup.style.display = "block";
+    if (drawChoicePopup) {
+      drawChoicePopup.style.display = "block";
+    }
   });
 }
 
@@ -1564,150 +1580,43 @@ async function shriekEscape() {
 
 async function chameleonFight(card) {
   return new Promise((resolve) => {
+    // Create a clean copy of the card
     const cardCopy = JSON.parse(JSON.stringify(card));
-
+    
+    // Remove any transformation properties from the copy
+    delete cardCopy.originalAttributes;
+    delete cardCopy.isCopied;
+    delete cardCopy.markedToDestroy;
+    
+    // Mark for cleanup and add to played cards
+    cardCopy.markedForDeletion = true;
+    cardCopy.isSimulation = true;
     cardsPlayedThisTurn.push(cardCopy);
-    cardCopy.markedToDestroy = true;
 
+    // Apply the card's stats
     totalAttackPoints += cardCopy.attack || 0;
     totalRecruitPoints += cardCopy.recruit || 0;
-
     cumulativeAttackPoints += cardCopy.attack || 0;
     cumulativeRecruitPoints += cardCopy.recruit || 0;
 
-    console.log("Chameleon Copy Called:", cardCopy);
+    console.log("Chameleon Copy Called:", cardCopy.name);
 
-    // Handle unconditional ability
-    let abilityPromise = Promise.resolve();
-    if (
-      cardCopy.unconditionalAbility &&
-      cardCopy.unconditionalAbility !== "None"
-    ) {
-      const abilityFunction = window[cardCopy.unconditionalAbility];
-      if (typeof abilityFunction === "function") {
-        abilityPromise = new Promise((resolveAbility, rejectAbility) => {
-          try {
-            const result = abilityFunction(cardCopy);
-            resolveAbility(result);
-          } catch (error) {
-            rejectAbility(error);
-          }
-        });
-      } else {
-        console.error(
-          `Unconditional ability function ${cardCopy.unconditionalAbility} not found`,
-        );
-      }
-    }
-
-    // Handle conditional ability
-    abilityPromise
-      .then(() => {
-        if (
-          cardCopy.conditionalAbility &&
-          cardCopy.conditionalAbility !== "None"
-        ) {
-          const { conditionType, condition } = cardCopy;
-          if (isConditionMet(conditionType, condition)) {
-            if (autoSuperpowers) {
-              const conditionalAbilityFunction =
-                window[cardCopy.conditionalAbility];
-              if (typeof conditionalAbilityFunction === "function") {
-                return new Promise((resolveConditional, rejectConditional) => {
-                  try {
-                    const result = conditionalAbilityFunction(cardCopy);
-                    resolveConditional(result);
-                  } catch (error) {
-                    rejectConditional(error);
-                  }
-                });
-              } else {
-                console.error(
-                  `Conditional ability function ${cardCopy.conditionalAbility} not found`,
-                );
-                return Promise.resolve();
-              }
-            } else {
-              return new Promise((resolveConditional, rejectConditional) => {
-                setTimeout(() => {
-                  const { confirmButton, denyButton } = showHeroAbilityMayPopup(
-                    `DO YOU WISH TO ACTIVATE <span class="console-highlights">${cardCopy.name}</span><span class="bold-spans">'s</span> ABILITY?`,
-                    "Yes",
-                    "No",
-                  );
-
-                  // Update title
-                  document.querySelector(
-                    ".info-or-choice-popup-title",
-                  ).innerHTML = "CONFIRM";
-
-                  // Hide close button
-                  document.querySelector(
-                    ".info-or-choice-popup-closebutton",
-                  ).style.display = "none";
-
-                  // Use preview area for image
-                  const previewArea = document.querySelector(
-                    ".info-or-choice-popup-preview",
-                  );
-                  if (previewArea) {
-                    previewArea.style.backgroundImage = `url('${cardCopy.image}')`;
-                    previewArea.style.backgroundSize = "contain";
-                    previewArea.style.backgroundRepeat = "no-repeat";
-                    previewArea.style.backgroundPosition = "center";
-                    previewArea.style.display = "block";
-                  }
-
-                  const cleanup = () => {
-                    closeInfoChoicePopup();
-                    resolveConditional();
-                  };
-
-                  confirmButton.onclick = () => {
-                    try {
-                      cleanup();
-                      const conditionalAbilityFunction =
-                        window[cardCopy.conditionalAbility];
-                      if (typeof conditionalAbilityFunction === "function") {
-                        const result = conditionalAbilityFunction(cardCopy);
-                        resolveConditional(result);
-                      } else {
-                        console.error(
-                          `Conditional ability function ${cardCopy.conditionalAbility} not found`,
-                        );
-                        resolveConditional();
-                      }
-                    } catch (error) {
-                      rejectConditional(error);
-                    }
-                  };
-
-                  denyButton.onclick = () => {
-                    onscreenConsole.log(
-                      `You have chosen not to activate <span class="console-highlights">${cardCopy.name}</span><span class="bold-spans">'s</span> ability.`,
-                    );
-                    cleanup();
-                  };
-                }, 10);
-              });
-            }
-          } else {
-            console.log(`Unable to use conditional ability.`);
-            return Promise.resolve();
-          }
-        }
-        return Promise.resolve();
-      })
+    // Execute abilities using the helper - NO POPUP, auto-execute
+    executeAbilityWithSpecialCases(cardCopy, "chameleon", {
+      skipStats: true, // Stats already added above
+      autoActivate: true // Always auto-activate for Chameleon
+    })
       .then(() => {
         updateGameBoard();
+        addHRToTopWithInnerHTML();
         resolve();
       })
-      .catch((err) => {
-        console.error("Error during chameleon copy:", err);
+      .catch((error) => {
+        console.error("Error in chameleonFight:", error);
+        updateGameBoard();
+        addHRToTopWithInnerHTML();
         resolve();
       });
-
-    addHRToTopWithInnerHTML();
   });
 }
 
@@ -2122,8 +2031,9 @@ async function sandmanEscape() {
 
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -2198,8 +2108,9 @@ async function vultureEscape() {
 
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -2274,8 +2185,9 @@ async function shockerAmbush() {
 
   const cardsYouHave = [
     ...playerHand,
+    ...playerArtifacts,
     ...cardsPlayedThisTurn.filter(
-      (card) => card.isCopied !== true && card.sidekickToDestroy !== true,
+      (card) => card.isCopied !== true && card.sidekickToDestroy !== true && !card.markedForDeletion && !card.isSimulation
     ),
   ];
 
@@ -2800,23 +2712,29 @@ function moonKnightLunarCommunion() {
 
 function moonKnightLunarCommunionKOChoice() {
   return new Promise((resolve) => {
-    // Combine cards from hand and played cards with source tracking
-    const combinedCards = [
-      ...playerHand.map((card) => ({ card, source: "hand" })),
-      ...cardsPlayedThisTurn
-        .filter((card) => !card.isCopied && !card.sidekickToDestroy)
-        .map((card) => ({ card, source: "played" })),
-    ];
+    // Combine cards from artifacts, hand, and played cards with source tracking
+    const artifactCards = playerArtifacts
+      .filter((card) => card.type === "Hero") // Only include Hero artifacts
+      .map((card) => ({ card, source: "artifacts" }));
+    
+    const handCards = playerHand.map((card) => ({ card, source: "hand" }));
+    
+    const playedCards = cardsPlayedThisTurn
+      .filter((card) => !card.isCopied && !card.sidekickToDestroy && !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation)
+      .map((card) => ({ card, source: "played" }));
+
+    // Combine all cards for "Your Cards" section
+    const yourCards = [...artifactCards, ...handCards, ...playedCards];
 
     // Check if we have any cards available
-    if (combinedCards.length === 0 && playerDiscardPile.length === 0) {
+    if (yourCards.length === 0 && playerDiscardPile.length === 0) {
       onscreenConsole.log(`No cards available to KO.`);
       resolve(false);
       return;
     }
 
     // Sort the arrays
-    genericCardSort(combinedCards, "card");
+    genericCardSort(yourCards, "card");
     genericCardSort(playerDiscardPile);
 
     const cardchoicepopup = document.querySelector(".card-choice-popup");
@@ -2870,12 +2788,6 @@ function moonKnightLunarCommunionKOChoice() {
     let selectedLocations = []; // Array to track locations of selected cards
     let selectedSources = []; // Array to track sources of selected cards
     let isDragging = false;
-
-    // Separate combined cards by source for display
-    const handCards = combinedCards.filter((item) => item.source === "hand");
-    const playedCards = combinedCards.filter(
-      (item) => item.source === "played",
-    );
 
     // Update the confirm button state and instructions
     function updateUI() {
@@ -3057,18 +2969,42 @@ function moonKnightLunarCommunionKOChoice() {
       row.appendChild(cardElement);
     }
 
-    // Populate row1 with Your Cards (Played Cards then Hand)
-    if (playedCards.length > 0) {
-      selectionRow1.appendChild(createSectionLabel("Played Cards"));
-      playedCards.forEach((cardItem) => {
+    // Populate row1 with Your Cards (Artifacts first, then Played Cards, then Hand)
+    let hasAddedSection = false;
+    
+    // Add Artifacts section if any
+    const artifactCardItems = yourCards.filter((item) => item.source === "artifacts");
+    if (artifactCardItems.length > 0) {
+      selectionRow1.appendChild(createSectionLabel("Artifacts"));
+      hasAddedSection = true;
+      artifactCardItems.forEach((cardItem) => {
+        createCardElement(cardItem, "your-cards", "artifacts", selectionRow1);
+      });
+    }
+    
+    // Add Played Cards section if any
+    const playedCardItems = yourCards.filter((item) => item.source === "played");
+    if (playedCardItems.length > 0) {
+      if (hasAddedSection) {
+        selectionRow1.appendChild(createSectionLabel("Played Cards"));
+      } else {
+        selectionRow1.appendChild(createSectionLabel("Played Cards"));
+        hasAddedSection = true;
+      }
+      playedCardItems.forEach((cardItem) => {
         createCardElement(cardItem, "your-cards", "played", selectionRow1);
       });
     }
-    if (handCards.length > 0) {
-      if (playedCards.length > 0) {
+    
+    // Add Hand section if any
+    const handCardItems = yourCards.filter((item) => item.source === "hand");
+    if (handCardItems.length > 0) {
+      if (hasAddedSection) {
+        selectionRow1.appendChild(createSectionLabel("Hand"));
+      } else {
         selectionRow1.appendChild(createSectionLabel("Hand"));
       }
-      handCards.forEach((cardItem) => {
+      handCardItems.forEach((cardItem) => {
         createCardElement(cardItem, "your-cards", "hand", selectionRow1);
       });
     }
@@ -3116,8 +3052,16 @@ function moonKnightLunarCommunionKOChoice() {
           let koIndex = -1;
 
           if (location === "your-cards") {
-            // Handle cards from hand or played cards
-            if (source === "hand") {
+            // Handle cards from artifacts, hand, or played cards
+            if (source === "artifacts") {
+              // Remove from artifacts
+              koIndex = playerArtifacts.findIndex((c) => c.id === selectedCard.id);
+              if (koIndex !== -1) {
+                const koedCard = playerArtifacts.splice(koIndex, 1)[0];
+                koPile.push(koedCard);
+                koCount++;
+              }
+            } else if (source === "hand") {
               // Remove from hand
               koIndex = playerHand.findIndex((c) => c.id === selectedCard.id);
               if (koIndex !== -1) {
@@ -3558,6 +3502,13 @@ function moonKnightGoldenAnkhOfKhonshuTech() {
           plutoniumOverlay.innerHTML = `<span class="plutonium-count">${city[i].plutoniumCaptured.length}</span><img src="Visual Assets/Other/Plutonium.webp" alt="Plutonium" class="captured-plutonium-image-overlay">`;
           cardContainer.appendChild(plutoniumOverlay);
         }
+
+            if (city[i].shards && city[i].shards > 0) {
+      const shardsOverlay = document.createElement("div");
+      shardsOverlay.classList.add("villain-shards-class");
+      shardsOverlay.innerHTML = `<span class="villain-shards-count">${city[i].shards}</span><img src="Visual Assets/Icons/Shards.svg" alt="Shards" class="villain-shards-overlay">`;
+      cardContainer.appendChild(shardsOverlay);
+    }
       } else {
         // If no villain, add a blank card image
         const blankCardImage = document.createElement("img");
@@ -4535,53 +4486,12 @@ function spiderWomanArachnoPheromones() {
 
       const hero = hq[selectedHQIndex];
 
-      // Recruit the hero using the original function
-      recruitHeroConfirmed(hero, selectedHQIndex);
-
-      console.log(`${hero.name} has been recruited.`);
-      onscreenConsole.log(
-        `You have recruited <span class="console-highlights">${hero.name}</span> for free.`,
-      );
-      playSFX("recruit");
-
-      const previousCards = cardsPlayedThisTurn.slice(0, -1);
-      const cardsYouHave = [
-        ...playerHand,
-        ...previousCards.filter(
-          (card) => !card.isCopied && !card.sidekickToDestroy,
-        ),
-      ];
-
-      updateGameBoard();
       closeHQCityCardChoicePopup();
 
-      const spiderFriends = cardsYouHave.filter(
-        (item) => item.team === "Spider Friends",
-      );
+      spiderWomanArachnoRecruit = true;
 
-      // Check if there are any Spider Friends (use length, not the array itself)
-      if (spiderFriends.length > 0) {
-        // Get the last recruited hero (the one just added to discard pile)
-        const justRecruited = playerDiscardPile[playerDiscardPile.length - 1];
-
-        // Remove from discard pile and add to deck
-        const recruitedCardIndex = playerDiscardPile.indexOf(justRecruited);
-        if (recruitedCardIndex !== -1) {
-          const [recruitedHero] = playerDiscardPile.splice(
-            recruitedCardIndex,
-            1,
-          );
-          playerDeck.push(recruitedHero);
-          recruitedHero.revealed = true;
-          onscreenConsole.log(
-            `<img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="console-card-icons"> Hero played. Superpower Ability activated. <span class="console-highlights">${recruitedHero.name}</span> has been put on top of your deck.`,
-          );
-
-          if (stingOfTheSpider) {
-            await scarletSpiderStingOfTheSpiderDrawChoice(recruitedHero);
-          }
-        }
-      }
+      // Recruit the hero using the original function
+      recruitHeroConfirmed(hero, selectedHQIndex);
 
       resolve(true);
     };
@@ -4696,7 +4606,7 @@ function symbioteSpiderManShadowedSpider() {
         (card.cost === 1 || card.cost === 2) &&
         !card.isCopied &&
         !card.sidekickToDestroy &&
-        !card.markedToDestroy,
+        !card.markedToDestroy && !card.markedForDeletion && !card.isSimulation
     );
 
   if (lowCostPlayedHeroes.length === 0) {
@@ -5646,7 +5556,9 @@ async function mysterioMistsOfDeception() {
         // Add to top of deck first
         villainDeck.push(strike);
         // Then draw it properly
+        enterCityNotDraw = true;
         await drawVillainCard();
+        enterCityNotDraw = false;
       }
     }
 
@@ -5668,174 +5580,3 @@ async function mysterioMistsOfDeception() {
     onscreenConsole.log(`This is the final Tactic. No effect.`);
   }
 }
-
-//Expansion Popup
-
-// Add this to your existing JS file
-function initCityscape() {
-  const canvas = document.getElementById("mycanvas");
-  const ctx = canvas.getContext("2d");
-
-  // Building class
-  class Building {
-    constructor(x, w, h, speed) {
-      this.x = x;
-      this.w = w;
-      this.h = h;
-      this.speed = speed;
-      this.y = h * Math.random();
-    }
-
-    update() {
-      // Draw building
-      ctx.fillRect(this.x, canvas.height - this.y, this.w, this.y);
-
-      // Move building
-      this.x -= this.speed;
-
-      // Reset position if off screen
-      if (this.x < -this.w) {
-        this.x = canvas.width + this.w;
-        this.y = this.h * Math.random();
-      }
-    }
-  }
-
-  let first = [];
-  let second = [];
-  let third = [];
-  let animationId;
-
-  function initBuildings() {
-    first = [];
-    second = [];
-    third = [];
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Use viewport height percentages for building heights
-    const vh = canvas.height / 100; // 1% of viewport height
-
-    for (let i = 0; i < canvas.width; i += 100) {
-      first.push(new Building(i, 100, vh * 50, 3)); // 35vh tall
-    }
-
-    for (let i = 0; i < canvas.width; i += 50) {
-      second.push(new Building(i, 50, vh * 50, 2)); // 50vh tall
-    }
-
-    for (let i = 0; i < canvas.width; i += 25) {
-      third.push(new Building(i, 25, vh * 60, 1)); // 60vh tall
-    }
-  }
-
-  // Animation loop
-  function draw() {
-    // Clear canvas with background color
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#282828");
-    gradient.addColorStop(0.5, "#921313");
-    gradient.addColorStop(1, "#282828");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw third layer
-    ctx.fillStyle = "#aaaaaa";
-    third.forEach((b) => b.update());
-
-    // Draw second layer
-    ctx.fillStyle = "#41414f";
-    second.forEach((b) => b.update());
-
-    // Draw first layer
-    ctx.fillStyle = "#282828";
-    first.forEach((b) => b.update());
-
-    animationId = requestAnimationFrame(draw);
-  }
-
-  function handleResize() {
-    // Stop current animation
-    cancelAnimationFrame(animationId);
-
-    // Reinitialize buildings for new window size
-    initBuildings();
-
-    // Restart animation
-    draw();
-  }
-
-  // Debounced resize handler to improve performance
-  let resizeTimeout;
-  function debouncedResize() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(handleResize, 250);
-  }
-
-  // Initialize everything
-  initBuildings();
-  draw();
-
-  // Add resize event listener
-  window.addEventListener("resize", debouncedResize);
-}
-
-function initSplash() {
-  const splashContent = document.getElementById("splashContent");
-  const splashText = document.getElementById("splashText");
-  const backgroundElement = document.getElementById(
-    "background-for-expansion-popup",
-  );
-  const popupContainer = document.getElementById("expansion-popup-container");
-
-  initCityscape();
-
-  // Start as a circle
-  setTimeout(() => {
-    // Calculate size based on screen dimensions
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    const size = Math.min(screenWidth, screenHeight) * 0.3;
-
-    splashContent.style.width = size + "px";
-    splashContent.style.height = size + "px";
-    splashContent.classList.add("visible");
-
-    // After 4 seconds, transform to rectangle
-    setTimeout(() => {
-      splashContent.classList.remove("circular");
-      splashContent.classList.add("rectangular");
-
-      // Set rectangle dimensions based on screen size
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        splashContent.style.width = "70%";
-        splashContent.style.height = "auto";
-        splashContent.style.minHeight = "40%";
-      } else {
-        splashContent.style.width = "70%";
-        splashContent.style.height = "auto";
-        splashContent.style.maxWidth = "600px";
-      }
-
-      // Fade in content
-      setTimeout(() => {
-        splashText.classList.add("visible");
-      }, 1000);
-    }, 4000);
-  }, 2000); // Initial delay
-}
-
-// Initialize everything when the window loads
-window.onload = function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  const restartParam = urlParams.get("restart");
-
-  if (restartParam === "true") {
-    skipSplashAndIntro();
-    return;
-  }
-  initSplash();
-};

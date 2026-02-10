@@ -1,6 +1,35 @@
 // updatesContent.js
-//24.11.2025 17.35
+//10.02.26 20:45
 const updatesHTML = `
+<h3>✨ <i>Version 5.0.1</i> - Guardians of the Galaxy <img src="Visual Assets/Icons/Guardians of the Galaxy.svg" alt="Guardians of the Galaxy Icon" class="popup-card-icons"></h3>
+<p>NEW EXPANSION! Happy New Year! Along with bug fixes and new custom soundtracks, this patch brings you all the content of <strong>Guardians of the Galaxy</strong>.</p>
+<p>Another thank you to the community for helping bring this project to life! Special thanks to Bageltop Games and my dedicated playtesters for their ongoing help.</p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<p><img src="Visual Assets/Icons/Guardians of the Galaxy.svg" alt="Guardians of the Galaxy Icon" class="popup-card-icons"> <span style="text-decoration:underline;"><strong>GUARDIANS OF THE GALAXY:</strong></span></p>
+<ul>
+<li><strong>New Heroes -</strong> 5 new Heroes to recruit: Drax the Destroyer, Gamora, Groot, Rocket Raccoon and Star-Lord.
+<li><strong>New Threats -</strong> Take on four new schemes, the Supreme Intelligence of the Kree, the Kree Starforce, Thanos and the Infinity Gems! 
+<li><strong>New Keyword and Mechanic -</strong> Gain near-permanent bonus abilities with <i>Artifacts</i> and trade <i>Shards</i> to gain attack.
+<li><strong>New Theme -</strong> A new cosmic theme and font that you can use to customise your gameboard - my favourite background yet!
+</ul>
+<p>🔁 <span style="text-decoration:underline;"><strong>GAME SETUP:</strong></span></p>
+<ul>
+<li><strong>Be my pen-pal? </strong> The Game Setup screen now features a link to sign up for email updates - you'll be the first to hear about game changes and new expansions.
+</ul>
+<p>🖼️ <span style="text-decoration:underline;"><strong>USER INTERFACE:</strong></span></p>
+<ul>
+<li><strong>Artifacts -</strong> Artifacts will alter the gameboard when played, appearing in a pile between your played cards and your hand. 
+<li><strong>Awesome Mix Vol. 1 -</strong> Schemes now have custom backing tracks. If you have a preference, you can always change it in the settings menu.
+</ul>
+<p>🎮 <span style="text-decoration:underline;"><strong>GAMEPLAY:</strong></span></p>
+<ul>
+<li><strong>Couple of bugs -</strong> Nothing too noticeable has changed since last update. Any effects or popups that let you select one of your cards should now include Artifacts as well.
+</ul>
+
+<p>Enjoy the new expansion!</p>
+<p><i>Disclaimer: Rocket is not responsible for any property damage, intergalactic incidents, or "borrowed" technology.</i></p>
+<p>📧 For any bugs, issues, feedback, or suggestions, please email us at legendarysoloplay@gmail.com - We appreciate your input!</p>
+<hr>
 <h3>✨ <i>Version 4.0.2</i> - Paint the Town Red <img src="Visual Assets/Icons/Spider Friends.svg" alt="Spider Friends Icon" class="popup-card-icons"></h3>
 <p>NEW EXPANSION! Along with countless bug fixes, new visuals and audio updates, this patch brings you all the content of <strong>Paint the Town Red</strong>.</p>
 <p>Another massive thank you to the community for making this project so fun! Special thanks to Bageltop Games for endless support and many of the new visuals you'll encounter as well as my dedicated playtesters who have made this expansion the most perfect release yet: Blade_Omicron, Deadeye, Hatephd, Hersh, Jean-Sebastian, KB Driver, lycanknight_, maxwatto and Tozar.</p>
